@@ -1,9 +1,20 @@
 #pragma once
 
+#include <system/string.h>
+
 #include <cinttypes>
 
 namespace Shipyard
 {
+    enum class MapFlag
+    {
+        Read,
+        Write,
+        Read_Write,
+        Write_Discard,
+        Write_No_Overwrite
+    };
+
     enum class GfxFormat
     {
         R32G32B32A32_FLOAT,

@@ -17,6 +17,7 @@ D3D11_MAP GetD3D11MapFlag(MapFlag mapFlag);
 
 DX11BaseBuffer::DX11BaseBuffer(ID3D11DeviceContext& deviceContext)
     : m_DeviceContext(deviceContext)
+    , m_Buffer(nullptr)
 {
 
 }

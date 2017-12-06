@@ -2,17 +2,10 @@
 
 #include <common/wrapper/wrapper_common.h>
 
+#include <common/common.h>
+
 namespace Shipyard
 {
-    enum class MapFlag
-    {
-        Read,
-        Write,
-        Read_Write,
-        Write_Discard,
-        Write_No_Overwrite
-    };
-
     class BaseBuffer
     {
 #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
@@ -25,8 +18,7 @@ namespace Shipyard
     class VertexBuffer
     {
     public:
-        VertexBuffer(size_t numVertices, size_t vertexSizeInBytes, bool dynamic, void* initialData);
-        
+        VertexBuffer(size_t numVertices, size_t vertexSizeInBytes, bool dynamic, void* initialData);        
     };
 
     class IndexBuffer

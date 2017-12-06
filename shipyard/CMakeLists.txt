@@ -63,10 +63,12 @@ set (SHIPYARD_COMMON_WRAPPER_DX11_HEADER_FILES
 
 set (SHIPYARD_SYSTEM_SOURCE_FILES
 	system/memory.cpp
+	system/string.cpp
 )
 
 set (SHIPYARD_SYSTEM_HEADER_FILES
 	system/memory.h
+	system/string.h
 )
 
 source_group("Header Files\\common\\" FILES ${SHIPYARD_COMMON_HEADER_FILES})

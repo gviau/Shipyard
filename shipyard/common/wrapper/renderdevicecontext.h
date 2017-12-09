@@ -24,6 +24,7 @@ namespace Shipyard
         virtual void SetPixelShader(GFXPixelShader* pixelShader) = 0;
 
         virtual void Draw(PrimitiveTopology primitiveTopology, const GFXVertexBuffer& vertexBuffer, uint32_t startVertexLocation) = 0;
+        virtual void DrawIndexed(PrimitiveTopology primitiveTopology, const GFXVertexBuffer& vertexBuffer, const GFXIndexBuffer& indexBuffer, uint32_t startVertexLocation, uint32_t startIndexLocation) = 0;
 #endif // #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
     };
 }

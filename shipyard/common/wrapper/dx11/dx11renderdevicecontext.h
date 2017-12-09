@@ -25,6 +25,7 @@ namespace Shipyard
         void SetPixelShader(GFXPixelShader* pixelShader);
 
         void Draw(PrimitiveTopology primitiveTopology, const GFXVertexBuffer& vertexBuffer, uint32_t startVertexLocation);
+        void DrawIndexed(PrimitiveTopology primitiveTopology, const GFXVertexBuffer& vertexBuffer, const GFXIndexBuffer& indexBuffer, uint32_t startVertexLocation, uint32_t startIndexLocation);
 
     private:
         ID3D11Device* m_Device;

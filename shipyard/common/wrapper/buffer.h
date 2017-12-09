@@ -32,14 +32,14 @@ namespace Shipyard
     class SHIPYARD_API IndexBuffer
     {
     public:
-        IndexBuffer(uint32_t numIndices, uint32_t indexSizeInBytes, bool dynamic, void* initialData);
+        IndexBuffer(uint32_t numIndices, bool uses2BytesPerIndex, bool dynamic, void* initialData);
 
         uint32_t GetNumIndices() const { return m_NumIndices; }
-        uint32_t GetIndexSizeInBytes() const { return m_IndexSizeInBytes; }
+        bool Uses2BytesPerIndex() const { return m_Uses2BytesPerIndex; }
 
     private:
         uint32_t m_NumIndices;
-        uint32_t m_IndexSizeInBytes;
+        uint32_t m_Uses2BytesPerIndex;
     };
 
     class SHIPYARD_API ConstantBuffer

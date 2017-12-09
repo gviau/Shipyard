@@ -86,9 +86,9 @@ DX11VertexBuffer::DX11VertexBuffer(ID3D11Device& device, ID3D11DeviceContext& de
     }
 }
 
-DX11IndexBuffer::DX11IndexBuffer(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t numIndices, uint32_t indexSizeInBytes, bool dynamic, void* initialData)
+DX11IndexBuffer::DX11IndexBuffer(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t numIndices, bool uses2BytesPerIndex, bool dynamic, void* initialData)
     : DX11BaseBuffer(deviceContext)
-    , IndexBuffer(numIndices, indexSizeInBytes, dynamic, initialData)
+    , IndexBuffer(numIndices, uses2BytesPerIndex, dynamic, initialData)
 {
     D3D11_USAGE usage = (dynamic) ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
 

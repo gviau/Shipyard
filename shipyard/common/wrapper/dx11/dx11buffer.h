@@ -33,7 +33,7 @@ namespace Shipyard
     class SHIPYARD_API DX11IndexBuffer : public IndexBuffer, public DX11BaseBuffer
     {
     public:
-        DX11IndexBuffer(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t numIndices, uint32_t indexSizeInBytes, bool dynamic, void* initialData);
+        DX11IndexBuffer(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t numIndices, bool uses2BytesPerIndex, bool dynamic, void* initialData);
     };
 
     class SHIPYARD_API DX11ConstantBuffer : public ConstantBuffer, public DX11BaseBuffer

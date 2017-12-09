@@ -10,9 +10,9 @@ VertexBuffer::VertexBuffer(uint32_t numVertices, VertexFormatType vertexFormatTy
 
 }
 
-IndexBuffer::IndexBuffer(uint32_t numIndices, uint32_t indexSizeInBytes, bool dynamic, void* initialData)
+IndexBuffer::IndexBuffer(uint32_t numIndices, bool uses2BytesPerIndex, bool dynamic, void* initialData)
     : m_NumIndices(numIndices)
-    , m_IndexSizeInBytes(indexSizeInBytes)
+    , m_Uses2BytesPerIndex(uses2BytesPerIndex)
 {
 
 }

@@ -163,6 +163,31 @@ void DX11RenderDeviceContext::Draw(PrimitiveTopology primitiveTopology, const GF
     m_ImmediateDeviceContext->Draw(vertexBuffer.GetNumVertices(), startVertexLocation);
 }
 
+void DX11RenderDeviceContext::DrawIndexed(PrimitiveTopology primitiveTopology, const GFXVertexBuffer& vertexBuffer, const GFXIndexBuffer& indexBuffer, uint32_t startVertexLocation, uint32_t startIndexLocation)
+{
+    D3D11_PRIMITIVE_TOPOLOGY topology = ConvertShipyardPrimitiveTopologyToDX11(primitiveTopology);
+    m_ImmediateDeviceContext->IASetPrimitiveTopology(topology);
+
+    ID3D11Buffer* d3dVertexBuffer = vertexBuffer.GetBuffer();
+    ID3D11Buffer* d3dIndexBuffer = indexBuffer.GetBuffer();
+
+    VertexFormatType vertexFormatType = vertexBuffer.GetVertexFormatType();
+    VertexFormat* vertexFormat = nullptr;
+
+    GetVertexFormat(vertexFormatType, vertexFormat);
+
+    uint32_t stride = vertexFormat->GetSize();
+    uint32_t offset = 0;
+
+    m_ImmediateDeviceContext->IASetInputLayout(g_RegisteredInputLayouts[uint32_t(vertexFormatType)]);
+    m_ImmediateDeviceContext->IASetVertexBuffers(0, 1, &d3dVertexBuffer, &stride, &offset);
+
+    DXGI_FORMAT indexFormat = (indexBuffer.Uses2BytesPerIndex() ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT);
+    m_ImmediateDeviceContext->IASetIndexBuffer(d3dIndexBuffer, indexFormat, 0);
+
+    m_ImmediateDeviceContext->DrawIndexed(indexBuffer.GetNumIndices(), startIndexLocation, startVertexLocation);
+}
+
 ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatType vertexFormatType)
 {
     static_assert(uint32_t(VertexFormatType::VertexFormatType_Count) == 5, "Update the RegisterVertexFormatType function if you add or remove vertex formats");

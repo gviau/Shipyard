@@ -82,7 +82,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
     shared_ptr<Shipyard::GFXVertexBuffer> vertexBuffer(gfxRenderDevice.CreateVertexBuffer(3, Shipyard::VertexFormatType::Pos_Color, false, vertexBufferData));
 
-    Shipyard::String vertexShaderSource = "struct vs_input { float2 pos : POSITION; float3 color : COLOR; }; struct vs_output { float4 pos : SV_POSITION; float3 color : TEXCOORD; }; "
+    Shipyard::String vertexShaderSource = "struct vs_input { float3 pos : POSITION; float3 color : COLOR; }; struct vs_output { float4 pos : SV_POSITION; float3 color : TEXCOORD; }; "
         "vs_output main(vs_input input) { vs_output output; output.pos = float4(input.pos.xy, 0.0, 1.0); output.color = input.color; return output; }";
 
     shared_ptr<Shipyard::GFXVertexShader> vertexShader(gfxRenderDevice.CreateVertexShader(vertexShaderSource));

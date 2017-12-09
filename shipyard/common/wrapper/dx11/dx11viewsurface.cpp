@@ -20,8 +20,13 @@ DX11ViewSurface::DX11ViewSurface(DX11RenderDevice& renderDevice, DX11RenderDevic
     : ViewSurface(width, height, viewSurfaceFormat)
     , m_RenderDevice(renderDevice)
     , m_ImmediateRenderContext(immediateRenderContext)
+    , m_WindowHandle(windowHandle)
+    , m_SwapChain(nullptr)
+    , m_BackBuffer(nullptr)
 {
     m_SwapChain = renderDevice.CreateSwapchain(m_Width, m_Height, m_ViewSurfaceFormat, m_WindowHandle);
+   
+    CreateBackBuffer();
 }
 
 DX11ViewSurface::~DX11ViewSurface()
@@ -30,11 +35,17 @@ DX11ViewSurface::~DX11ViewSurface()
     {
         m_SwapChain->Release();
     }
+
+    if (m_BackBuffer != nullptr)
+    {
+        m_BackBuffer->Release();
+    }
 }
 
 void DX11ViewSurface::PreRender()
 {
-
+    m_ImmediateRenderContext.SetRenderTargetView(0, m_BackBuffer);
+    m_ImmediateRenderContext.ClearFirstRenderTarget(0.0f, 0.0f, 0.125f, 1.0f);
 }
 
 void DX11ViewSurface::Render()
@@ -49,7 +60,32 @@ void DX11ViewSurface::PostRender()
 
 void DX11ViewSurface::Flip()
 {
-    m_SwapChain->Present(0, 0);
+    HRESULT hr = m_SwapChain->Present(0, 0);
+    if (FAILED(hr))
+    {
+        MessageBox(NULL, "Present failed", "error", MB_OK);
+    }
+}
+
+void DX11ViewSurface::CreateBackBuffer()
+{
+    ID3D11Texture2D* backBufferTexture = nullptr;
+    HRESULT hr = m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBufferTexture);
+    if (FAILED(hr))
+    {
+        MessageBox(NULL, "BackBufferTexture creation failed", "DX11 error", MB_OK);
+        return;
+    }
+
+    ID3D11Device* device = m_RenderDevice.GetDevice();
+    hr = device->CreateRenderTargetView(backBufferTexture, nullptr, &m_BackBuffer);
+    if (FAILED(hr))
+    {
+        MessageBox(NULL, "DX11ViewSurface CreateRenderTargetView failed", "DX11 error", MB_OK);
+        return;
+    }
+
+    backBufferTexture->Release();
 }
 
 }

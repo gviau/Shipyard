@@ -1,6 +1,7 @@
 #include <common/wrapper/dx11/dx11renderdevice.h>
 
 #include <common/wrapper/dx11/dx11buffer.h>
+#include <common/wrapper/dx11/dx11shader.h>
 
 #include <system/memory.h>
 
@@ -15,7 +16,8 @@ namespace Shipyard
 
 DX11RenderDevice::DX11RenderDevice()
 {
-    HRESULT hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, nullptr, 0, D3D11_SDK_VERSION, &m_Device, nullptr, &m_ImmediateDeviceContext);
+    UINT flags = D3D11_CREATE_DEVICE_DEBUG;
+    HRESULT hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, NULL, flags, nullptr, 0, D3D11_SDK_VERSION, &m_Device, nullptr, &m_ImmediateDeviceContext);
     if (FAILED(hr))
     {
         MessageBox(NULL, "DX11RenderDevice::DX11RenderDevice() failed", "DX11 error", MB_OK);
@@ -35,19 +37,29 @@ DX11RenderDevice::~DX11RenderDevice()
     }
 }
 
-GFXVertexBuffer* DX11RenderDevice::CreateVertexBuffer(size_t numVertices, size_t vertexSizeInBytes, bool dynamic, void* initialData)
+GFXVertexBuffer* DX11RenderDevice::CreateVertexBuffer(uint32_t numVertices, VertexFormatType vertexFormatType, bool dynamic, void* initialData)
 {
-    return MemAlloc(GFXVertexBuffer)(*m_Device, *m_ImmediateDeviceContext, numVertices, vertexSizeInBytes, dynamic, initialData);
+    return MemAlloc(GFXVertexBuffer)(*m_Device, *m_ImmediateDeviceContext, numVertices, vertexFormatType, dynamic, initialData);
 }
 
-GFXIndexBuffer* DX11RenderDevice::CreateIndexBuffer(size_t numIndices, size_t indexSizeInBytes, bool dynamic, void* initialData)
+GFXIndexBuffer* DX11RenderDevice::CreateIndexBuffer(uint32_t numIndices, uint32_t indexSizeInBytes, bool dynamic, void* initialData)
 {
     return MemAlloc(GFXIndexBuffer)(*m_Device, *m_ImmediateDeviceContext, numIndices, indexSizeInBytes, dynamic, initialData);
 }
 
-GFXConstantBuffer* DX11RenderDevice::CreateConstantBuffer(size_t dataSizeInBytes, bool dynamic, void* initialData)
+GFXConstantBuffer* DX11RenderDevice::CreateConstantBuffer(uint32_t dataSizeInBytes, bool dynamic, void* initialData)
 {
     return MemAlloc(GFXConstantBuffer)(*m_Device, *m_ImmediateDeviceContext, dataSizeInBytes, dynamic, initialData);
+}
+
+GFXVertexShader* DX11RenderDevice::CreateVertexShader(const String& source)
+{
+    return MemAlloc(GFXVertexShader)(*m_Device, source);
+}
+
+GFXPixelShader* DX11RenderDevice::CreatePixelShader(const String& source)
+{
+    return MemAlloc(GFXPixelShader)(*m_Device, source);
 }
 
 IDXGISwapChain* DX11RenderDevice::CreateSwapchain(uint32_t width, uint32_t height, GfxFormat format, HWND hWnd)
@@ -60,9 +72,10 @@ IDXGISwapChain* DX11RenderDevice::CreateSwapchain(uint32_t width, uint32_t heigh
     swapChainDesc.BufferDesc.Format = backBufferFormat;
     swapChainDesc.BufferDesc.Height = height;
     swapChainDesc.BufferDesc.Width = width;
-    swapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
+    swapChainDesc.BufferDesc.RefreshRate.Numerator = 0;
     swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
     swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
     swapChainDesc.OutputWindow = hWnd;
     swapChainDesc.SampleDesc.Count = 1;
     swapChainDesc.Windowed = true;

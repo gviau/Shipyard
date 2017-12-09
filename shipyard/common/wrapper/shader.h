@@ -6,7 +6,7 @@
 
 namespace Shipyard
 {
-    class BaseShader
+    class SHIPYARD_API BaseShader
     {
     public:
         virtual ~BaseShader();
@@ -15,13 +15,13 @@ namespace Shipyard
 #endif // #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
     };
 
-    class VertexShader
+    class SHIPYARD_API VertexShader
     {
     public:
         VertexShader(const String& source);
     };
 
-    class PixelShader
+    class SHIPYARD_API PixelShader
     {
     public:
         PixelShader(const String& source);

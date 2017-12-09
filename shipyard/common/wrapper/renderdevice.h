@@ -2,15 +2,17 @@
 
 #include <common/wrapper/wrapper_common.h>
 
+#include <common/vertexformat.h>
+
 namespace Shipyard
 {
-    class BaseRenderDevice
+    class SHIPYARD_API BaseRenderDevice
     {
     public:
 #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
-        virtual GFXVertexBuffer* CreateVertexBuffer(size_t numVertices, size_t vertexSizeInBytes, bool dynamic, void* initialData) = 0;
-        virtual GFXIndexBuffer* CreateIndexBuffer(size_t numIndices, size_t indexSizeInBytes, bool dynamic, void* initialData) = 0;
-        virtual GFXConstantBuffer* CreateConstantBuffer(size_t dataSizeInBytes, bool dynamic, void* initialData) = 0;
+        virtual GFXVertexBuffer* CreateVertexBuffer(uint32_t numVertices, VertexFormatType vertexFormatType, bool dynamic, void* initialData) = 0;
+        virtual GFXIndexBuffer* CreateIndexBuffer(uint32_t numIndices, uint32_t indexSizeInBytes, bool dynamic, void* initialData) = 0;
+        virtual GFXConstantBuffer* CreateConstantBuffer(uint32_t dataSizeInBytes, bool dynamic, void* initialData) = 0;
 #endif // #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
     };
 }

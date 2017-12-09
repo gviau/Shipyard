@@ -18,8 +18,13 @@ source_group("Source Files\\extern\\glm" FILES ${EXTERN_GLM_SOURCE_FILES})
 source_group("Header Files\\extern\\glm" FILES ${EXTERN_GLM_HEADER_FILES})
 
 # Shipyard DLL
+set (SHIPYARD_COMMON_SOURCE_FILES
+	common/vertexformat.cpp
+)
+
 set (SHIPYARD_COMMON_HEADER_FILES
 	common/common.h
+	common/vertexformat.h
 )
 
 set (SHIPYARD_COMMON_WRAPPER_SOURCE_FILES
@@ -38,6 +43,7 @@ set (SHIPYARD_COMMON_WRAPPER_HEADER_FILES
 	common/wrapper/shader.h
 	common/wrapper/texture.h
 	common/wrapper/viewsurface.h
+	common/wrapper/wrapper.h
 	common/wrapper/wrapper_common.h
 )
 
@@ -62,15 +68,19 @@ set (SHIPYARD_COMMON_WRAPPER_DX11_HEADER_FILES
 )
 
 set (SHIPYARD_SYSTEM_SOURCE_FILES
+	system/array.cpp
 	system/memory.cpp
 	system/string.cpp
 )
 
 set (SHIPYARD_SYSTEM_HEADER_FILES
+	system/array.h
 	system/memory.h
+	system/platform.h
 	system/string.h
 )
 
+source_group("Source Files\\common\\" FILES ${SHIPYARD_COMMON_SOURCE_FILES})
 source_group("Header Files\\common\\" FILES ${SHIPYARD_COMMON_HEADER_FILES})
 
 source_group("Source Files\\common\\wrapper\\" FILES ${SHIPYARD_COMMON_WRAPPER_SOURCE_FILES})
@@ -94,6 +104,7 @@ add_library(
 	
     ${EXTERN_IMGUI_SOURCE_FILES}
 	${EXTERN_GLM_SOURCE_FILES}
+	${SHIPYARD_COMMON_SOURCE_FILES}
 	${SHIPYARD_COMMON_WRAPPER_SOURCE_FILES}
 	${SHIPYARD_COMMON_WRAPPER_DX11_SOURCE_FILES}
 	${SHIPYARD_SYSTEM_SOURCE_FILES}

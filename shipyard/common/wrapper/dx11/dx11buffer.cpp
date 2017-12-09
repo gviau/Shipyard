@@ -1,6 +1,6 @@
 #include <common/wrapper/dx11/dx11buffer.h>
 
-#include <assert.h>
+#include <cassert>
 
 #include <common/wrapper/dx11/dx11_common.h>
 
@@ -58,15 +58,18 @@ void DX11BaseBuffer::Unmap()
     }
 }
 
-DX11VertexBuffer::DX11VertexBuffer(ID3D11Device& device, ID3D11DeviceContext& deviceContext, size_t numVertices, size_t vertexSizeInBytes, bool dynamic, void* initialData)
+DX11VertexBuffer::DX11VertexBuffer(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t numVertices, VertexFormatType vertexFormatType, bool dynamic, void* initialData)
     : DX11BaseBuffer(deviceContext)
-    , VertexBuffer(numVertices, vertexSizeInBytes, dynamic, initialData)
+    , VertexBuffer(numVertices, vertexFormatType, dynamic, initialData)
 {
     D3D11_USAGE usage = (dynamic) ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
 
+    VertexFormat* vertexFormat = nullptr;
+    GetVertexFormat(vertexFormatType, vertexFormat);
+
     D3D11_BUFFER_DESC desc;
     desc.Usage = usage;
-    desc.ByteWidth = vertexSizeInBytes * numVertices;
+    desc.ByteWidth = vertexFormat->GetSize() * numVertices;
     desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     desc.CPUAccessFlags = (dynamic) ? D3D11_CPU_ACCESS_WRITE : 0;
     desc.MiscFlags = 0;
@@ -83,7 +86,7 @@ DX11VertexBuffer::DX11VertexBuffer(ID3D11Device& device, ID3D11DeviceContext& de
     }
 }
 
-DX11IndexBuffer::DX11IndexBuffer(ID3D11Device& device, ID3D11DeviceContext& deviceContext, size_t numIndices, size_t indexSizeInBytes, bool dynamic, void* initialData)
+DX11IndexBuffer::DX11IndexBuffer(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t numIndices, uint32_t indexSizeInBytes, bool dynamic, void* initialData)
     : DX11BaseBuffer(deviceContext)
     , IndexBuffer(numIndices, indexSizeInBytes, dynamic, initialData)
 {
@@ -108,7 +111,7 @@ DX11IndexBuffer::DX11IndexBuffer(ID3D11Device& device, ID3D11DeviceContext& devi
     }
 }
 
-DX11ConstantBuffer::DX11ConstantBuffer(ID3D11Device& device, ID3D11DeviceContext& deviceContext, size_t dataSizeInBytes, bool dynamic, void* initialData)
+DX11ConstantBuffer::DX11ConstantBuffer(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t dataSizeInBytes, bool dynamic, void* initialData)
     : DX11BaseBuffer(deviceContext)
     , ConstantBuffer(dataSizeInBytes, dynamic, initialData)
 {

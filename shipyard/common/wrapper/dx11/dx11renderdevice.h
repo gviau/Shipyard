@@ -12,18 +12,22 @@ struct IDXGISwapChain;
 
 namespace Shipyard
 {
-    class DX11RenderDevice : public BaseRenderDevice
+    class SHIPYARD_API DX11RenderDevice : public BaseRenderDevice
     {
     public:
         DX11RenderDevice();
         ~DX11RenderDevice();
 
-        GFXVertexBuffer* CreateVertexBuffer(size_t numVertices, size_t vertexSizeInBytes, bool dynamic, void* initialData);
-        GFXIndexBuffer* CreateIndexBuffer(size_t numIndices, size_t indexSizeInBytes, bool dynamic, void* initialData);
-        GFXConstantBuffer* CreateConstantBuffer(size_t dataSizeInBytes, bool dynamic, void* initialData);
+        GFXVertexBuffer* CreateVertexBuffer(uint32_t numVertices, VertexFormatType vertexFormatType, bool dynamic, void* initialData);
+        GFXIndexBuffer* CreateIndexBuffer(uint32_t numIndices, uint32_t indexSizeInBytes, bool dynamic, void* initialData);
+        GFXConstantBuffer* CreateConstantBuffer(uint32_t dataSizeInBytes, bool dynamic, void* initialData);
+
+        GFXVertexShader* CreateVertexShader(const String& source);
+        GFXPixelShader* CreatePixelShader(const String& source);
 
         IDXGISwapChain* CreateSwapchain(uint32_t width, uint32_t height, GfxFormat format, HWND hWnd);
 
+        ID3D11Device* GetDevice() const { return m_Device; }
         ID3D11DeviceContext* GetImmediateDeviceContext() const { return m_ImmediateDeviceContext; }
 
     private:

@@ -9,7 +9,7 @@ struct ID3D11VertexShader;
 
 namespace Shipyard
 {
-    class DX11BaseShader : public BaseShader
+    class SHIPYARD_API DX11BaseShader : public BaseShader
     {
     public:
         DX11BaseShader();
@@ -21,10 +21,10 @@ namespace Shipyard
         ID3D10Blob* m_ShaderBlob;
     };
 
-    class DX11VertexShader : public VertexShader, public DX11BaseShader
+    class SHIPYARD_API DX11VertexShader : public VertexShader, public DX11BaseShader
     {
     public:
-        DX11VertexShader(ID3D11Device* device, const String& source);
+        DX11VertexShader(ID3D11Device& device, const String& source);
         ~DX11VertexShader();
 
         ID3D11VertexShader* GetShader() const { return m_VertexShader; }
@@ -33,10 +33,10 @@ namespace Shipyard
         ID3D11VertexShader* m_VertexShader;
     };
 
-    class DX11PixelShader : public PixelShader, public DX11BaseShader
+    class SHIPYARD_API DX11PixelShader : public PixelShader, public DX11BaseShader
     {
     public:
-        DX11PixelShader(ID3D11Device* device, const String& source);
+        DX11PixelShader(ID3D11Device& device, const String& source);
         ~DX11PixelShader();
 
         ID3D11PixelShader* GetShader() const { return m_PixelShader; }

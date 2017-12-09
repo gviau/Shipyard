@@ -3,17 +3,21 @@
 namespace Shipyard
 {;
 
-VertexBuffer::VertexBuffer(size_t numVertices, size_t vertexSizeInBytes, bool dynamic, void* initialData)
+VertexBuffer::VertexBuffer(uint32_t numVertices, VertexFormatType vertexFormatType, bool dynamic, void* initialData)
+    : m_NumVertices(numVertices)
+    , m_VertexFormatType(vertexFormatType)
 {
 
 }
 
-IndexBuffer::IndexBuffer(size_t numIndices, size_t indexSizeInBytes, bool dynamic, void* initialData)
+IndexBuffer::IndexBuffer(uint32_t numIndices, uint32_t indexSizeInBytes, bool dynamic, void* initialData)
+    : m_NumIndices(numIndices)
+    , m_IndexSizeInBytes(indexSizeInBytes)
 {
 
 }
 
-ConstantBuffer::ConstantBuffer(size_t dataSizeInBytes, bool dynamic, void* initialData)
+ConstantBuffer::ConstantBuffer(uint32_t dataSizeInBytes, bool dynamic, void* initialData)
 {
 
 }

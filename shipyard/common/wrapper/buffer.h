@@ -3,10 +3,11 @@
 #include <common/wrapper/wrapper_common.h>
 
 #include <common/common.h>
+#include <common/vertexformat.h>
 
 namespace Shipyard
 {
-    class BaseBuffer
+    class SHIPYARD_API BaseBuffer
     {
 #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
     public:
@@ -15,22 +16,36 @@ namespace Shipyard
 #endif // #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
     };
 
-    class VertexBuffer
+    class SHIPYARD_API VertexBuffer
     {
     public:
-        VertexBuffer(size_t numVertices, size_t vertexSizeInBytes, bool dynamic, void* initialData);        
+        VertexBuffer(uint32_t numVertices, VertexFormatType vertexFormatType, bool dynamic, void* initialData);
+
+        uint32_t GetNumVertices() const { return m_NumVertices; }
+        VertexFormatType GetVertexFormatType() const { return m_VertexFormatType; }
+
+    private:
+        uint32_t m_NumVertices;
+        VertexFormatType m_VertexFormatType;
     };
 
-    class IndexBuffer
+    class SHIPYARD_API IndexBuffer
     {
     public:
-        IndexBuffer(size_t numIndices, size_t indexSizeInBytes, bool dynamic, void* initialData);
+        IndexBuffer(uint32_t numIndices, uint32_t indexSizeInBytes, bool dynamic, void* initialData);
+
+        uint32_t GetNumIndices() const { return m_NumIndices; }
+        uint32_t GetIndexSizeInBytes() const { return m_IndexSizeInBytes; }
+
+    private:
+        uint32_t m_NumIndices;
+        uint32_t m_IndexSizeInBytes;
     };
 
-    class ConstantBuffer
+    class SHIPYARD_API ConstantBuffer
     {
     public:
-        ConstantBuffer(size_t dataSizeInBytes, bool dynamic, void* initialData);
+        ConstantBuffer(uint32_t dataSizeInBytes, bool dynamic, void* initialData);
     };
 
     class StructuredBuffer

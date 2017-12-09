@@ -1,11 +1,22 @@
 #pragma once
 
+#include <system/array.h>
+#include <system/platform.h>
 #include <system/string.h>
 
 #include <cinttypes>
 
 namespace Shipyard
 {
+    enum class PrimitiveTopology
+    {
+        LineList,
+        LineStrip,
+        PointList,
+        TriangleList,
+        TriangleStrip
+    };
+
     enum class MapFlag
     {
         Read,
@@ -20,6 +31,9 @@ namespace Shipyard
         R32G32B32A32_FLOAT,
         R32G32B32A32_UINT,
         R32G32B32A32_SINT,
+        R32G32B32_FLOAT,
+        R32G32B32_UINT,
+        R32G32B32_SINT,
         R16G16B16A16_FLOAT,
         R16G16B16A16_UNORM,
         R16G16B16A16_UINT,
@@ -57,5 +71,66 @@ namespace Shipyard
         R8_UINT,
         R8_SNORM,
         R8_SINT
+    };
+
+    enum class FillMode
+    {
+        Wireframe,
+        Solid
+    };
+
+    enum class CullMode
+    {
+        CullNone,
+        CullFrontFace,
+        CullBackFace
+    };
+
+    struct RasterizerState
+    {
+        FillMode m_FillMode;
+        CullMode m_CullMode;
+        bool m_IsFrontCounterClockWise;
+        int m_DepthBias;
+        float m_DepthBiasClamp;
+        float m_SlopeScaledDepthBias;
+        bool m_DepthClipEnable;
+        bool m_ScissorEnable;
+        bool m_MultisampleEnable;
+        bool m_AntialiasedLineEnable;
+    };
+
+    enum class SemanticName
+    {
+        BiNormal,
+        Bones,
+        Color,
+        Normal,
+        Position,
+        Tangent,
+        TexCoord,
+        Weights
+    };
+
+    struct InputLayout
+    {
+        SemanticName    m_SemanticName;
+        uint32_t        m_SemanticIndex;
+        GfxFormat       m_Format;
+        uint32_t        m_InputSlot;
+        uint32_t        m_ByteOffset;
+        bool            m_IsDataPerInstance;
+        uint32_t        m_InstanceDataStepRate;
+
+        bool operator!= (const InputLayout& rhs)
+        {
+            return (m_SemanticName != rhs.m_SemanticName &&
+                    m_SemanticIndex != rhs.m_SemanticIndex &&
+                    m_Format != rhs.m_Format &&
+                    m_InputSlot != rhs.m_InputSlot &&
+                    m_ByteOffset != rhs.m_ByteOffset &&
+                    m_IsDataPerInstance != rhs.m_IsDataPerInstance &&
+                    m_InstanceDataStepRate != rhs.m_InstanceDataStepRate);
+        }
     };
 }

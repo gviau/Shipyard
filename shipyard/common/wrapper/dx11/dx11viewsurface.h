@@ -5,6 +5,7 @@
 #include <windows.h>
 
 struct IDXGISwapChain;
+struct ID3D11DepthStencilView;
 struct ID3D11RenderTargetView;
 
 namespace Shipyard
@@ -32,5 +33,6 @@ namespace Shipyard
         IDXGISwapChain* m_SwapChain;
 
         ID3D11RenderTargetView* m_BackBuffer;
+        ID3D11DepthStencilView* m_DepthStencilView;
     };
 }

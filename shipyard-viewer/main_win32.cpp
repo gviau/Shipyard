@@ -7,6 +7,15 @@ using namespace std;
 
 bool g_IsOpen = false;
 
+#include <extern/glm/glm.hpp>
+#include <extern/glm/gtc/matrix_transform.hpp>
+#include <extern/glm/gtc/type_ptr.hpp>
+
+struct SimpleConstantBuffer
+{
+    glm::mat4x4 m_Matrix;
+};
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg)
@@ -65,25 +74,71 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     rasterizerState.m_DepthBiasClamp = 0.0f;
     rasterizerState.m_DepthClipEnable = false;
     rasterizerState.m_FillMode = Shipyard::FillMode::Solid;
-    rasterizerState.m_IsFrontCounterClockWise = true;
+    rasterizerState.m_IsFrontCounterClockWise = false;
     rasterizerState.m_MultisampleEnable = false;
     rasterizerState.m_ScissorEnable = false;
     rasterizerState.m_SlopeScaledDepthBias = 0.0f;
     gfxRenderDeviceContext.SetRasterizerState(rasterizerState);
 
+    Shipyard::DepthStencilState depthStencilState;
+    depthStencilState.m_DepthEnable = true;
+    depthStencilState.m_EnableDepthWrite = true;
+    depthStencilState.m_DepthComparisonFunc = Shipyard::ComparisonFunc::Less;
+    depthStencilState.m_StencilEnable = false;
+    depthStencilState.m_StencilReadMask = 0;
+    depthStencilState.m_StencilWriteMask = 0;
+    gfxRenderDeviceContext.SetDepthStencilState(depthStencilState, 0);
+
     gfxRenderDeviceContext.SetViewport(0.0f, 0.0f, 800.0f, 600.0f);
 
     Shipyard::Vertex_Pos_Color vertexBufferData[] =
     {
-        { {  0.5f, -0.5f, 0.0f}, { 1.0f, 0.0f, 0.0f, } },
-        { {  0.0f,  0.5f, 0.0f}, { 0.0f, 1.0f, 0.0f, } },
-        { { -0.5f, -0.5f, 0.0f}, { 0.0f, 0.0f, 1.0f  } }
+        { { -0.5f, -0.5f, -0.25f }, { 1.0f, 0.0f, 0.0f } },
+        { { -0.5f,  0.5f, -0.25f }, { 0.0f, 1.0f, 0.0f } },
+        { {  0.5f,  0.5f, -0.25f }, { 0.0f, 0.0f, 1.0f } },
+        { {  0.5f, -0.5f, -0.25f }, { 1.0f, 1.0f, 0.0f } },
+
+        { { -0.5f, -0.5f,  0.25f }, { 1.0f, 0.0f, 1.0f } },
+        { { -0.5f,  0.5f,  0.25f }, { 0.0f, 1.0f, 1.0f } },
+        { {  0.5f,  0.5f,  0.25f }, { 0.0f, 0.0f, 1.0f } },
+        { {  0.5f, -0.5f,  0.25f }, { 1.0f, 0.0f, 0.0f } }
     };
 
-    shared_ptr<Shipyard::GFXVertexBuffer> vertexBuffer(gfxRenderDevice.CreateVertexBuffer(3, Shipyard::VertexFormatType::Pos_Color, false, vertexBufferData));
+    unsigned short indices[] =
+    {
+        0, 1, 2,
+        0, 2, 3,
 
-    Shipyard::String vertexShaderSource = "struct vs_input { float3 pos : POSITION; float3 color : COLOR; }; struct vs_output { float4 pos : SV_POSITION; float3 color : TEXCOORD; }; "
-        "vs_output main(vs_input input) { vs_output output; output.pos = float4(input.pos.xy, 0.0, 1.0); output.color = input.color; return output; }";
+        3, 2, 6,
+        3, 6, 7,
+
+        4, 5, 1,
+        4, 1, 0,
+
+        1, 5, 6,
+        1, 6, 2,
+
+        4, 0, 3,
+        4, 3, 7,
+
+        7, 6, 5,
+        7, 5, 4
+    };
+
+    SimpleConstantBuffer data =
+    {
+        glm::mat4x4(1.0f, 0.0f, 0.0f, 0.0f,
+                    0.0f, 1.0f, 0.0f, 0.0f,
+                    0.0f, 0.0f, 1.0f, 0.0f,
+                    0.0f, 0.0f, 0.0f, 1.0f)
+    };
+
+    shared_ptr<Shipyard::GFXVertexBuffer> vertexBuffer(gfxRenderDevice.CreateVertexBuffer(8, Shipyard::VertexFormatType::Pos_Color, false, vertexBufferData));
+    shared_ptr<Shipyard::GFXIndexBuffer> indexBuffer(gfxRenderDevice.CreateIndexBuffer(36, true, false, indices));
+    shared_ptr<Shipyard::GFXConstantBuffer> constantBuffer(gfxRenderDevice.CreateConstantBuffer(sizeof(data), true, &data));
+
+    Shipyard::String vertexShaderSource = "cbuffer constantBuffer : register(b0) { float4x4 mat; }; struct vs_input { float3 pos : POSITION; float3 color : COLOR; }; struct vs_output { float4 pos : SV_POSITION; float3 color : TEXCOORD; }; "
+        "vs_output main(vs_input input) { vs_output output; output.pos = mul(mat, float4(input.pos.xyz, 1.0)); output.color = input.color; return output; }";
 
     shared_ptr<Shipyard::GFXVertexShader> vertexShader(gfxRenderDevice.CreateVertexShader(vertexShaderSource));
 
@@ -93,6 +148,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     shared_ptr<Shipyard::GFXPixelShader> pixelShader(gfxRenderDevice.CreatePixelShader(pixelShaderSource));
 
     g_IsOpen = true;
+
+    float theta = 0.0f;
 
     MSG msg;
     while (g_IsOpen)
@@ -104,11 +161,24 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         }
         else
         {
+            void* data = constantBuffer->Map(Shipyard::MapFlag::Write_Discard);
+
+            glm::mat4 matrix(1.0f, 0.0f, 0.0f, 0.0f,
+                             0.0f, 1.0f, 0.0f, 0.0f,
+                             0.0f, 0.0f, 1.0f, 0.25f,
+                             0.0f, 0.0f, 0.0f, 1.0f);
+            ((SimpleConstantBuffer*)data)->m_Matrix = glm::rotate(matrix, theta, glm::vec3(0.0f, 1.0f, 0.0f));
+
+            constantBuffer->Unmap();
+
+            theta += 0.001f;
+
             gfxViewSurface.PreRender();
 
             gfxRenderDeviceContext.SetVertexShader(vertexShader.get());
             gfxRenderDeviceContext.SetPixelShader(pixelShader.get());
-            gfxRenderDeviceContext.Draw(Shipyard::PrimitiveTopology::TriangleList, *(vertexBuffer.get()), 0);
+            gfxRenderDeviceContext.SetVertexShaderConstantBuffer(constantBuffer.get(), 0);
+            gfxRenderDeviceContext.DrawIndexed(Shipyard::PrimitiveTopology::TriangleList, *(vertexBuffer.get()), *(indexBuffer.get()), 0, 0);
 
             gfxViewSurface.Flip();
         }

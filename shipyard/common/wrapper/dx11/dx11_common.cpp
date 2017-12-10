@@ -117,6 +117,46 @@ const char* ConvertShipyardSemanticNameToDX11(SemanticName semanticName)
     return dx11SemanticName;
 }
 
+D3D11_COMPARISON_FUNC ConvertShipyardComparisonFuncToDX11(ComparisonFunc func)
+{
+    D3D11_COMPARISON_FUNC comparisonFunc = D3D11_COMPARISON_ALWAYS;
+    switch (func)
+    {
+    case ComparisonFunc::Always:        comparisonFunc = D3D11_COMPARISON_ALWAYS; break;
+    case ComparisonFunc::Equal:         comparisonFunc = D3D11_COMPARISON_EQUAL; break;
+    case ComparisonFunc::Greater:       comparisonFunc = D3D11_COMPARISON_GREATER; break;
+    case ComparisonFunc::GreaterEqual:  comparisonFunc = D3D11_COMPARISON_GREATER_EQUAL; break;
+    case ComparisonFunc::Less:          comparisonFunc = D3D11_COMPARISON_LESS; break;
+    case ComparisonFunc::LessEqual:     comparisonFunc = D3D11_COMPARISON_LESS_EQUAL; break;
+    case ComparisonFunc::Never:         comparisonFunc = D3D11_COMPARISON_NEVER; break;
+    case ComparisonFunc::NotEqual:      comparisonFunc = D3D11_COMPARISON_NOT_EQUAL; break;
+    }
+
+    return comparisonFunc;
+}
+
+D3D11_STENCIL_OP ConvertShipyardStencilOperationToDX11(StencilOperation operation)
+{
+    D3D11_STENCIL_OP stencilOp = D3D11_STENCIL_OP_KEEP;
+
+    switch (operation)
+    {
+    case StencilOperation::Decr:            stencilOp = D3D11_STENCIL_OP_DECR; break;
+    case StencilOperation::DecrSaturate:    stencilOp = D3D11_STENCIL_OP_DECR_SAT; break;
+    case StencilOperation::Incr:            stencilOp = D3D11_STENCIL_OP_INCR; break;
+    case StencilOperation::IncrSaturate:    stencilOp = D3D11_STENCIL_OP_INCR_SAT; break;
+    case StencilOperation::Invert:          stencilOp = D3D11_STENCIL_OP_INVERT; break;
+    case StencilOperation::Keep:            stencilOp = D3D11_STENCIL_OP_KEEP; break;
+    case StencilOperation::Replace:         stencilOp = D3D11_STENCIL_OP_REPLACE; break;
+    case StencilOperation::Zero:            stencilOp = D3D11_STENCIL_OP_ZERO; break;
+    {
+
+    };
+    }
+
+    return stencilOp;
+}
+
 String GetD3DShaderVersion(D3D_FEATURE_LEVEL featureLevel)
 {
     String version = "";

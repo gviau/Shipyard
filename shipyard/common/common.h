@@ -100,6 +100,50 @@ namespace Shipyard
         bool m_AntialiasedLineEnable;
     };
 
+    enum class ComparisonFunc
+    {
+        Never,
+        Less,
+        Equal,
+        LessEqual,
+        Greater,
+        NotEqual,
+        GreaterEqual,
+        Always
+    };
+
+    enum class StencilOperation
+    {
+        Keep,
+        Zero,
+        Replace,
+        IncrSaturate,
+        DecrSaturate,
+        Invert,
+        Incr,
+        Decr
+    };
+
+    struct DepthStencilState
+    {
+        bool m_DepthEnable;
+        bool m_EnableDepthWrite;
+        ComparisonFunc m_DepthComparisonFunc;
+        bool m_StencilEnable;
+        uint8_t m_StencilReadMask;
+        uint8_t m_StencilWriteMask;
+
+        StencilOperation m_FrontFaceStencilFailOp;
+        StencilOperation m_FrontFaceStencilDepthFailOp;
+        StencilOperation m_FrontFaceStencilPassOp;
+        ComparisonFunc m_FrontFaceStencilComparisonFunc;
+
+        StencilOperation m_BackFaceStencilFailOp;
+        StencilOperation m_BackFaceStencilDepthFailOp;
+        StencilOperation m_BackFaceStencilPassOp;
+        ComparisonFunc m_BackFaceStencilComparisonFunc;
+    };
+
     enum class SemanticName
     {
         BiNormal,

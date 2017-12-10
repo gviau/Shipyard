@@ -39,7 +39,7 @@ namespace Shipyard
 
     private:
         uint32_t m_NumIndices;
-        uint32_t m_Uses2BytesPerIndex;
+        bool m_Uses2BytesPerIndex;
     };
 
     class SHIPYARD_API ConstantBuffer

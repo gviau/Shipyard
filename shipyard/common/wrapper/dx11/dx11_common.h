@@ -17,6 +17,8 @@ namespace Shipyard
     D3D11_FILL_MODE ConvertShipyardFillModeToDX11(FillMode fillMode);
     D3D11_CULL_MODE ConvertShipyardCullModeToDX11(CullMode cullMode);
     const char* ConvertShipyardSemanticNameToDX11(SemanticName semanticName);
+    D3D11_COMPARISON_FUNC ConvertShipyardComparisonFuncToDX11(ComparisonFunc func);
+    D3D11_STENCIL_OP ConvertShipyardStencilOperationToDX11(StencilOperation operation);
 
     String GetD3DShaderVersion(D3D_FEATURE_LEVEL featureLevel);
 }

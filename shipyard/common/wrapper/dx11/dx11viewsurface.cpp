@@ -23,8 +23,17 @@ DX11ViewSurface::DX11ViewSurface(DX11RenderDevice& renderDevice, DX11RenderDevic
     , m_WindowHandle(windowHandle)
     , m_SwapChain(nullptr)
     , m_BackBuffer(nullptr)
+    , m_DepthStencilView(nullptr)
 {
     m_SwapChain = renderDevice.CreateSwapchain(m_Width, m_Height, m_ViewSurfaceFormat, m_WindowHandle);
+
+    ID3D11Texture2D* depthStencilTexture = nullptr;
+    renderDevice.CreateDepthStencilBuffer(m_Width, m_Height, depthStencilTexture, m_DepthStencilView);
+
+    if (depthStencilTexture != nullptr)
+    {
+        depthStencilTexture->Release();
+    }
    
     CreateBackBuffer();
 }
@@ -40,12 +49,19 @@ DX11ViewSurface::~DX11ViewSurface()
     {
         m_BackBuffer->Release();
     }
+
+    if (m_DepthStencilView != nullptr)
+    {
+        m_DepthStencilView->Release();
+    }
 }
 
 void DX11ViewSurface::PreRender()
 {
     m_ImmediateRenderContext.SetRenderTargetView(0, m_BackBuffer);
+    m_ImmediateRenderContext.SetDepthStencilView(m_DepthStencilView);
     m_ImmediateRenderContext.ClearFirstRenderTarget(0.0f, 0.0f, 0.125f, 1.0f);
+    m_ImmediateRenderContext.ClearDepthStencil(true, false);
 }
 
 void DX11ViewSurface::Render()

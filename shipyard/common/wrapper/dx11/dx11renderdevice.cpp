@@ -42,9 +42,9 @@ GFXVertexBuffer* DX11RenderDevice::CreateVertexBuffer(uint32_t numVertices, Vert
     return MemAlloc(GFXVertexBuffer)(*m_Device, *m_ImmediateDeviceContext, numVertices, vertexFormatType, dynamic, initialData);
 }
 
-GFXIndexBuffer* DX11RenderDevice::CreateIndexBuffer(uint32_t numIndices, uint32_t indexSizeInBytes, bool dynamic, void* initialData)
+GFXIndexBuffer* DX11RenderDevice::CreateIndexBuffer(uint32_t numIndices, bool uses2BytesPerIndex, bool dynamic, void* initialData)
 {
-    return MemAlloc(GFXIndexBuffer)(*m_Device, *m_ImmediateDeviceContext, numIndices, indexSizeInBytes, dynamic, initialData);
+    return MemAlloc(GFXIndexBuffer)(*m_Device, *m_ImmediateDeviceContext, numIndices, uses2BytesPerIndex, dynamic, initialData);
 }
 
 GFXConstantBuffer* DX11RenderDevice::CreateConstantBuffer(uint32_t dataSizeInBytes, bool dynamic, void* initialData)
@@ -103,6 +103,42 @@ IDXGISwapChain* DX11RenderDevice::CreateSwapchain(uint32_t width, uint32_t heigh
     }
 
     return swapChain;
+}
+
+void DX11RenderDevice::CreateDepthStencilBuffer(uint32_t width, uint32_t height, ID3D11Texture2D*& depthStencilTexture, ID3D11DepthStencilView*& depthStencilTextureView)
+{
+    D3D11_TEXTURE2D_DESC depthStencilTextureDesc;
+    depthStencilTextureDesc.Width = width;
+    depthStencilTextureDesc.Height = height;
+    depthStencilTextureDesc.MipLevels = 1;
+    depthStencilTextureDesc.ArraySize = 1;
+    depthStencilTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    depthStencilTextureDesc.SampleDesc.Count = 1;
+    depthStencilTextureDesc.SampleDesc.Quality = 0;
+    depthStencilTextureDesc.Usage = D3D11_USAGE_DEFAULT;
+    depthStencilTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    depthStencilTextureDesc.CPUAccessFlags = 0;
+    depthStencilTextureDesc.MiscFlags = 0;
+
+    HRESULT hr = m_Device->CreateTexture2D(&depthStencilTextureDesc, nullptr, &depthStencilTexture);
+    if (FAILED(hr))
+    {
+        MessageBox(NULL, "DepthStencilTexture creation failed", "DX11 error", MB_OK);
+        return;
+    }
+
+    D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+    depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    depthStencilViewDesc.Texture2D.MipSlice = 0;
+    depthStencilViewDesc.Flags = 0;
+
+    hr = m_Device->CreateDepthStencilView(depthStencilTexture, &depthStencilViewDesc, &depthStencilTextureView);
+    if (FAILED(hr))
+    {
+        MessageBox(NULL, "CreateDepthStencilView failed", "DX11 error", MB_OK);
+        return;
+    }
 }
 
 }

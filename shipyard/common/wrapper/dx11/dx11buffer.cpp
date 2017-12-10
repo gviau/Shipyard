@@ -92,6 +92,8 @@ DX11IndexBuffer::DX11IndexBuffer(ID3D11Device& device, ID3D11DeviceContext& devi
 {
     D3D11_USAGE usage = (dynamic) ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
 
+    uint32_t indexSizeInBytes = (uses2BytesPerIndex ? 2 : 4);
+
     D3D11_BUFFER_DESC desc;
     desc.Usage = usage;
     desc.ByteWidth = numIndices * indexSizeInBytes;

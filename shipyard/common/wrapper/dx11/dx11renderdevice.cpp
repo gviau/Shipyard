@@ -2,6 +2,7 @@
 
 #include <common/wrapper/dx11/dx11buffer.h>
 #include <common/wrapper/dx11/dx11shader.h>
+#include <common/wrapper/dx11/dx11texture.h>
 
 #include <system/memory.h>
 
@@ -50,6 +51,11 @@ GFXIndexBuffer* DX11RenderDevice::CreateIndexBuffer(uint32_t numIndices, bool us
 GFXConstantBuffer* DX11RenderDevice::CreateConstantBuffer(uint32_t dataSizeInBytes, bool dynamic, void* initialData)
 {
     return MemAlloc(GFXConstantBuffer)(*m_Device, *m_ImmediateDeviceContext, dataSizeInBytes, dynamic, initialData);
+}
+
+GFXTexture2D* DX11RenderDevice::CreateTexture2D(uint32_t width, uint32_t height, GfxFormat pixelFormat, bool dynamic, void* initialData, bool generateMips)
+{
+    return MemAlloc(GFXTexture2D)(*m_Device, width, height, pixelFormat, dynamic, initialData, generateMips);
 }
 
 GFXVertexShader* DX11RenderDevice::CreateVertexShader(const String& source)

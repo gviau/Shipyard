@@ -91,17 +91,17 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
     gfxRenderDeviceContext.SetViewport(0.0f, 0.0f, 800.0f, 600.0f);
 
-    Shipyard::Vertex_Pos_Color vertexBufferData[] =
+    Shipyard::Vertex_Pos_UV vertexBufferData[] =
     {
-        { { -0.5f, -0.5f, -0.25f }, { 1.0f, 0.0f, 0.0f } },
-        { { -0.5f,  0.5f, -0.25f }, { 0.0f, 1.0f, 0.0f } },
-        { {  0.5f,  0.5f, -0.25f }, { 0.0f, 0.0f, 1.0f } },
-        { {  0.5f, -0.5f, -0.25f }, { 1.0f, 1.0f, 0.0f } },
+        { { -0.5f, -0.5f, -0.25f }, { 0.0f, 0.0f } },
+        { { -0.5f,  0.5f, -0.25f }, { 0.0f, 1.0f } },
+        { {  0.5f,  0.5f, -0.25f }, { 1.0f, 1.0f } },
+        { {  0.5f, -0.5f, -0.25f }, { 1.0f, 0.0f } },
 
-        { { -0.5f, -0.5f,  0.25f }, { 1.0f, 0.0f, 1.0f } },
-        { { -0.5f,  0.5f,  0.25f }, { 0.0f, 1.0f, 1.0f } },
-        { {  0.5f,  0.5f,  0.25f }, { 0.0f, 0.0f, 1.0f } },
-        { {  0.5f, -0.5f,  0.25f }, { 1.0f, 0.0f, 0.0f } }
+        { { -0.5f, -0.5f,  0.25f }, { 0.0f, 0.0f } },
+        { { -0.5f,  0.5f,  0.25f }, { 0.0f, 1.0f } },
+        { {  0.5f,  0.5f,  0.25f }, { 1.0f, 1.0f } },
+        { {  0.5f, -0.5f,  0.25f }, { 1.0f, 0.0f } }
     };
 
     unsigned short indices[] =
@@ -133,17 +133,25 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
                     0.0f, 0.0f, 0.0f, 1.0f)
     };
 
-    shared_ptr<Shipyard::GFXVertexBuffer> vertexBuffer(gfxRenderDevice.CreateVertexBuffer(8, Shipyard::VertexFormatType::Pos_Color, false, vertexBufferData));
+    uint8_t textureData[] =
+    {
+        255, 255, 255, 255, 255, 0, 0, 255,
+        255, 0, 0, 255, 255, 0, 0, 255
+    };
+
+    shared_ptr<Shipyard::GFXVertexBuffer> vertexBuffer(gfxRenderDevice.CreateVertexBuffer(8, Shipyard::VertexFormatType::Pos_UV, false, vertexBufferData));
     shared_ptr<Shipyard::GFXIndexBuffer> indexBuffer(gfxRenderDevice.CreateIndexBuffer(36, true, false, indices));
     shared_ptr<Shipyard::GFXConstantBuffer> constantBuffer(gfxRenderDevice.CreateConstantBuffer(sizeof(data), true, &data));
+    shared_ptr<Shipyard::GFXTexture2D> texture(gfxRenderDevice.CreateTexture2D(2, 2, Shipyard::GfxFormat::R8G8B8A8_UNORM, false, textureData, false));
 
-    Shipyard::String vertexShaderSource = "cbuffer constantBuffer : register(b0) { float4x4 mat; }; struct vs_input { float3 pos : POSITION; float3 color : COLOR; }; struct vs_output { float4 pos : SV_POSITION; float3 color : TEXCOORD; }; "
-        "vs_output main(vs_input input) { vs_output output; output.pos = mul(mat, float4(input.pos.xyz, 1.0)); output.color = input.color; return output; }";
+    Shipyard::String vertexShaderSource = "cbuffer constantBuffer : register(b0) { float4x4 mat; }; struct vs_input { float3 pos : POSITION; float2 uv : TEXCOORD; }; struct vs_output { float4 pos : SV_POSITION; float2 uv: TEXCOORD; }; "
+        "vs_output main(vs_input input) { vs_output output; output.pos = mul(mat, float4(input.pos.xyz, 1.0)); output.uv = input.uv; return output; }";
 
     shared_ptr<Shipyard::GFXVertexShader> vertexShader(gfxRenderDevice.CreateVertexShader(vertexShaderSource));
 
-    Shipyard::String pixelShaderSource = "struct ps_input { float4 pos : SV_POSITION; float3 color : TEXCOORD; }; struct ps_output { float4 color : SV_TARGET; }; "
-        "ps_output main(ps_input input) { ps_output output; output.color = float4(input.color, 1.0); return output; }";
+    Shipyard::String pixelShaderSource = "SamplerState testSampler\n{\nFilter = MIN_MAG_MIP_LINEAR;\nAddressU = Wrap;\nAddressV = Wrap;\n};\nTexture2D tex : register(t0);\n"
+        "struct ps_input\n{\nfloat4 pos : SV_POSITION;\nfloat2 uv: TEXCOORD;\n};\nstruct ps_output\n{\nfloat4 color : SV_TARGET;\n};\n"
+        "ps_output main(ps_input input) {\nps_output output;\noutput.color = tex.Sample(testSampler, input.uv);\nreturn output;\n}";
 
     shared_ptr<Shipyard::GFXPixelShader> pixelShader(gfxRenderDevice.CreatePixelShader(pixelShaderSource));
 
@@ -178,6 +186,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
             gfxRenderDeviceContext.SetVertexShader(vertexShader.get());
             gfxRenderDeviceContext.SetPixelShader(pixelShader.get());
             gfxRenderDeviceContext.SetVertexShaderConstantBuffer(constantBuffer.get(), 0);
+            gfxRenderDeviceContext.SetPixelShaderTexture(texture.get(), 0);
             gfxRenderDeviceContext.DrawIndexed(Shipyard::PrimitiveTopology::TriangleList, *(vertexBuffer.get()), *(indexBuffer.get()), 0, 0);
 
             gfxViewSurface.Flip();

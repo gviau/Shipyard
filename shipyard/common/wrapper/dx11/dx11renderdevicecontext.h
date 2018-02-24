@@ -28,8 +28,11 @@ namespace Shipyard
         void SetViewport(float topLeftX, float topLeftY, float width, float height);
 
         void SetVertexShader(GFXVertexShader* vertexShader);
-        void SetVertexShaderConstantBuffer(GFXConstantBuffer* constantBuffer, uint32_t slot);
         void SetPixelShader(GFXPixelShader* pixelShader);
+
+        void SetVertexShaderConstantBuffer(GFXConstantBuffer* constantBuffer, uint32_t slot);
+        void SetPixelShaderConstantBuffer(GFXConstantBuffer* constantBuffer, uint32_t slot);
+        void SetPixelShaderTexture(GFXTexture2D* texture, uint32_t slot);
 
         void Draw(PrimitiveTopology primitiveTopology, const GFXVertexBuffer& vertexBuffer, uint32_t startVertexLocation);
         void DrawIndexed(PrimitiveTopology primitiveTopology, const GFXVertexBuffer& vertexBuffer, const GFXIndexBuffer& indexBuffer, uint32_t startVertexLocation, uint32_t startIndexLocation);

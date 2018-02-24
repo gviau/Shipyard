@@ -1,5 +1,7 @@
 #pragma once
 
+#include <common/common.h>
+
 #include <system/platform.h>
 
 // TODO
@@ -18,6 +20,7 @@ class DX11IndexBuffer;
 class DX11PixelShader;
 class DX11RenderDevice;
 class DX11RenderDeviceContext;
+class DX11Texture2D;
 class DX11VertexBuffer;
 class DX11VertexShader;
 class DX11ViewSurface;
@@ -27,6 +30,7 @@ typedef DX11IndexBuffer GFXIndexBuffer;
 typedef DX11PixelShader GFXPixelShader;
 typedef DX11RenderDevice GFXRenderDevice;
 typedef DX11RenderDeviceContext GFXRenderDeviceContext;
+typedef DX11Texture2D GFXTexture2D;
 typedef DX11VertexBuffer GFXVertexBuffer;
 typedef DX11VertexShader GFXVertexShader;
 typedef DX11ViewSurface GFXViewSurface;

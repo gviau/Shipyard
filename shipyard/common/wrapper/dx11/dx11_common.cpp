@@ -29,8 +29,8 @@ DXGI_FORMAT ConvertShipyardFormatToDX11(GfxFormat format)
         case GfxFormat::R32G32B32A32_UINT:      return DXGI_FORMAT_R32G32B32A32_UINT;
         case GfxFormat::R32G32B32A32_SINT:      return DXGI_FORMAT_R32G32B32A32_SINT;
         case GfxFormat::R32G32B32_FLOAT:        return DXGI_FORMAT_R32G32B32_FLOAT;
-        case GfxFormat::R32G32B32_UINT:        return DXGI_FORMAT_R32G32B32_UINT;
-        case GfxFormat::R32G32B32_SINT:        return DXGI_FORMAT_R32G32B32_SINT;
+        case GfxFormat::R32G32B32_UINT:         return DXGI_FORMAT_R32G32B32_UINT;
+        case GfxFormat::R32G32B32_SINT:         return DXGI_FORMAT_R32G32B32_SINT;
         case GfxFormat::R16G16B16A16_FLOAT:     return DXGI_FORMAT_R16G16B16A16_FLOAT;
         case GfxFormat::R16G16B16A16_UNORM:     return DXGI_FORMAT_R16G16B16A16_UNORM;
         case GfxFormat::R16G16B16A16_UINT:      return DXGI_FORMAT_R16G16B16A16_UINT;

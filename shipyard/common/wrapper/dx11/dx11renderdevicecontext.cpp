@@ -4,6 +4,7 @@
 #include <common/wrapper/dx11/dx11buffer.h>
 #include <common/wrapper/dx11/dx11renderdevice.h>
 #include <common/wrapper/dx11/dx11shader.h>
+#include <common/wrapper/dx11/dx11texture.h>
 
 #include <common/vertexformat.h>
 
@@ -187,16 +188,28 @@ void DX11RenderDeviceContext::SetVertexShader(GFXVertexShader* vertexShader)
     m_ImmediateDeviceContext->VSSetShader(shader, nullptr, 0);
 }
 
+void DX11RenderDeviceContext::SetPixelShader(GFXPixelShader* pixelShader)
+{
+    ID3D11PixelShader* shader = (pixelShader != nullptr) ? pixelShader->GetShader() : nullptr;
+    m_ImmediateDeviceContext->PSSetShader(shader, nullptr, 0);
+}
+
 void DX11RenderDeviceContext::SetVertexShaderConstantBuffer(GFXConstantBuffer* constantBuffer, uint32_t slot)
 {
     ID3D11Buffer* buffer = (constantBuffer != nullptr) ? constantBuffer->GetBuffer() : nullptr;
     m_ImmediateDeviceContext->VSSetConstantBuffers(slot, 1, &buffer);
 }
 
-void DX11RenderDeviceContext::SetPixelShader(GFXPixelShader* pixelShader)
+void DX11RenderDeviceContext::SetPixelShaderConstantBuffer(GFXConstantBuffer* constantBuffer, uint32_t slot)
 {
-    ID3D11PixelShader* shader = (pixelShader != nullptr) ? pixelShader->GetShader() : nullptr;
-    m_ImmediateDeviceContext->PSSetShader(shader, nullptr, 0);
+    ID3D11Buffer* buffer = (constantBuffer != nullptr) ? constantBuffer->GetBuffer() : nullptr;
+    m_ImmediateDeviceContext->PSSetConstantBuffers(slot, 1, &buffer);
+}
+
+void DX11RenderDeviceContext::SetPixelShaderTexture(GFXTexture2D* texture, uint32_t slot)
+{
+    ID3D11ShaderResourceView* shaderResourceView = (texture != nullptr) ? texture->GetShaderResourceView() : nullptr;
+    m_ImmediateDeviceContext->PSSetShaderResources(slot, 1, &shaderResourceView);
 }
 
 void DX11RenderDeviceContext::Draw(PrimitiveTopology primitiveTopology, const GFXVertexBuffer& vertexBuffer, uint32_t startVertexLocation)

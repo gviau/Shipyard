@@ -99,7 +99,7 @@ DX11PixelShader::DX11PixelShader(ID3D11Device& device, const String& source)
     hr = device.CreatePixelShader(m_ShaderBlob->GetBufferPointer(), m_ShaderBlob->GetBufferSize(), nullptr, &m_PixelShader);
     if (FAILED(hr))
     {
-        MessageBox(NULL, "CreateVertexShader failed", "DX11 error", MB_OK);
+        MessageBox(NULL, "CreatePixelShader failed", "DX11 error", MB_OK);
     }
 }
 

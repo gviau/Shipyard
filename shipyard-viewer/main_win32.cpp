@@ -1,5 +1,8 @@
 #include <common/wrapper/wrapper.h>
 
+#include <common/shadercompiler/shadercompiler.h>
+#include <common/shadercompiler/shaderwatcher.h>
+
 #include <memory>
 using namespace std;
 
@@ -149,7 +152,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
     shared_ptr<Shipyard::GFXVertexShader> vertexShader(gfxRenderDevice.CreateVertexShader(vertexShaderSource));
 
-    Shipyard::String pixelShaderSource = "SamplerState testSampler\n{\nFilter = MIN_MAG_MIP_LINEAR;\nAddressU = Wrap;\nAddressV = Wrap;\n};\nTexture2D tex : register(t0);\n"
+    Shipyard::String pixelShaderSource = "SamplerState testSampler\n{\nFilter = MIN_MAG_MIP_POINT;\nAddressU = Wrap;\nAddressV = Wrap;\n};\nTexture2D tex : register(t0);\n"
         "struct ps_input\n{\nfloat4 pos : SV_POSITION;\nfloat2 uv: TEXCOORD;\n};\nstruct ps_output\n{\nfloat4 color : SV_TARGET;\n};\n"
         "ps_output main(ps_input input) {\nps_output output;\noutput.color = tex.Sample(testSampler, input.uv);\nreturn output;\n}";
 
@@ -158,6 +161,9 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     g_IsOpen = true;
 
     float theta = 0.0f;
+
+    Shipyard::ShaderCompiler shaderCompiler;
+    Shipyard::ShaderWatcher shaderWatcher(&shaderCompiler, ".\\shaders");
 
     MSG msg;
     while (g_IsOpen)

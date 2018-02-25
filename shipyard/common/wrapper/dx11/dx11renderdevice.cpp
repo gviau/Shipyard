@@ -17,7 +17,7 @@ namespace Shipyard
 
 DX11RenderDevice::DX11RenderDevice()
 {
-    UINT flags = D3D11_CREATE_DEVICE_DEBUG;
+    UINT flags = 0; // D3D11_CREATE_DEVICE_DEBUG;
     HRESULT hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, NULL, flags, nullptr, 0, D3D11_SDK_VERSION, &m_Device, nullptr, &m_ImmediateDeviceContext);
     if (FAILED(hr))
     {

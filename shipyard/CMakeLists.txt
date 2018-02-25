@@ -19,12 +19,41 @@ source_group("Header Files\\extern\\glm" FILES ${EXTERN_GLM_HEADER_FILES})
 
 # Shipyard DLL
 set (SHIPYARD_COMMON_SOURCE_FILES
+	common/shaderdatabase.cpp
+	common/shaderfamilies.cpp
+	common/shaderhandler.cpp
+	common/shaderhandlermanager.cpp
+	common/shaderkey.cpp
+	common/shaderoptions.cpp
+	common/shadervariationset.cpp
+	common/shadervariationsetmanager.cpp
 	common/vertexformat.cpp
 )
 
 set (SHIPYARD_COMMON_HEADER_FILES
 	common/common.h
+	common/shaderdatabase.h
+	common/shaderfamilies.h
+	common/shaderhandler.h
+	common/shaderhandlermanager.h
+	common/shaderkey.h
+	common/shaderkeydefinitions.h
+	common/shaderoptions.h
+	common/shadervariationset.h
+	common/shadervariationsetmanager.h
 	common/vertexformat.h
+)
+
+set (SHIPYARD_COMMON_SHADERCOMPILER_SOURCE_FILES
+	common/shadercompiler/shadercompiler.cpp
+	common/shadercompiler/shadercompilerwin.cpp
+	common/shadercompiler/shaderwatcher.cpp
+)
+
+set (SHIPYARD_COMMON_SHADERCOMPILER_HEADER_FILES
+	common/shadercompiler/shadercompiler.h
+	common/shadercompiler/shadercompilerwin.h
+	common/shadercompiler/shaderwatcher.h
 )
 
 set (SHIPYARD_COMMON_WRAPPER_SOURCE_FILES
@@ -83,6 +112,9 @@ set (SHIPYARD_SYSTEM_HEADER_FILES
 source_group("Source Files\\common\\" FILES ${SHIPYARD_COMMON_SOURCE_FILES})
 source_group("Header Files\\common\\" FILES ${SHIPYARD_COMMON_HEADER_FILES})
 
+source_group("Source Files\\common\\shadercompiler\\" FILES ${SHIPYARD_COMMON_SHADERCOMPILER_SOURCE_FILES})
+source_group("Header Files\\common\\shadercompiler\\" FILES ${SHIPYARD_COMMON_SHADERCOMPILER_HEADER_FILES})
+
 source_group("Source Files\\common\\wrapper\\" FILES ${SHIPYARD_COMMON_WRAPPER_SOURCE_FILES})
 source_group("Header Files\\common\\wrapper\\" FILES ${SHIPYARD_COMMON_WRAPPER_HEADER_FILES})
 
@@ -105,6 +137,7 @@ add_library(
     ${EXTERN_IMGUI_SOURCE_FILES}
 	${EXTERN_GLM_SOURCE_FILES}
 	${SHIPYARD_COMMON_SOURCE_FILES}
+	${SHIPYARD_COMMON_SHADERCOMPILER_SOURCE_FILES}
 	${SHIPYARD_COMMON_WRAPPER_SOURCE_FILES}
 	${SHIPYARD_COMMON_WRAPPER_DX11_SOURCE_FILES}
 	${SHIPYARD_SYSTEM_SOURCE_FILES}
@@ -112,6 +145,7 @@ add_library(
     ${EXTERN_IMGUI_HEADER_FILES}
 	${EXTERN_GLM_HEADER_FILES}
 	${SHIPYARD_COMMON_HEADER_FILES}
+	${SHIPYARD_COMMON_SHADERCOMPILER_HEADER_FILES}
 	${SHIPYARD_COMMON_WRAPPER_HEADER_FILES}
 	${SHIPYARD_COMMON_WRAPPER_DX11_HEADER_FILES}
 	${SHIPYARD_SYSTEM_HEADER_FILES}

@@ -1,0 +1,24 @@
+#ifndef START_SHADER_KEY
+#define START_SHADER_KEY(shaderFamily)
+#endif
+
+#ifndef ADD_SHADER_OPTION
+#define ADD_SHADER_OPTION(shaderOption)
+#endif
+
+#ifndef END_SHADER_KEY
+#define END_SHADER_KEY(shaderFamily)
+#endif
+
+START_SHADER_KEY(Error)
+ADD_SHADER_OPTION(Test2Bits)
+END_SHADER_KEY(Error)
+
+START_SHADER_KEY(Generic)
+ADD_SHADER_OPTION(Test1Bit)
+ADD_SHADER_OPTION(Test2Bits)
+END_SHADER_KEY(Generic)
+
+#undef START_SHADER_KEY
+#undef ADD_SHADER_OPTION
+#undef END_SHADER_KEY

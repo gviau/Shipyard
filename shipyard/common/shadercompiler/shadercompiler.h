@@ -11,11 +11,13 @@
 #include <thread>
 using namespace std;
 
+struct _D3D_SHADER_MACRO;
 struct ID3D10Blob;
 
 namespace Shipyard
 {
     enum class ShaderFamily : uint8_t;
+    enum class ShaderOption : uint32_t;
 
     class SHIPYARD_API ShaderCompiler : public Singleton<ShaderCompiler>
     {
@@ -35,14 +37,15 @@ namespace Shipyard
         struct CompiledShaderKeyEntry
         {
             CompiledShaderKeyEntry()
-                : m_GotRecompiledSinceLastAccess(false)
+                : m_RawShaderKey(0)
+                , m_GotRecompiledSinceLastAccess(false)
                 , m_GotCompilationError(false)
                 , m_CompiledVertexShaderBlob(nullptr)
                 , m_CompiledPixelShaderBlob(nullptr)
                 , m_CompiledComputeShaderBlob(nullptr)
             {}
 
-            ShaderKey m_ShaderKey;
+            ShaderKey::RawShaderKeyType m_RawShaderKey;
             bool m_GotRecompiledSinceLastAccess;
             bool m_GotCompilationError;
 
@@ -56,13 +59,13 @@ namespace Shipyard
 
         void CompileShaderFamily(ShaderFamily shaderFamily);
 
-        void CompileShaderKey(ShaderKey shaderKey, const String& source);
-        ID3D10Blob* CompileVertexShaderForShaderKey(ShaderKey shaderKey, const String& source);
-        ID3D10Blob* CompilePixelShaderForShaderKey(ShaderKey shaderKey, const String& source);
-        ID3D10Blob* CompileComputeShaderForShaderKey(ShaderKey shaderKey, const String& source);
-        ID3D10Blob* CompileShaderForShaderKey(ShaderKey shaderKey, const String& shaderSource, const String& version, const String& mainName);
+        void CompileShaderKey(ShaderKey::RawShaderKeyType rawShaderKey, const Array<ShaderOption>& everyPossibleShaderOptionForShaderKey, const String& source);
+        ID3D10Blob* CompileVertexShaderForShaderKey(const String& source, _D3D_SHADER_MACRO* shaderOptionDefines);
+        ID3D10Blob* CompilePixelShaderForShaderKey(const String& source, _D3D_SHADER_MACRO* shaderOptionDefines);
+        ID3D10Blob* CompileComputeShaderForShaderKey(const String& source, _D3D_SHADER_MACRO* shaderOptionDefines);
+        ID3D10Blob* CompileShader(const String& shaderSource, const String& version, const String& mainName, _D3D_SHADER_MACRO* shaderOptionDefines);
 
-        CompiledShaderKeyEntry& GetCompiledShaderKeyEntry(ShaderKey shaderKey);
+        CompiledShaderKeyEntry& GetCompiledShaderKeyEntry(ShaderKey::RawShaderKeyType rawShaderKey);
 
         thread m_ShaderCompilerThread;
         mutable mutex m_ShaderCompilationRequestLock;

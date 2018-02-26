@@ -4,11 +4,12 @@
 
 namespace Shipyard
 {
+#define CREATE_OPTION(option, numBits) \
+    ShaderOption_##option,
+
     enum class ShaderOption : uint32_t
     {
-        Test1Bit,
-        Test2Bits,
-
+#include <common/shaderoptiondefinitions.h>
         Count
     };
 }

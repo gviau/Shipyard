@@ -41,7 +41,13 @@ vs_output VS_Main(vs_input input)
 ps_output PS_Main(vs_output input)
 {
 	ps_output output;
-	output.color = tex.Sample(testSampler, input.uv);
+	float4 color = tex.Sample(testSampler, input.uv);
+	
+#if Test1Bit
+	output.color = color * 0.5;
+#else
+	output.color = color - float4(1.0, 1.0, 0.0, 0.0);
+#endif
 	
 	return output;
 }

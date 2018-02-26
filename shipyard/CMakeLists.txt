@@ -39,6 +39,7 @@ set (SHIPYARD_COMMON_HEADER_FILES
 	common/shaderkey.h
 	common/shaderkeydefinitions.h
 	common/shaderoptions.h
+	common/shaderoptiondefinitions.h
 	common/shadervariationset.h
 	common/shadervariationsetmanager.h
 	common/vertexformat.h

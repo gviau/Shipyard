@@ -22,7 +22,7 @@ struct ShaderKeyGroupBase
         static constexpr uint32_t ms_ShaderOptionGroup[] = {
 
 #define ADD_SHADER_OPTION(shaderOption) \
-    uint32_t(ShaderOption:: ##shaderOption),
+    uint32_t(ShaderOption::ShaderOption_##shaderOption),
 
 #define END_SHADER_KEY(shaderFamily) \
         0xFFFFFFFF \
@@ -135,7 +135,7 @@ uint32_t ShaderKey::GetShaderOptionValue(ShaderOption shaderOption) const
     return ((options >> shiftForShaderOption) & shaderOptionBitMask);
 }
 
-uint32_t ShaderKey::GetRawShaderKey() const
+ShaderKey::RawShaderKeyType ShaderKey::GetRawShaderKey() const
 {
     return m_RawShaderKey;
 }

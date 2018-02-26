@@ -6,6 +6,7 @@
 #include <common/shaderhandler.h>
 #include <common/shaderhandlermanager.h>
 #include <common/shaderkey.h>
+#include <common/shaderoptions.h>
 
 #include <system/singletonstorer.h>
 

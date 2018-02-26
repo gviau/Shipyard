@@ -1,6 +1,7 @@
 #include <common/shadercompiler/shadercompiler.h>
 
 #include <common/shaderfamilies.h>
+#include <common/shaderoptions.h>
 
 #pragma warning( disable : 4005 )
 
@@ -18,6 +19,8 @@ namespace Shipyard
 volatile bool ShaderCompiler::m_RunShaderCompilerThread = true;
 
 extern String g_ShaderFamilyFilenames[uint8_t(ShaderFamily::Count)];
+extern uint8_t g_NumBitsForShaderOption[uint32_t(ShaderOption::Count)];
+extern String g_ShaderOptionString[uint32_t(ShaderOption::Count)];
 
 ShaderCompiler::ShaderCompiler()
     : m_ShaderDirectoryName(".\\shaders\\")
@@ -61,7 +64,7 @@ bool ShaderCompiler::GetShaderBlobsForShaderKey(ShaderKey shaderKey, ID3D10Blob*
         isShaderCompiled = false;
     }
 
-    CompiledShaderKeyEntry& shaderKeyEntry = GetCompiledShaderKeyEntry(shaderKey);
+    CompiledShaderKeyEntry& shaderKeyEntry = GetCompiledShaderKeyEntry(shaderKey.GetRawShaderKey());
     if (shaderKeyEntry.m_GotCompilationError)
     {
         isShaderCompiled = false;
@@ -163,12 +166,6 @@ void ShaderCompiler::ShaderCompilerThreadFunction()
 
 void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
 {
-    Array<ShaderOption> shaderOptions;
-    ShaderKey::GetShaderKeyOptionsForShaderFamily(shaderFamily, shaderOptions);
-
-    ShaderKey shaderKey;
-    shaderKey.SetShaderFamily(shaderFamily);
-
     const String& sourceFilename = g_ShaderFamilyFilenames[uint32_t(shaderFamily)];
 
     ifstream shaderFile(m_ShaderDirectoryName + sourceFilename);
@@ -184,16 +181,78 @@ void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
 
     shaderFile.read(&source[0], source.length());
 
-    CompileShaderKey(shaderKey, source);
+    Array<ShaderOption> shaderOptions;
+    ShaderKey::GetShaderKeyOptionsForShaderFamily(shaderFamily, shaderOptions);
+
+    uint32_t shaderOptionAsInt = 0;
+    for (uint32_t i = shaderOptions.size(); i > 0; i--)
+    {
+        uint32_t idx = i - 1;
+
+        uint32_t bitShift = uint32_t(g_NumBitsForShaderOption[uint32_t(shaderOptions[idx])]);
+
+        shaderOptionAsInt <<= bitShift;
+
+        shaderOptionAsInt |= ((1 << bitShift) - 1);
+    }
+
+    uint32_t possibleNumberOfPermutations = shaderOptionAsInt + 1;
+
+    ShaderKey shaderKey;
+    shaderKey.SetShaderFamily(shaderFamily);
+
+    ShaderKey::RawShaderKeyType baseRawShaderKey = shaderKey.GetRawShaderKey();
+
+    for (uint32_t i = 0; i < possibleNumberOfPermutations; i++)
+    {
+        ShaderKey::RawShaderKeyType rawShaderKey = baseRawShaderKey | (shaderOptionAsInt << ShaderKey::ms_ShaderOptionShift);
+
+        CompileShaderKey(rawShaderKey, shaderOptions, source);
+
+        shaderOptionAsInt -= 1;
+    }
 }
 
-void ShaderCompiler::CompileShaderKey(ShaderKey shaderKey, const String& source)
+void ShaderCompiler::CompileShaderKey(ShaderKey::RawShaderKeyType rawShaderKey, const Array<ShaderOption>& everyPossibleShaderOptionForShaderKey, const String& source)
 {
-    CompiledShaderKeyEntry& compiledShaderKeyEntry = GetCompiledShaderKeyEntry(shaderKey);
+    CompiledShaderKeyEntry& compiledShaderKeyEntry = GetCompiledShaderKeyEntry(rawShaderKey);
 
-    ID3D10Blob* vertexShaderBlob = CompileVertexShaderForShaderKey(shaderKey, source);
-    ID3D10Blob* pixelShaderBlob = CompilePixelShaderForShaderKey(shaderKey, source);
-    ID3D10Blob* computeShaderBlob = CompileComputeShaderForShaderKey(shaderKey, source);
+    ShaderKey shaderKey;
+    shaderKey.m_RawShaderKey = rawShaderKey;
+
+    Array<D3D_SHADER_MACRO> shaderOptionDefines;
+    shaderOptionDefines.reserve(everyPossibleShaderOptionForShaderKey.size());
+
+    for (ShaderOption shaderOption : everyPossibleShaderOptionForShaderKey)
+    {
+        uint32_t valueForShaderOption = shaderKey.GetShaderOptionValue(shaderOption);
+        if (valueForShaderOption == 0)
+        {
+            continue;
+        }
+
+        D3D_SHADER_MACRO shaderDefine;
+        shaderDefine.Name = g_ShaderOptionString[uint32_t(shaderOption)].c_str();
+
+        char* buf = new char[8];
+        sprintf_s(buf, 8, "%u", valueForShaderOption);
+
+        shaderDefine.Definition = buf;
+
+        shaderOptionDefines.push_back(shaderDefine);
+    }
+
+    D3D_SHADER_MACRO nullShaderDefine = { nullptr, nullptr };
+    shaderOptionDefines.push_back(nullShaderDefine);
+
+    ID3D10Blob* vertexShaderBlob = CompileVertexShaderForShaderKey(source, &shaderOptionDefines[0]);
+    ID3D10Blob* pixelShaderBlob = CompilePixelShaderForShaderKey(source, &shaderOptionDefines[0]);
+    ID3D10Blob* computeShaderBlob = CompileComputeShaderForShaderKey( source, &shaderOptionDefines[0]);
+
+    for (D3D_SHADER_MACRO& shaderMacro : shaderOptionDefines)
+    {
+        delete[] shaderMacro.Definition;
+    }
 
     if (!m_RecompileCurrentRequest)
     {
@@ -209,22 +268,22 @@ void ShaderCompiler::CompileShaderKey(ShaderKey shaderKey, const String& source)
     }
 }
 
-ID3D10Blob* ShaderCompiler::CompileVertexShaderForShaderKey(ShaderKey shaderKey, const String& source)
+ID3D10Blob* ShaderCompiler::CompileVertexShaderForShaderKey(const String& source, D3D_SHADER_MACRO* shaderOptionDefines)
 {
-    return CompileShaderForShaderKey(shaderKey, source, "vs_5_0", "VS_Main");
+    return CompileShader(source, "vs_5_0", "VS_Main", shaderOptionDefines);
 }
 
-ID3D10Blob* ShaderCompiler::CompilePixelShaderForShaderKey(ShaderKey shaderKey, const String& source)
+ID3D10Blob* ShaderCompiler::CompilePixelShaderForShaderKey(const String& source, D3D_SHADER_MACRO* shaderOptionDefines)
 {
-    return CompileShaderForShaderKey(shaderKey, source, "ps_5_0", "PS_Main");
+    return CompileShader(source, "ps_5_0", "PS_Main", shaderOptionDefines);
 }
 
-ID3D10Blob* ShaderCompiler::CompileComputeShaderForShaderKey(ShaderKey shaderKey, const String& source)
+ID3D10Blob* ShaderCompiler::CompileComputeShaderForShaderKey(const String& source, D3D_SHADER_MACRO* shaderOptionDefines)
 {
-    return CompileShaderForShaderKey(shaderKey, source, "cs_5_0", "CS_Main");
+    return CompileShader(source, "cs_5_0", "CS_Main", shaderOptionDefines);
 }
 
-ID3D10Blob* ShaderCompiler::CompileShaderForShaderKey(ShaderKey shaderKey, const String& shaderSource, const String& version, const String& mainName)
+ID3D10Blob* ShaderCompiler::CompileShader(const String& shaderSource, const String& version, const String& mainName, D3D_SHADER_MACRO* shaderOptionDefines)
 {
     ID3D10Blob* shaderBlob = nullptr;
     ID3D10Blob* error = nullptr;
@@ -235,7 +294,7 @@ ID3D10Blob* ShaderCompiler::CompileShaderForShaderKey(ShaderKey shaderKey, const
     flags = D3DCOMPILE_DEBUG;
 #endif
 
-    HRESULT hr = D3DCompile(shaderSource.c_str(), shaderSource.size(), nullptr, nullptr, nullptr, mainName.c_str(), version.c_str(), flags, 0, &shaderBlob, &error);
+    HRESULT hr = D3DCompile(shaderSource.c_str(), shaderSource.size(), nullptr, shaderOptionDefines, nullptr, mainName.c_str(), version.c_str(), flags, 0, &shaderBlob, &error);
     if (FAILED(hr))
     {
         if (error != nullptr)
@@ -251,12 +310,12 @@ ID3D10Blob* ShaderCompiler::CompileShaderForShaderKey(ShaderKey shaderKey, const
     return shaderBlob;
 }
 
-ShaderCompiler::CompiledShaderKeyEntry& ShaderCompiler::GetCompiledShaderKeyEntry(ShaderKey shaderKey)
+ShaderCompiler::CompiledShaderKeyEntry& ShaderCompiler::GetCompiledShaderKeyEntry(ShaderKey::RawShaderKeyType rawShaderKey)
 {
     uint32_t idx = 0;
     for (; idx < m_CompiledShaderKeyEntries.size(); idx++)
     {
-        if (m_CompiledShaderKeyEntries[idx].m_ShaderKey.GetRawShaderKey() == shaderKey.GetRawShaderKey())
+        if (m_CompiledShaderKeyEntries[idx].m_RawShaderKey == rawShaderKey)
         {
             break;
         }
@@ -265,7 +324,7 @@ ShaderCompiler::CompiledShaderKeyEntry& ShaderCompiler::GetCompiledShaderKeyEntr
     if (idx == m_CompiledShaderKeyEntries.size())
     {
         CompiledShaderKeyEntry newCompiledShaderKeyEntry;
-        newCompiledShaderKeyEntry.m_ShaderKey = shaderKey;
+        newCompiledShaderKeyEntry.m_RawShaderKey = rawShaderKey;
 
         m_CompiledShaderKeyEntries.push_back(newCompiledShaderKeyEntry);
     }

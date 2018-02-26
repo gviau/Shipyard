@@ -10,9 +10,14 @@ namespace Shipyard
     enum class ShaderFamily : uint8_t;
     enum class ShaderOption : uint32_t;
 
+    class ShaderCompiler;
+
     class SHIPYARD_API ShaderKey
     {
+        friend class ShaderCompiler;
+
     public:
+        typedef uint32_t RawShaderKeyType;
         ShaderKey();
 
         void SetShaderFamily(ShaderFamily shaderFamily);
@@ -21,7 +26,7 @@ namespace Shipyard
         ShaderFamily GetShaderFamily() const;
         uint32_t GetShaderOptionValue(ShaderOption shaderOption) const;
 
-        uint32_t GetRawShaderKey() const;
+        RawShaderKeyType GetRawShaderKey() const;
 
         static void InitializeShaderKeyGroups();
 
@@ -30,12 +35,16 @@ namespace Shipyard
         // Required to be used in a map (ShaderHandlerManager)
         bool operator< (const ShaderKey& rhs) const { return m_RawShaderKey < rhs.m_RawShaderKey; }
 
-    private:
-        static const uint32_t ms_ShaderFamilyMask = 0xFF;
-        static const uint32_t ms_ShaderOptionMask = 0xFFFFFF;
+        static const RawShaderKeyType ms_ShaderFamilyMask = 0xFF;
+        static const RawShaderKeyType ms_ShaderOptionMask = 0xFFFFFF;
 
-        static const uint32_t ms_ShaderFamilyShift = 0x00;
-        static const uint32_t ms_ShaderOptionShift = 0x08;
-        uint32_t m_RawShaderKey;
+        static const RawShaderKeyType ms_ShaderFamilyShift = 0x00;
+        static const RawShaderKeyType ms_ShaderOptionShift = 0x08;
+
+    private:
+        RawShaderKeyType m_RawShaderKey;
     };
 }
+
+#define SET_SHADER_OPTION(shaderKey, shaderOption, value) shaderKey.SetShaderOption(Shipyard::ShaderOption::ShaderOption_##shaderOption, value)
+#define GET_SHADER_OPTION_VALUE(shaderKey, shaderOption) shaderKey.GetShaderOptionValue(Shipyard::ShaderOption::ShaderOption_##shaderOption)

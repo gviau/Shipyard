@@ -74,6 +74,8 @@ void ShaderWatcher::GetModifiedFilesInDirectory(const String& directoryName, Arr
         }
 
     } while (FindNextFileA(findHandle, &findData));
+
+    FindClose(findHandle);
 }
 
 bool ShaderWatcher::FileWasModified(const String& filename, uint64_t lastWriteTimestamp)

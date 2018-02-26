@@ -14,7 +14,7 @@ namespace Shipyard
     class SHIPYARD_API ShaderWatcher
     {
     public:
-        ShaderWatcher(const String& shaderDirectoryName);
+        ShaderWatcher();
         ~ShaderWatcher();
 
     private:

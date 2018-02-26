@@ -1,3 +1,6 @@
+#include "test.hlsl"
+#include "test2.hlsl"
+
 cbuffer constantBuffer : register(b0)
 {
 	float4x4 mat;
@@ -43,10 +46,14 @@ ps_output PS_Main(vs_output input)
 	ps_output output;
 	float4 color = tex.Sample(testSampler, input.uv);
 	
-#if Test1Bit
-	output.color = color * 0.5;
-#else
+#if Test2Bits == 3
+	output.color = (color - GetValue()) * GetMultiplier();
+#elif Test2Bits == 2
+	output.color = color * 0.25;
+#elif Test2Bits == 1
 	output.color = color - float4(1.0, 1.0, 0.0, 0.0);
+#else
+	output.color = color;
 #endif
 	
 	return output;

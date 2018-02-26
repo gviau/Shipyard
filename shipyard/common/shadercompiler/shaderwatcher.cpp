@@ -11,22 +11,9 @@ namespace Shipyard
 
 volatile bool ShaderWatcher::m_RunShaderWatcherThread = true;
 
-ShaderWatcher::ShaderWatcher(const String& shaderDirectoryName)
-    : m_ShaderDirectoryName(shaderDirectoryName)
+ShaderWatcher::ShaderWatcher()
 {
-    if (m_ShaderDirectoryName.back() != '\\')
-    {
-        m_ShaderDirectoryName += '\\';
-    }
-
-    if (m_ShaderDirectoryName.length() >= MAX_PATH)
-    {
-        MessageBox(NULL, "ShaderWatcher thread will not start, shader directory path is too long for Windows to open", "Error", MB_OK);
-    }
-    else
-    {
-        m_ShaderWatcherThread = thread(&ShaderWatcher::ShaderWatcherThreadFunction, this);
-    }
+    m_ShaderWatcherThread = thread(&ShaderWatcher::ShaderWatcherThreadFunction, this);
 }
 
 ShaderWatcher::~ShaderWatcher()
@@ -39,15 +26,17 @@ void ShaderWatcher::ShaderWatcherThreadFunction()
 {
     while (m_RunShaderWatcherThread)
     {
+        ShaderCompiler& shaderCompiler = ShaderCompiler::GetInstance();
+
         Array<String> modifiedFiles;
-        GetModifiedFilesInDirectory(m_ShaderDirectoryName, modifiedFiles);
+        GetModifiedFilesInDirectory(shaderCompiler.GetShaderDirectoryName(), modifiedFiles);
 
         if (modifiedFiles.empty())
         {
             continue;
         }
 
-        ShaderCompiler::GetInstance().RequestCompilationFromShaderFiles(m_ShaderDirectoryName, modifiedFiles);
+        shaderCompiler.RequestCompilationFromShaderFiles(modifiedFiles);
     }
 }
 

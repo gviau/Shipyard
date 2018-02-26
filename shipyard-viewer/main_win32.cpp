@@ -160,7 +160,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
     Shipyard::SingletonStorer singletonStorer;
 
-    Shipyard::ShaderWatcher shaderWatcher(".\\shaders");
+    Shipyard::ShaderWatcher shaderWatcher;
 
     Shipyard::ShaderKey shaderKey;
     shaderKey.SetShaderFamily(Shipyard::ShaderFamily::Generic);
@@ -188,6 +188,10 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
             theta += 0.001f;
 
             gfxViewSurface.PreRender();
+
+            static volatile uint32_t value = 0;
+
+            SET_SHADER_OPTION(shaderKey, Test2Bits, value);
 
             Shipyard::ShaderHandler* shaderHandler = Shipyard::ShaderHandlerManager::GetInstance().GetShaderHandlerForShaderKey(shaderKey, gfxRenderDevice);
             shaderHandler->ApplyShader(gfxRenderDeviceContext);

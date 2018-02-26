@@ -5,6 +5,7 @@
 
 #pragma warning( disable : 4005 )
 
+#include <d3dcommon.h>
 #include <d3dcompiler.h>
 
 #pragma warning( default : 4005 )
@@ -21,6 +22,43 @@ volatile bool ShaderCompiler::m_RunShaderCompilerThread = true;
 extern String g_ShaderFamilyFilenames[uint8_t(ShaderFamily::Count)];
 extern uint8_t g_NumBitsForShaderOption[uint32_t(ShaderOption::Count)];
 extern String g_ShaderOptionString[uint32_t(ShaderOption::Count)];
+
+class ShaderCompilerIncludeHandler : public ID3DInclude
+{
+public:
+    STDMETHOD(Open)(D3D_INCLUDE_TYPE includeType, const char* includeFilename, const void* parentData, const void** outData, uint32_t* outByteLength)
+    {
+        String filename = ((includeType == D3D_INCLUDE_LOCAL) ? (String(ShaderCompiler::GetInstance().GetShaderDirectoryName()) + includeFilename) : includeFilename);
+
+        ifstream includeFile(filename);
+        if (!includeFile.is_open())
+        {
+            return E_FAIL;
+        }
+
+        includeFile.ignore((std::numeric_limits<std::streamsize>::max)());
+        size_t includeFileContentLength = size_t(includeFile.gcount());
+        includeFile.clear();
+        includeFile.seekg(0, std::ios::beg);
+
+        char* data = new char[includeFileContentLength];
+
+        includeFile.read(data, includeFileContentLength);
+
+        *outData = data;
+        *outByteLength = includeFileContentLength;
+
+        return S_OK;
+    }
+
+    STDMETHOD(Close)(const void* data)
+    {
+        char* charData = (char*)data;
+        delete[] charData;
+
+        return S_OK;
+    }
+};
 
 ShaderCompiler::ShaderCompiler()
     : m_ShaderDirectoryName(".\\shaders\\")
@@ -85,45 +123,179 @@ bool ShaderCompiler::GetShaderBlobsForShaderKey(ShaderKey shaderKey, ID3D10Blob*
     return isShaderCompiled;
 }
 
-void ShaderCompiler::RequestCompilationFromShaderFiles(const String& directoryName, const Array<String>& shaderFilenames)
+void ShaderCompiler::RequestCompilationFromShaderFiles(const Array<String>& shaderFilenames)
 {
     m_ShaderCompilationRequestLock.lock();
 
     for (const String& shaderFilename : shaderFilenames)
     {
-        ShaderFamily shaderFamilyToCompile = ShaderFamily::Count;
-
-        for (uint32_t i = 0; i < uint32_t(ShaderFamily::Count); i++)
+        if (shaderFilename.substr(shaderFilename.size() - 3) == ".fx")
         {
-            if (shaderFilename == g_ShaderFamilyFilenames[i])
-            {
-                shaderFamilyToCompile = ShaderFamily(i);
-                break;
-            }
+            AddCompilationRequestForFxFile(shaderFilename);
         }
-        // The error shader family will never be recompiled at runtime, since it's supposed to be always available as a fallback
-        if (shaderFamilyToCompile == ShaderFamily::Count || shaderFamilyToCompile == ShaderFamily::Error)
+        else if (shaderFilename.substr(shaderFilename.size() - 5) == ".hlsl")
         {
-            continue;
+            AddCompilationRequestForHlslFile(shaderFilename);
         }
-
-        if (shaderFamilyToCompile == m_CurrentShaderFamilyBeingCompiled)
-        {
-            m_RecompileCurrentRequest = true;
-        }
-
-        // Ensure we don't have duplicates
-        if (find(m_ShaderFamiliesToCompile.begin(), m_ShaderFamiliesToCompile.end(), shaderFamilyToCompile) != m_ShaderFamiliesToCompile.end())
-        {
-            continue;
-        }
-
-        m_ShaderFamiliesToCompile.push_back(shaderFamilyToCompile);
     }
 
-    m_ShaderDirectoryName = directoryName;
-
     m_ShaderCompilationRequestLock.unlock();
+}
+
+void ShaderCompiler::AddCompilationRequestForFxFile(const String& fxFilename)
+{
+    ShaderFamily shaderFamilyToCompile = ShaderFamily::Count;
+
+    for (uint32_t i = 0; i < uint32_t(ShaderFamily::Count); i++)
+    {
+        if (fxFilename == g_ShaderFamilyFilenames[i])
+        {
+            shaderFamilyToCompile = ShaderFamily(i);
+            break;
+        }
+    }
+
+    if (shaderFamilyToCompile == ShaderFamily::Count)
+    {
+        return;
+    }
+
+    AddShaderFamilyCompilationRequest(shaderFamilyToCompile);
+}
+
+void ShaderCompiler::AddCompilationRequestForHlslFile(const String& hlslFilename)
+{
+    // For Hlsl files, we need to inspect every FX file and check whether they reference that Hlsl file. Moreoever, we also have to inspect
+    // every Hlsl files to see if they reference the touched Hlsl file.
+    
+    for (uint32_t i = 0; i < uint32_t(ShaderFamily::Count); i++)
+    {
+        ShaderFamily shaderFamily = ShaderFamily(i);
+
+        // The error shader family will never be recompiled at runtime, since it's supposed to be always available as a fallback
+        if (shaderFamily == ShaderFamily::Error)
+        {
+            continue;
+        }
+
+        String shaderFamilyFilename = g_ShaderFamilyFilenames[i];
+
+        if (CheckFileForHlslReference(shaderFamilyFilename, hlslFilename))
+        {
+            AddShaderFamilyCompilationRequest(shaderFamily);
+        }
+    }
+}
+
+bool ShaderCompiler::CheckFileForHlslReference(const String& filenameToCheck, const String& touchedHlslFilename) const
+{
+    ifstream file(m_ShaderDirectoryName + filenameToCheck);
+    if (!file.is_open())
+    {
+        return false;
+    }
+
+    String filenameToCheckContent;
+    file.ignore((std::numeric_limits<std::streamsize>::max)());
+    filenameToCheckContent.resize((size_t)file.gcount());
+    file.clear();
+    file.seekg(0, std::ios::beg);
+
+    file.read(&filenameToCheckContent[0], filenameToCheckContent.length());
+
+    Array<String> includeDirectives;
+    GetIncludeDirectives(filenameToCheckContent, includeDirectives);
+
+    bool immediateReference = (find(includeDirectives.begin(), includeDirectives.end(), touchedHlslFilename) != includeDirectives.end());
+    
+    if (immediateReference)
+    {
+        return true;
+    }
+
+    for (const String& includeDirective : includeDirectives)
+    {
+        if (CheckFileForHlslReference(includeDirective, touchedHlslFilename))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void ShaderCompiler::GetIncludeDirectives(const String& fileContent, Array<String>& includeDirectives) const
+{
+    size_t currentOffset = 0;
+    size_t findPosition = 0;
+
+    // For now, it is assumed that all #include directives are one per line, never in a comment, and with a single whitespace between the #include and the file name
+    static const String searchString = "#include ";
+
+    while (true)
+    {
+        findPosition = fileContent.find(searchString, currentOffset);
+        if (findPosition == String::npos)
+        {
+            break;
+        }
+
+        String includeFilename = "";
+        char currentChar = '\0';
+
+        currentOffset = findPosition + searchString.length();
+
+        bool startCollectingFilename = false;
+
+        do 
+        {
+            currentChar = fileContent[currentOffset++];
+            if (currentChar == '\"')
+            {
+                if (startCollectingFilename)
+                {
+                    startCollectingFilename = false;
+                    break;
+                }
+                else
+                {
+                    startCollectingFilename = true;
+                }
+            }
+            else if (startCollectingFilename)
+            {
+                includeFilename += currentChar;
+            }
+
+        } while (currentChar != '\n');
+
+        if (!startCollectingFilename)
+        {
+            includeDirectives.push_back(includeFilename);
+        }
+    }
+}
+
+void ShaderCompiler::AddShaderFamilyCompilationRequest(ShaderFamily shaderFamilyToCompile)
+{
+    // The error shader family will never be recompiled at runtime, since it's supposed to be always available as a fallback
+    if (shaderFamilyToCompile == ShaderFamily::Error)
+    {
+        return;
+    }
+
+    if (shaderFamilyToCompile == m_CurrentShaderFamilyBeingCompiled)
+    {
+        m_RecompileCurrentRequest = true;
+    }
+
+    // Ensure we don't have duplicates
+    if (find(m_ShaderFamiliesToCompile.begin(), m_ShaderFamiliesToCompile.end(), shaderFamilyToCompile) != m_ShaderFamiliesToCompile.end())
+    {
+        return;
+    }
+
+    m_ShaderFamiliesToCompile.push_back(shaderFamilyToCompile);
 }
 
 void ShaderCompiler::ShaderCompilerThreadFunction()
@@ -166,17 +338,20 @@ void ShaderCompiler::ShaderCompilerThreadFunction()
 
 void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
 {
-    const String& sourceFilename = g_ShaderFamilyFilenames[uint32_t(shaderFamily)];
+    const String& shaderFamilyFilename = g_ShaderFamilyFilenames[uint32_t(shaderFamily)];
 
-    ifstream shaderFile(m_ShaderDirectoryName + sourceFilename);
+    String sourceFilename = m_ShaderDirectoryName + shaderFamilyFilename;
+
+    ifstream shaderFile(sourceFilename);
     if (!shaderFile.is_open())
     {
         return;
     }
 
     String source;
-    shaderFile.seekg(0, std::ios::end);
-    source.resize((size_t)shaderFile.tellg());
+    shaderFile.ignore((std::numeric_limits<std::streamsize>::max)());
+    source.resize((size_t)shaderFile.gcount());
+    shaderFile.clear();
     shaderFile.seekg(0, std::ios::beg);
 
     shaderFile.read(&source[0], source.length());
@@ -207,13 +382,13 @@ void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
     {
         ShaderKey::RawShaderKeyType rawShaderKey = baseRawShaderKey | (shaderOptionAsInt << ShaderKey::ms_ShaderOptionShift);
 
-        CompileShaderKey(rawShaderKey, shaderOptions, source);
+        CompileShaderKey(rawShaderKey, shaderOptions, sourceFilename, source);
 
         shaderOptionAsInt -= 1;
     }
 }
 
-void ShaderCompiler::CompileShaderKey(ShaderKey::RawShaderKeyType rawShaderKey, const Array<ShaderOption>& everyPossibleShaderOptionForShaderKey, const String& source)
+void ShaderCompiler::CompileShaderKey(ShaderKey::RawShaderKeyType rawShaderKey, const Array<ShaderOption>& everyPossibleShaderOptionForShaderKey, const String& sourceFilename, const String& source)
 {
     CompiledShaderKeyEntry& compiledShaderKeyEntry = GetCompiledShaderKeyEntry(rawShaderKey);
 
@@ -245,9 +420,9 @@ void ShaderCompiler::CompileShaderKey(ShaderKey::RawShaderKeyType rawShaderKey, 
     D3D_SHADER_MACRO nullShaderDefine = { nullptr, nullptr };
     shaderOptionDefines.push_back(nullShaderDefine);
 
-    ID3D10Blob* vertexShaderBlob = CompileVertexShaderForShaderKey(source, &shaderOptionDefines[0]);
-    ID3D10Blob* pixelShaderBlob = CompilePixelShaderForShaderKey(source, &shaderOptionDefines[0]);
-    ID3D10Blob* computeShaderBlob = CompileComputeShaderForShaderKey( source, &shaderOptionDefines[0]);
+    ID3D10Blob* vertexShaderBlob = CompileVertexShaderForShaderKey(sourceFilename, source, &shaderOptionDefines[0]);
+    ID3D10Blob* pixelShaderBlob = CompilePixelShaderForShaderKey(sourceFilename, source, &shaderOptionDefines[0]);
+    ID3D10Blob* computeShaderBlob = CompileComputeShaderForShaderKey(sourceFilename, source, &shaderOptionDefines[0]);
 
     for (D3D_SHADER_MACRO& shaderMacro : shaderOptionDefines)
     {
@@ -268,22 +443,43 @@ void ShaderCompiler::CompileShaderKey(ShaderKey::RawShaderKeyType rawShaderKey, 
     }
 }
 
-ID3D10Blob* ShaderCompiler::CompileVertexShaderForShaderKey(const String& source, D3D_SHADER_MACRO* shaderOptionDefines)
+ID3D10Blob* ShaderCompiler::CompileVertexShaderForShaderKey(const String& sourceFilename, const String& source, D3D_SHADER_MACRO* shaderOptionDefines)
 {
-    return CompileShader(source, "vs_5_0", "VS_Main", shaderOptionDefines);
+    static const String vertexShaderEntryPoint = "VS_Main";
+
+    if (source.find(vertexShaderEntryPoint) == String::npos)
+    {
+        return nullptr;
+    }
+
+    return CompileShader(sourceFilename, source, "vs_5_0", vertexShaderEntryPoint, shaderOptionDefines);
 }
 
-ID3D10Blob* ShaderCompiler::CompilePixelShaderForShaderKey(const String& source, D3D_SHADER_MACRO* shaderOptionDefines)
+ID3D10Blob* ShaderCompiler::CompilePixelShaderForShaderKey(const String& sourceFilename, const String& source, D3D_SHADER_MACRO* shaderOptionDefines)
 {
-    return CompileShader(source, "ps_5_0", "PS_Main", shaderOptionDefines);
+    static const String pixelShaderEntryPoint = "PS_Main";
+
+    if (source.find(pixelShaderEntryPoint) == String::npos)
+    {
+        return nullptr;
+    }
+
+    return CompileShader(sourceFilename, source, "ps_5_0", pixelShaderEntryPoint, shaderOptionDefines);
 }
 
-ID3D10Blob* ShaderCompiler::CompileComputeShaderForShaderKey(const String& source, D3D_SHADER_MACRO* shaderOptionDefines)
+ID3D10Blob* ShaderCompiler::CompileComputeShaderForShaderKey(const String& sourceFilename, const String& source, D3D_SHADER_MACRO* shaderOptionDefines)
 {
-    return CompileShader(source, "cs_5_0", "CS_Main", shaderOptionDefines);
+    static const String computeShaderEntryPoint = "CS_Main";
+
+    if (source.find(computeShaderEntryPoint) == String::npos)
+    {
+        return nullptr;
+    }
+
+    return CompileShader(sourceFilename, source, "cs_5_0", computeShaderEntryPoint, shaderOptionDefines);
 }
 
-ID3D10Blob* ShaderCompiler::CompileShader(const String& shaderSource, const String& version, const String& mainName, D3D_SHADER_MACRO* shaderOptionDefines)
+ID3D10Blob* ShaderCompiler::CompileShader(const String& shaderSourceFilename, const String& shaderSource, const String& version, const String& mainName, D3D_SHADER_MACRO* shaderOptionDefines)
 {
     ID3D10Blob* shaderBlob = nullptr;
     ID3D10Blob* error = nullptr;
@@ -294,13 +490,33 @@ ID3D10Blob* ShaderCompiler::CompileShader(const String& shaderSource, const Stri
     flags = D3DCOMPILE_DEBUG;
 #endif
 
-    HRESULT hr = D3DCompile(shaderSource.c_str(), shaderSource.size(), nullptr, shaderOptionDefines, nullptr, mainName.c_str(), version.c_str(), flags, 0, &shaderBlob, &error);
+    ShaderCompilerIncludeHandler shaderCompilerIncludeHandler;
+
+    ID3D10Blob* preprocessedBlob = nullptr;
+    ID3D10Blob* preprocessError = nullptr;
+
+    HRESULT tmp = D3DPreprocess(shaderSource.c_str(), shaderSource.size(), shaderSourceFilename.c_str(), shaderOptionDefines, &shaderCompilerIncludeHandler, &preprocessedBlob, &preprocessError);
+    if (FAILED(tmp))
+    {
+        if (preprocessError != nullptr)
+        {
+            char* errorMsg = (char*)preprocessError->GetBufferPointer();
+            OutputDebugString(errorMsg);
+            // cout << errorMsg << endl;
+            // MessageBox(NULL, errorMsg, "DX11 error", MB_OK);
+        }
+    }
+
+    HRESULT hr = D3DCompile(shaderSource.c_str(), shaderSource.size(), shaderSourceFilename.c_str(), shaderOptionDefines, &shaderCompilerIncludeHandler, mainName.c_str(), version.c_str(), flags, 0, &shaderBlob, &error);
     if (FAILED(hr))
     {
         if (error != nullptr)
         {
             char* errorMsg = (char*)error->GetBufferPointer();
-            cout << errorMsg << endl;
+            OutputDebugString(errorMsg);
+
+            char* data = (char*)preprocessedBlob->GetBufferPointer();
+            // cout << errorMsg << endl;
             // MessageBox(NULL, errorMsg, "DX11 error", MB_OK);
         }
 

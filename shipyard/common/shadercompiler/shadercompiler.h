@@ -31,7 +31,10 @@ namespace Shipyard
         // ShaderKey passed
         bool GetShaderBlobsForShaderKey(ShaderKey shaderKey, ID3D10Blob*& vertexShaderBlob, ID3D10Blob*& pixelShaderBlob, ID3D10Blob*& computeShaderBlob, bool& gotRecompiledSinceLastAccess);
 
-        void RequestCompilationFromShaderFiles(const String& directoryName, const Array<String>& shaderFilenames);
+        void RequestCompilationFromShaderFiles(const Array<String>& shaderFilenames);
+
+        void SetShaderDirectoryName(const String& shaderDirectoryName) { m_ShaderDirectoryName = shaderDirectoryName; }
+        const String& GetShaderDirectoryName() const { return m_ShaderDirectoryName; }
 
     private:
         struct CompiledShaderKeyEntry
@@ -55,15 +58,21 @@ namespace Shipyard
         };
 
     private:
+        void AddCompilationRequestForFxFile(const String& fxFilename);
+        void AddCompilationRequestForHlslFile(const String& hlslFilename);
+        bool CheckFileForHlslReference(const String& filenameToCheck, const String& touchedHlslFilename) const;
+        void GetIncludeDirectives(const String& fileContent, Array<String>& includeDirectives) const;
+        void AddShaderFamilyCompilationRequest(ShaderFamily shaderFamilyToCompile);
+
         void ShaderCompilerThreadFunction();
 
         void CompileShaderFamily(ShaderFamily shaderFamily);
 
-        void CompileShaderKey(ShaderKey::RawShaderKeyType rawShaderKey, const Array<ShaderOption>& everyPossibleShaderOptionForShaderKey, const String& source);
-        ID3D10Blob* CompileVertexShaderForShaderKey(const String& source, _D3D_SHADER_MACRO* shaderOptionDefines);
-        ID3D10Blob* CompilePixelShaderForShaderKey(const String& source, _D3D_SHADER_MACRO* shaderOptionDefines);
-        ID3D10Blob* CompileComputeShaderForShaderKey(const String& source, _D3D_SHADER_MACRO* shaderOptionDefines);
-        ID3D10Blob* CompileShader(const String& shaderSource, const String& version, const String& mainName, _D3D_SHADER_MACRO* shaderOptionDefines);
+        void CompileShaderKey(ShaderKey::RawShaderKeyType rawShaderKey, const Array<ShaderOption>& everyPossibleShaderOptionForShaderKey, const String& sourceFilename, const String& source);
+        ID3D10Blob* CompileVertexShaderForShaderKey(const String& sourceFilename, const String& source, _D3D_SHADER_MACRO* shaderOptionDefines);
+        ID3D10Blob* CompilePixelShaderForShaderKey(const String& sourceFilename, const String& source, _D3D_SHADER_MACRO* shaderOptionDefines);
+        ID3D10Blob* CompileComputeShaderForShaderKey(const String& sourceFilename, const String& source, _D3D_SHADER_MACRO* shaderOptionDefines);
+        ID3D10Blob* CompileShader(const String& shaderSourceFilename, const String& shaderSource, const String& version, const String& mainName, _D3D_SHADER_MACRO* shaderOptionDefines);
 
         CompiledShaderKeyEntry& GetCompiledShaderKeyEntry(ShaderKey::RawShaderKeyType rawShaderKey);
 

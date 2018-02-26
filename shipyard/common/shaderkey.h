@@ -27,6 +27,9 @@ namespace Shipyard
 
         static void GetShaderKeyOptionsForShaderFamily(ShaderFamily shaderFamily, Array<ShaderOption>& shaderOptions);
 
+        // Required to be used in a map (ShaderHandlerManager)
+        bool operator< (const ShaderKey& rhs) const { return m_RawShaderKey < rhs.m_RawShaderKey; }
+
     private:
         static const uint32_t ms_ShaderFamilyMask = 0xFF;
         static const uint32_t ms_ShaderOptionMask = 0xFFFFFF;

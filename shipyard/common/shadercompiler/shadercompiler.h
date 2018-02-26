@@ -4,6 +4,7 @@
 
 #include <system/array.h>
 #include <system/platform.h>
+#include <system/singleton.h>
 #include <system/string.h>
 
 #include <mutex>
@@ -16,11 +17,17 @@ namespace Shipyard
 {
     enum class ShaderFamily : uint8_t;
 
-    class SHIPYARD_API ShaderCompiler
+    class SHIPYARD_API ShaderCompiler : public Singleton<ShaderCompiler>
     {
+        friend class Singleton<ShaderCompiler>;
+
     public:
         ShaderCompiler();
-        ~ShaderCompiler();
+        virtual ~ShaderCompiler();
+
+        // Returns false if the ShaderKey isn't compiled yet, in which case the blob returned are from the error ShaderKey that corresponds to the
+        // ShaderKey passed
+        bool GetShaderBlobsForShaderKey(ShaderKey shaderKey, ID3D10Blob*& vertexShaderBlob, ID3D10Blob*& pixelShaderBlob, ID3D10Blob*& computeShaderBlob, bool& gotRecompiledSinceLastAccess);
 
         void RequestCompilationFromShaderFiles(const String& directoryName, const Array<String>& shaderFilenames);
 
@@ -28,12 +35,17 @@ namespace Shipyard
         struct CompiledShaderKeyEntry
         {
             CompiledShaderKeyEntry()
-                : m_CompiledVertexShaderBlob(nullptr)
+                : m_GotRecompiledSinceLastAccess(false)
+                , m_GotCompilationError(false)
+                , m_CompiledVertexShaderBlob(nullptr)
                 , m_CompiledPixelShaderBlob(nullptr)
                 , m_CompiledComputeShaderBlob(nullptr)
             {}
 
             ShaderKey m_ShaderKey;
+            bool m_GotRecompiledSinceLastAccess;
+            bool m_GotCompilationError;
+
             ID3D10Blob* m_CompiledVertexShaderBlob;
             ID3D10Blob* m_CompiledPixelShaderBlob;
             ID3D10Blob* m_CompiledComputeShaderBlob;
@@ -53,8 +65,7 @@ namespace Shipyard
         CompiledShaderKeyEntry& GetCompiledShaderKeyEntry(ShaderKey shaderKey);
 
         thread m_ShaderCompilerThread;
-        mutex m_ShaderCompilationRequestLock;
-        mutex m_CurrentShaderFamilyBeingCompiledLock;
+        mutable mutex m_ShaderCompilationRequestLock;
 
         static volatile bool m_RunShaderCompilerThread;
 

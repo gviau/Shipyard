@@ -18,12 +18,12 @@ namespace Shipyard
     class SHIPYARD_API VertexShader
     {
     public:
-        VertexShader(const String& source);
+        VertexShader(void* shaderData, uint64_t shaderDataSize);
     };
 
     class SHIPYARD_API PixelShader
     {
     public:
-        PixelShader(const String& source);
+        PixelShader(void* shaderData, uint64_t shaderDataSize);
     };
 }

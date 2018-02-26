@@ -8,12 +8,12 @@ BaseShader::~BaseShader()
 
 }
 
-VertexShader::VertexShader(const String& source)
+VertexShader::VertexShader(void* shaderData, uint64_t shaderDataSize)
 {
 
 }
 
-PixelShader::PixelShader(const String& source)
+PixelShader::PixelShader(void* shaderData, uint64_t shaderDataSize)
 {
 
 }

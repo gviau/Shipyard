@@ -11,12 +11,9 @@ namespace Shipyard
 
 volatile bool ShaderWatcher::m_RunShaderWatcherThread = true;
 
-ShaderWatcher::ShaderWatcher(ShaderCompiler* shaderCompiler, const String& shaderDirectoryName)
-    : m_ShaderCompiler(shaderCompiler)
-    , m_ShaderDirectoryName(shaderDirectoryName)
+ShaderWatcher::ShaderWatcher(const String& shaderDirectoryName)
+    : m_ShaderDirectoryName(shaderDirectoryName)
 {
-    assert(m_ShaderCompiler != nullptr);
-
     if (m_ShaderDirectoryName.back() != '\\')
     {
         m_ShaderDirectoryName += '\\';
@@ -50,7 +47,7 @@ void ShaderWatcher::ShaderWatcherThreadFunction()
             continue;
         }
 
-        m_ShaderCompiler->RequestCompilationFromShaderFiles(m_ShaderDirectoryName, modifiedFiles);
+        ShaderCompiler::GetInstance().RequestCompilationFromShaderFiles(m_ShaderDirectoryName, modifiedFiles);
     }
 }
 

@@ -58,14 +58,14 @@ GFXTexture2D* DX11RenderDevice::CreateTexture2D(uint32_t width, uint32_t height,
     return MemAlloc(GFXTexture2D)(*m_Device, width, height, pixelFormat, dynamic, initialData, generateMips);
 }
 
-GFXVertexShader* DX11RenderDevice::CreateVertexShader(const String& source)
+GFXVertexShader* DX11RenderDevice::CreateVertexShader(void* shaderData, uint64_t shaderDataSize)
 {
-    return MemAlloc(GFXVertexShader)(*m_Device, source);
+    return MemAlloc(GFXVertexShader)(*m_Device, shaderData, shaderDataSize);
 }
 
-GFXPixelShader* DX11RenderDevice::CreatePixelShader(const String& source)
+GFXPixelShader* DX11RenderDevice::CreatePixelShader(void* shaderData, uint64_t shaderDataSize)
 {
-    return MemAlloc(GFXPixelShader)(*m_Device, source);
+    return MemAlloc(GFXPixelShader)(*m_Device, shaderData, shaderDataSize);
 }
 
 IDXGISwapChain* DX11RenderDevice::CreateSwapchain(uint32_t width, uint32_t height, GfxFormat format, HWND hWnd)

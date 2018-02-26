@@ -1,7 +1,13 @@
 #include <common/wrapper/wrapper.h>
 
-#include <common/shadercompiler/shadercompiler.h>
 #include <common/shadercompiler/shaderwatcher.h>
+
+#include <common/shaderfamilies.h>
+#include <common/shaderhandler.h>
+#include <common/shaderhandlermanager.h>
+#include <common/shaderkey.h>
+
+#include <system/singletonstorer.h>
 
 #include <memory>
 using namespace std;
@@ -147,23 +153,16 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     shared_ptr<Shipyard::GFXConstantBuffer> constantBuffer(gfxRenderDevice.CreateConstantBuffer(sizeof(data), true, &data));
     shared_ptr<Shipyard::GFXTexture2D> texture(gfxRenderDevice.CreateTexture2D(2, 2, Shipyard::GfxFormat::R8G8B8A8_UNORM, false, textureData, false));
 
-    Shipyard::String vertexShaderSource = "cbuffer constantBuffer : register(b0) { float4x4 mat; }; struct vs_input { float3 pos : POSITION; float2 uv : TEXCOORD; }; struct vs_output { float4 pos : SV_POSITION; float2 uv: TEXCOORD; }; "
-        "vs_output main(vs_input input) { vs_output output; output.pos = mul(mat, float4(input.pos.xyz, 1.0)); output.uv = input.uv; return output; }";
-
-    shared_ptr<Shipyard::GFXVertexShader> vertexShader(gfxRenderDevice.CreateVertexShader(vertexShaderSource));
-
-    Shipyard::String pixelShaderSource = "SamplerState testSampler\n{\nFilter = MIN_MAG_MIP_POINT;\nAddressU = Wrap;\nAddressV = Wrap;\n};\nTexture2D tex : register(t0);\n"
-        "struct ps_input\n{\nfloat4 pos : SV_POSITION;\nfloat2 uv: TEXCOORD;\n};\nstruct ps_output\n{\nfloat4 color : SV_TARGET;\n};\n"
-        "ps_output main(ps_input input) {\nps_output output;\noutput.color = tex.Sample(testSampler, input.uv);\nreturn output;\n}";
-
-    shared_ptr<Shipyard::GFXPixelShader> pixelShader(gfxRenderDevice.CreatePixelShader(pixelShaderSource));
-
     g_IsOpen = true;
 
     float theta = 0.0f;
 
-    Shipyard::ShaderCompiler shaderCompiler;
-    Shipyard::ShaderWatcher shaderWatcher(&shaderCompiler, ".\\shaders");
+    Shipyard::SingletonStorer singletonStorer;
+
+    Shipyard::ShaderWatcher shaderWatcher(".\\shaders");
+
+    Shipyard::ShaderKey shaderKey;
+    shaderKey.SetShaderFamily(Shipyard::ShaderFamily::Generic);
 
     MSG msg;
     while (g_IsOpen)
@@ -189,8 +188,9 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
             gfxViewSurface.PreRender();
 
-            gfxRenderDeviceContext.SetVertexShader(vertexShader.get());
-            gfxRenderDeviceContext.SetPixelShader(pixelShader.get());
+            Shipyard::ShaderHandler* shaderHandler = Shipyard::ShaderHandlerManager::GetInstance().GetShaderHandlerForShaderKey(shaderKey, gfxRenderDevice);
+            shaderHandler->ApplyShader(gfxRenderDeviceContext);
+
             gfxRenderDeviceContext.SetVertexShaderConstantBuffer(constantBuffer.get(), 0);
             gfxRenderDeviceContext.SetPixelShaderTexture(texture.get(), 0);
             gfxRenderDeviceContext.DrawIndexed(Shipyard::PrimitiveTopology::TriangleList, *(vertexBuffer.get()), *(indexBuffer.get()), 0, 0);

@@ -24,7 +24,7 @@ namespace Shipyard
     class SHIPYARD_API DX11VertexShader : public VertexShader, public DX11BaseShader
     {
     public:
-        DX11VertexShader(ID3D11Device& device, const String& source);
+        DX11VertexShader(ID3D11Device& device, void* shaderData, uint64_t shaderDataSize);
         ~DX11VertexShader();
 
         ID3D11VertexShader* GetShader() const { return m_VertexShader; }
@@ -36,7 +36,7 @@ namespace Shipyard
     class SHIPYARD_API DX11PixelShader : public PixelShader, public DX11BaseShader
     {
     public:
-        DX11PixelShader(ID3D11Device& device, const String& source);
+        DX11PixelShader(ID3D11Device& device, void* shaderData, uint64_t shaderDataSize);
         ~DX11PixelShader();
 
         ID3D11PixelShader* GetShader() const { return m_PixelShader; }

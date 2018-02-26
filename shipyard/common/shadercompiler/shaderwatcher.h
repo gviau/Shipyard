@@ -14,7 +14,7 @@ namespace Shipyard
     class SHIPYARD_API ShaderWatcher
     {
     public:
-        ShaderWatcher(ShaderCompiler* shaderCompiler, const String& shaderDirectoryName);
+        ShaderWatcher(const String& shaderDirectoryName);
         ~ShaderWatcher();
 
     private:
@@ -38,7 +38,6 @@ namespace Shipyard
         thread m_ShaderWatcherThread;
         static volatile bool m_RunShaderWatcherThread;
 
-        ShaderCompiler* m_ShaderCompiler;
         String m_ShaderDirectoryName;
 
         Array<ShaderFile> m_WatchedShaderFiles;

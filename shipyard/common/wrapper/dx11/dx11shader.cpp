@@ -25,35 +25,11 @@ DX11BaseShader::~DX11BaseShader()
     }
 }
 
-DX11VertexShader::DX11VertexShader(ID3D11Device& device, const String& source)
-    : VertexShader(source)
+DX11VertexShader::DX11VertexShader(ID3D11Device& device, void* shaderData, uint64_t shaderDataSize)
+    : VertexShader(shaderData, shaderDataSize)
     , m_VertexShader(nullptr)
 {
-    ID3D10Blob* error = nullptr;
-
-    D3D_FEATURE_LEVEL featureLevel = device.GetFeatureLevel();
-    String shaderVersion = GetD3DShaderVersion(featureLevel);
-
-    String version = ("vs_" + shaderVersion);
-    unsigned int flags = 0;
-
-#ifdef _DEBUG
-    flags = D3DCOMPILE_DEBUG;
-#endif
-
-    HRESULT hr = D3DCompile(source.c_str(), source.size(), nullptr, nullptr, nullptr, "main", version.c_str(), flags, 0, &m_ShaderBlob, &error);
-    if (FAILED(hr))
-    {
-        if (error != nullptr)
-        {
-            char* errorMsg = (char*)error->GetBufferPointer();
-            MessageBox(NULL, errorMsg, "DX11 error", MB_OK);
-        }
-
-        return;
-    }
-
-    hr = device.CreateVertexShader(m_ShaderBlob->GetBufferPointer(), m_ShaderBlob->GetBufferSize(), nullptr, &m_VertexShader);
+    HRESULT hr = device.CreateVertexShader(shaderData, SIZE_T(shaderDataSize), nullptr, &m_VertexShader);
     if (FAILED(hr))
     {
         MessageBox(NULL, "CreateVertexShader failed", "DX11 error", MB_OK);
@@ -68,35 +44,11 @@ DX11VertexShader::~DX11VertexShader()
     }
 }
 
-DX11PixelShader::DX11PixelShader(ID3D11Device& device, const String& source)
-    : PixelShader(source)
+DX11PixelShader::DX11PixelShader(ID3D11Device& device, void* shaderData, uint64_t shaderDataSize)
+    : PixelShader(shaderData, shaderDataSize)
     , m_PixelShader(nullptr)
 {
-    ID3D10Blob* error = nullptr;
-
-    D3D_FEATURE_LEVEL featureLevel = device.GetFeatureLevel();
-    String shaderVersion = GetD3DShaderVersion(featureLevel);
-
-    String version = ("ps_" + shaderVersion);
-    unsigned int flags = 0;
-
-#ifdef _DEBUG
-    flags = D3DCOMPILE_DEBUG;
-#endif
-
-    HRESULT hr = D3DCompile(source.c_str(), source.size(), nullptr, nullptr, nullptr, "main", version.c_str(), flags, 0, &m_ShaderBlob, &error);
-    if (FAILED(hr))
-    {
-        if (error != nullptr)
-        {
-            char* errorMsg = (char*)error->GetBufferPointer();
-            MessageBox(NULL, errorMsg, "DX11 error", MB_OK);
-        }
-
-        return;
-    }
-
-    hr = device.CreatePixelShader(m_ShaderBlob->GetBufferPointer(), m_ShaderBlob->GetBufferSize(), nullptr, &m_PixelShader);
+    HRESULT hr = device.CreatePixelShader(shaderData, SIZE_T(shaderDataSize), nullptr, &m_PixelShader);
     if (FAILED(hr))
     {
         MessageBox(NULL, "CreatePixelShader failed", "DX11 error", MB_OK);

@@ -20,11 +20,15 @@ volatile bool ShaderCompiler::m_RunShaderCompilerThread = true;
 extern String g_ShaderFamilyFilenames[uint8_t(ShaderFamily::Count)];
 
 ShaderCompiler::ShaderCompiler()
+    : m_ShaderDirectoryName(".\\shaders\\")
 {
     m_CurrentShaderFamilyBeingCompiled = ShaderFamily::Count;
     m_RecompileCurrentRequest = false;
 
     ShaderKey::InitializeShaderKeyGroups();
+
+    // Make sure the ShaderFamily error is compiled initialy
+    CompileShaderFamily(ShaderFamily::Error);
 
     m_ShaderCompilerThread = thread(&ShaderCompiler::ShaderCompilerThreadFunction, this);
 }
@@ -33,6 +37,49 @@ ShaderCompiler::~ShaderCompiler()
 {
     m_RunShaderCompilerThread = false;
     m_ShaderCompilerThread.join();
+}
+
+bool ShaderCompiler::GetShaderBlobsForShaderKey(ShaderKey shaderKey, ID3D10Blob*& vertexShaderBlob, ID3D10Blob*& pixelShaderBlob, ID3D10Blob*& computeShaderBlob, bool& gotRecompiledSinceLastAccess)
+{
+    ShaderFamily shaderFamily = shaderKey.GetShaderFamily();
+
+    ShaderKey errorShaderKey;
+    errorShaderKey.SetShaderFamily(ShaderFamily::Error);
+
+    vertexShaderBlob = nullptr;
+    pixelShaderBlob = nullptr;
+    computeShaderBlob = nullptr;
+    gotRecompiledSinceLastAccess = false;
+
+    bool isShaderCompiled = true;
+
+    m_ShaderCompilationRequestLock.lock();
+
+    if (shaderFamily == m_CurrentShaderFamilyBeingCompiled || find(m_ShaderFamiliesToCompile.begin(), m_ShaderFamiliesToCompile.end(), shaderFamily) != m_ShaderFamiliesToCompile.end())
+    {
+        shaderKey = errorShaderKey;
+        isShaderCompiled = false;
+    }
+
+    CompiledShaderKeyEntry& shaderKeyEntry = GetCompiledShaderKeyEntry(shaderKey);
+    if (shaderKeyEntry.m_GotCompilationError)
+    {
+        isShaderCompiled = false;
+    }
+
+    vertexShaderBlob = shaderKeyEntry.m_CompiledVertexShaderBlob;
+    pixelShaderBlob = shaderKeyEntry.m_CompiledPixelShaderBlob;
+    computeShaderBlob = shaderKeyEntry.m_CompiledComputeShaderBlob;
+    gotRecompiledSinceLastAccess = shaderKeyEntry.m_GotRecompiledSinceLastAccess;
+
+    if (isShaderCompiled)
+    {
+        shaderKeyEntry.m_GotRecompiledSinceLastAccess = false;
+    }
+
+    m_ShaderCompilationRequestLock.unlock();
+
+    return isShaderCompiled;
 }
 
 void ShaderCompiler::RequestCompilationFromShaderFiles(const String& directoryName, const Array<String>& shaderFilenames)
@@ -51,8 +98,8 @@ void ShaderCompiler::RequestCompilationFromShaderFiles(const String& directoryNa
                 break;
             }
         }
-
-        if (shaderFamilyToCompile == ShaderFamily::Count)
+        // The error shader family will never be recompiled at runtime, since it's supposed to be always available as a fallback
+        if (shaderFamilyToCompile == ShaderFamily::Count || shaderFamilyToCompile == ShaderFamily::Error)
         {
             continue;
         }
@@ -150,9 +197,15 @@ void ShaderCompiler::CompileShaderKey(ShaderKey shaderKey, const String& source)
 
     if (!m_RecompileCurrentRequest)
     {
-        compiledShaderKeyEntry.m_CompiledVertexShaderBlob = vertexShaderBlob;
-        compiledShaderKeyEntry.m_CompiledPixelShaderBlob = pixelShaderBlob;
-        compiledShaderKeyEntry.m_CompiledComputeShaderBlob = computeShaderBlob;
+        compiledShaderKeyEntry.m_GotCompilationError = ((vertexShaderBlob != nullptr && pixelShaderBlob == nullptr) || (pixelShaderBlob != nullptr && vertexShaderBlob == nullptr) || (vertexShaderBlob == nullptr && pixelShaderBlob == nullptr && computeShaderBlob == nullptr));
+
+        if (!compiledShaderKeyEntry.m_GotCompilationError)
+        {
+            compiledShaderKeyEntry.m_CompiledVertexShaderBlob = vertexShaderBlob;
+            compiledShaderKeyEntry.m_CompiledPixelShaderBlob = pixelShaderBlob;
+            compiledShaderKeyEntry.m_CompiledComputeShaderBlob = computeShaderBlob;
+            compiledShaderKeyEntry.m_GotRecompiledSinceLastAccess = true;
+        }
     }
 }
 

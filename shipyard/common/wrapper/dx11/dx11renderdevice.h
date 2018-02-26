@@ -23,8 +23,8 @@ namespace Shipyard
         GFXConstantBuffer* CreateConstantBuffer(uint32_t dataSizeInBytes, bool dynamic, void* initialData);
         GFXTexture2D* CreateTexture2D(uint32_t width, uint32_t height, GfxFormat pixelFormat, bool dynamic, void* initialData, bool generateMips);
 
-        GFXVertexShader* CreateVertexShader(const String& source);
-        GFXPixelShader* CreatePixelShader(const String& source);
+        GFXVertexShader* CreateVertexShader(void* shaderData, uint64_t shaderDataSize);
+        GFXPixelShader* CreatePixelShader(void* shaderData, uint64_t shaderDataSize);
 
         IDXGISwapChain* CreateSwapchain(uint32_t width, uint32_t height, GfxFormat format, HWND hWnd);
         void CreateDepthStencilBuffer(uint32_t width, uint32_t height, ID3D11Texture2D*& depthStencilTexture, ID3D11DepthStencilView*& depthStencilTextureView);

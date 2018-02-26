@@ -99,6 +99,7 @@ set (SHIPYARD_COMMON_WRAPPER_DX11_HEADER_FILES
 set (SHIPYARD_SYSTEM_SOURCE_FILES
 	system/array.cpp
 	system/memory.cpp
+	system/singletonstorer.cpp
 	system/string.cpp
 )
 
@@ -106,6 +107,8 @@ set (SHIPYARD_SYSTEM_HEADER_FILES
 	system/array.h
 	system/memory.h
 	system/platform.h
+	system/singleton.h
+	system/singletonstorer.h
 	system/string.h
 )
 

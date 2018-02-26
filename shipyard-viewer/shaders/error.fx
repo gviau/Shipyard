@@ -41,7 +41,7 @@ vs_output VS_Main(vs_input input)
 ps_output PS_Main(vs_output input)
 {
 	ps_output output;
-	output.color = tex.Sample(testSampler, input.uv);
+	output.color = float4(0.95, 0.25, 0.94, 1.0);
 	
 	return output;
 }

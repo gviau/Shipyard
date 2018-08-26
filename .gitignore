@@ -18,3 +18,4 @@ Win32/
 Debug/
 Release/
 *.dir
+generated-projects/

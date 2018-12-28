@@ -6,7 +6,7 @@ namespace ShipyardSharpmake
     class ShipyardViewerProject : BaseShipyardProject
     {
         public ShipyardViewerProject()
-            : base("ShipyardViewer", "../shipyard-viewer", ShipyardUtils.DefaultShipyardTarget)
+            : base("ShipyardViewer", "../shipyard-viewer", ShipyardUtils.DefaultShipyardTargetLib)
         {
 
         }
@@ -16,7 +16,7 @@ namespace ShipyardSharpmake
         {
             base.ConfigureAll(configuration, target);
 
-            configuration.Output = Configuration.OutputType.Exe;
+            // configuration.Output = Configuration.OutputType.Exe;
         }
 
         protected override void ConfigureProjectDependencies(Configuration configuration, Target target)

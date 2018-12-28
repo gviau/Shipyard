@@ -6,7 +6,7 @@ namespace ShipyardSharpmake
     class ShipyardSolution : BaseShipyardSolution
     {
         public ShipyardSolution()
-            : base("Shipyard", ShipyardUtils.DefaultShipyardTarget)
+            : base("Shipyard", ShipyardUtils.DefaultShipyardTargetLib)
         {
         }
 

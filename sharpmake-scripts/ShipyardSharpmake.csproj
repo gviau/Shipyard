@@ -34,7 +34,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Sharpmake">
-      <HintPath>sharpkmake-binaries\Sharpmake.dll</HintPath>
+      <HintPath>sharpmake-binaries\Sharpmake.dll</HintPath>
+    </Reference>
+    <Reference Include="Sharpmake.CommonPlatforms">
+      <HintPath>sharpmake-binaries\Sharpmake.CommonPlatforms.dll</HintPath>
+    </Reference>
+    <Reference Include="Sharpmake.Generators">
+      <HintPath>sharpmake-binaries\Sharpmake.Generators.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

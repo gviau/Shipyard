@@ -6,7 +6,7 @@ namespace ShipyardSharpmake
     class ShipyardViewerSolution : BaseShipyardSolution
     {
         public ShipyardViewerSolution()
-            : base("Shipyard-Viewer", ShipyardUtils.DefaultShipyardTarget)
+            : base("Shipyard-Viewer", ShipyardUtils.DefaultShipyardTargetLib)
         {
 
         }

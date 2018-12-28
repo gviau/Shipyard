@@ -6,7 +6,7 @@ namespace ShipyardSharpmake
     class ShipyardProject : BaseShipyardProject
     {
         public ShipyardProject()
-            : base("Shipyard", "../shipyard", ShipyardUtils.DefaultShipyardTarget)
+            : base("Shipyard", "../shipyard", ShipyardUtils.DefaultShipyardTargetLib)
         {
 
         }
@@ -22,7 +22,7 @@ namespace ShipyardSharpmake
             base.ConfigureIncludePaths(configuration);
 
             configuration.IncludePaths.Add(SourceRootPath);
-            configuration.IncludePrivatePaths.Add(SourceRootPath + @"extern\");
+            configuration.IncludePaths.Add(SourceRootPath + @"extern\");
         }
 
         protected override void ConfigurePlatform(Configuration configuration, Platform platform)

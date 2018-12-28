@@ -1,5 +1,6 @@
 #include <common/wrapper/wrapper.h>
 
+#include <common/shadercompiler/shadercompiler.h>
 #include <common/shadercompiler/shaderwatcher.h>
 
 #include <common/shaderfamilies.h>
@@ -159,6 +160,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     float theta = 0.0f;
 
     Shipyard::SingletonStorer singletonStorer;
+
+    Shipyard::ShaderCompiler::GetInstance().SetShaderDirectoryName("c:\\Sandbox\\shipyard\\shipyard-viewer\\shaders\\");
 
     Shipyard::ShaderWatcher shaderWatcher;
 

@@ -44,7 +44,6 @@ void ShaderWatcher::GetModifiedFilesInDirectory(const String& directoryName, Arr
 {
     WIN32_FIND_DATAA findData;
     HANDLE findHandle = INVALID_HANDLE_VALUE;
-    DWORD error = 0;
 
     findHandle = FindFirstFileA((directoryName + '*').c_str(), &findData);
 

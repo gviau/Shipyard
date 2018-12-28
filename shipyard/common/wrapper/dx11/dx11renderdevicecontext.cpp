@@ -314,6 +314,8 @@ ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatTy
         if (error != nullptr)
         {
             char* errorMsg = (char*)error->GetBufferPointer();
+            OutputDebugString(errorMsg);
+
             error->Release();
         }
 

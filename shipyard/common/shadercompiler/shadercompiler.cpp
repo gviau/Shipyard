@@ -502,8 +502,6 @@ ID3D10Blob* ShaderCompiler::CompileShader(const String& shaderSourceFilename, co
         {
             char* errorMsg = (char*)preprocessError->GetBufferPointer();
             OutputDebugString(errorMsg);
-            // cout << errorMsg << endl;
-            // MessageBox(NULL, errorMsg, "DX11 error", MB_OK);
         }
     }
 
@@ -516,8 +514,7 @@ ID3D10Blob* ShaderCompiler::CompileShader(const String& shaderSourceFilename, co
             OutputDebugString(errorMsg);
 
             char* data = (char*)preprocessedBlob->GetBufferPointer();
-            // cout << errorMsg << endl;
-            // MessageBox(NULL, errorMsg, "DX11 error", MB_OK);
+            OutputDebugString(data);
         }
 
         return nullptr;

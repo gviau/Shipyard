@@ -178,13 +178,13 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         }
         else
         {
-            void* data = constantBuffer->Map(Shipyard::MapFlag::Write_Discard);
+            void* mappedData = constantBuffer->Map(Shipyard::MapFlag::Write_Discard);
 
             glm::mat4 matrix(1.0f, 0.0f, 0.0f, 0.0f,
                              0.0f, 1.0f, 0.0f, 0.0f,
                              0.0f, 0.0f, 1.0f, 0.25f,
                              0.0f, 0.0f, 0.0f, 1.0f);
-            ((SimpleConstantBuffer*)data)->m_Matrix = glm::rotate(matrix, theta, glm::vec3(0.0f, 1.0f, 0.0f));
+            ((SimpleConstantBuffer*)mappedData)->m_Matrix = glm::rotate(matrix, theta, glm::vec3(0.0f, 1.0f, 0.0f));
 
             constantBuffer->Unmap();
 

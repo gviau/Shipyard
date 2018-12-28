@@ -29,7 +29,7 @@ namespace ShipyardSharpmake
             configuration.ProjectPath = @"[project.SharpmakeCsPath]\..\generated-projects\";
             configuration.IntermediatePath = configuration.ProjectPath + @"intermediate\";
 
-            configuration.Output = Configuration.OutputType.Dll;
+            configuration.Output = (target.OutputType == OutputType.Lib) ? Configuration.OutputType.Lib : Configuration.OutputType.Dll;
 
             ConfigureIncludePaths(configuration);
             ConfigurePlatform(configuration, target.Platform);

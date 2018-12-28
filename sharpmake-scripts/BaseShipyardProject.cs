@@ -43,6 +43,8 @@ namespace ShipyardSharpmake
             ConfigureDefines(configuration, target.Platform);
 
             ConfigureProjectDependencies(configuration, target);
+
+            ConfigureDisabledWarnings(configuration, target);
         }
 
         protected virtual void ConfigureIncludePaths(Configuration configuration)
@@ -52,7 +54,8 @@ namespace ShipyardSharpmake
 
         protected virtual void ConfigurePlatform(Configuration configuration, Platform platform)
         {
-
+            configuration.Options.Add(Options.Vc.Compiler.Exceptions.Disable);
+            configuration.Options.Add(Options.Vc.Compiler.MinimalRebuild.Disable);
         }
 
         protected virtual void ConfigureDefines(Configuration configuration, Platform platform)
@@ -63,6 +66,20 @@ namespace ShipyardSharpmake
         protected virtual void ConfigureProjectDependencies(Configuration configuration, Target target)
         {
 
+        }
+
+        protected virtual void ConfigureDisabledWarnings(Configuration configuration, Target target)
+        {
+            const string disableUnreferencedFormalParameterWarning = "4100";
+            const string disableNamelessStructUnionWarning = "4201";
+            const string disableUnwindSemanticsNotEnabledWarning = "4530";
+            const string disableNoExceptWithNoExceptionModeWarning = "4577";
+
+            configuration.Options.Add(new Options.Vc.Compiler.DisableSpecificWarnings(
+                    disableUnreferencedFormalParameterWarning,
+                    disableNamelessStructUnionWarning,
+                    disableUnwindSemanticsNotEnabledWarning,
+                    disableNoExceptWithNoExceptionModeWarning));
         }
 
         protected virtual string GetTargetOutputPath()

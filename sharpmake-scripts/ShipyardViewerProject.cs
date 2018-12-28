@@ -16,7 +16,8 @@ namespace ShipyardSharpmake
         {
             base.ConfigureAll(configuration, target);
 
-            // configuration.Output = Configuration.OutputType.Exe;
+            configuration.Output = Configuration.OutputType.Exe;
+            configuration.Options.Add(Sharpmake.Options.Vc.Linker.SubSystem.Application);
         }
 
         protected override void ConfigureProjectDependencies(Configuration configuration, Target target)
@@ -24,6 +25,11 @@ namespace ShipyardSharpmake
             base.ConfigureProjectDependencies(configuration, target);
 
             configuration.AddPublicDependency<ShipyardProject>(target, ShipyardUtils.DefaultDependencySettings);
+        }
+
+        protected override string GetTargetOutputPath()
+        {
+            return @"\bin";
         }
     }
 }

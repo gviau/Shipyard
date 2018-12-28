@@ -25,9 +25,16 @@ namespace ShipyardSharpmake
                 platformString = @"Mswin\";
             }
 
-            configuration.ProjectFileName = platformString + @"[target.DevEnv]\[project.Name]";
-            configuration.ProjectPath = @"[project.SharpmakeCsPath]\..\generated-projects\";
-            configuration.IntermediatePath = configuration.ProjectPath + @"intermediate\";
+            configuration.ProjectFileName  = platformString + @"[target.DevEnv]\[project.Name]";
+            configuration.ProjectPath      = @"[project.SharpmakeCsPath]\..\generated-projects\";
+            configuration.IntermediatePath = configuration.ProjectPath + @"intermediate\[target.DevEnv]\[project.Name]\";
+
+            string targetOutputPath = GetTargetOutputPath();
+
+            string outputPath = @"..\" + targetOutputPath + @"\" + platformString + @"\[target.Optimization]\";
+
+            configuration.TargetLibraryPath = outputPath;
+            configuration.TargetPath = outputPath;
 
             configuration.Output = (target.OutputType == OutputType.Lib) ? Configuration.OutputType.Lib : Configuration.OutputType.Dll;
 
@@ -56,6 +63,11 @@ namespace ShipyardSharpmake
         protected virtual void ConfigureProjectDependencies(Configuration configuration, Target target)
         {
 
+        }
+
+        protected virtual string GetTargetOutputPath()
+        {
+            return @"lib\";
         }
     }
 }

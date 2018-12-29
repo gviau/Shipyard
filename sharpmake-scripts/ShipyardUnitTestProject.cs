@@ -3,20 +3,17 @@
 namespace ShipyardSharpmake
 {
     [Generate]
-    class ShipyardViewerProject : BaseShipyardExecutableProject
+    class ShipyardUnitTestProject : BaseShipyardExecutableProject
     {
-        public ShipyardViewerProject()
-            : base("ShipyardViewer", "../shipyard-viewer")
+        public ShipyardUnitTestProject()
+            : base("ShipyardUnitTest", "../shipyard-unit-test")
         {
-
         }
-
+        
         [Configure]
         public override void ConfigureAll(Configuration configuration, Target target)
         {
             base.ConfigureAll(configuration, target);
-
-            configuration.Options.Add(Sharpmake.Options.Vc.Linker.SubSystem.Application);
         }
 
         protected override void ConfigureProjectDependencies(Configuration configuration, Target target)

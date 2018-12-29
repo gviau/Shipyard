@@ -3,10 +3,10 @@
 namespace ShipyardSharpmake
 {
     [Generate]
-    class ShipyardProject : BaseShipyardProject
+    class ShipyardProject : BaseShipyardLibProject
     {
         public ShipyardProject()
-            : base("Shipyard", "../shipyard", ShipyardUtils.DefaultShipyardTargetLib)
+            : base("Shipyard", "../shipyard")
         {
 
         }
@@ -21,7 +21,6 @@ namespace ShipyardSharpmake
         {
             base.ConfigureIncludePaths(configuration);
 
-            configuration.IncludePaths.Add(SourceRootPath);
             configuration.IncludePaths.Add(SourceRootPath + @"extern\");
         }
 

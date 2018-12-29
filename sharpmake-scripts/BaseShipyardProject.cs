@@ -2,7 +2,7 @@
 
 namespace ShipyardSharpmake
 {
-    class BaseShipyardProject : Project
+    abstract class BaseShipyardProject : Project
     {
         public BaseShipyardProject(string projectName, string baseSourcePath, ITarget target)
         {
@@ -36,8 +36,6 @@ namespace ShipyardSharpmake
             configuration.TargetLibraryPath = outputPath;
             configuration.TargetPath = outputPath;
 
-            configuration.Output = (target.OutputType == OutputType.Lib) ? Configuration.OutputType.Lib : Configuration.OutputType.Dll;
-
             ConfigureIncludePaths(configuration);
             ConfigurePlatform(configuration, target.Platform);
             ConfigureDefines(configuration, target.Platform);
@@ -51,7 +49,7 @@ namespace ShipyardSharpmake
 
         protected virtual void ConfigureIncludePaths(Configuration configuration)
         {
-
+            configuration.IncludePaths.Add(SourceRootPath);
         }
 
         protected virtual void ConfigurePlatform(Configuration configuration, Platform platform)
@@ -84,9 +82,6 @@ namespace ShipyardSharpmake
                     disableNoExceptWithNoExceptionModeWarning));
         }
 
-        protected virtual string GetTargetOutputPath()
-        {
-            return @"lib\";
-        }
+        protected abstract string GetTargetOutputPath();
     }
 }

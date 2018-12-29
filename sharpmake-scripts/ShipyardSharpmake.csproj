@@ -52,12 +52,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseShipyardExecutableProject.cs" />
+    <Compile Include="BaseShipyardLibProject.cs" />
     <Compile Include="BaseShipyardProject.cs" />
     <Compile Include="BaseShipyardSolution.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShipyardProject.cs" />
     <Compile Include="ShipyardSolution.cs" />
+    <Compile Include="ShipyardUnitTestProject.cs" />
+    <Compile Include="ShipyardUnitTestSolution.cs" />
     <Compile Include="ShipyardUtils.cs" />
     <Compile Include="ShipyardViewerProject.cs" />
     <Compile Include="ShipyardViewerSolution.cs" />

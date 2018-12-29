@@ -96,7 +96,7 @@ bool ShaderCompiler::GetShaderBlobsForShaderKey(ShaderKey shaderKey, ID3D10Blob*
 
     m_ShaderCompilationRequestLock.lock();
 
-    if (shaderFamily == m_CurrentShaderFamilyBeingCompiled || find(m_ShaderFamiliesToCompile.begin(), m_ShaderFamiliesToCompile.end(), shaderFamily) != m_ShaderFamiliesToCompile.end())
+    if (shaderFamily == m_CurrentShaderFamilyBeingCompiled || m_ShaderFamiliesToCompile.Exists(shaderFamily))
     {
         shaderKey = errorShaderKey;
         isShaderCompiled = false;
@@ -206,7 +206,7 @@ bool ShaderCompiler::CheckFileForHlslReference(const String& filenameToCheck, co
     Array<String> includeDirectives;
     GetIncludeDirectives(filenameToCheckContent, includeDirectives);
 
-    bool immediateReference = (find(includeDirectives.begin(), includeDirectives.end(), touchedHlslFilename) != includeDirectives.end());
+    bool immediateReference = includeDirectives.Exists(touchedHlslFilename);
     
     if (immediateReference)
     {
@@ -271,7 +271,7 @@ void ShaderCompiler::GetIncludeDirectives(const String& fileContent, Array<Strin
 
         if (!startCollectingFilename)
         {
-            includeDirectives.push_back(includeFilename);
+            includeDirectives.Add(includeFilename);
         }
     }
 }
@@ -290,12 +290,12 @@ void ShaderCompiler::AddShaderFamilyCompilationRequest(ShaderFamily shaderFamily
     }
 
     // Ensure we don't have duplicates
-    if (find(m_ShaderFamiliesToCompile.begin(), m_ShaderFamiliesToCompile.end(), shaderFamilyToCompile) != m_ShaderFamiliesToCompile.end())
+    if (m_ShaderFamiliesToCompile.Exists(shaderFamilyToCompile))
     {
         return;
     }
 
-    m_ShaderFamiliesToCompile.push_back(shaderFamilyToCompile);
+    m_ShaderFamiliesToCompile.Add(shaderFamilyToCompile);
 }
 
 void ShaderCompiler::ShaderCompilerThreadFunction()
@@ -304,12 +304,12 @@ void ShaderCompiler::ShaderCompilerThreadFunction()
     {
         uint32_t shaderFamilyToCompileIndex = 0;
 
-        if (m_ShaderFamiliesToCompile.size() > 0 && m_CurrentShaderFamilyBeingCompiled == ShaderFamily::Count)
+        if (m_ShaderFamiliesToCompile.Size() > 0 && m_CurrentShaderFamilyBeingCompiled == ShaderFamily::Count)
         {
             m_ShaderCompilationRequestLock.lock();
 
-            m_CurrentShaderFamilyBeingCompiled = m_ShaderFamiliesToCompile.back();
-            shaderFamilyToCompileIndex = (m_ShaderFamiliesToCompile.size() - 1);
+            m_CurrentShaderFamilyBeingCompiled = m_ShaderFamiliesToCompile.Back();
+            shaderFamilyToCompileIndex = (m_ShaderFamiliesToCompile.Size() - 1);
 
             m_ShaderCompilationRequestLock.unlock();
         }
@@ -327,7 +327,7 @@ void ShaderCompiler::ShaderCompilerThreadFunction()
         {
             m_CurrentShaderFamilyBeingCompiled = ShaderFamily::Count;
 
-            m_ShaderFamiliesToCompile.erase(m_ShaderFamiliesToCompile.begin() + shaderFamilyToCompileIndex);
+            m_ShaderFamiliesToCompile.RemoveAt(shaderFamilyToCompileIndex);
         }
 
         m_RecompileCurrentRequest = false;
@@ -360,7 +360,7 @@ void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
     ShaderKey::GetShaderKeyOptionsForShaderFamily(shaderFamily, shaderOptions);
 
     uint32_t shaderOptionAsInt = 0;
-    for (uint32_t i = shaderOptions.size(); i > 0; i--)
+    for (uint32_t i = shaderOptions.Size(); i > 0; i--)
     {
         uint32_t idx = i - 1;
 
@@ -396,7 +396,7 @@ void ShaderCompiler::CompileShaderKey(ShaderKey::RawShaderKeyType rawShaderKey, 
     shaderKey.m_RawShaderKey = rawShaderKey;
 
     Array<D3D_SHADER_MACRO> shaderOptionDefines;
-    shaderOptionDefines.reserve(everyPossibleShaderOptionForShaderKey.size());
+    shaderOptionDefines.Reserve(everyPossibleShaderOptionForShaderKey.Size());
 
     for (ShaderOption shaderOption : everyPossibleShaderOptionForShaderKey)
     {
@@ -414,11 +414,11 @@ void ShaderCompiler::CompileShaderKey(ShaderKey::RawShaderKeyType rawShaderKey, 
 
         shaderDefine.Definition = buf;
 
-        shaderOptionDefines.push_back(shaderDefine);
+        shaderOptionDefines.Add(shaderDefine);
     }
 
     D3D_SHADER_MACRO nullShaderDefine = { nullptr, nullptr };
-    shaderOptionDefines.push_back(nullShaderDefine);
+    shaderOptionDefines.Add(nullShaderDefine);
 
     ID3D10Blob* vertexShaderBlob = CompileVertexShaderForShaderKey(sourceFilename, source, &shaderOptionDefines[0]);
     ID3D10Blob* pixelShaderBlob = CompilePixelShaderForShaderKey(sourceFilename, source, &shaderOptionDefines[0]);
@@ -526,7 +526,7 @@ ID3D10Blob* ShaderCompiler::CompileShader(const String& shaderSourceFilename, co
 ShaderCompiler::CompiledShaderKeyEntry& ShaderCompiler::GetCompiledShaderKeyEntry(ShaderKey::RawShaderKeyType rawShaderKey)
 {
     uint32_t idx = 0;
-    for (; idx < m_CompiledShaderKeyEntries.size(); idx++)
+    for (; idx < m_CompiledShaderKeyEntries.Size(); idx++)
     {
         if (m_CompiledShaderKeyEntries[idx].m_RawShaderKey == rawShaderKey)
         {
@@ -534,12 +534,12 @@ ShaderCompiler::CompiledShaderKeyEntry& ShaderCompiler::GetCompiledShaderKeyEntr
         }
     }
 
-    if (idx == m_CompiledShaderKeyEntries.size())
+    if (idx == m_CompiledShaderKeyEntries.Size())
     {
         CompiledShaderKeyEntry newCompiledShaderKeyEntry;
         newCompiledShaderKeyEntry.m_RawShaderKey = rawShaderKey;
 
-        m_CompiledShaderKeyEntries.push_back(newCompiledShaderKeyEntry);
+        m_CompiledShaderKeyEntries.Add(newCompiledShaderKeyEntry);
     }
 
     return m_CompiledShaderKeyEntries[idx];

@@ -31,7 +31,7 @@ void ShaderWatcher::ShaderWatcherThreadFunction()
         Array<String> modifiedFiles;
         GetModifiedFilesInDirectory(shaderCompiler.GetShaderDirectoryName(), modifiedFiles);
 
-        if (modifiedFiles.empty())
+        if (modifiedFiles.Empty())
         {
             continue;
         }
@@ -69,7 +69,7 @@ void ShaderWatcher::GetModifiedFilesInDirectory(const String& directoryName, Arr
 
         if (FileWasModified(filename, lastWriteTimestamp))
         {
-            modifiedFiles.push_back(filename);
+            modifiedFiles.Add(filename);
         }
 
     } while (FindNextFileA(findHandle, &findData));
@@ -80,7 +80,7 @@ void ShaderWatcher::GetModifiedFilesInDirectory(const String& directoryName, Arr
 bool ShaderWatcher::FileWasModified(const String& filename, uint64_t lastWriteTimestamp)
 {
     uint32_t idx = 0;
-    for (; idx < m_WatchedShaderFiles.size(); idx++)
+    for (; idx < m_WatchedShaderFiles.Size(); idx++)
     {
         if (m_WatchedShaderFiles[idx].m_Filename == filename)
         {
@@ -90,13 +90,13 @@ bool ShaderWatcher::FileWasModified(const String& filename, uint64_t lastWriteTi
 
     bool fileWasModified = false;
 
-    if (idx == m_WatchedShaderFiles.size())
+    if (idx == m_WatchedShaderFiles.Size())
     {
         ShaderFile shaderFile;
         shaderFile.m_Filename = filename;
         shaderFile.m_LastWriteTimestamp = lastWriteTimestamp;
 
-        m_WatchedShaderFiles.push_back(shaderFile);
+        m_WatchedShaderFiles.Add(shaderFile);
 
         fileWasModified = true;
     }

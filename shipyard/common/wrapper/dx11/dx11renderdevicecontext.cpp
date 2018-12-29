@@ -358,11 +358,11 @@ ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatTy
         inputElement.InputSlotClass = (inputLayout.m_IsDataPerInstance) ? D3D11_INPUT_PER_INSTANCE_DATA : D3D11_INPUT_PER_VERTEX_DATA;
         inputElement.InstanceDataStepRate = inputLayout.m_InstanceDataStepRate;
 
-        inputElements.push_back(inputElement);
+        inputElements.Add(inputElement);
     }
 
     ID3D11InputLayout* inputLayout = nullptr;
-    hr = device->CreateInputLayout(&inputElements[0], inputElements.size(), shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), &inputLayout);
+    hr = device->CreateInputLayout(&inputElements[0], inputElements.Size(), shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), &inputLayout);
     if (FAILED(hr))
     {
         shader->Release();

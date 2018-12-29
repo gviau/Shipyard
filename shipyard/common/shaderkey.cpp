@@ -43,14 +43,14 @@ struct ShaderKeyGroupBase
         } \
         virtual void GetShaderOptions(Array<ShaderOption>& shaderOptions) override \
         { \
-            shaderOptions.clear(); \
+            shaderOptions.Clear(); \
             uint32_t idx = 0; \
             uint32_t currentShaderOption = 0; \
             while (true) \
             { \
                 currentShaderOption = ms_ShaderOptionGroup[idx]; \
                 if (currentShaderOption == 0xFFFFFFFF) break; \
-                shaderOptions.push_back(ShaderOption(currentShaderOption)); \
+                shaderOptions.Add(ShaderOption(currentShaderOption)); \
                 idx += 1; \
             } \
         } \

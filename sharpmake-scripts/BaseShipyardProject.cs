@@ -45,6 +45,7 @@ namespace ShipyardSharpmake
             ConfigureDisabledWarnings(configuration, target);
 
             configuration.Options.Add(Options.Vc.General.TreatWarningsAsErrors.Enable);
+            configuration.Options.Add(Options.Vc.Compiler.RTTI.Disable);
         }
 
         protected virtual void ConfigureIncludePaths(Configuration configuration)

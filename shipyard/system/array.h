@@ -191,15 +191,15 @@ namespace Shipyard
             {
                 Clear();
 
-                Reserve(src.Capacity());
+                Reserve(rhs.Capacity());
 
-                uint32_t srcSize = src.size();
+                uint32_t srcSize = rhs.Size();
 
                 m_ArraySizeAndCapacity |= srcSize;
 
                 for (uint32_t i = 0; i < srcSize; i++)
                 {
-                    m_Array[i] = src.m_Array[i];
+                    m_Array[i] = rhs.m_Array[i];
                 }
             }
 
@@ -266,6 +266,12 @@ namespace Shipyard
             m_Array[currentSize] = element;
 
             m_ArraySizeAndCapacity += 1;
+        }
+
+        T& Grow()
+        {
+            Add(T());
+            return Back();
         }
 
         void Pop()
@@ -564,13 +570,13 @@ namespace Shipyard
             {
                 Clear();
 
-                Reserve(src.m_Capacity);
+                Reserve(rhs.m_Capacity);
 
-                m_Size = src.m_Size;
+                m_Size = rhs.m_Size;
 
                 for (uint32_t i = 0; i < m_Size; i++)
                 {
-                    m_Array[i] = src.m_Array[i];
+                    m_Array[i] = rhs.m_Array[i];
                 }
             }
 
@@ -630,6 +636,12 @@ namespace Shipyard
             m_Array[currentSize] = element;
 
             m_Size -= 1;
+        }
+
+        T& Grow()
+        {
+            Add(T());
+            return Back();
         }
 
         void Pop()

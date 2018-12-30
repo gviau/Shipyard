@@ -259,7 +259,7 @@ namespace Shipyard
 
             if ((currentSize + 1) > currentCapacity)
             {
-                uint32_t newCapacity = currentCapacity * 2;
+                uint32_t newCapacity = MIN(currentCapacity * 2, 16383);
                 Reserve(MAX(newCapacity, 4));
             }
 
@@ -354,7 +354,7 @@ namespace Shipyard
 
             if ((currentSize + 1) > currentCapacity)
             {
-                uint32_t newCapacity = currentCapacity * 2;
+                uint32_t newCapacity = MIN(currentCapacity * 2, 16383);
                 Reserve(MAX(newCapacity, 4));
             }
 
@@ -623,7 +623,7 @@ namespace Shipyard
 
             if ((currentSize + 1) > m_Capacity)
             {
-                uint32_t newCapacity = currentCapacity * 2;
+                uint32_t newCapacity = uint32_t(MIN(uint64_t(currentCapacity) * 2, 0xFFFFFFFF));
                 Reserve(MAX(newCapacity, 4));
             }
 
@@ -705,11 +705,11 @@ namespace Shipyard
 
         void InsertAt(uint32_t indexToInsertAt, const T& elementToInsert)
         {
-            assert(m_Size < 4294967295);
+            assert(m_Size < 0xFFFFFFFF);
 
             if ((m_Size + 1) > m_Capacity)
             {
-                uint32_t newCapacity = currentCapacity * 2;
+                uint32_t newCapacity = uint32_t(MIN(uint64_t(currentCapacity) * 2, 0xFFFFFFFF));
                 Reserve(MAX(newCapacity, 4));
             }
 
@@ -731,7 +731,7 @@ namespace Shipyard
         void Reserve(uint32_t newCapacity)
         {
             assert(newCapacity > 0);
-            assert(newCapacity <= 4294967295);
+            assert(newCapacity <= 0xFFFFFFFF);
 
             if (newCapacity <= m_Capacity)
             {
@@ -754,7 +754,7 @@ namespace Shipyard
 
         void Resize(uint32_t newSize)
         {
-            assert(newSize <= 4294967295);
+            assert(newSize <= 0xFFFFFFFF);
 
             if (newSize < m_Size)
             {

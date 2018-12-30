@@ -14,6 +14,12 @@ namespace Shipyard
     template <typename T>
     class Array
     {
+    protected:
+        enum
+        {
+            BORROWED_MEMORY_FLAG = 0x80000000
+        };
+
     public:
         Array()
             : m_Array(nullptr)
@@ -189,7 +195,10 @@ namespace Shipyard
 
         void Clear()
         {
-            MemArrayFree(m_Array);
+            if ((m_ArraySizeAndCapacity & BORROWED_MEMORY_FLAG) == 0)
+            {
+                MemArrayFree(m_Array);
+            }
 
             m_Array = nullptr;
             m_ArraySizeAndCapacity = 0;
@@ -247,7 +256,11 @@ namespace Shipyard
                 newArray[i] = m_Array[i];
             }
 
-            MemArrayFree(m_Array);
+            if ((m_ArraySizeAndCapacity & BORROWED_MEMORY_FLAG) == 0)
+            {
+                MemArrayFree(m_Array);
+            }
+
             m_Array = newArray;
 
             m_ArraySizeAndCapacity &= ~0xFFFC000;
@@ -312,7 +325,23 @@ namespace Shipyard
             return (FindIndex(elementToFind) != uint32_t(-1));
         }
 
-    private:
+        void SetUserPointer(T* userArray, uint32_t numElements, uint32_t startingSize)
+        {
+            assert(userArray != nullptr);
+            assert(numElements > 0);
+            assert(numElements < 16384);
+            assert(startingSize <= numElements);
+
+            Clear();
+
+            m_Array = userArray;
+
+            m_ArraySizeAndCapacity |= startingSize;
+            m_ArraySizeAndCapacity |= (numElements << 14);
+            m_ArraySizeAndCapacity |= BORROWED_MEMORY_FLAG;
+        }
+
+    protected:
         T* m_Array;
         uint32_t m_ArraySizeAndCapacity;
 
@@ -468,5 +497,27 @@ namespace Shipyard
         {
             return ConstIterator(&m_Array[Size()]);
         }
+    };
+
+    // Syntactic sugar for:
+    //
+    // ArrayType staticBuffer[100];
+    // Array<ArrayType> myArray;
+    // myArray.SetUserPoint(staticBuffer, 100, 0);
+    //
+    // Instead:
+    //
+    // InplaceArray<ArrayType, 100> myArray;
+    template <typename T, uint32_t inplaceSize>
+    class InplaceArray : public Array<T>
+    {
+    public:
+        InplaceArray()
+        {
+            this->SetUserPointer(m_StaticArray, inplaceSize, 0);
+        }
+
+    private:
+        T m_StaticArray[inplaceSize];
     };
 }

@@ -164,4 +164,45 @@ TEST_CASE("Test array", "[Array]")
             idx += 1;
         }
     }
+
+    SECTION("Inplace array")
+    {
+        constexpr int numElements = 3;
+
+        Shipyard::InplaceArray<int, numElements> inplaceArray;
+
+        REQUIRE(inplaceArray.Capacity() == numElements);
+        REQUIRE(inplaceArray.Size() == 0);
+
+        for (int i = 0; i < numElements; i++)
+        {
+            inplaceArray.Add(i);
+        }
+
+        REQUIRE(inplaceArray.Capacity() == numElements);
+        REQUIRE(inplaceArray.Size() == numElements);
+
+        for (int i = 0; i < numElements; i++)
+        {
+            inplaceArray.Add(i);
+        }
+
+        REQUIRE(inplaceArray.Capacity() >= numElements * 2);
+        REQUIRE(inplaceArray.Size() == numElements * 2);
+
+        inplaceArray.Clear();
+
+        REQUIRE(inplaceArray.Capacity() == 0);
+        REQUIRE(inplaceArray.Size() == 0);
+
+        inplaceArray.Reserve(numElements);
+
+        for (int i = 0; i < numElements; i++)
+        {
+            inplaceArray.Add(i);
+        }
+
+        REQUIRE(inplaceArray.Capacity() == numElements);
+        REQUIRE(inplaceArray.Size() == numElements);
+    }
 }

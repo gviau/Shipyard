@@ -50,7 +50,7 @@ namespace Shipyard
 #define NEW_INPUT_LAYOUT(semanticName, semanticIndex, format, inputSlot, byteOffset, isDataPerInstance, instanceDataStepRate) \
     { semanticName, semanticIndex, format, inputSlot, byteOffset, isDataPerInstance, instanceDataStepRate }
 
-    enum class VertexFormatType
+    enum class VertexFormatType : uint16_t
     {
         Pos,
         Pos_Color,

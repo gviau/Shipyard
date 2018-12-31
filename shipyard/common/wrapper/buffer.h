@@ -1,13 +1,12 @@
 #pragma once
 
-#include <common/wrapper/wrapper_common.h>
+#include <common/wrapper/gfxresource.h>
 
-#include <common/common.h>
 #include <common/vertexformat.h>
 
 namespace Shipyard
 {
-    class SHIPYARD_API BaseBuffer
+    class SHIPYARD_API BaseBuffer : public GfxResource
     {
 #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
     public:

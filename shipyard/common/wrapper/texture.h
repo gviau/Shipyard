@@ -1,6 +1,6 @@
 #pragma once
 
-#include <common/wrapper/wrapper_common.h>
+#include <common/wrapper/gfxresource.h>
 
 namespace Shipyard
 {
@@ -8,7 +8,7 @@ namespace Shipyard
     uint32_t GetRowPitch(uint32_t width, GfxFormat pixelFormat);
     uint32_t Get2DSlicePitch(uint32_t width, uint32_t height, GfxFormat pixelFormat);
 
-    class SHIPYARD_API BaseTexture
+    class SHIPYARD_API BaseTexture : public GfxResource
     {
     public:
         BaseTexture(uint32_t width, uint32_t height, GfxFormat pixelFormat);

@@ -34,7 +34,17 @@ namespace ShipyardSharpmake
 
             string targetOutputPath = GetTargetOutputPath();
 
-            string outputPath = @"..\" + targetOutputPath + @"\" + platformString + @"\[target.Optimization]\";
+            string platformPath = @"[target.Platform]\";
+            if (target.Platform == Platform.win32)
+            {
+                platformPath = @"x86\";
+            }
+            else if (target.Platform == Platform.win64)
+            {
+                platformPath = @"x64\";
+            }
+
+            string outputPath = @"..\" + targetOutputPath + platformPath + @"[target.Optimization]\";
 
             configuration.TargetLibraryPath = outputPath;
             configuration.TargetPath = outputPath;

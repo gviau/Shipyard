@@ -2,8 +2,6 @@
 
 #include <common/wrapper/wrapper_common.h>
 
-#include <common/common.h>
-
 namespace Shipyard
 {
     class SHIPYARD_API RenderDeviceContext

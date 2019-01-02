@@ -342,10 +342,32 @@ void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
 
     String sourceFilename = m_ShaderDirectoryName + shaderFamilyFilename;
 
+    // This is kind of ugly: if a file is saved inside of Visual Studio with the AutoRecover feature enabled, it will
+    // first save the file's content in a temporary file, and then copy the content to the real file before quickly deleting the
+    // temporary file. This means that, sometimes, when saving a file through Visual Studio, we won't be able to open it as
+    // the file descriptor is already opened by Visual Studio. To counter that, we try a few times to open the same file.
     ifstream shaderFile(sourceFilename);
     if (!shaderFile.is_open())
     {
-        return;
+        constexpr uint32_t timesToTryOpeningAgain = 5;
+
+        uint32_t i = 0;
+        for (; i < timesToTryOpeningAgain; i++)
+        {
+            Sleep(100);
+
+            shaderFile.open(sourceFilename, ios_base::in);
+            if (shaderFile.is_open())
+            {
+                break;
+            }
+        }
+
+        bool couldntOpenFile = (i == timesToTryOpeningAgain);
+        if (couldntOpenFile)
+        {
+            return;
+        }
     }
 
     String source;

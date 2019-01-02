@@ -236,12 +236,12 @@ namespace Shipyard
         ShaderVisibility_Compute = 0x20,
 
         ShaderVisibility_All =
-        ShaderVisibility_Vertex |
-        ShaderVisibility_Pixel |
-        ShaderVisibility_Hull |
-        ShaderVisibility_Domain |
-        ShaderVisibility_Geometry |
-        ShaderVisibility_Compute
+                ShaderVisibility_Vertex |
+                ShaderVisibility_Pixel |
+                ShaderVisibility_Hull |
+                ShaderVisibility_Domain |
+                ShaderVisibility_Geometry |
+                ShaderVisibility_Compute
     };
 
     enum class DescriptorRangeType

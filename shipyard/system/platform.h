@@ -4,11 +4,14 @@
 // OgrePlatformInformation.h files. Big thanks to them.
 namespace Shipyard
 {
-#define PLATFORM_WIN32 1
+#define PLATFORM_WINDOWS 1
 #define PLATFORM_LINUX 2
 
 #define COMPILER_MSVC 1
 #define COMPILER_GNUC 2
+
+#define CPU_BITS_32 1
+#define CPU_BITS_64 2
 
     // Compiler
 #if defined(_MSC_VER)
@@ -16,19 +19,40 @@ namespace Shipyard
 #elif defined(__GNUC__)
 #   define COMPILER COMPILER_GNUC
 #else
-#   pragma error "Unsupported compiler!"
-#endif
+#   pragma error "Unreconized compiler"
+#endif // #if defined(_MSC_VER)
 
     // Platform
-#if defined(__WIN32__) || defined(_WIN32)
-#   define PLATFORM PLATFORM_WIN32
+#if defined(WIN32) || defined(WIN64)
+#   define PLATFORM PLATFORM_WINDOWS
 #else
 #   define PLATFORM PLATFORM_LINUX
-#endif
+#endif // #if defined(WIN32) || defined(WIN64)
+
+    // CPU bits
+#if COMPILER == COMPILER_MSVC
+
+#   if defined(WIN64)
+#       define CPU_BITS CPU_BITS_64
+#   elif defined(WIN32)
+#       define CPU_BITS CPU_BITS_32
+#   endif // #if defined(WIN32)
+
+#elif COMPILER == COMPILER_GNUC
+
+#   if __x86_64__ || __ppc64__
+#       define CPU_BITS CPU_BITS_64
+#   else
+#       define CPU_BITS CPU_BITS_32
+#   endif // #if __x86_64__ || __ppc64__
+
+#else
+#   pragma error "Unreconized compiler"
+#endif // #if COMPILER == COMPILER_MSVC
 
     // DLL stuff
 #if !defined(SHIPYARD_BUILD_STATIC)
-#   if PLATFORM == PLATFORM_WIN32
+#   if COMPILER == COMPILER_MSVC
 #       define SHIPYARD_API_EXPORT __declspec(dllexport)
 #       define SHIPYARD_API_IMPORT __declspec(dllimport)
 
@@ -47,11 +71,11 @@ namespace Shipyard
 #else
 #   define SHIPYARD_API_EXPORT
 #   define SHIPYARD_API_IMPORT
-#endif
+#endif // #if !defined(SHIPYARD_BUILD_STATIC)
 
 #if defined(SHIPYARD_NONCLIENT_BUILD)
 #   define SHIPYARD_API SHIPYARD_API_EXPORT
 #else
 #   define SHIPYARD_API SHIPYARD_API_IMPORT
-#endif
+#endif // #if defined(SHIPYARD_NONCLIENT_BUILD)
 }

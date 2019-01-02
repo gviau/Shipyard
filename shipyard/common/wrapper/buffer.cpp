@@ -3,6 +3,12 @@
 namespace Shipyard
 {;
 
+BaseBuffer::BaseBuffer()
+    : GfxResource(GfxResourceType::Unknown)
+{
+
+}
+
 VertexBuffer::VertexBuffer(uint32_t numVertices, VertexFormatType vertexFormatType, bool dynamic, void* initialData)
     : m_NumVertices(numVertices)
     , m_VertexFormatType(vertexFormatType)

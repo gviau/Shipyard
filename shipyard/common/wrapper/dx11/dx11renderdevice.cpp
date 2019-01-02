@@ -1,6 +1,9 @@
 #include <common/wrapper/dx11/dx11renderdevice.h>
 
 #include <common/wrapper/dx11/dx11buffer.h>
+#include <common/wrapper/dx11/dx11descriptorset.h>
+#include <common/wrapper/dx11/dx11pipelinestateobject.h>
+#include <common/wrapper/dx11/dx11rootsignature.h>
 #include <common/wrapper/dx11/dx11shader.h>
 #include <common/wrapper/dx11/dx11texture.h>
 
@@ -66,6 +69,21 @@ GFXVertexShader* DX11RenderDevice::CreateVertexShader(void* shaderData, uint64_t
 GFXPixelShader* DX11RenderDevice::CreatePixelShader(void* shaderData, uint64_t shaderDataSize)
 {
     return MemAlloc(GFXPixelShader)(*m_Device, shaderData, shaderDataSize);
+}
+
+GFXRootSignature* DX11RenderDevice::CreateRootSignature(const Array<RootSignatureParameterEntry>& rootSignatureParameters)
+{
+    return MemAlloc(GFXRootSignature)(rootSignatureParameters);
+}
+
+GFXPipelineStateObject* DX11RenderDevice::CreatePipelineStateObject(const PipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters)
+{
+    return MemAlloc(GFXPipelineStateObject)(pipelineStateObjectCreationParameters);
+}
+
+GFXDescriptorSet* DX11RenderDevice::CreateDescriptorSet(DescriptorSetType descriptorSetType, const RootSignature& rootSignature)
+{
+    return MemAlloc(GFXDescriptorSet)(descriptorSetType, rootSignature);
 }
 
 IDXGISwapChain* DX11RenderDevice::CreateSwapchain(uint32_t width, uint32_t height, GfxFormat format, HWND hWnd)

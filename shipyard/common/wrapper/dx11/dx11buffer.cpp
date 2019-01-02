@@ -145,6 +145,8 @@ DX11ConstantBuffer::DX11ConstantBuffer(ID3D11Device& device, ID3D11DeviceContext
     {
         MessageBox(NULL, "DX11ConstantBuffer::DX11ConstantBuffer() failed", "DX11 error", MB_OK);
     }
+
+    m_ResourceType = GfxResourceType::ConstantBuffer;
 }
 
 D3D11_MAP GetD3D11MapFlag(MapFlag mapFlag)

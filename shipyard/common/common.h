@@ -8,6 +8,16 @@
 
 namespace Shipyard
 {
+    class RootSignature;
+
+    enum class VertexFormatType : uint16_t;
+
+    struct BytesArray
+    {
+        const char* m_Bytes;
+        uint64_t m_BytesLength;
+    };
+
     enum class PrimitiveTopology
     {
         LineList,
@@ -180,5 +190,166 @@ namespace Shipyard
                     m_IsDataPerInstance != rhs.m_IsDataPerInstance &&
                     m_InstanceDataStepRate != rhs.m_InstanceDataStepRate);
         }
+    };
+
+    enum class BlendFactor
+    {
+
+    };
+
+    enum class BlendOperator
+    {
+        Add,
+        Subtract,
+        ReverseSubstract,
+        Min,
+        Max
+    };
+
+    struct RenderTargetBlendState
+    {
+
+    };
+
+    enum class RootSignatureParameterType
+    {
+        DescriptorTable,
+
+        Constant,
+
+        ConstantBufferView,
+        ShaderResourceView,
+        UnorderedAccessView,
+
+        Unknown
+    };
+
+    enum ShaderVisibility
+    {
+        ShaderVisibility_Unknown = 0x00,
+
+        ShaderVisibility_Vertex = 0x01,
+        ShaderVisibility_Pixel = 0x02,
+        ShaderVisibility_Hull = 0x04,
+        ShaderVisibility_Domain = 0x08,
+        ShaderVisibility_Geometry = 0x10,
+        ShaderVisibility_Compute = 0x20,
+
+        ShaderVisibility_All =
+        ShaderVisibility_Vertex |
+        ShaderVisibility_Pixel |
+        ShaderVisibility_Hull |
+        ShaderVisibility_Domain |
+        ShaderVisibility_Geometry |
+        ShaderVisibility_Compute
+    };
+
+    enum class DescriptorRangeType
+    {
+        ShaderResourceView,
+        UnorderedAccessView,
+        ConstantBufferView,
+        Sampler,
+
+        Unknown
+    };
+
+    struct DescriptorRange
+    {
+        DescriptorRange()
+            : descriptorRangeType(DescriptorRangeType::Unknown)
+            , numDescriptors(0)
+            , baseShaderRegister(0)
+            , registerSpace(0)
+            , offsetInDescriptorsFromTableStart(0)
+        {
+        }
+
+        DescriptorRangeType descriptorRangeType;
+        uint32_t numDescriptors;
+        uint32_t baseShaderRegister;
+        uint32_t registerSpace;
+        uint32_t offsetInDescriptorsFromTableStart;
+    };
+
+    struct RootDescriptorTable
+    {
+        RootDescriptorTable()
+            : numDescriptorRanges(0)
+            , descriptorRanges(nullptr)
+        {
+        }
+
+        uint32_t numDescriptorRanges;
+        const DescriptorRange* descriptorRanges;
+    };
+
+    struct RootDescriptor
+    {
+        RootDescriptor()
+            : shaderBindingSlot(0)
+            , registerSpace(0)
+        {
+        }
+
+        uint32_t shaderBindingSlot;
+        uint32_t registerSpace;
+    };
+
+    struct RootSignatureParameterEntry
+    {
+        RootSignatureParameterEntry()
+            : parameterType(RootSignatureParameterType::Unknown)
+            , shaderVisibility(ShaderVisibility::ShaderVisibility_Unknown)
+        {
+        }
+
+        RootSignatureParameterType parameterType;
+
+        union
+        {
+            RootDescriptorTable descriptorTable;
+            RootDescriptor descriptor;
+        };
+
+        ShaderVisibility shaderVisibility;
+    };
+
+    struct PipelineStateObjectCreationParameters
+    {
+        PipelineStateObjectCreationParameters(RootSignature& rootSignatureToUse)
+            : rootSignature(rootSignatureToUse)
+            , numRenderTargets(0)
+        {
+        }
+
+        RootSignature& rootSignature;
+
+        RasterizerState rasterizerState;
+        DepthStencilState depthStencilState;
+        VertexFormatType vertexFormatType;
+        PrimitiveTopology primitiveTopology;
+
+        uint32_t numRenderTargets;
+        GfxFormat renderTargetsFormat[8];
+        GfxFormat depthStencilFormat;
+    };
+
+    enum class DescriptorSetType
+    {
+        ConstantBuffer_ShaderResource_UnorderedAccess_Views,
+        Samplers,
+        RenderTargetViews,
+        DepthStencilView,
+
+        Unknown
+    };
+
+    enum class GfxResourceType
+    {
+        ConstantBuffer,
+        Texture,
+
+        Unknown
     };
 }

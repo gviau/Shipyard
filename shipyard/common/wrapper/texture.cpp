@@ -5,7 +5,8 @@
 namespace Shipyard
 {;
 BaseTexture::BaseTexture(uint32_t width, uint32_t height, GfxFormat pixelFormat)
-    : m_Width(width)
+    : GfxResource(GfxResourceType::Texture)
+    , m_Width(width)
     , m_Height(height)
     , m_PixelFormat(pixelFormat)
 {

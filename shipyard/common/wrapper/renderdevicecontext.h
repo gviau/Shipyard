@@ -17,15 +17,12 @@ namespace Shipyard
 
 #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
         virtual void ClearRenderTarget(float red, float green, float blue, float alpha, uint32_t renderTarget) = 0;
-        virtual void SetRasterizerState(const RasterizerState& rasterizerState) = 0;
-        virtual void SetDepthStencilState(const DepthStencilState& depthStencilState, uint8_t stencilRef) = 0;
         virtual void SetViewport(float topLeftX, float topLeftY, float width, float height) = 0;
 
-        virtual void SetVertexShader(GFXVertexShader* vertexShader) = 0;
-        virtual void SetPixelShader(GFXPixelShader* pixelShader) = 0;
-
-        virtual void SetVertexShaderConstantBuffer(GFXConstantBuffer* constantBuffer, uint32_t slot) = 0;
-        virtual void SetPixelShaderConstantBuffer(GFXConstantBuffer* constantBuffer, uint32_t slot) = 0;
+        virtual void PrepareNextDrawCalls(
+                const GFXRootSignature& rootSignature,
+                const GFXPipelineStateObject& pipelineStateObject,
+                const GFXDescriptorSet& descriptorSet) = 0;
 
         virtual void Draw(PrimitiveTopology primitiveTopology, const GFXVertexBuffer& vertexBuffer, uint32_t startVertexLocation) = 0;
         virtual void DrawIndexed(PrimitiveTopology primitiveTopology, const GFXVertexBuffer& vertexBuffer, const GFXIndexBuffer& indexBuffer, uint32_t startVertexLocation, uint32_t startIndexLocation) = 0;

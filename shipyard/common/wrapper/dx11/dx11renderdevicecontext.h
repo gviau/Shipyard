@@ -11,6 +11,8 @@ struct ID3D11RenderTargetView;
 
 namespace Shipyard
 {
+    class GfxResource;
+
     class SHIPYARD_API DX11RenderDeviceContext : public RenderDeviceContext
     {
     public:
@@ -25,8 +27,7 @@ namespace Shipyard
 
         void SetRasterizerState(const RasterizerState& rasterizerState);
         void SetDepthStencilState(const DepthStencilState& depthStencilState, uint8_t stencilRef);
-        void SetViewport(float topLeftX, float topLeftY, float width, float height);
-
+        
         void SetVertexShader(GFXVertexShader* vertexShader);
         void SetPixelShader(GFXPixelShader* pixelShader);
 
@@ -34,10 +35,24 @@ namespace Shipyard
         void SetPixelShaderConstantBuffer(GFXConstantBuffer* constantBuffer, uint32_t slot);
         void SetPixelShaderTexture(GFXTexture2D* texture, uint32_t slot);
 
+        void PrepareNextDrawCalls(
+                const GFXRootSignature& rootSignature,
+                const GFXPipelineStateObject& pipelineStateObject,
+                const GFXDescriptorSet& descriptorSet);
+
         void Draw(PrimitiveTopology primitiveTopology, const GFXVertexBuffer& vertexBuffer, uint32_t startVertexLocation);
         void DrawIndexed(PrimitiveTopology primitiveTopology, const GFXVertexBuffer& vertexBuffer, const GFXIndexBuffer& indexBuffer, uint32_t startVertexLocation, uint32_t startIndexLocation);
 
+        void SetViewport(float topLeftX, float topLeftY, float width, float height);
+
     private:
+        void BindRootSignature(const GFXRootSignature& rootSignature);
+        void BindPipelineStateObject(const GFXPipelineStateObject& pipelineStateObject);
+        void BindDescriptorSet(const GFXDescriptorSet& descriptorSet, const GFXRootSignature& rootSignature);
+
+        void BindDescriptorTableFromDescriptorSet(const Array<GfxResource*>& descriptorTableResources, const RootSignatureParameterEntry& rootSignatureParameter);
+        void BindDescriptorFromDescriptorSet(GfxResource* descriptorResource, const RootSignatureParameterEntry& rootSignatureParameter);
+
         ID3D11Device* m_Device;
         ID3D11DeviceContext* m_ImmediateDeviceContext;
 

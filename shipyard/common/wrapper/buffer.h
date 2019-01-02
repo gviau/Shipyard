@@ -8,8 +8,10 @@ namespace Shipyard
 {
     class SHIPYARD_API BaseBuffer : public GfxResource
     {
-#ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
     public:
+        BaseBuffer();
+
+#ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
         virtual void* Map(MapFlag mapFlag) = 0;
         virtual void Unmap() = 0;
 #endif // #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION

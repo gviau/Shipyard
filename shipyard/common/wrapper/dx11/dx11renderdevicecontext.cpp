@@ -2,7 +2,10 @@
 
 #include <common/wrapper/dx11/dx11_common.h>
 #include <common/wrapper/dx11/dx11buffer.h>
+#include <common/wrapper/dx11/dx11descriptorset.h>
+#include <common/wrapper/dx11/dx11pipelinestateobject.h>
 #include <common/wrapper/dx11/dx11renderdevice.h>
+#include <common/wrapper/dx11/dx11rootsignature.h>
 #include <common/wrapper/dx11/dx11shader.h>
 #include <common/wrapper/dx11/dx11texture.h>
 
@@ -210,6 +213,95 @@ void DX11RenderDeviceContext::SetPixelShaderTexture(GFXTexture2D* texture, uint3
 {
     ID3D11ShaderResourceView* shaderResourceView = (texture != nullptr) ? texture->GetShaderResourceView() : nullptr;
     m_ImmediateDeviceContext->PSSetShaderResources(slot, 1, &shaderResourceView);
+}
+
+void DX11RenderDeviceContext::PrepareNextDrawCalls(
+        const GFXRootSignature& rootSignature,
+        const GFXPipelineStateObject& pipelineStateObject,
+        const GFXDescriptorSet& descriptorSet)
+{
+    BindRootSignature(rootSignature);
+    BindPipelineStateObject(pipelineStateObject);
+    BindDescriptorSet(descriptorSet, rootSignature);
+}
+
+void DX11RenderDeviceContext::BindRootSignature(const GFXRootSignature& rootSignature)
+{
+}
+
+void DX11RenderDeviceContext::BindPipelineStateObject(const GFXPipelineStateObject& pipelineStateObject)
+{
+    const PipelineStateObjectCreationParameters& pipelineStateObjectParameters = pipelineStateObject.GetCreationParameters();
+
+    SetRasterizerState(pipelineStateObjectParameters.rasterizerState);
+    SetDepthStencilState(pipelineStateObjectParameters.depthStencilState, 0);
+}
+
+void DX11RenderDeviceContext::BindDescriptorSet(const GFXDescriptorSet& descriptorSet, const GFXRootSignature& rootSignature)
+{
+    const Array<GFXDescriptorSet::DescriptorSetEntry>& resourcesToBind = descriptorSet.GetDescriptorSetEntries();
+    const Array<RootSignatureParameterEntry>& rootSignatureParameters = rootSignature.GetRootSignatureParameters();
+
+    for (const GFXDescriptorSet::DescriptorSetEntry& descriptorSetEntry : resourcesToBind)
+    {
+        const RootSignatureParameterEntry& rootSignatureParameter = rootSignatureParameters[descriptorSetEntry.rootIndex];
+
+        if (descriptorSetEntry.isDescriptorTable)
+        {
+            BindDescriptorTableFromDescriptorSet(descriptorSetEntry.descriptorResources, rootSignatureParameter);
+        }
+        else
+        {
+            BindDescriptorFromDescriptorSet(descriptorSetEntry.descriptorResources[0], rootSignatureParameter);
+        }
+    }
+}
+
+void DX11RenderDeviceContext::BindDescriptorTableFromDescriptorSet(
+        const Array<GfxResource*>& descriptorTableResources,
+        const RootSignatureParameterEntry& rootSignatureParameter)
+{
+    // Not yet implemented
+    assert(false);
+}
+
+void DX11RenderDeviceContext::BindDescriptorFromDescriptorSet(GfxResource* descriptorResource, const RootSignatureParameterEntry& rootSignatureParameter)
+{
+    GfxResourceType resourceType = descriptorResource->GetResourceType();
+
+    if ((rootSignatureParameter.shaderVisibility & ShaderVisibility::ShaderVisibility_Vertex) > 0)
+    {
+        if (resourceType == GfxResourceType::Texture)
+        {
+            
+        }
+        else if (resourceType == GfxResourceType::ConstantBuffer)
+        {
+            assert(rootSignatureParameter.parameterType == RootSignatureParameterType::ConstantBufferView);
+
+            GFXConstantBuffer* gfxConstantBuffer = static_cast<GFXConstantBuffer*>(descriptorResource);
+            SetVertexShaderConstantBuffer(gfxConstantBuffer, rootSignatureParameter.descriptor.shaderBindingSlot);
+        }
+    }
+
+    if ((rootSignatureParameter.shaderVisibility & ShaderVisibility::ShaderVisibility_Pixel) > 0)
+    {
+        if (resourceType == GfxResourceType::Texture)
+        {
+            if (rootSignatureParameter.parameterType == RootSignatureParameterType::ShaderResourceView)
+            {
+                GFXTexture2D* gfxTexture = static_cast<GFXTexture2D*>(descriptorResource);
+                SetPixelShaderTexture(gfxTexture, rootSignatureParameter.descriptor.shaderBindingSlot);
+            }
+        }
+        else if (resourceType == GfxResourceType::ConstantBuffer)
+        {
+            assert(rootSignatureParameter.parameterType == RootSignatureParameterType::ConstantBufferView);
+
+            GFXConstantBuffer* gfxConstantBuffer = static_cast<GFXConstantBuffer*>(descriptorResource);
+            SetPixelShaderConstantBuffer(gfxConstantBuffer, rootSignatureParameter.descriptor.shaderBindingSlot);
+        }
+    }
 }
 
 void DX11RenderDeviceContext::Draw(PrimitiveTopology primitiveTopology, const GFXVertexBuffer& vertexBuffer, uint32_t startVertexLocation)

@@ -142,6 +142,14 @@ void ShaderCompiler::RequestCompilationFromShaderFiles(const Array<String>& shad
     m_ShaderCompilationRequestLock.unlock();
 }
 
+void ShaderCompiler::SetShaderDirectoryName(const String& shaderDirectoryName)
+{
+    m_ShaderDirectoryName = shaderDirectoryName;
+
+    // Make sure the ShaderFamily error is compiled initialy
+    CompileShaderFamily(ShaderFamily::Error);
+}
+
 void ShaderCompiler::AddCompilationRequestForFxFile(const String& fxFilename)
 {
     ShaderFamily shaderFamilyToCompile = ShaderFamily::Count;

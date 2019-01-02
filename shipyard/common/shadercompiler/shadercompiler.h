@@ -33,7 +33,7 @@ namespace Shipyard
 
         void RequestCompilationFromShaderFiles(const Array<String>& shaderFilenames);
 
-        void SetShaderDirectoryName(const String& shaderDirectoryName) { m_ShaderDirectoryName = shaderDirectoryName; }
+        void SetShaderDirectoryName(const String& shaderDirectoryName);
         const String& GetShaderDirectoryName() const { return m_ShaderDirectoryName; }
 
     private:

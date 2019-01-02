@@ -79,6 +79,23 @@ void ShaderWatcher::GetModifiedFilesInDirectory(const String& directoryName, Arr
 
 bool ShaderWatcher::FileWasModified(const String& filename, uint64_t lastWriteTimestamp)
 {
+    bool isValidShaderFile = false;
+
+    // Filter out filenames with unsupported extensions
+    if (filename.substr(filename.size() - 3) == ".fx")
+    {
+        isValidShaderFile = true;
+    }
+    else if (filename.substr(filename.size() - 5) == ".hlsl")
+    {
+        isValidShaderFile = true;
+    }
+
+    if (!isValidShaderFile)
+    {
+        return false;
+    }
+
     uint32_t idx = 0;
     for (; idx < m_WatchedShaderFiles.Size(); idx++)
     {

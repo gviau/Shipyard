@@ -26,7 +26,7 @@ extern String g_ShaderOptionString[uint32_t(ShaderOption::Count)];
 class ShaderCompilerIncludeHandler : public ID3DInclude
 {
 public:
-    STDMETHOD(Open)(D3D_INCLUDE_TYPE includeType, const char* includeFilename, const void* parentData, const void** outData, uint32_t* outByteLength)
+    STDMETHOD(Open)(D3D_INCLUDE_TYPE includeType, const char* includeFilename, const void* parentData, const void** outData, UINT* outByteLength)
     {
         String filename = ((includeType == D3D_INCLUDE_LOCAL) ? (String(ShaderCompiler::GetInstance().GetShaderDirectoryName()) + includeFilename) : includeFilename);
 
@@ -46,7 +46,7 @@ public:
         includeFile.read(data, includeFileContentLength);
 
         *outData = data;
-        *outByteLength = includeFileContentLength;
+        *outByteLength = UINT(includeFileContentLength);
 
         return S_OK;
     }

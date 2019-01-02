@@ -13,6 +13,9 @@ namespace ShipyardSharpmake
             AddTargets(target);
 
             SourceRootPath = @"[project.SharpmakeCsPath]\" + baseSourcePath + @"\";
+
+            ResourceFilesExtensions.Add(".fx");
+            ResourceFilesExtensions.Add(".hlsl");
         }
 
         public virtual void ConfigureAll(Configuration configuration, Target target)

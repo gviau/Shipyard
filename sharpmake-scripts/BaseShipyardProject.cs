@@ -96,6 +96,9 @@ namespace ShipyardSharpmake
         protected virtual void ConfigurePlatform(Configuration configuration, Platform platform)
         {
             configuration.Options.Add(Options.Vc.Compiler.Exceptions.Disable);
+
+            // In practice, multi processor builds are faster than minimal rebuild: https://github.com/cinder/Cinder/issues/1158#issuecomment-148571748
+            // This option cannot co-exist with multiprocessor builds, so let's disable it.
             configuration.Options.Add(Options.Vc.Compiler.MinimalRebuild.Disable);
         }
 

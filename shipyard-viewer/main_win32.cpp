@@ -89,7 +89,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     rootSignatureParameters[1].shaderVisibility = Shipyard::ShaderVisibility_Pixel;
     rootSignatureParameters[1].descriptor.shaderBindingSlot = 0;
 
-    shared_ptr<Shipyard::GFXRootSignature> gfxRootSignature(gfxRenderDevice.CreateRootSignature(rootSignatureParameters));
+    unique_ptr<Shipyard::GFXRootSignature> gfxRootSignature(gfxRenderDevice.CreateRootSignature(rootSignatureParameters));
 
     Shipyard::PipelineStateObjectCreationParameters pipelineStateObjectCreationParameters(*gfxRootSignature.get());
 
@@ -114,8 +114,6 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     pipelineStateObjectCreationParameters.primitiveTopology = Shipyard::PrimitiveTopology::TriangleList;
     pipelineStateObjectCreationParameters.vertexFormatType = Shipyard::VertexFormatType::Pos_UV;
     pipelineStateObjectCreationParameters.numRenderTargets = 1;
-
-    shared_ptr<Shipyard::GFXPipelineStateObject> gfxPipelineStateObject(gfxRenderDevice.CreatePipelineStateObject(pipelineStateObjectCreationParameters));
 
     gfxRenderDeviceContext.SetViewport(0.0f, 0.0f, 800.0f, 600.0f);
 
@@ -167,12 +165,12 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         255, 0, 0, 255, 255, 0, 0, 255
     };
 
-    shared_ptr<Shipyard::GFXVertexBuffer> vertexBuffer(gfxRenderDevice.CreateVertexBuffer(8, Shipyard::VertexFormatType::Pos_UV, false, vertexBufferData));
-    shared_ptr<Shipyard::GFXIndexBuffer> indexBuffer(gfxRenderDevice.CreateIndexBuffer(36, true, false, indices));
-    shared_ptr<Shipyard::GFXConstantBuffer> constantBuffer(gfxRenderDevice.CreateConstantBuffer(sizeof(data), true, &data));
-    shared_ptr<Shipyard::GFXTexture2D> texture(gfxRenderDevice.CreateTexture2D(2, 2, Shipyard::GfxFormat::R8G8B8A8_UNORM, false, textureData, false));
+    unique_ptr<Shipyard::GFXVertexBuffer> vertexBuffer(gfxRenderDevice.CreateVertexBuffer(8, Shipyard::VertexFormatType::Pos_UV, false, vertexBufferData));
+    unique_ptr<Shipyard::GFXIndexBuffer> indexBuffer(gfxRenderDevice.CreateIndexBuffer(36, true, false, indices));
+    unique_ptr<Shipyard::GFXConstantBuffer> constantBuffer(gfxRenderDevice.CreateConstantBuffer(sizeof(data), true, &data));
+    unique_ptr<Shipyard::GFXTexture2D> texture(gfxRenderDevice.CreateTexture2D(2, 2, Shipyard::GfxFormat::R8G8B8A8_UNORM, false, textureData, false));
 
-    shared_ptr<Shipyard::GFXDescriptorSet> gfxDescriptorSet(
+    unique_ptr<Shipyard::GFXDescriptorSet> gfxDescriptorSet(
             gfxRenderDevice.CreateDescriptorSet(Shipyard::DescriptorSetType::ConstantBuffer_ShaderResource_UnorderedAccess_Views, *gfxRootSignature.get()));
 
     gfxDescriptorSet->SetDescriptorForRootIndex(0, *constantBuffer.get());
@@ -215,16 +213,23 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
             gfxViewSurface.PreRender();
 
-            gfxRenderDeviceContext.PrepareNextDrawCalls(*gfxRootSignature.get(), *gfxPipelineStateObject.get(), *gfxDescriptorSet.get());
-
             static volatile uint32_t value = 0;
 
             SET_SHADER_OPTION(shaderKey, Test2Bits, value);
 
             Shipyard::ShaderHandler* shaderHandler = Shipyard::ShaderHandlerManager::GetInstance().GetShaderHandlerForShaderKey(shaderKey, gfxRenderDevice);
-            shaderHandler->ApplyShader(gfxRenderDeviceContext);
-            
+
+            shaderHandler->ApplyShader(pipelineStateObjectCreationParameters);
+
+            Shipyard::GFXPipelineStateObject* gfxPipelineStateObject = gfxRenderDevice.CreatePipelineStateObject(pipelineStateObjectCreationParameters);
+
+            Shipyard::GFXPipelineStateObject pipelineStateObject = *gfxPipelineStateObject;
+
+            gfxRenderDeviceContext.PrepareNextDrawCalls(*gfxRootSignature.get(), pipelineStateObject, *gfxDescriptorSet.get());
+
             gfxRenderDeviceContext.DrawIndexed(Shipyard::PrimitiveTopology::TriangleList, *(vertexBuffer.get()), *(indexBuffer.get()), 0, 0);
+
+            MemFree(gfxPipelineStateObject);
 
             gfxViewSurface.Flip();
         }

@@ -10,10 +10,10 @@ ShaderHandler::ShaderHandler(ShaderKey shaderKey)
 {
 }
 
-void ShaderHandler::ApplyShader(GFXRenderDeviceContext& gfxRenderDeviceContext)
+void ShaderHandler::ApplyShader(PipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters)
 {
-    gfxRenderDeviceContext.SetVertexShader(m_VertexShader.get());
-    gfxRenderDeviceContext.SetPixelShader(m_PixelShader.get());
+    pipelineStateObjectCreationParameters.vertexShader = m_VertexShader.get();
+    pipelineStateObjectCreationParameters.pixelShader = m_PixelShader.get();
 }
 
 }

@@ -13,6 +13,8 @@ namespace Shipyard
 {
     class ShaderHandlerManager;
 
+    struct PipelineStateObjectCreationParameters;
+
     class SHIPYARD_API ShaderHandler
     {
         friend class ShaderHandlerManager;
@@ -20,7 +22,7 @@ namespace Shipyard
     public:
         ShaderHandler(ShaderKey shaderKey);
 
-        void ApplyShader(GFXRenderDeviceContext& gfxRenderDeviceContext);
+        void ApplyShader(PipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters);
 
         const ShaderKey& GetShaderKey() const { return m_ShaderKey; }
 

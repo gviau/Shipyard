@@ -24,11 +24,12 @@ ShaderWatcher::~ShaderWatcher()
 
 void ShaderWatcher::ShaderWatcherThreadFunction()
 {
+    InplaceArray<String, 8> modifiedFiles;
+
     while (m_RunShaderWatcherThread)
     {
         ShaderCompiler& shaderCompiler = ShaderCompiler::GetInstance();
 
-        Array<String> modifiedFiles;
         GetModifiedFilesInDirectory(shaderCompiler.GetShaderDirectoryName(), modifiedFiles);
 
         if (modifiedFiles.Empty())
@@ -37,6 +38,8 @@ void ShaderWatcher::ShaderWatcherThreadFunction()
         }
 
         shaderCompiler.RequestCompilationFromShaderFiles(modifiedFiles);
+
+        modifiedFiles.Resize(0);
     }
 }
 

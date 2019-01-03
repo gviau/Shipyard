@@ -2,6 +2,8 @@
 
 #include <common/wrapper/renderdevicecontext.h>
 
+#include <common/wrapper/dx11/dx11renderstatecache.h>
+
 struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct ID3D11DepthStencilState;
@@ -25,16 +27,6 @@ namespace Shipyard
         void ClearRenderTarget(float red, float green, float blue, float alpha, uint32_t renderTarget);
         void ClearDepthStencil(bool clearDepth, bool clearStencil);
 
-        void SetRasterizerState(const RasterizerState& rasterizerState);
-        void SetDepthStencilState(const DepthStencilState& depthStencilState, uint8_t stencilRef);
-        
-        void SetVertexShader(GFXVertexShader* vertexShader);
-        void SetPixelShader(GFXPixelShader* pixelShader);
-
-        void SetVertexShaderConstantBuffer(GFXConstantBuffer* constantBuffer, uint32_t slot);
-        void SetPixelShaderConstantBuffer(GFXConstantBuffer* constantBuffer, uint32_t slot);
-        void SetPixelShaderTexture(GFXTexture2D* texture, uint32_t slot);
-
         void PrepareNextDrawCalls(
                 const GFXRootSignature& rootSignature,
                 const GFXPipelineStateObject& pipelineStateObject,
@@ -46,20 +38,12 @@ namespace Shipyard
         void SetViewport(float topLeftX, float topLeftY, float width, float height);
 
     private:
-        void BindRootSignature(const GFXRootSignature& rootSignature);
-        void BindPipelineStateObject(const GFXPipelineStateObject& pipelineStateObject);
-        void BindDescriptorSet(const GFXDescriptorSet& descriptorSet, const GFXRootSignature& rootSignature);
-
-        void BindDescriptorTableFromDescriptorSet(const Array<GfxResource*>& descriptorTableResources, const RootSignatureParameterEntry& rootSignatureParameter);
-        void BindDescriptorFromDescriptorSet(GfxResource* descriptorResource, const RootSignatureParameterEntry& rootSignatureParameter);
-
         ID3D11Device* m_Device;
-        ID3D11DeviceContext* m_ImmediateDeviceContext;
-
-        ID3D11RasterizerState* m_RasterizerState;
-        ID3D11DepthStencilState* m_DepthStencilState;
+        ID3D11DeviceContext* m_DeviceContext;
 
         ID3D11RenderTargetView* m_RenderTargets[8];
         ID3D11DepthStencilView* m_DepthStencilView;
+
+        DX11RenderStateCache m_RenderStateCache;
     };
 }

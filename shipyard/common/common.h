@@ -1,5 +1,7 @@
 #pragma once
 
+#include <math/mathutilities.h>
+
 #include <system/array.h>
 #include <system/platform.h>
 #include <system/string.h>
@@ -8,7 +10,9 @@
 
 namespace Shipyard
 {
+    class PixelShader;
     class RootSignature;
+    class VertexShader;
 
     enum class VertexFormatType : uint16_t;
 
@@ -18,7 +22,7 @@ namespace Shipyard
         uint64_t m_BytesLength;
     };
 
-    enum class PrimitiveTopology
+    enum class PrimitiveTopology : uint8_t
     {
         LineList,
         LineStrip,
@@ -36,7 +40,7 @@ namespace Shipyard
         Write_No_Overwrite
     };
 
-    enum class GfxFormat
+    enum class GfxFormat : uint16_t
     {
         R32G32B32A32_FLOAT,
         R32G32B32A32_UINT,
@@ -87,13 +91,13 @@ namespace Shipyard
         R8_SINT
     };
 
-    enum class FillMode
+    enum class FillMode : uint8_t
     {
         Wireframe,
         Solid
     };
 
-    enum class CullMode
+    enum class CullMode : uint8_t
     {
         CullNone,
         CullFrontFace,
@@ -102,19 +106,57 @@ namespace Shipyard
 
     struct RasterizerState
     {
-        FillMode m_FillMode;
-        CullMode m_CullMode;
-        bool m_IsFrontCounterClockWise;
+        RasterizerState()
+            : m_DepthBias(0)
+            , m_DepthBiasClamp(0.0f)
+            , m_SlopeScaledDepthBias(0.0f)
+
+            , m_FillMode(FillMode::Solid)
+            , m_CullMode(CullMode::CullBackFace)
+
+            , m_IsFrontCounterClockWise(false)
+            , m_DepthClipEnable(false)
+            , m_ScissorEnable(false)
+            , m_MultisampleEnable(false)
+            , m_AntialiasedLineEnable(false)
+        {
+
+        }
+
         int m_DepthBias;
         float m_DepthBiasClamp;
         float m_SlopeScaledDepthBias;
+
+        FillMode m_FillMode;
+        CullMode m_CullMode;
+
+        bool m_IsFrontCounterClockWise;
         bool m_DepthClipEnable;
         bool m_ScissorEnable;
         bool m_MultisampleEnable;
         bool m_AntialiasedLineEnable;
+
+        bool operator== (const RasterizerState &rhs) const
+        {
+            return (m_DepthBias == rhs.m_DepthBias &&
+                    IsAlmostEqual(m_DepthBiasClamp, rhs.m_DepthBiasClamp) &&
+                    IsAlmostEqual(m_SlopeScaledDepthBias, rhs.m_SlopeScaledDepthBias) &&
+                    m_FillMode == rhs.m_FillMode &&
+                    m_CullMode == rhs.m_CullMode &&
+                    m_IsFrontCounterClockWise == rhs.m_IsFrontCounterClockWise &&
+                    m_DepthClipEnable == rhs.m_DepthClipEnable &&
+                    m_ScissorEnable == rhs.m_ScissorEnable &&
+                    m_MultisampleEnable == rhs.m_MultisampleEnable &&
+                    m_AntialiasedLineEnable == rhs.m_AntialiasedLineEnable);
+        }
+
+        bool operator!= (const RasterizerState& rhs) const
+        {
+            return !(*this == rhs);
+        }
     };
 
-    enum class ComparisonFunc
+    enum class ComparisonFunc : uint8_t
     {
         Never,
         Less,
@@ -126,7 +168,7 @@ namespace Shipyard
         Always
     };
 
-    enum class StencilOperation
+    enum class StencilOperation : uint8_t
     {
         Keep,
         Zero,
@@ -140,10 +182,28 @@ namespace Shipyard
 
     struct DepthStencilState
     {
-        bool m_DepthEnable;
-        bool m_EnableDepthWrite;
+        DepthStencilState()
+            : m_DepthComparisonFunc(ComparisonFunc::LessEqual)
+            , m_StencilReadMask(0)
+            , m_StencilWriteMask(0)
+
+            , m_FrontFaceStencilFailOp(StencilOperation::Keep)
+            , m_FrontFaceStencilDepthFailOp(StencilOperation::Keep)
+            , m_FrontFaceStencilPassOp(StencilOperation::Keep)
+            , m_FrontFaceStencilComparisonFunc(ComparisonFunc::Always)
+
+            , m_BackFaceStencilFailOp(StencilOperation::Keep)
+            , m_BackFaceStencilDepthFailOp(StencilOperation::Keep)
+            , m_BackFaceStencilPassOp(StencilOperation::Keep)
+            , m_BackFaceStencilComparisonFunc(ComparisonFunc::Always)
+
+            , m_DepthEnable(true)
+            , m_EnableDepthWrite(true)
+            , m_StencilEnable(false)
+        {
+        }
+
         ComparisonFunc m_DepthComparisonFunc;
-        bool m_StencilEnable;
         uint8_t m_StencilReadMask;
         uint8_t m_StencilWriteMask;
 
@@ -156,6 +216,33 @@ namespace Shipyard
         StencilOperation m_BackFaceStencilDepthFailOp;
         StencilOperation m_BackFaceStencilPassOp;
         ComparisonFunc m_BackFaceStencilComparisonFunc;
+
+        bool m_DepthEnable;
+        bool m_EnableDepthWrite;
+        bool m_StencilEnable;
+
+        bool operator== (const DepthStencilState& rhs) const
+        {
+            return (m_DepthComparisonFunc == rhs.m_DepthComparisonFunc &&
+                    m_StencilReadMask == rhs.m_StencilReadMask &&
+                    m_StencilWriteMask == rhs.m_StencilWriteMask &&
+                    m_FrontFaceStencilFailOp == rhs.m_FrontFaceStencilFailOp &&
+                    m_FrontFaceStencilDepthFailOp == rhs.m_FrontFaceStencilDepthFailOp &&
+                    m_FrontFaceStencilPassOp == rhs.m_FrontFaceStencilPassOp &&
+                    m_FrontFaceStencilComparisonFunc == m_FrontFaceStencilComparisonFunc &&
+                    m_BackFaceStencilFailOp == rhs.m_BackFaceStencilFailOp &&
+                    m_BackFaceStencilDepthFailOp == rhs.m_BackFaceStencilDepthFailOp &&
+                    m_BackFaceStencilPassOp == rhs.m_BackFaceStencilPassOp &&
+                    m_BackFaceStencilComparisonFunc == m_BackFaceStencilComparisonFunc &&
+                    m_DepthEnable == rhs.m_DepthEnable &&
+                    m_EnableDepthWrite == rhs.m_EnableDepthWrite &&
+                    m_StencilEnable == rhs.m_StencilEnable);
+        }
+
+        bool operator!= (const DepthStencilState& rhs) const
+        {
+            return !(*this == rhs);
+        }
     };
 
     enum class SemanticName
@@ -226,7 +313,7 @@ namespace Shipyard
 
     enum ShaderVisibility
     {
-        ShaderVisibility_Unknown = 0x00,
+        ShaderVisibility_None = 0x00,
 
         ShaderVisibility_Vertex = 0x01,
         ShaderVisibility_Pixel = 0x02,
@@ -242,6 +329,18 @@ namespace Shipyard
                 ShaderVisibility_Domain |
                 ShaderVisibility_Geometry |
                 ShaderVisibility_Compute
+    };
+
+    enum ShaderStage
+    {
+        ShaderStage_Vertex,
+        ShaderStage_Pixel,
+        ShaderStage_Hull,
+        ShaderStage_Domain,
+        ShaderStage_Geometry,
+        ShaderStage_Compute,
+
+        ShaderStage_Count
     };
 
     enum class DescriptorRangeType
@@ -300,17 +399,14 @@ namespace Shipyard
     {
         RootSignatureParameterEntry()
             : parameterType(RootSignatureParameterType::Unknown)
-            , shaderVisibility(ShaderVisibility::ShaderVisibility_Unknown)
+            , shaderVisibility(ShaderVisibility::ShaderVisibility_None)
         {
         }
 
         RootSignatureParameterType parameterType;
 
-        union
-        {
-            RootDescriptorTable descriptorTable;
-            RootDescriptor descriptor;
-        };
+        RootDescriptorTable descriptorTable;
+        RootDescriptor descriptor;
 
         ShaderVisibility shaderVisibility;
     };
@@ -319,11 +415,16 @@ namespace Shipyard
     {
         PipelineStateObjectCreationParameters(RootSignature& rootSignatureToUse)
             : rootSignature(rootSignatureToUse)
+            , vertexShader(nullptr)
+            , pixelShader(nullptr)
             , numRenderTargets(0)
         {
         }
 
         RootSignature& rootSignature;
+
+        VertexShader* vertexShader;
+        PixelShader* pixelShader;
 
         RasterizerState rasterizerState;
         DepthStencilState depthStencilState;
@@ -351,5 +452,33 @@ namespace Shipyard
         Texture,
 
         Unknown
+    };
+
+    enum GfxConstants
+    {
+        GfxConstants_MaxShaderResourceViewsBoundPerShaderStage = 64,
+        GfxConstants_MaxConstantBufferViewsBoundPerShaderStage = 15,
+        GfxConstants_MaxUnorderedAccessViewsBoundPerShaderStage = 8,
+        GfxConstatns_MaxSamplersBoundPerShaderStage = 16
+    };
+
+    struct GfxViewport
+    {
+        GfxViewport()
+            : topLeftX(0.0f)
+            , topLeftY(0.0f)
+            , width(1.0f)
+            , height(1.0f)
+            , minDepth(0.0f)
+            , maxDepth(1.0f)
+        {
+        }
+
+        float topLeftX;
+        float topLeftY;
+        float width;
+        float height;
+        float minDepth;
+        float maxDepth;
     };
 }

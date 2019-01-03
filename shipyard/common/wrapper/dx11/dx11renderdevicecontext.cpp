@@ -32,13 +32,11 @@ ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatTy
 
 DX11RenderDeviceContext::DX11RenderDeviceContext(const GFXRenderDevice& renderDevice)
     : RenderDeviceContext(renderDevice)
-    , m_RasterizerState(nullptr)
-    , m_DepthStencilState(nullptr)
+    , m_Device(renderDevice.GetDevice())
+    , m_DeviceContext(renderDevice.GetImmediateDeviceContext())
     , m_DepthStencilView(nullptr)
+    , m_RenderStateCache(m_Device, m_DeviceContext)
 {
-    m_Device = renderDevice.GetDevice();
-    m_ImmediateDeviceContext = renderDevice.GetImmediateDeviceContext();
-
     for (int i = 0; i < 8; i++)
     {
         m_RenderTargets[i] = nullptr;
@@ -59,11 +57,6 @@ DX11RenderDeviceContext::~DX11RenderDeviceContext()
             g_RegisteredInputLayouts[i]->Release();
         }
     }
-
-    if (m_RasterizerState != nullptr)
-    {
-        m_RasterizerState->Release();
-    }
 }
 
 void DX11RenderDeviceContext::SetRenderTargetView(uint32_t renderTarget, ID3D11RenderTargetView* renderTargetView)
@@ -72,14 +65,14 @@ void DX11RenderDeviceContext::SetRenderTargetView(uint32_t renderTarget, ID3D11R
 
     m_RenderTargets[renderTarget] = renderTargetView;
 
-    m_ImmediateDeviceContext->OMSetRenderTargets(1, &renderTargetView, m_DepthStencilView);
+    m_DeviceContext->OMSetRenderTargets(1, &renderTargetView, m_DepthStencilView);
 }
 
 void DX11RenderDeviceContext::SetDepthStencilView(ID3D11DepthStencilView* depthStencilView)
 {
     m_DepthStencilView = depthStencilView;
 
-    m_ImmediateDeviceContext->OMSetRenderTargets(1, &m_RenderTargets[0], m_DepthStencilView);
+    m_DeviceContext->OMSetRenderTargets(1, &m_RenderTargets[0], m_DepthStencilView);
 }
 
 void DX11RenderDeviceContext::ClearRenderTarget(float red, float green, float blue, float alpha, uint32_t renderTarget)
@@ -97,79 +90,14 @@ void DX11RenderDeviceContext::ClearRenderTarget(float red, float green, float bl
         alpha
     };
 
-    m_ImmediateDeviceContext->ClearRenderTargetView(renderTargetView, colorRGBA);
+    m_DeviceContext->ClearRenderTargetView(renderTargetView, colorRGBA);
 }
 
 void DX11RenderDeviceContext::ClearDepthStencil(bool clearDepth, bool clearStencil)
 {
     UINT clearFlag = (clearDepth ? D3D11_CLEAR_DEPTH : 0) | (clearStencil ? D3D11_CLEAR_STENCIL : 0);
 
-    m_ImmediateDeviceContext->ClearDepthStencilView(m_DepthStencilView, clearFlag, 1.0f, 0);
-}
-
-void DX11RenderDeviceContext::SetRasterizerState(const RasterizerState& rasterizerState)
-{
-    D3D11_RASTERIZER_DESC rasterizerDesc;
-    rasterizerDesc.FillMode = ConvertShipyardFillModeToDX11(rasterizerState.m_FillMode);
-    rasterizerDesc.CullMode = ConvertShipyardCullModeToDX11(rasterizerState.m_CullMode);
-    rasterizerDesc.FrontCounterClockwise = rasterizerState.m_IsFrontCounterClockWise;
-    rasterizerDesc.DepthBias = rasterizerState.m_DepthBias;
-    rasterizerDesc.DepthBiasClamp = rasterizerState.m_DepthBiasClamp;
-    rasterizerDesc.SlopeScaledDepthBias = rasterizerState.m_SlopeScaledDepthBias;
-    rasterizerDesc.DepthClipEnable = rasterizerState.m_DepthClipEnable;
-    rasterizerDesc.ScissorEnable = rasterizerState.m_ScissorEnable;
-    rasterizerDesc.MultisampleEnable = rasterizerState.m_MultisampleEnable;
-    rasterizerDesc.AntialiasedLineEnable = rasterizerState.m_AntialiasedLineEnable;
-
-    if (m_RasterizerState != nullptr)
-    {
-        m_RasterizerState->Release();
-        m_RasterizerState = nullptr;
-    }
-
-    HRESULT hr = m_Device->CreateRasterizerState(&rasterizerDesc, &m_RasterizerState);
-    if (FAILED(hr))
-    {
-        MessageBox(NULL, "CreateRasterizerState failed", "DX11 error", MB_OK);
-        return;
-    }
-
-    m_ImmediateDeviceContext->RSSetState(m_RasterizerState);
-}
-
-void DX11RenderDeviceContext::SetDepthStencilState(const DepthStencilState& depthStencilState, uint8_t stencilRef)
-{
-    D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
-    depthStencilDesc.DepthEnable = depthStencilState.m_DepthEnable;
-    depthStencilDesc.DepthWriteMask = (depthStencilState.m_EnableDepthWrite ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO);
-    depthStencilDesc.DepthFunc = ConvertShipyardComparisonFuncToDX11(depthStencilState.m_DepthComparisonFunc);
-    depthStencilDesc.StencilEnable = depthStencilState.m_StencilEnable;
-    depthStencilDesc.StencilReadMask = depthStencilState.m_StencilReadMask;
-    depthStencilDesc.StencilWriteMask = depthStencilState.m_StencilWriteMask;
-    depthStencilDesc.FrontFace.StencilFailOp = ConvertShipyardStencilOperationToDX11(depthStencilState.m_FrontFaceStencilFailOp);
-    depthStencilDesc.FrontFace.StencilDepthFailOp = ConvertShipyardStencilOperationToDX11(depthStencilState.m_FrontFaceStencilDepthFailOp);
-    depthStencilDesc.FrontFace.StencilPassOp = ConvertShipyardStencilOperationToDX11(depthStencilState.m_FrontFaceStencilPassOp);
-    depthStencilDesc.FrontFace.StencilFunc = ConvertShipyardComparisonFuncToDX11(depthStencilState.m_FrontFaceStencilComparisonFunc);
-    depthStencilDesc.BackFace.StencilFailOp = ConvertShipyardStencilOperationToDX11(depthStencilState.m_BackFaceStencilFailOp);
-    depthStencilDesc.BackFace.StencilDepthFailOp = ConvertShipyardStencilOperationToDX11(depthStencilState.m_BackFaceStencilDepthFailOp);
-    depthStencilDesc.BackFace.StencilPassOp = ConvertShipyardStencilOperationToDX11(depthStencilState.m_BackFaceStencilPassOp);
-    depthStencilDesc.BackFace.StencilFunc = ConvertShipyardComparisonFuncToDX11(depthStencilState.m_BackFaceStencilComparisonFunc);
-
-    if (m_DepthStencilState != nullptr)
-    {
-        m_DepthStencilState->Release();
-        m_DepthStencilState = nullptr;
-    }
-
-    HRESULT hr = m_Device->CreateDepthStencilState(&depthStencilDesc, &m_DepthStencilState);
-    if (FAILED(hr))
-    {
-        MessageBox(NULL, "CreateDepthStencilState failed", "DX11 error", MB_OK);
-        return;
-    }
-
-    m_ImmediateDeviceContext->OMSetDepthStencilState(m_DepthStencilState, stencilRef);
-
+    m_DeviceContext->ClearDepthStencilView(m_DepthStencilView, clearFlag, 1.0f, 0);
 }
 
 void DX11RenderDeviceContext::SetViewport(float topLeftX, float topLeftY, float width, float height)
@@ -182,37 +110,7 @@ void DX11RenderDeviceContext::SetViewport(float topLeftX, float topLeftY, float 
     viewport.MinDepth = 0.0f;
     viewport.MaxDepth = 1.0f;
 
-    m_ImmediateDeviceContext->RSSetViewports(1, &viewport);
-}
-
-void DX11RenderDeviceContext::SetVertexShader(GFXVertexShader* vertexShader)
-{
-    ID3D11VertexShader* shader = (vertexShader != nullptr) ? vertexShader->GetShader() : nullptr;
-    m_ImmediateDeviceContext->VSSetShader(shader, nullptr, 0);
-}
-
-void DX11RenderDeviceContext::SetPixelShader(GFXPixelShader* pixelShader)
-{
-    ID3D11PixelShader* shader = (pixelShader != nullptr) ? pixelShader->GetShader() : nullptr;
-    m_ImmediateDeviceContext->PSSetShader(shader, nullptr, 0);
-}
-
-void DX11RenderDeviceContext::SetVertexShaderConstantBuffer(GFXConstantBuffer* constantBuffer, uint32_t slot)
-{
-    ID3D11Buffer* buffer = (constantBuffer != nullptr) ? constantBuffer->GetBuffer() : nullptr;
-    m_ImmediateDeviceContext->VSSetConstantBuffers(slot, 1, &buffer);
-}
-
-void DX11RenderDeviceContext::SetPixelShaderConstantBuffer(GFXConstantBuffer* constantBuffer, uint32_t slot)
-{
-    ID3D11Buffer* buffer = (constantBuffer != nullptr) ? constantBuffer->GetBuffer() : nullptr;
-    m_ImmediateDeviceContext->PSSetConstantBuffers(slot, 1, &buffer);
-}
-
-void DX11RenderDeviceContext::SetPixelShaderTexture(GFXTexture2D* texture, uint32_t slot)
-{
-    ID3D11ShaderResourceView* shaderResourceView = (texture != nullptr) ? texture->GetShaderResourceView() : nullptr;
-    m_ImmediateDeviceContext->PSSetShaderResources(slot, 1, &shaderResourceView);
+    m_DeviceContext->RSSetViewports(1, &viewport);
 }
 
 void DX11RenderDeviceContext::PrepareNextDrawCalls(
@@ -220,94 +118,17 @@ void DX11RenderDeviceContext::PrepareNextDrawCalls(
         const GFXPipelineStateObject& pipelineStateObject,
         const GFXDescriptorSet& descriptorSet)
 {
-    BindRootSignature(rootSignature);
-    BindPipelineStateObject(pipelineStateObject);
-    BindDescriptorSet(descriptorSet, rootSignature);
-}
-
-void DX11RenderDeviceContext::BindRootSignature(const GFXRootSignature& rootSignature)
-{
-}
-
-void DX11RenderDeviceContext::BindPipelineStateObject(const GFXPipelineStateObject& pipelineStateObject)
-{
-    const PipelineStateObjectCreationParameters& pipelineStateObjectParameters = pipelineStateObject.GetCreationParameters();
-
-    SetRasterizerState(pipelineStateObjectParameters.rasterizerState);
-    SetDepthStencilState(pipelineStateObjectParameters.depthStencilState, 0);
-}
-
-void DX11RenderDeviceContext::BindDescriptorSet(const GFXDescriptorSet& descriptorSet, const GFXRootSignature& rootSignature)
-{
-    const Array<GFXDescriptorSet::DescriptorSetEntry>& resourcesToBind = descriptorSet.GetDescriptorSetEntries();
-    const Array<RootSignatureParameterEntry>& rootSignatureParameters = rootSignature.GetRootSignatureParameters();
-
-    for (const GFXDescriptorSet::DescriptorSetEntry& descriptorSetEntry : resourcesToBind)
-    {
-        const RootSignatureParameterEntry& rootSignatureParameter = rootSignatureParameters[descriptorSetEntry.rootIndex];
-
-        if (descriptorSetEntry.isDescriptorTable)
-        {
-            BindDescriptorTableFromDescriptorSet(descriptorSetEntry.descriptorResources, rootSignatureParameter);
-        }
-        else
-        {
-            BindDescriptorFromDescriptorSet(descriptorSetEntry.descriptorResources[0], rootSignatureParameter);
-        }
-    }
-}
-
-void DX11RenderDeviceContext::BindDescriptorTableFromDescriptorSet(
-        const Array<GfxResource*>& descriptorTableResources,
-        const RootSignatureParameterEntry& rootSignatureParameter)
-{
-    // Not yet implemented
-    assert(false);
-}
-
-void DX11RenderDeviceContext::BindDescriptorFromDescriptorSet(GfxResource* descriptorResource, const RootSignatureParameterEntry& rootSignatureParameter)
-{
-    GfxResourceType resourceType = descriptorResource->GetResourceType();
-
-    if ((rootSignatureParameter.shaderVisibility & ShaderVisibility::ShaderVisibility_Vertex) > 0)
-    {
-        if (resourceType == GfxResourceType::Texture)
-        {
-            
-        }
-        else if (resourceType == GfxResourceType::ConstantBuffer)
-        {
-            assert(rootSignatureParameter.parameterType == RootSignatureParameterType::ConstantBufferView);
-
-            GFXConstantBuffer* gfxConstantBuffer = static_cast<GFXConstantBuffer*>(descriptorResource);
-            SetVertexShaderConstantBuffer(gfxConstantBuffer, rootSignatureParameter.descriptor.shaderBindingSlot);
-        }
-    }
-
-    if ((rootSignatureParameter.shaderVisibility & ShaderVisibility::ShaderVisibility_Pixel) > 0)
-    {
-        if (resourceType == GfxResourceType::Texture)
-        {
-            if (rootSignatureParameter.parameterType == RootSignatureParameterType::ShaderResourceView)
-            {
-                GFXTexture2D* gfxTexture = static_cast<GFXTexture2D*>(descriptorResource);
-                SetPixelShaderTexture(gfxTexture, rootSignatureParameter.descriptor.shaderBindingSlot);
-            }
-        }
-        else if (resourceType == GfxResourceType::ConstantBuffer)
-        {
-            assert(rootSignatureParameter.parameterType == RootSignatureParameterType::ConstantBufferView);
-
-            GFXConstantBuffer* gfxConstantBuffer = static_cast<GFXConstantBuffer*>(descriptorResource);
-            SetPixelShaderConstantBuffer(gfxConstantBuffer, rootSignatureParameter.descriptor.shaderBindingSlot);
-        }
-    }
+    m_RenderStateCache.BindRootSignature(rootSignature);
+    m_RenderStateCache.BindPipelineStateObject(pipelineStateObject);
+    m_RenderStateCache.BindDescriptorSet(descriptorSet, rootSignature);
 }
 
 void DX11RenderDeviceContext::Draw(PrimitiveTopology primitiveTopology, const GFXVertexBuffer& vertexBuffer, uint32_t startVertexLocation)
 {
+    m_RenderStateCache.CommitStateChangesForGraphics();
+
     D3D11_PRIMITIVE_TOPOLOGY topology = ConvertShipyardPrimitiveTopologyToDX11(primitiveTopology);
-    m_ImmediateDeviceContext->IASetPrimitiveTopology(topology);
+    m_DeviceContext->IASetPrimitiveTopology(topology);
 
     ID3D11Buffer* buffer = vertexBuffer.GetBuffer();
 
@@ -319,16 +140,18 @@ void DX11RenderDeviceContext::Draw(PrimitiveTopology primitiveTopology, const GF
     uint32_t stride = vertexFormat->GetSize();
     uint32_t offset = 0;
 
-    m_ImmediateDeviceContext->IASetInputLayout(g_RegisteredInputLayouts[uint32_t(vertexFormatType)]);
-    m_ImmediateDeviceContext->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
+    m_DeviceContext->IASetInputLayout(g_RegisteredInputLayouts[uint32_t(vertexFormatType)]);
+    m_DeviceContext->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
 
-    m_ImmediateDeviceContext->Draw(vertexBuffer.GetNumVertices(), startVertexLocation);
+    m_DeviceContext->Draw(vertexBuffer.GetNumVertices(), startVertexLocation);
 }
 
 void DX11RenderDeviceContext::DrawIndexed(PrimitiveTopology primitiveTopology, const GFXVertexBuffer& vertexBuffer, const GFXIndexBuffer& indexBuffer, uint32_t startVertexLocation, uint32_t startIndexLocation)
 {
+    m_RenderStateCache.CommitStateChangesForGraphics();
+
     D3D11_PRIMITIVE_TOPOLOGY topology = ConvertShipyardPrimitiveTopologyToDX11(primitiveTopology);
-    m_ImmediateDeviceContext->IASetPrimitiveTopology(topology);
+    m_DeviceContext->IASetPrimitiveTopology(topology);
 
     ID3D11Buffer* d3dVertexBuffer = vertexBuffer.GetBuffer();
     ID3D11Buffer* d3dIndexBuffer = indexBuffer.GetBuffer();
@@ -341,13 +164,13 @@ void DX11RenderDeviceContext::DrawIndexed(PrimitiveTopology primitiveTopology, c
     uint32_t stride = vertexFormat->GetSize();
     uint32_t offset = 0;
 
-    m_ImmediateDeviceContext->IASetInputLayout(g_RegisteredInputLayouts[uint32_t(vertexFormatType)]);
-    m_ImmediateDeviceContext->IASetVertexBuffers(0, 1, &d3dVertexBuffer, &stride, &offset);
+    m_DeviceContext->IASetInputLayout(g_RegisteredInputLayouts[uint32_t(vertexFormatType)]);
+    m_DeviceContext->IASetVertexBuffers(0, 1, &d3dVertexBuffer, &stride, &offset);
 
     DXGI_FORMAT indexFormat = (indexBuffer.Uses2BytesPerIndex() ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT);
-    m_ImmediateDeviceContext->IASetIndexBuffer(d3dIndexBuffer, indexFormat, 0);
+    m_DeviceContext->IASetIndexBuffer(d3dIndexBuffer, indexFormat, 0);
 
-    m_ImmediateDeviceContext->DrawIndexed(indexBuffer.GetNumIndices(), startIndexLocation, startVertexLocation);
+    m_DeviceContext->DrawIndexed(indexBuffer.GetNumIndices(), startIndexLocation, startVertexLocation);
 }
 
 ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatType vertexFormatType)

@@ -1,6 +1,7 @@
 #pragma once
 
-#include <system/common.h>
+#include <math/mathutilities.h>
+
 #include <system/memory.h>
 #include <system/platform.h>
 

@@ -2,16 +2,12 @@
 
 #include <system/platform.h>
 
-
 #if PLATFORM == PLATFORM_WINDOWS
 #include <intrin.h>
 #endif // #if PLATFORM == PLATFORM_WINDOWS
 
 namespace Shipyard
 {
-#define MIN(a, b) ((a < b) ? a : b)
-#define MAX(a, b) ((a > b) ? a : b)
-
     // Sone intrinsics as macros for convenience
 #if COMPILER == COMPILER_MSVC
 #   if CPU_BITS == CPU_BITS_64

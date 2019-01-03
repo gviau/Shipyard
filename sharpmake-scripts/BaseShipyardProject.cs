@@ -59,6 +59,33 @@ namespace ShipyardSharpmake
 
             configuration.Options.Add(Options.Vc.General.TreatWarningsAsErrors.Enable);
             configuration.Options.Add(Options.Vc.Compiler.RTTI.Disable);
+
+            if (target.OutputType == OutputType.Lib)
+            {
+                configuration.Output = Configuration.OutputType.Lib;
+
+                if (target.Optimization == Optimization.Debug)
+                {
+                    configuration.Options.Add(Options.Vc.Compiler.RuntimeLibrary.MultiThreadedDebug);
+                }
+                else
+                {
+                    configuration.Options.Add(Options.Vc.Compiler.RuntimeLibrary.MultiThreaded);
+                }
+            }
+            else
+            {
+                configuration.Output = Configuration.OutputType.Dll;
+
+                if (target.Optimization == Optimization.Debug)
+                {
+                    configuration.Options.Add(Options.Vc.Compiler.RuntimeLibrary.MultiThreadedDebugDLL);
+                }
+                else
+                {
+                    configuration.Options.Add(Options.Vc.Compiler.RuntimeLibrary.MultiThreadedDLL);
+                }
+            }
         }
 
         protected virtual void ConfigureIncludePaths(Configuration configuration)

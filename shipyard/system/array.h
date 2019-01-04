@@ -165,6 +165,13 @@ namespace Shipyard
             Reserve(4);
         }
 
+        Array(uint32_t initialCapacity)
+            : m_Array(nullptr)
+            , m_ArraySizeAndCapacity(0)
+        {
+            Reserve(initialCapacity);
+        }
+
         ~Array()
         {
             Clear();
@@ -543,6 +550,14 @@ namespace Shipyard
             , m_Capacity(0)
         {
             Reserve(4);
+        }
+
+        Array(uint32_t initialCapacity)
+            : m_Array(nullptr)
+            , m_Size(0)
+            , m_Capacity(0)
+        {
+            Reserve(initialCapacity);
         }
 
         ~BigArray()

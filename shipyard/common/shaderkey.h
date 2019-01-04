@@ -34,6 +34,7 @@ namespace Shipyard
 
         // Required to be used in a map (ShaderHandlerManager)
         bool operator< (const ShaderKey& rhs) const { return m_RawShaderKey < rhs.m_RawShaderKey; }
+        bool operator== (const ShaderKey& rhs) const { return m_RawShaderKey == rhs.m_RawShaderKey; }
 
         static const RawShaderKeyType ms_ShaderFamilyMask = 0xFF;
         static const RawShaderKeyType ms_ShaderOptionMask = 0xFFFFFF;

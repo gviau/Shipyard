@@ -389,24 +389,23 @@ void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
     Array<ShaderOption> shaderOptions;
     ShaderKey::GetShaderKeyOptionsForShaderFamily(shaderFamily, shaderOptions);
 
-    uint32_t shaderOptionAsInt = 0;
-    for (uint32_t i = shaderOptions.Size(); i > 0; i--)
+    uint32_t numBitsInShaderKey = 0;
+    for (ShaderOption shaderOption : shaderOptions)
     {
-        uint32_t idx = i - 1;
-
-        uint32_t bitShift = uint32_t(g_NumBitsForShaderOption[uint32_t(shaderOptions[idx])]);
-
-        shaderOptionAsInt <<= bitShift;
-
-        shaderOptionAsInt |= ((1 << bitShift) - 1);
+        numBitsInShaderKey += uint32_t(g_NumBitsForShaderOption[uint32_t(shaderOption)]);
     }
 
-    uint32_t possibleNumberOfPermutations = shaderOptionAsInt + 1;
+    uint32_t everyShaderOptionSet = ((1 << numBitsInShaderKey) - 1);
+
+    uint32_t possibleNumberOfPermutations = everyShaderOptionSet + 1;
 
     ShaderKey shaderKey;
     shaderKey.SetShaderFamily(shaderFamily);
 
     ShaderKey::RawShaderKeyType baseRawShaderKey = shaderKey.GetRawShaderKey();
+
+    // Go through every permutation of shader options
+    uint32_t shaderOptionAsInt = everyShaderOptionSet;
 
     for (uint32_t i = 0; i < possibleNumberOfPermutations; i++)
     {

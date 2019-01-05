@@ -552,7 +552,7 @@ namespace Shipyard
             Reserve(4);
         }
 
-        Array(uint32_t initialCapacity)
+        BigArray(uint32_t initialCapacity)
             : m_Array(nullptr)
             , m_Size(0)
             , m_Capacity(0)

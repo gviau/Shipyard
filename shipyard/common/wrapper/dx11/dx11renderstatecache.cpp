@@ -189,13 +189,24 @@ void DX11RenderStateCache::BindPipelineStateObject(const GFXPipelineStateObject&
 
     if (pipelineStateObjectParameters.vertexShader != m_VertexShader)
     {
+        assert(pipelineStateObjectParameters.vertexShader != nullptr);
+
         m_VertexShader = static_cast<GFXVertexShader*>(pipelineStateObjectParameters.vertexShader);
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexShader);
     }
 
     if (pipelineStateObjectParameters.pixelShader != m_PixelShader)
     {
-        m_PixelShader = static_cast<GFXPixelShader*>(pipelineStateObjectParameters.pixelShader);
+        // Null pixel shader is actually okay (for example, depth rendering only).
+        if (pipelineStateObjectParameters.pixelShader == nullptr)
+        {
+            m_PixelShader = nullptr;
+        }
+        else
+        {
+            m_PixelShader = static_cast<GFXPixelShader*>(pipelineStateObjectParameters.pixelShader);
+        }
+
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_PixelShader);
     }
 }

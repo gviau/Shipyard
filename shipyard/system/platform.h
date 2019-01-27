@@ -78,4 +78,7 @@ namespace Shipyard
 #else
 #   define SHIPYARD_API SHIPYARD_API_IMPORT
 #endif // #if defined(SHIPYARD_NONCLIENT_BUILD)
+
+    // Uncomment the following to have virtual methods in each of the wrappers' base class to make sure that your implementation is valid
+#define DEBUG_WRAPPER_INTERFACE_COMPILATION
 }

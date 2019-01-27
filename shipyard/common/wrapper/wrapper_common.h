@@ -2,14 +2,11 @@
 
 #include <common/common.h>
 
-#include <system/platform.h>
+#include <system/common.h>
 
 // TODO
 // Move this in project configuration
 #define DX11_RENDERER
-
-// Uncomment the following to have virtual methods in each of the wrappers' base class to make sure that your implementation is valid
-#define DEBUG_WRAPPER_INTERFACE_COMPILATION
 
 namespace Shipyard
 {

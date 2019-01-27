@@ -3,6 +3,7 @@
 #include <common/shadercompiler/shadercompiler.h>
 #include <common/shadercompiler/shaderwatcher.h>
 
+#include <common/shaderdatabase.h>
 #include <common/shaderfamilies.h>
 #include <common/shaderhandler.h>
 #include <common/shaderhandlermanager.h>
@@ -183,6 +184,11 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     Shipyard::SingletonStorer singletonStorer;
 
     Shipyard::ShaderCompiler::GetInstance().SetShaderDirectoryName("c:\\Sandbox\\shipyard\\shipyard-viewer\\shaders\\");
+
+    Shipyard::ShaderDatabase shaderDatabase;
+    shaderDatabase.Load("C:\\Sandbox\\shipyard\\generated-projects\\ShipyardShaderDatabase.bin");
+
+    Shipyard::ShaderHandlerManager::GetInstance().SetShaderDatabase(shaderDatabase);
 
     Shipyard::ShaderWatcher shaderWatcher;
 

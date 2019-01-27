@@ -17,7 +17,7 @@ namespace Shipyard
         ShaderWatcher();
         ~ShaderWatcher();
 
-    private:
+    public:
         struct ShaderFile
         {
             ShaderFile()
@@ -31,9 +31,6 @@ namespace Shipyard
 
     private:
         void ShaderWatcherThreadFunction();
-
-        void GetModifiedFilesInDirectory(const String& directoryName, Array<String>& modifiedFiles);
-        bool FileWasModified(const String& filename, uint64_t lastWriteTimestamp);
 
         thread m_ShaderWatcherThread;
         static volatile bool m_RunShaderWatcherThread;

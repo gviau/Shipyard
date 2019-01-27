@@ -1,5 +1,6 @@
 #include <common/shaderhandlermanager.h>
 
+#include <common/shaderdatabase.h>
 #include <common/shaderfamilies.h>
 #include <common/shaderhandler.h>
 
@@ -9,6 +10,12 @@
 
 namespace Shipyard
 {;
+
+ShaderHandlerManager::ShaderHandlerManager()
+    : m_ShaderDatabase(nullptr)
+{
+
+}
 
 ShaderHandlerManager::~ShaderHandlerManager()
 {
@@ -22,26 +29,73 @@ ShaderHandlerManager::~ShaderHandlerManager()
     m_ShaderHandlers.clear();
 }
 
+void ShaderHandlerManager::SetShaderDatabase(ShaderDatabase& shaderDatabase)
+{
+    m_ShaderDatabase = &shaderDatabase;
+
+    ShaderKey errorShaderKey;
+    errorShaderKey.SetShaderFamily(ShaderFamily::Error);
+
+    ShaderDatabase::ShaderEntrySet compiledShaderEntrySet;
+    uint64_t lastModifiedTimestamp = 0;
+
+    if (m_ShaderDatabase->RetrieveShadersForShaderKey(errorShaderKey, lastModifiedTimestamp, compiledShaderEntrySet))
+    {
+        return;
+    }
+
+    bool dummy = false;
+    ShaderCompiler::GetInstance().GetRawShadersForShaderKey(errorShaderKey, compiledShaderEntrySet, dummy);
+
+    m_ShaderDatabase->AppendShadersForShaderKey(errorShaderKey, compiledShaderEntrySet);
+}
+
 ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shaderKey, GFXRenderDevice& gfxRenderDevice)
 {
-    ShaderHandler* shaderHandler = nullptr;
+    assert(m_ShaderDatabase != nullptr);
 
     ShaderCompiler& shaderCompiler = ShaderCompiler::GetInstance();
 
-    ID3D10Blob* vertexShaderBlob = nullptr;
-    ID3D10Blob* pixelShaderBlob = nullptr;
-    ID3D10Blob* computeShaderBlob = nullptr;
-    bool gotRecompiledSinceLastAccess = false;
+    uint64_t lastModifiedTimestamp = shaderCompiler.GetTimestampForShaderKey(shaderKey);
 
-    bool isShaderKeyCompiled = shaderCompiler.GetShaderBlobsForShaderKey(shaderKey, vertexShaderBlob, pixelShaderBlob, computeShaderBlob, gotRecompiledSinceLastAccess);
+    ShaderDatabase::ShaderEntrySet compiledShaderEntrySet;
+    bool foundValidShaderInDatabase = m_ShaderDatabase->RetrieveShadersForShaderKey(shaderKey, lastModifiedTimestamp, compiledShaderEntrySet);
+
+    bool gotRecompiledSinceLastAccess = false;
+    bool isShaderKeyCompiled = true;
+
+    if (foundValidShaderInDatabase)
+    {
+        if (lastModifiedTimestamp > compiledShaderEntrySet.lastModifiedTimestamp)
+        {
+            m_ShaderDatabase->RemoveShadersForShaderKey(shaderKey);
+
+            shaderCompiler.AddCompilationRequestForShaderKey(shaderKey);
+
+            isShaderKeyCompiled = false;
+        }
+    }
+    else
+    {
+        isShaderKeyCompiled = shaderCompiler.GetRawShadersForShaderKey(shaderKey, compiledShaderEntrySet, gotRecompiledSinceLastAccess);
+
+        if (isShaderKeyCompiled)
+        {
+            m_ShaderDatabase->AppendShadersForShaderKey(shaderKey, compiledShaderEntrySet);
+        }
+    }
 
     if (!isShaderKeyCompiled)
     {
+        shaderCompiler.AddCompilationRequestForShaderKey(shaderKey);
+
         ShaderKey errorShaderKey;
         errorShaderKey.SetShaderFamily(ShaderFamily::Error);
 
         shaderKey = errorShaderKey;
     }
+
+    ShaderHandler* shaderHandler = nullptr;
 
     bool createShaders = gotRecompiledSinceLastAccess;
 
@@ -50,6 +104,13 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
     {
         shaderHandler = new ShaderHandler(shaderKey);
         m_ShaderHandlers[shaderKey] = shaderHandler;
+
+        if (shaderKey.GetShaderFamily() == ShaderFamily::Error)
+        {
+            foundValidShaderInDatabase = m_ShaderDatabase->RetrieveShadersForShaderKey(shaderKey, lastModifiedTimestamp, compiledShaderEntrySet);
+
+            assert(foundValidShaderInDatabase);
+        }
 
         createShaders = true;
     }
@@ -60,18 +121,20 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
 
     if (createShaders)
     {
-        if (vertexShaderBlob != nullptr)
+        if (compiledShaderEntrySet.rawVertexShaderSize > 0)
         {
-            shaderHandler->m_VertexShader.reset(gfxRenderDevice.CreateVertexShader(vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize()));
+            shaderHandler->m_VertexShader.reset(
+                    gfxRenderDevice.CreateVertexShader(compiledShaderEntrySet.rawVertexShader, compiledShaderEntrySet.rawVertexShaderSize));
         }
         else
         {
             shaderHandler->m_VertexShader.reset();
         }
 
-        if (pixelShaderBlob != nullptr)
+        if (compiledShaderEntrySet.rawPixelShaderSize > 0)
         {
-            shaderHandler->m_PixelShader.reset(gfxRenderDevice.CreatePixelShader(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize()));
+            shaderHandler->m_PixelShader.reset(
+                    gfxRenderDevice.CreatePixelShader(compiledShaderEntrySet.rawPixelShader, compiledShaderEntrySet.rawPixelShaderSize));
         }
         else
         {

@@ -78,18 +78,34 @@ ShaderCompiler::~ShaderCompiler()
 {
     m_RunShaderCompilerThread = false;
     m_ShaderCompilerThread.join();
+
+    for (CompiledShaderKeyEntry& compiledShaderKeyEntry : m_CompiledShaderKeyEntries)
+    {
+        compiledShaderKeyEntry.Reset();
+    }
 }
 
-bool ShaderCompiler::GetShaderBlobsForShaderKey(ShaderKey shaderKey, ID3D10Blob*& vertexShaderBlob, ID3D10Blob*& pixelShaderBlob, ID3D10Blob*& computeShaderBlob, bool& gotRecompiledSinceLastAccess)
+void ShaderCompiler::AddCompilationRequestForShaderKey(ShaderKey shaderKey)
+{
+    ShaderFamily shaderFamily = shaderKey.GetShaderFamily();
+
+    m_ShaderCompilationRequestLock.lock();
+
+    if (shaderFamily != m_CurrentShaderFamilyBeingCompiled && !m_ShaderFamiliesToCompile.Exists(shaderFamily))
+    {
+        m_ShaderFamiliesToCompile.Add(shaderFamily);
+    }
+
+    m_ShaderCompilationRequestLock.unlock();
+}
+
+bool ShaderCompiler::GetRawShadersForShaderKey(ShaderKey shaderKey, ShaderDatabase::ShaderEntrySet& compiledShaderEntrySet, bool& gotRecompiledSinceLastAccess)
 {
     ShaderFamily shaderFamily = shaderKey.GetShaderFamily();
 
     ShaderKey errorShaderKey;
     errorShaderKey.SetShaderFamily(ShaderFamily::Error);
 
-    vertexShaderBlob = nullptr;
-    pixelShaderBlob = nullptr;
-    computeShaderBlob = nullptr;
     gotRecompiledSinceLastAccess = false;
 
     bool isShaderCompiled = true;
@@ -102,40 +118,89 @@ bool ShaderCompiler::GetShaderBlobsForShaderKey(ShaderKey shaderKey, ID3D10Blob*
         isShaderCompiled = false;
     }
 
-    CompiledShaderKeyEntry& shaderKeyEntry = GetCompiledShaderKeyEntry(shaderKey.GetRawShaderKey());
-    if (shaderKeyEntry.m_GotCompilationError)
-    {
-        isShaderCompiled = false;
-    }
-
-    vertexShaderBlob = shaderKeyEntry.m_CompiledVertexShaderBlob;
-    pixelShaderBlob = shaderKeyEntry.m_CompiledPixelShaderBlob;
-    computeShaderBlob = shaderKeyEntry.m_CompiledComputeShaderBlob;
-    gotRecompiledSinceLastAccess = shaderKeyEntry.m_GotRecompiledSinceLastAccess;
-
     if (isShaderCompiled)
     {
-        shaderKeyEntry.m_GotRecompiledSinceLastAccess = false;
-    }
+        CompiledShaderKeyEntry& shaderKeyEntry = GetCompiledShaderKeyEntry(shaderKey.GetRawShaderKey());
+        if (shaderKeyEntry.m_GotCompilationError)
+        {
+            isShaderCompiled = false;
+        }
+        else
+        {
+            for (const ShaderFamilyModificationEntry& shaderFamilyModificationEntry : m_ShaderFamilyModificationEntries)
+            {
+                if (shaderFamilyModificationEntry.shaderFamily == shaderFamily)
+                {
+                    compiledShaderEntrySet.lastModifiedTimestamp = shaderFamilyModificationEntry.lastModifiedTimestamp;
+                    break;
+                }
+            }
 
+            if (shaderKeyEntry.m_CompiledVertexShaderBlob != nullptr)
+            {
+                compiledShaderEntrySet.rawVertexShader = (uint8_t*)shaderKeyEntry.m_CompiledVertexShaderBlob->GetBufferPointer();
+                compiledShaderEntrySet.rawVertexShaderSize = shaderKeyEntry.m_CompiledVertexShaderBlob->GetBufferSize();
+            }
+
+            if (shaderKeyEntry.m_CompiledPixelShaderBlob != nullptr)
+            {
+                compiledShaderEntrySet.rawPixelShader = (uint8_t*)shaderKeyEntry.m_CompiledPixelShaderBlob->GetBufferPointer();
+                compiledShaderEntrySet.rawPixelShaderSize = shaderKeyEntry.m_CompiledPixelShaderBlob->GetBufferSize();
+            }
+
+            if (shaderKeyEntry.m_CompiledComputeShaderBlob != nullptr)
+            {
+                compiledShaderEntrySet.rawComputeShader = (uint8_t*)shaderKeyEntry.m_CompiledComputeShaderBlob->GetBufferPointer();
+                compiledShaderEntrySet.rawComputeShaderSize = shaderKeyEntry.m_CompiledComputeShaderBlob->GetBufferSize();
+            }
+
+            gotRecompiledSinceLastAccess = shaderKeyEntry.m_GotRecompiledSinceLastAccess;
+
+            shaderKeyEntry.m_GotRecompiledSinceLastAccess = false;
+        }
+    }
     m_ShaderCompilationRequestLock.unlock();
 
     return isShaderCompiled;
 }
 
-void ShaderCompiler::RequestCompilationFromShaderFiles(const Array<String>& shaderFilenames)
+uint64_t ShaderCompiler::GetTimestampForShaderKey(const ShaderKey& shaderKey) const
+{
+    ShaderFamily shaderFamily = shaderKey.GetShaderFamily();
+
+    uint64_t lastModifiedTimestamp = 0;
+
+    m_ShaderCompilationRequestLock.lock();
+
+    for (const ShaderFamilyModificationEntry& shaderFamilyModificationEntry : m_ShaderFamilyModificationEntries)
+    {
+        if (shaderFamilyModificationEntry.shaderFamily == shaderFamily)
+        {
+            lastModifiedTimestamp = shaderFamilyModificationEntry.lastModifiedTimestamp;
+            break;
+        }
+    }
+
+    m_ShaderCompilationRequestLock.unlock();
+
+    return lastModifiedTimestamp;
+}
+
+void ShaderCompiler::RequestCompilationFromShaderFiles(const Array<ShaderFileCompilationRequest>& shaderFileCompilationRequests)
 {
     m_ShaderCompilationRequestLock.lock();
 
-    for (const String& shaderFilename : shaderFilenames)
+    for (const ShaderFileCompilationRequest& shaderFileCompilationRequest : shaderFileCompilationRequests)
     {
+        const String& shaderFilename = shaderFileCompilationRequest.shaderFilename;
+
         if (shaderFilename.substr(shaderFilename.size() - 3) == ".fx")
         {
-            AddCompilationRequestForFxFile(shaderFilename);
+            AddCompilationRequestForFxFile(shaderFileCompilationRequest);
         }
         else if (shaderFilename.substr(shaderFilename.size() - 5) == ".hlsl")
         {
-            AddCompilationRequestForHlslFile(shaderFilename);
+            AddCompilationRequestForHlslFile(shaderFileCompilationRequest);
         }
     }
 
@@ -150,8 +215,10 @@ void ShaderCompiler::SetShaderDirectoryName(const String& shaderDirectoryName)
     CompileShaderFamily(ShaderFamily::Error);
 }
 
-void ShaderCompiler::AddCompilationRequestForFxFile(const String& fxFilename)
+void ShaderCompiler::AddCompilationRequestForFxFile(const ShaderFileCompilationRequest& shaderFileCompilationRequest)
 {
+    const String& fxFilename = shaderFileCompilationRequest.shaderFilename;
+
     ShaderFamily shaderFamilyToCompile = ShaderFamily::Count;
 
     for (uint32_t i = 0; i < uint32_t(ShaderFamily::Count); i++)
@@ -168,13 +235,14 @@ void ShaderCompiler::AddCompilationRequestForFxFile(const String& fxFilename)
         return;
     }
 
-    AddShaderFamilyCompilationRequest(shaderFamilyToCompile);
+    AddShaderFamilyCompilationRequest(shaderFamilyToCompile, shaderFileCompilationRequest.modificationTimestamp);
 }
 
-void ShaderCompiler::AddCompilationRequestForHlslFile(const String& hlslFilename)
+void ShaderCompiler::AddCompilationRequestForHlslFile(const ShaderFileCompilationRequest& shaderFileCompilationRequest)
 {
     // For Hlsl files, we need to inspect every FX file and check whether they reference that Hlsl file. Moreoever, we also have to inspect
     // every Hlsl files to see if they reference the touched Hlsl file.
+    const String& hlslFilename = shaderFileCompilationRequest.shaderFilename;
     
     for (uint32_t i = 0; i < uint32_t(ShaderFamily::Count); i++)
     {
@@ -190,7 +258,7 @@ void ShaderCompiler::AddCompilationRequestForHlslFile(const String& hlslFilename
 
         if (CheckFileForHlslReference(shaderFamilyFilename, hlslFilename))
         {
-            AddShaderFamilyCompilationRequest(shaderFamily);
+            AddShaderFamilyCompilationRequest(shaderFamily, shaderFileCompilationRequest.modificationTimestamp);
         }
     }
 }
@@ -284,7 +352,7 @@ void ShaderCompiler::GetIncludeDirectives(const String& fileContent, Array<Strin
     }
 }
 
-void ShaderCompiler::AddShaderFamilyCompilationRequest(ShaderFamily shaderFamilyToCompile)
+void ShaderCompiler::AddShaderFamilyCompilationRequest(ShaderFamily shaderFamilyToCompile, uint64_t modificationTimestamp)
 {
     // The error shader family will never be recompiled at runtime, since it's supposed to be always available as a fallback
     if (shaderFamilyToCompile == ShaderFamily::Error)
@@ -292,18 +360,18 @@ void ShaderCompiler::AddShaderFamilyCompilationRequest(ShaderFamily shaderFamily
         return;
     }
 
-    if (shaderFamilyToCompile == m_CurrentShaderFamilyBeingCompiled)
+    for (ShaderFamilyModificationEntry& shaderFamiliyModificationEntry : m_ShaderFamilyModificationEntries)
     {
-        m_RecompileCurrentRequest = true;
+        if (shaderFamiliyModificationEntry.shaderFamily == shaderFamilyToCompile)
+        {
+            shaderFamiliyModificationEntry.lastModifiedTimestamp = modificationTimestamp;
+            return;
+        }
     }
 
-    // Ensure we don't have duplicates
-    if (m_ShaderFamiliesToCompile.Exists(shaderFamilyToCompile))
-    {
-        return;
-    }
-
-    m_ShaderFamiliesToCompile.Add(shaderFamilyToCompile);
+    ShaderFamilyModificationEntry& newShaderFamilyModificationEntry = m_ShaderFamilyModificationEntries.Grow();
+    newShaderFamilyModificationEntry.shaderFamily = shaderFamilyToCompile;
+    newShaderFamilyModificationEntry.lastModifiedTimestamp = modificationTimestamp;
 }
 
 void ShaderCompiler::ShaderCompilerThreadFunction()
@@ -419,7 +487,10 @@ void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
 
 void ShaderCompiler::CompileShaderKey(ShaderKey::RawShaderKeyType rawShaderKey, const Array<ShaderOption>& everyPossibleShaderOptionForShaderKey, const String& sourceFilename, const String& source)
 {
+    m_ShaderCompilationRequestLock.lock();
+
     CompiledShaderKeyEntry& compiledShaderKeyEntry = GetCompiledShaderKeyEntry(rawShaderKey);
+    compiledShaderKeyEntry.Reset();
 
     ShaderKey shaderKey;
     shaderKey.m_RawShaderKey = rawShaderKey;
@@ -470,6 +541,8 @@ void ShaderCompiler::CompileShaderKey(ShaderKey::RawShaderKeyType rawShaderKey, 
             compiledShaderKeyEntry.m_GotRecompiledSinceLastAccess = true;
         }
     }
+
+    m_ShaderCompilationRequestLock.unlock();
 }
 
 ID3D10Blob* ShaderCompiler::CompileVertexShaderForShaderKey(const String& sourceFilename, const String& source, D3D_SHADER_MACRO* shaderOptionDefines)
@@ -567,11 +640,33 @@ ShaderCompiler::CompiledShaderKeyEntry& ShaderCompiler::GetCompiledShaderKeyEntr
     {
         CompiledShaderKeyEntry newCompiledShaderKeyEntry;
         newCompiledShaderKeyEntry.m_RawShaderKey = rawShaderKey;
+        newCompiledShaderKeyEntry.m_GotCompilationError = true;
 
         m_CompiledShaderKeyEntries.Add(newCompiledShaderKeyEntry);
     }
 
     return m_CompiledShaderKeyEntries[idx];
+}
+
+void ShaderCompiler::CompiledShaderKeyEntry::Reset()
+{
+    if (m_CompiledVertexShaderBlob != nullptr)
+    {
+        m_CompiledVertexShaderBlob->Release();
+        m_CompiledVertexShaderBlob = nullptr;
+    }
+
+    if (m_CompiledPixelShaderBlob != nullptr)
+    {
+        m_CompiledPixelShaderBlob->Release();
+        m_CompiledPixelShaderBlob = nullptr;
+    }
+
+    if (m_CompiledComputeShaderBlob != nullptr)
+    {
+        m_CompiledComputeShaderBlob->Release();
+        m_CompiledComputeShaderBlob = nullptr;
+    }
 }
 
 }

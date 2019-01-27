@@ -1,5 +1,6 @@
 #pragma once
 
+#include <common/shaderdatabase.h>
 #include <common/shaderkey.h>
 
 #include <system/array.h>
@@ -24,14 +25,25 @@ namespace Shipyard
         friend class Singleton<ShaderCompiler>;
 
     public:
+        struct ShaderFileCompilationRequest
+        {
+            String shaderFilename;
+            uint64_t modificationTimestamp;
+        };
+
+    public:
         ShaderCompiler();
         virtual ~ShaderCompiler();
 
+        void AddCompilationRequestForShaderKey(ShaderKey shaderKey);
+
         // Returns false if the ShaderKey isn't compiled yet, in which case the blob returned are from the error ShaderKey that corresponds to the
         // ShaderKey passed
-        bool GetShaderBlobsForShaderKey(ShaderKey shaderKey, ID3D10Blob*& vertexShaderBlob, ID3D10Blob*& pixelShaderBlob, ID3D10Blob*& computeShaderBlob, bool& gotRecompiledSinceLastAccess);
+        bool GetRawShadersForShaderKey(ShaderKey shaderKey, ShaderDatabase::ShaderEntrySet& compiledShaderEntrySet, bool& gotRecompiledSinceLastAccess);
 
-        void RequestCompilationFromShaderFiles(const Array<String>& shaderFilenames);
+        uint64_t GetTimestampForShaderKey(const ShaderKey& shaderKey) const;
+
+        void RequestCompilationFromShaderFiles(const Array<ShaderFileCompilationRequest>& shaderFileCompilationRequests);
 
         void SetShaderDirectoryName(const String& shaderDirectoryName);
         const String& GetShaderDirectoryName() const { return m_ShaderDirectoryName; }
@@ -48,6 +60,8 @@ namespace Shipyard
                 , m_CompiledComputeShaderBlob(nullptr)
             {}
 
+            void Reset();
+
             ShaderKey::RawShaderKeyType m_RawShaderKey;
             bool m_GotRecompiledSinceLastAccess;
             bool m_GotCompilationError;
@@ -57,12 +71,18 @@ namespace Shipyard
             ID3D10Blob* m_CompiledComputeShaderBlob;
         };
 
+        struct ShaderFamilyModificationEntry
+        {
+            ShaderFamily shaderFamily;
+            uint64_t lastModifiedTimestamp;
+        };
+
     private:
-        void AddCompilationRequestForFxFile(const String& fxFilename);
-        void AddCompilationRequestForHlslFile(const String& hlslFilename);
+        void AddCompilationRequestForFxFile(const ShaderFileCompilationRequest& shaderFileCompilationRequest);
+        void AddCompilationRequestForHlslFile(const ShaderFileCompilationRequest& shaderFileCompilationRequest);
         bool CheckFileForHlslReference(const String& filenameToCheck, const String& touchedHlslFilename) const;
         void GetIncludeDirectives(const String& fileContent, Array<String>& includeDirectives) const;
-        void AddShaderFamilyCompilationRequest(ShaderFamily shaderFamilyToCompile);
+        void AddShaderFamilyCompilationRequest(ShaderFamily shaderFamilyToCompile, uint64_t modificationTimestamp);
 
         void ShaderCompilerThreadFunction();
 
@@ -87,6 +107,7 @@ namespace Shipyard
         ShaderFamily m_CurrentShaderFamilyBeingCompiled;
         bool m_RecompileCurrentRequest;
 
+        Array<ShaderFamilyModificationEntry> m_ShaderFamilyModificationEntries;
         Array<CompiledShaderKeyEntry> m_CompiledShaderKeyEntries;
     };
 }

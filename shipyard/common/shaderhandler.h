@@ -11,12 +11,14 @@ using namespace std;
 
 namespace Shipyard
 {
+    class ShaderDatabase;
     class ShaderHandlerManager;
 
     struct PipelineStateObjectCreationParameters;
 
     class SHIPYARD_API ShaderHandler
     {
+        friend class ShaderDatabase;
         friend class ShaderHandlerManager;
 
     public:

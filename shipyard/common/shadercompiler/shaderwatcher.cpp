@@ -11,6 +11,13 @@ namespace Shipyard
 
 volatile bool ShaderWatcher::m_RunShaderWatcherThread = true;
 
+void GetModifiedFilesInDirectory(
+        const String& directoryName,
+        Array<ShaderWatcher::ShaderFile>& watchedShaderFiles,
+        Array<ShaderCompiler::ShaderFileCompilationRequest>& modifiedFiles);
+
+bool FileWasModified(const String& filename, uint64_t lastWriteTimestamp, Array<ShaderWatcher::ShaderFile>& watchedShaderFiles);
+
 ShaderWatcher::ShaderWatcher()
 {
     m_ShaderWatcherThread = thread(&ShaderWatcher::ShaderWatcherThreadFunction, this);
@@ -24,13 +31,13 @@ ShaderWatcher::~ShaderWatcher()
 
 void ShaderWatcher::ShaderWatcherThreadFunction()
 {
-    InplaceArray<String, 8> modifiedFiles;
+    InplaceArray<ShaderCompiler::ShaderFileCompilationRequest, 8> modifiedFiles;
 
     while (m_RunShaderWatcherThread)
     {
         ShaderCompiler& shaderCompiler = ShaderCompiler::GetInstance();
 
-        GetModifiedFilesInDirectory(shaderCompiler.GetShaderDirectoryName(), modifiedFiles);
+        GetModifiedFilesInDirectory(shaderCompiler.GetShaderDirectoryName(), m_WatchedShaderFiles,  modifiedFiles);
 
         if (modifiedFiles.Empty())
         {
@@ -43,7 +50,10 @@ void ShaderWatcher::ShaderWatcherThreadFunction()
     }
 }
 
-void ShaderWatcher::GetModifiedFilesInDirectory(const String& directoryName, Array<String>& modifiedFiles)
+void GetModifiedFilesInDirectory(
+        const String& directoryName,
+        Array<ShaderWatcher::ShaderFile>& watchedShaderFiles,
+        Array<ShaderCompiler::ShaderFileCompilationRequest>& modifiedFiles)
 {
     WIN32_FIND_DATAA findData;
     HANDLE findHandle = INVALID_HANDLE_VALUE;
@@ -70,9 +80,11 @@ void ShaderWatcher::GetModifiedFilesInDirectory(const String& directoryName, Arr
         String filename = findData.cFileName;
         uint64_t lastWriteTimestamp = (uint64_t(findData.ftLastWriteTime.dwHighDateTime) << 32) | uint64_t(findData.ftLastWriteTime.dwLowDateTime);
 
-        if (FileWasModified(filename, lastWriteTimestamp))
+        if (FileWasModified(filename, lastWriteTimestamp, watchedShaderFiles))
         {
-            modifiedFiles.Add(filename);
+            ShaderCompiler::ShaderFileCompilationRequest& newShaderFileCompilationRequest = modifiedFiles.Grow();
+            newShaderFileCompilationRequest.shaderFilename = filename;
+            newShaderFileCompilationRequest.modificationTimestamp = lastWriteTimestamp;
         }
 
     } while (FindNextFileA(findHandle, &findData));
@@ -80,7 +92,7 @@ void ShaderWatcher::GetModifiedFilesInDirectory(const String& directoryName, Arr
     FindClose(findHandle);
 }
 
-bool ShaderWatcher::FileWasModified(const String& filename, uint64_t lastWriteTimestamp)
+bool FileWasModified(const String& filename, uint64_t lastWriteTimestamp, Array<ShaderWatcher::ShaderFile>& watchedShaderFiles)
 {
     bool isValidShaderFile = false;
 
@@ -100,9 +112,9 @@ bool ShaderWatcher::FileWasModified(const String& filename, uint64_t lastWriteTi
     }
 
     uint32_t idx = 0;
-    for (; idx < m_WatchedShaderFiles.Size(); idx++)
+    for (; idx < watchedShaderFiles.Size(); idx++)
     {
-        if (m_WatchedShaderFiles[idx].m_Filename == filename)
+        if (watchedShaderFiles[idx].m_Filename == filename)
         {
             break;
         }
@@ -110,19 +122,17 @@ bool ShaderWatcher::FileWasModified(const String& filename, uint64_t lastWriteTi
 
     bool fileWasModified = false;
 
-    if (idx == m_WatchedShaderFiles.Size())
+    if (idx == watchedShaderFiles.Size())
     {
-        ShaderFile shaderFile;
-        shaderFile.m_Filename = filename;
-        shaderFile.m_LastWriteTimestamp = lastWriteTimestamp;
-
-        m_WatchedShaderFiles.Add(shaderFile);
+        ShaderWatcher::ShaderFile& newWatchedShaderFile = watchedShaderFiles.Grow();
+        newWatchedShaderFile.m_Filename = filename;
+        newWatchedShaderFile.m_LastWriteTimestamp = lastWriteTimestamp;
 
         fileWasModified = true;
     }
-    else if (lastWriteTimestamp > m_WatchedShaderFiles[idx].m_LastWriteTimestamp)
+    else if (lastWriteTimestamp > watchedShaderFiles[idx].m_LastWriteTimestamp)
     {
-        m_WatchedShaderFiles[idx].m_LastWriteTimestamp = lastWriteTimestamp;
+        watchedShaderFiles[idx].m_LastWriteTimestamp = lastWriteTimestamp;
 
         fileWasModified = true;
     }

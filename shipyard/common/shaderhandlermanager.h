@@ -11,6 +11,7 @@ using namespace std;
 
 namespace Shipyard
 {
+    class ShaderDatabase;
     class ShaderHandler;
 
     class SHIPYARD_API ShaderHandlerManager : public Singleton<ShaderHandlerManager>
@@ -18,12 +19,15 @@ namespace Shipyard
         friend class Singleton<ShaderHandlerManager>;
 
     public:
-        ShaderHandlerManager() {}
+        ShaderHandlerManager();
         virtual ~ShaderHandlerManager();
+
+        void SetShaderDatabase(ShaderDatabase& shaderDatabase);
 
         ShaderHandler* GetShaderHandlerForShaderKey(ShaderKey shaderKey, GFXRenderDevice& gfxRenderDevice);
 
     private:
         map<ShaderKey, ShaderHandler*> m_ShaderHandlers;
+        ShaderDatabase* m_ShaderDatabase;
     };
 }

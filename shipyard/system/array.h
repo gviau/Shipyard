@@ -169,7 +169,10 @@ namespace Shipyard
             : m_Array(nullptr)
             , m_ArraySizeAndCapacity(0)
         {
-            Reserve(initialCapacity);
+            if (initialCapacity > 0)
+            {
+                Reserve(initialCapacity);
+            }
         }
 
         ~Array()
@@ -557,7 +560,10 @@ namespace Shipyard
             , m_Size(0)
             , m_Capacity(0)
         {
-            Reserve(initialCapacity);
+            if (initialCapacity > 0)
+            {
+                Reserve(initialCapacity);
+            }
         }
 
         ~BigArray()
@@ -629,29 +635,29 @@ namespace Shipyard
         {
             assert(m_Size > 0);
 
-            return m_Array[currentSize - 1];
+            return m_Array[m_Size - 1];
         }
 
         const T& Back() const
         {
             assert(m_Size > 0);
 
-            return m_Array[currentSize - 1];
+            return m_Array[m_Size - 1];
         }
 
         void Add(const T& element)
         {
             assert(m_Size < 0xFFFFFFFF);
 
-            if ((currentSize + 1) > m_Capacity)
+            if ((m_Size + 1) > m_Capacity)
             {
-                uint32_t newCapacity = uint32_t(MIN(uint64_t(currentCapacity) * 2, 0xFFFFFFFF));
+                uint32_t newCapacity = uint32_t(MIN(uint64_t(m_Capacity) * 2, 0xFFFFFFFF));
                 Reserve(MAX(newCapacity, 4));
             }
 
-            m_Array[currentSize] = element;
+            m_Array[m_Size] = element;
 
-            m_Size -= 1;
+            m_Size += 1;
         }
 
         T& Grow()
@@ -664,7 +670,7 @@ namespace Shipyard
         {
             assert(m_Size > 0);
 
-            m_Array[currentSize - 1].~T();
+            m_Array[m_Size - 1].~T();
 
             m_Size -= 1;
         }
@@ -737,7 +743,7 @@ namespace Shipyard
 
             if ((m_Size + 1) > m_Capacity)
             {
-                uint32_t newCapacity = uint32_t(MIN(uint64_t(currentCapacity) * 2, 0xFFFFFFFF));
+                uint32_t newCapacity = uint32_t(MIN(uint64_t(m_Capacity) * 2, 0xFFFFFFFF));
                 Reserve(MAX(newCapacity, 4));
             }
 

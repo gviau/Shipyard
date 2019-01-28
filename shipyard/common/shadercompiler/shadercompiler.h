@@ -25,13 +25,6 @@ namespace Shipyard
         friend class Singleton<ShaderCompiler>;
 
     public:
-        struct ShaderFileCompilationRequest
-        {
-            String shaderFilename;
-            uint64_t modificationTimestamp;
-        };
-
-    public:
         ShaderCompiler();
         virtual ~ShaderCompiler();
 
@@ -40,10 +33,6 @@ namespace Shipyard
         // Returns false if the ShaderKey isn't compiled yet, in which case the blob returned are from the error ShaderKey that corresponds to the
         // ShaderKey passed
         bool GetRawShadersForShaderKey(ShaderKey shaderKey, ShaderDatabase::ShaderEntrySet& compiledShaderEntrySet, bool& gotRecompiledSinceLastAccess);
-
-        uint64_t GetTimestampForShaderKey(const ShaderKey& shaderKey) const;
-
-        void RequestCompilationFromShaderFiles(const Array<ShaderFileCompilationRequest>& shaderFileCompilationRequests);
 
         void SetShaderDirectoryName(const String& shaderDirectoryName);
         const String& GetShaderDirectoryName() const { return m_ShaderDirectoryName; }
@@ -71,24 +60,20 @@ namespace Shipyard
             ID3D10Blob* m_CompiledComputeShaderBlob;
         };
 
-        struct ShaderFamilyModificationEntry
-        {
-            ShaderFamily shaderFamily;
-            uint64_t lastModifiedTimestamp;
-        };
-
     private:
-        void AddCompilationRequestForFxFile(const ShaderFileCompilationRequest& shaderFileCompilationRequest);
-        void AddCompilationRequestForHlslFile(const ShaderFileCompilationRequest& shaderFileCompilationRequest);
-        bool CheckFileForHlslReference(const String& filenameToCheck, const String& touchedHlslFilename) const;
-        void GetIncludeDirectives(const String& fileContent, Array<String>& includeDirectives) const;
-        void AddShaderFamilyCompilationRequest(ShaderFamily shaderFamilyToCompile, uint64_t modificationTimestamp);
-
         void ShaderCompilerThreadFunction();
+
+        bool ReadShaderFile(const String& sourceFilename, String& source) const;
 
         void CompileShaderFamily(ShaderFamily shaderFamily);
 
-        void CompileShaderKey(ShaderKey::RawShaderKeyType rawShaderKey, const Array<ShaderOption>& everyPossibleShaderOptionForShaderKey, const String& sourceFilename, const String& source);
+        void CompileShaderKey(const ShaderKey& shaderKeyToCompile);
+        void CompileShaderKey(
+                const ShaderKey& shaderKeyToCompile,
+                const Array<ShaderOption>& everyPossibleShaderOptionForShaderKey,
+                const String& sourceFilename,
+                const String& source);
+
         ID3D10Blob* CompileVertexShaderForShaderKey(const String& sourceFilename, const String& source, _D3D_SHADER_MACRO* shaderOptionDefines);
         ID3D10Blob* CompilePixelShaderForShaderKey(const String& sourceFilename, const String& source, _D3D_SHADER_MACRO* shaderOptionDefines);
         ID3D10Blob* CompileComputeShaderForShaderKey(const String& sourceFilename, const String& source, _D3D_SHADER_MACRO* shaderOptionDefines);
@@ -103,11 +88,9 @@ namespace Shipyard
 
         String m_ShaderDirectoryName;
 
-        Array<ShaderFamily> m_ShaderFamiliesToCompile;
-        ShaderFamily m_CurrentShaderFamilyBeingCompiled;
-        bool m_RecompileCurrentRequest;
+        Array<ShaderKey> m_ShaderKeysToCompile;
+        ShaderKey m_CurrentShaderKeyBeingCompiled;
 
-        Array<ShaderFamilyModificationEntry> m_ShaderFamilyModificationEntries;
         Array<CompiledShaderKeyEntry> m_CompiledShaderKeyEntries;
     };
 }

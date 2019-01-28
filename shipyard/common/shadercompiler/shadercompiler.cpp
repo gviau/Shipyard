@@ -63,9 +63,8 @@ public:
 ShaderCompiler::ShaderCompiler()
     : m_ShaderDirectoryName(".\\shaders\\")
 {
-    m_CurrentShaderFamilyBeingCompiled = ShaderFamily::Count;
-    m_RecompileCurrentRequest = false;
-
+    m_CurrentShaderKeyBeingCompiled.SetShaderFamily(ShaderFamily::Count);
+    
     ShaderKey::InitializeShaderKeyGroups();
 
     // Make sure the ShaderFamily error is compiled initialy
@@ -87,13 +86,11 @@ ShaderCompiler::~ShaderCompiler()
 
 void ShaderCompiler::AddCompilationRequestForShaderKey(ShaderKey shaderKey)
 {
-    ShaderFamily shaderFamily = shaderKey.GetShaderFamily();
-
     m_ShaderCompilationRequestLock.lock();
 
-    if (shaderFamily != m_CurrentShaderFamilyBeingCompiled && !m_ShaderFamiliesToCompile.Exists(shaderFamily))
+    if (shaderKey != m_CurrentShaderKeyBeingCompiled && !m_ShaderKeysToCompile.Exists(shaderKey))
     {
-        m_ShaderFamiliesToCompile.Add(shaderFamily);
+        m_ShaderKeysToCompile.Add(shaderKey);
     }
 
     m_ShaderCompilationRequestLock.unlock();
@@ -101,8 +98,6 @@ void ShaderCompiler::AddCompilationRequestForShaderKey(ShaderKey shaderKey)
 
 bool ShaderCompiler::GetRawShadersForShaderKey(ShaderKey shaderKey, ShaderDatabase::ShaderEntrySet& compiledShaderEntrySet, bool& gotRecompiledSinceLastAccess)
 {
-    ShaderFamily shaderFamily = shaderKey.GetShaderFamily();
-
     ShaderKey errorShaderKey;
     errorShaderKey.SetShaderFamily(ShaderFamily::Error);
 
@@ -112,7 +107,7 @@ bool ShaderCompiler::GetRawShadersForShaderKey(ShaderKey shaderKey, ShaderDataba
 
     m_ShaderCompilationRequestLock.lock();
 
-    if (shaderFamily == m_CurrentShaderFamilyBeingCompiled || m_ShaderFamiliesToCompile.Exists(shaderFamily))
+    if (shaderKey == m_CurrentShaderKeyBeingCompiled || m_ShaderKeysToCompile.Exists(shaderKey))
     {
         shaderKey = errorShaderKey;
         isShaderCompiled = false;
@@ -127,15 +122,6 @@ bool ShaderCompiler::GetRawShadersForShaderKey(ShaderKey shaderKey, ShaderDataba
         }
         else
         {
-            for (const ShaderFamilyModificationEntry& shaderFamilyModificationEntry : m_ShaderFamilyModificationEntries)
-            {
-                if (shaderFamilyModificationEntry.shaderFamily == shaderFamily)
-                {
-                    compiledShaderEntrySet.lastModifiedTimestamp = shaderFamilyModificationEntry.lastModifiedTimestamp;
-                    break;
-                }
-            }
-
             if (shaderKeyEntry.m_CompiledVertexShaderBlob != nullptr)
             {
                 compiledShaderEntrySet.rawVertexShader = (uint8_t*)shaderKeyEntry.m_CompiledVertexShaderBlob->GetBufferPointer();
@@ -164,49 +150,6 @@ bool ShaderCompiler::GetRawShadersForShaderKey(ShaderKey shaderKey, ShaderDataba
     return isShaderCompiled;
 }
 
-uint64_t ShaderCompiler::GetTimestampForShaderKey(const ShaderKey& shaderKey) const
-{
-    ShaderFamily shaderFamily = shaderKey.GetShaderFamily();
-
-    uint64_t lastModifiedTimestamp = 0;
-
-    m_ShaderCompilationRequestLock.lock();
-
-    for (const ShaderFamilyModificationEntry& shaderFamilyModificationEntry : m_ShaderFamilyModificationEntries)
-    {
-        if (shaderFamilyModificationEntry.shaderFamily == shaderFamily)
-        {
-            lastModifiedTimestamp = shaderFamilyModificationEntry.lastModifiedTimestamp;
-            break;
-        }
-    }
-
-    m_ShaderCompilationRequestLock.unlock();
-
-    return lastModifiedTimestamp;
-}
-
-void ShaderCompiler::RequestCompilationFromShaderFiles(const Array<ShaderFileCompilationRequest>& shaderFileCompilationRequests)
-{
-    m_ShaderCompilationRequestLock.lock();
-
-    for (const ShaderFileCompilationRequest& shaderFileCompilationRequest : shaderFileCompilationRequests)
-    {
-        const String& shaderFilename = shaderFileCompilationRequest.shaderFilename;
-
-        if (shaderFilename.substr(shaderFilename.size() - 3) == ".fx")
-        {
-            AddCompilationRequestForFxFile(shaderFileCompilationRequest);
-        }
-        else if (shaderFilename.substr(shaderFilename.size() - 5) == ".hlsl")
-        {
-            AddCompilationRequestForHlslFile(shaderFileCompilationRequest);
-        }
-    }
-
-    m_ShaderCompilationRequestLock.unlock();
-}
-
 void ShaderCompiler::SetShaderDirectoryName(const String& shaderDirectoryName)
 {
     m_ShaderDirectoryName = shaderDirectoryName;
@@ -215,209 +158,41 @@ void ShaderCompiler::SetShaderDirectoryName(const String& shaderDirectoryName)
     CompileShaderFamily(ShaderFamily::Error);
 }
 
-void ShaderCompiler::AddCompilationRequestForFxFile(const ShaderFileCompilationRequest& shaderFileCompilationRequest)
-{
-    const String& fxFilename = shaderFileCompilationRequest.shaderFilename;
-
-    ShaderFamily shaderFamilyToCompile = ShaderFamily::Count;
-
-    for (uint32_t i = 0; i < uint32_t(ShaderFamily::Count); i++)
-    {
-        if (fxFilename == g_ShaderFamilyFilenames[i])
-        {
-            shaderFamilyToCompile = ShaderFamily(i);
-            break;
-        }
-    }
-
-    if (shaderFamilyToCompile == ShaderFamily::Count)
-    {
-        return;
-    }
-
-    AddShaderFamilyCompilationRequest(shaderFamilyToCompile, shaderFileCompilationRequest.modificationTimestamp);
-}
-
-void ShaderCompiler::AddCompilationRequestForHlslFile(const ShaderFileCompilationRequest& shaderFileCompilationRequest)
-{
-    // For Hlsl files, we need to inspect every FX file and check whether they reference that Hlsl file. Moreoever, we also have to inspect
-    // every Hlsl files to see if they reference the touched Hlsl file.
-    const String& hlslFilename = shaderFileCompilationRequest.shaderFilename;
-    
-    for (uint32_t i = 0; i < uint32_t(ShaderFamily::Count); i++)
-    {
-        ShaderFamily shaderFamily = ShaderFamily(i);
-
-        // The error shader family will never be recompiled at runtime, since it's supposed to be always available as a fallback
-        if (shaderFamily == ShaderFamily::Error)
-        {
-            continue;
-        }
-
-        String shaderFamilyFilename = g_ShaderFamilyFilenames[i];
-
-        if (CheckFileForHlslReference(shaderFamilyFilename, hlslFilename))
-        {
-            AddShaderFamilyCompilationRequest(shaderFamily, shaderFileCompilationRequest.modificationTimestamp);
-        }
-    }
-}
-
-bool ShaderCompiler::CheckFileForHlslReference(const String& filenameToCheck, const String& touchedHlslFilename) const
-{
-    ifstream file(m_ShaderDirectoryName + filenameToCheck);
-    if (!file.is_open())
-    {
-        return false;
-    }
-
-    String filenameToCheckContent;
-    file.ignore((std::numeric_limits<std::streamsize>::max)());
-    filenameToCheckContent.resize((size_t)file.gcount());
-    file.clear();
-    file.seekg(0, std::ios::beg);
-
-    file.read(&filenameToCheckContent[0], filenameToCheckContent.length());
-
-    Array<String> includeDirectives;
-    GetIncludeDirectives(filenameToCheckContent, includeDirectives);
-
-    bool immediateReference = includeDirectives.Exists(touchedHlslFilename);
-    
-    if (immediateReference)
-    {
-        return true;
-    }
-
-    for (const String& includeDirective : includeDirectives)
-    {
-        if (CheckFileForHlslReference(includeDirective, touchedHlslFilename))
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-void ShaderCompiler::GetIncludeDirectives(const String& fileContent, Array<String>& includeDirectives) const
-{
-    size_t currentOffset = 0;
-    size_t findPosition = 0;
-
-    // For now, it is assumed that all #include directives are one per line, never in a comment, and with a single whitespace between the #include and the file name
-    static const String searchString = "#include ";
-
-    while (true)
-    {
-        findPosition = fileContent.find(searchString, currentOffset);
-        if (findPosition == String::npos)
-        {
-            break;
-        }
-
-        String includeFilename = "";
-        char currentChar = '\0';
-
-        currentOffset = findPosition + searchString.length();
-
-        bool startCollectingFilename = false;
-
-        do 
-        {
-            currentChar = fileContent[currentOffset++];
-            if (currentChar == '\"')
-            {
-                if (startCollectingFilename)
-                {
-                    startCollectingFilename = false;
-                    break;
-                }
-                else
-                {
-                    startCollectingFilename = true;
-                }
-            }
-            else if (startCollectingFilename)
-            {
-                includeFilename += currentChar;
-            }
-
-        } while (currentChar != '\n');
-
-        if (!startCollectingFilename)
-        {
-            includeDirectives.Add(includeFilename);
-        }
-    }
-}
-
-void ShaderCompiler::AddShaderFamilyCompilationRequest(ShaderFamily shaderFamilyToCompile, uint64_t modificationTimestamp)
-{
-    // The error shader family will never be recompiled at runtime, since it's supposed to be always available as a fallback
-    if (shaderFamilyToCompile == ShaderFamily::Error)
-    {
-        return;
-    }
-
-    for (ShaderFamilyModificationEntry& shaderFamiliyModificationEntry : m_ShaderFamilyModificationEntries)
-    {
-        if (shaderFamiliyModificationEntry.shaderFamily == shaderFamilyToCompile)
-        {
-            shaderFamiliyModificationEntry.lastModifiedTimestamp = modificationTimestamp;
-            return;
-        }
-    }
-
-    ShaderFamilyModificationEntry& newShaderFamilyModificationEntry = m_ShaderFamilyModificationEntries.Grow();
-    newShaderFamilyModificationEntry.shaderFamily = shaderFamilyToCompile;
-    newShaderFamilyModificationEntry.lastModifiedTimestamp = modificationTimestamp;
-}
-
 void ShaderCompiler::ShaderCompilerThreadFunction()
 {
     while (m_RunShaderCompilerThread)
     {
         uint32_t shaderFamilyToCompileIndex = 0;
 
-        if (m_ShaderFamiliesToCompile.Size() > 0 && m_CurrentShaderFamilyBeingCompiled == ShaderFamily::Count)
+        if (m_ShaderKeysToCompile.Size() > 0 && m_CurrentShaderKeyBeingCompiled.GetShaderFamily() == ShaderFamily::Count)
         {
             m_ShaderCompilationRequestLock.lock();
 
-            m_CurrentShaderFamilyBeingCompiled = m_ShaderFamiliesToCompile.Back();
-            shaderFamilyToCompileIndex = (m_ShaderFamiliesToCompile.Size() - 1);
+            m_CurrentShaderKeyBeingCompiled = m_ShaderKeysToCompile.Back();
+            shaderFamilyToCompileIndex = (m_ShaderKeysToCompile.Size() - 1);
 
             m_ShaderCompilationRequestLock.unlock();
         }
 
-        if (m_CurrentShaderFamilyBeingCompiled == ShaderFamily::Count)
+        if (m_CurrentShaderKeyBeingCompiled.GetShaderFamily() == ShaderFamily::Count)
         {
             continue;
         }
 
-        CompileShaderFamily(m_CurrentShaderFamilyBeingCompiled);
+        CompileShaderKey(m_CurrentShaderKeyBeingCompiled);
 
         m_ShaderCompilationRequestLock.lock();
 
-        if (!m_RecompileCurrentRequest)
-        {
-            m_CurrentShaderFamilyBeingCompiled = ShaderFamily::Count;
+        m_CurrentShaderKeyBeingCompiled.SetShaderFamily(ShaderFamily::Count);
 
-            m_ShaderFamiliesToCompile.RemoveAt(shaderFamilyToCompileIndex);
-        }
-
-        m_RecompileCurrentRequest = false;
+        m_ShaderKeysToCompile.RemoveAt(shaderFamilyToCompileIndex);
 
         m_ShaderCompilationRequestLock.unlock();
     }
 }
 
-void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
+bool ShaderCompiler::ReadShaderFile(const String& sourceFilename, String& source) const
 {
-    const String& shaderFamilyFilename = g_ShaderFamilyFilenames[uint32_t(shaderFamily)];
-
-    String sourceFilename = m_ShaderDirectoryName + shaderFamilyFilename;
-
     // This is kind of ugly: if a file is saved inside of Visual Studio with the AutoRecover feature enabled, it will
     // first save the file's content in a temporary file, and then copy the content to the real file before quickly deleting the
     // temporary file. This means that, sometimes, when saving a file through Visual Studio, we won't be able to open it as
@@ -442,17 +217,37 @@ void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
         bool couldntOpenFile = (i == timesToTryOpeningAgain);
         if (couldntOpenFile)
         {
-            return;
+            return false;
         }
     }
 
-    String source;
     shaderFile.ignore((std::numeric_limits<std::streamsize>::max)());
     source.resize((size_t)shaderFile.gcount());
     shaderFile.clear();
     shaderFile.seekg(0, std::ios::beg);
 
+    if (source.size() == 0)
+    {
+        return false;
+    }
+
     shaderFile.read(&source[0], source.length());
+
+    return true;
+}
+
+void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
+{
+    const String& shaderFamilyFilename = g_ShaderFamilyFilenames[uint32_t(shaderFamily)];
+
+    String sourceFilename = m_ShaderDirectoryName + shaderFamilyFilename;
+    String source;
+
+    bool couldReadShaderFile = ReadShaderFile(sourceFilename, source);
+    if (!couldReadShaderFile)
+    {
+        return;
+    }
 
     Array<ShaderOption> shaderOptions;
     ShaderKey::GetShaderKeyOptionsForShaderFamily(shaderFamily, shaderOptions);
@@ -477,34 +272,51 @@ void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
 
     for (uint32_t i = 0; i < possibleNumberOfPermutations; i++)
     {
-        ShaderKey::RawShaderKeyType rawShaderKey = baseRawShaderKey | (shaderOptionAsInt << ShaderKey::ms_ShaderOptionShift);
+        ShaderKey currentShaderKeyToCompile;
+        currentShaderKeyToCompile.m_RawShaderKey = (baseRawShaderKey | (shaderOptionAsInt << ShaderKey::ms_ShaderOptionShift));
 
-        CompileShaderKey(rawShaderKey, shaderOptions, sourceFilename, source);
+        CompileShaderKey(currentShaderKeyToCompile, shaderOptions, sourceFilename, source);
 
         shaderOptionAsInt -= 1;
     }
 }
 
-void ShaderCompiler::CompileShaderKey(ShaderKey::RawShaderKeyType rawShaderKey, const Array<ShaderOption>& everyPossibleShaderOptionForShaderKey, const String& sourceFilename, const String& source)
+void ShaderCompiler::CompileShaderKey(const ShaderKey& shaderKeyToCompile)
+{
+    const String& shaderFamilyFilename = g_ShaderFamilyFilenames[uint32_t(shaderKeyToCompile.GetShaderFamily())];
+
+    String sourceFilename = m_ShaderDirectoryName + shaderFamilyFilename;
+    String source;
+
+    bool couldReadShaderFile = ReadShaderFile(sourceFilename, source);
+    if (!couldReadShaderFile)
+    {
+        return;
+    }
+
+    Array<ShaderOption> everyPossibleShaderOptionForShaderKey;
+    ShaderKey::GetShaderKeyOptionsForShaderFamily(shaderKeyToCompile.GetShaderFamily(), everyPossibleShaderOptionForShaderKey);
+
+    CompileShaderKey(shaderKeyToCompile, everyPossibleShaderOptionForShaderKey, sourceFilename, source);
+}
+
+void ShaderCompiler::CompileShaderKey(
+        const ShaderKey& shaderKeyToCompile,
+        const Array<ShaderOption>& everyPossibleShaderOptionForShaderKey,
+        const string& sourceFilename,
+        const string& source)
 {
     m_ShaderCompilationRequestLock.lock();
 
-    CompiledShaderKeyEntry& compiledShaderKeyEntry = GetCompiledShaderKeyEntry(rawShaderKey);
+    CompiledShaderKeyEntry& compiledShaderKeyEntry = GetCompiledShaderKeyEntry(shaderKeyToCompile.GetRawShaderKey());
     compiledShaderKeyEntry.Reset();
-
-    ShaderKey shaderKey;
-    shaderKey.m_RawShaderKey = rawShaderKey;
 
     Array<D3D_SHADER_MACRO> shaderOptionDefines;
     shaderOptionDefines.Reserve(everyPossibleShaderOptionForShaderKey.Size());
 
     for (ShaderOption shaderOption : everyPossibleShaderOptionForShaderKey)
     {
-        uint32_t valueForShaderOption = shaderKey.GetShaderOptionValue(shaderOption);
-        if (valueForShaderOption == 0)
-        {
-            continue;
-        }
+        uint32_t valueForShaderOption = shaderKeyToCompile.GetShaderOptionValue(shaderOption);
 
         D3D_SHADER_MACRO shaderDefine;
         shaderDefine.Name = g_ShaderOptionString[uint32_t(shaderOption)].c_str();
@@ -529,17 +341,14 @@ void ShaderCompiler::CompileShaderKey(ShaderKey::RawShaderKeyType rawShaderKey, 
         delete[] shaderMacro.Definition;
     }
 
-    if (!m_RecompileCurrentRequest)
-    {
-        compiledShaderKeyEntry.m_GotCompilationError = ((vertexShaderBlob != nullptr && pixelShaderBlob == nullptr) || (pixelShaderBlob != nullptr && vertexShaderBlob == nullptr) || (vertexShaderBlob == nullptr && pixelShaderBlob == nullptr && computeShaderBlob == nullptr));
+    compiledShaderKeyEntry.m_GotCompilationError = ((vertexShaderBlob != nullptr && pixelShaderBlob == nullptr) || (pixelShaderBlob != nullptr && vertexShaderBlob == nullptr) || (vertexShaderBlob == nullptr && pixelShaderBlob == nullptr && computeShaderBlob == nullptr));
 
-        if (!compiledShaderKeyEntry.m_GotCompilationError)
-        {
-            compiledShaderKeyEntry.m_CompiledVertexShaderBlob = vertexShaderBlob;
-            compiledShaderKeyEntry.m_CompiledPixelShaderBlob = pixelShaderBlob;
-            compiledShaderKeyEntry.m_CompiledComputeShaderBlob = computeShaderBlob;
-            compiledShaderKeyEntry.m_GotRecompiledSinceLastAccess = true;
-        }
+    if (!compiledShaderKeyEntry.m_GotCompilationError)
+    {
+        compiledShaderKeyEntry.m_CompiledVertexShaderBlob = vertexShaderBlob;
+        compiledShaderKeyEntry.m_CompiledPixelShaderBlob = pixelShaderBlob;
+        compiledShaderKeyEntry.m_CompiledComputeShaderBlob = computeShaderBlob;
+        compiledShaderKeyEntry.m_GotRecompiledSinceLastAccess = true;
     }
 
     m_ShaderCompilationRequestLock.unlock();

@@ -311,7 +311,7 @@ void ShaderDatabase::AppendShadersForShaderKey(const ShaderKey& shaderKey, Shade
     }
 }
 
-void ShaderDatabase::LoadNextShaderEntry(uint8_t* databaseBuffer, BigArray<ShaderEntryKey>& shaderEntryKeys, BigArray<ShaderEntrySet>& shaderEntrySets) const
+void ShaderDatabase::LoadNextShaderEntry(uint8_t*& databaseBuffer, BigArray<ShaderEntryKey>& shaderEntryKeys, BigArray<ShaderEntrySet>& shaderEntrySets) const
 {
     ShaderEntryHeader shaderEntryHeader = *(ShaderEntryHeader*)databaseBuffer;
 

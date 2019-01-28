@@ -95,7 +95,7 @@ namespace Shipyard
         };
 
     private:
-        void LoadNextShaderEntry(uint8_t* databaseBuffer, BigArray<ShaderEntryKey>& shaderEntryKeys, BigArray<ShaderEntrySet>& shaderEntrySets) const;
+        void LoadNextShaderEntry(uint8_t*& databaseBuffer, BigArray<ShaderEntryKey>& shaderEntryKeys, BigArray<ShaderEntrySet>& shaderEntrySets) const;
 
         String m_Filename;
         FileHandler m_FileHandler;

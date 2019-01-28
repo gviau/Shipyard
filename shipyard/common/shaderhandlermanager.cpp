@@ -5,6 +5,7 @@
 #include <common/shaderhandler.h>
 
 #include <common/shadercompiler/shadercompiler.h>
+#include <common/shadercompiler/shaderwatcher.h>
 
 #include <common/wrapper/wrapper.h>
 
@@ -54,9 +55,10 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
 {
     assert(m_ShaderDatabase != nullptr);
 
+    ShaderWatcher& shaderWatcher = ShaderWatcher::GetInstance();
     ShaderCompiler& shaderCompiler = ShaderCompiler::GetInstance();
 
-    uint64_t lastModifiedTimestamp = shaderCompiler.GetTimestampForShaderKey(shaderKey);
+    uint64_t lastModifiedTimestamp = shaderWatcher.GetTimestampForShaderKey(shaderKey);
 
     ShaderDatabase::ShaderEntrySet compiledShaderEntrySet;
     bool foundValidShaderInDatabase = m_ShaderDatabase->RetrieveShadersForShaderKey(shaderKey, lastModifiedTimestamp, compiledShaderEntrySet);
@@ -81,6 +83,7 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
 
         if (isShaderKeyCompiled)
         {
+            compiledShaderEntrySet.lastModifiedTimestamp = lastModifiedTimestamp;
             m_ShaderDatabase->AppendShadersForShaderKey(shaderKey, compiledShaderEntrySet);
         }
     }

@@ -3,19 +3,27 @@
 #include <system/array.h>
 #include <system/platform.h>
 #include <system/string.h>
+#include <system/singleton.h>
 
+#include <common/shaderkey.h>
+
+#include <mutex>
 #include <thread>
 using namespace std;
 
 namespace Shipyard
 {
-    class ShaderCompiler;
-
-    class SHIPYARD_API ShaderWatcher
+    class SHIPYARD_API ShaderWatcher : public Singleton<ShaderWatcher>
     {
+        friend class Singleton<ShaderWatcher>;
+
     public:
         ShaderWatcher();
         ~ShaderWatcher();
+
+        uint64_t GetTimestampForShaderKey(const ShaderKey& shaderKey) const;
+
+        void SetShaderDirectoryName(const String& shaderDirectoryName);
 
     public:
         struct ShaderFile
@@ -34,6 +42,8 @@ namespace Shipyard
 
         thread m_ShaderWatcherThread;
         static volatile bool m_RunShaderWatcherThread;
+
+        mutable mutex m_ShaderWatcherLock;
 
         String m_ShaderDirectoryName;
 

@@ -5,10 +5,11 @@
 namespace Shipyard
 {;
 
+#define START_SHADER_KEY(shaderFamily) #shaderFamily".fx",
+
 String g_ShaderFamilyFilenames[uint8_t(ShaderFamily::Count)] =
 {
-    "error.fx",
-    "generic.fx"
+#include <common/shaderkeydefinitions.h>
 };
 
 }

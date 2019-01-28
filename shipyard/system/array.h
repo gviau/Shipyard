@@ -534,6 +534,7 @@ namespace Shipyard
     {
     public:
         InplaceArray()
+            : Array(0)
         {
             this->SetUserPointer(m_StaticArray, inplaceSize, 0);
         }

@@ -114,21 +114,16 @@ void GetIncludeDirectives(const StringA& fileContent, Array<StringA>& includeDir
     }
 }
 
-bool CheckFileForHlslReference(const StringT& shaderDirectory, const StringA& filenameToCheck, const StringA& touchedHlslFilename)
+bool CheckFileForHlslReference(const StringT& shaderDirectory, const StringT& filenameToCheck, const StringA& touchedHlslFilename)
 {
-    std::ifstream file(filenameToCheck.GetBuffer());
-    if (!file.is_open())
+    FileHandler file(filenameToCheck, FileHandlerOpenFlag::FileHandlerOpenFlag_Read);
+    if (!file.IsOpen())
     {
         return false;
     }
 
     StringA filenameToCheckContent;
-    file.ignore((std::numeric_limits<std::streamsize>::max)());
-    filenameToCheckContent.Resize((size_t)file.gcount());
-    file.clear();
-    file.seekg(0, std::ios::beg);
-
-    file.read(&filenameToCheckContent[0], filenameToCheckContent.Size());
+    file.ReadWholeFile(filenameToCheckContent);
 
     Array<StringA> includeDirectives;
     GetIncludeDirectives(filenameToCheckContent, includeDirectives);

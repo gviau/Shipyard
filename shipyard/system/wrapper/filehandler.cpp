@@ -13,4 +13,9 @@ BaseFileHandler::BaseFileHandler(const StringT& filename, FileHandlerOpenFlag op
 
 }
 
+BaseFileHandler::BaseFileHandler(const char* filename, FileHandlerOpenFlag openFlag)
+{
+
+}
+
 }

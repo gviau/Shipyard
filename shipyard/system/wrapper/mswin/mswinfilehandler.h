@@ -11,8 +11,10 @@ namespace Shipyard
     public:
         MswinFileHandler();
         MswinFileHandler(const StringT& filename, FileHandlerOpenFlag openFlag);
+        MswinFileHandler(const char* filename, FileHandlerOpenFlag openFlag);
 
         bool Open(const StringT& filename, FileHandlerOpenFlag openFlag);
+        bool Open(const char* filename, FileHandlerOpenFlag openFlag);
         bool IsOpen() const;
         void Close();
 

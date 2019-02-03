@@ -15,7 +15,17 @@ MswinFileHandler::MswinFileHandler(const StringT& filename, FileHandlerOpenFlag 
     Open(filename, openFlag);
 }
 
+MswinFileHandler::MswinFileHandler(const char* filename, FileHandlerOpenFlag openFlag)
+{
+    Open(filename, openFlag);
+}
+
 bool MswinFileHandler::Open(const StringT& filename, FileHandlerOpenFlag openFlag)
+{
+    return Open(filename.GetBuffer(), openFlag);
+}
+
+bool MswinFileHandler::Open(const char* filename, FileHandlerOpenFlag openFlag)
 {
     m_Filename = filename;
     m_OpenFlag = openFlag;

@@ -10,8 +10,6 @@
 
 #pragma warning( default : 4005 )
 
-#include <fstream>
-
 namespace Shipyard
 {;
 
@@ -28,34 +26,28 @@ public:
     {
         StringT filename = ((includeType == D3D_INCLUDE_LOCAL) ? (StringT(ShaderCompiler::GetInstance().GetShaderDirectoryName()) + includeFilename) : includeFilename);
 
-        std::ifstream includeFile(filename.GetBuffer());
-        if (!includeFile.is_open())
+        FileHandler includeFile(filename, FileHandlerOpenFlag::FileHandlerOpenFlag_Read);
+        if (!includeFile.IsOpen())
         {
             return E_FAIL;
         }
 
-        includeFile.ignore((std::numeric_limits<std::streamsize>::max)());
-        size_t includeFileContentLength = size_t(includeFile.gcount());
-        includeFile.clear();
-        includeFile.seekg(0, std::ios::beg);
+        includeFile.ReadWholeFile(m_Data);
 
-        char* data = new char[includeFileContentLength];
-
-        includeFile.read(data, includeFileContentLength);
-
-        *outData = data;
-        *outByteLength = UINT(includeFileContentLength);
+        *outByteLength = UINT(m_Data.Size());
+        *outData = m_Data.GetBuffer();
 
         return S_OK;
     }
 
     STDMETHOD(Close)(const void* data)
     {
-        char* charData = (char*)data;
-        delete[] charData;
+        m_Data.Clear();
 
         return S_OK;
     }
+
+    StringA m_Data;
 };
 
 ShaderCompiler::ShaderCompiler()
@@ -196,8 +188,8 @@ bool ReadShaderFile(const StringT& sourceFilename, StringA& shaderSource, String
     // first save the file's content in a temporary file, and then copy the content to the real file before quickly deleting the
     // temporary file. This means that, sometimes, when saving a file through Visual Studio, we won't be able to open it as
     // the file descriptor is already opened by Visual Studio. To counter that, we try a few times to open the same file.
-    std::ifstream shaderFile(sourceFilename.GetBuffer());
-    if (!shaderFile.is_open())
+    FileHandler shaderFile(sourceFilename, FileHandlerOpenFlag::FileHandlerOpenFlag_Read);
+    if (!shaderFile.IsOpen())
     {
         constexpr uint32_t timesToTryOpeningAgain = 5;
 
@@ -206,8 +198,8 @@ bool ReadShaderFile(const StringT& sourceFilename, StringA& shaderSource, String
         {
             Sleep(100);
 
-            shaderFile.open(sourceFilename.GetBuffer(), std::ios_base::in);
-            if (shaderFile.is_open())
+            shaderFile.Open(sourceFilename.GetBuffer(), FileHandlerOpenFlag::FileHandlerOpenFlag_Read);
+            if (shaderFile.IsOpen())
             {
                 break;
             }
@@ -220,21 +212,9 @@ bool ReadShaderFile(const StringT& sourceFilename, StringA& shaderSource, String
         }
     }
 
-    shaderFile.ignore((std::numeric_limits<std::streamsize>::max)());
-    shaderSource.Resize((size_t)shaderFile.gcount());
-    shaderFile.clear();
-    shaderFile.seekg(0, std::ios::beg);
+    shaderFile.ReadWholeFile(shaderSource);
 
-    if (shaderSource.IsEmpty())
-    {
-        return false;
-    }
-
-    shaderFile.read(&shaderSource[0], shaderSource.Size());
-
-    shaderFile.close();
-
-    return true;
+    return (shaderSource.Size() > 0);
 }
 
 void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)

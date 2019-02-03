@@ -21,9 +21,11 @@ namespace Shipyard
     public:
         BaseFileHandler();
         BaseFileHandler(const StringT& filename, FileHandlerOpenFlag openFlag);
+        BaseFileHandler(const char* filename, FileHandlerOpenFlag openFlag);
 
 #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
         virtual bool Open(const StringT& filename, FileHandlerOpenFlag openFlag) = 0;
+        virtual bool Open(const char* filename, FileHandlerOpenFlag openFlag) = 0;
         virtual bool IsOpen() const = 0;
         virtual void Close() = 0;
 

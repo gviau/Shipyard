@@ -20,7 +20,7 @@ ShaderHandlerManager::ShaderHandlerManager()
 
 ShaderHandlerManager::~ShaderHandlerManager()
 {
-    for (const pair<ShaderKey, ShaderHandler*>& keyValue: m_ShaderHandlers)
+    for (const std::pair<ShaderKey, ShaderHandler*>& keyValue: m_ShaderHandlers)
     {
         ShaderHandler* shaderHandler = keyValue.second;
 

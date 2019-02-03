@@ -10,7 +10,6 @@
 
 #include <mutex>
 #include <thread>
-using namespace std;
 
 struct _D3D_SHADER_MACRO;
 struct ID3D10Blob;
@@ -79,8 +78,8 @@ namespace Shipyard
 
         CompiledShaderKeyEntry& GetCompiledShaderKeyEntry(ShaderKey::RawShaderKeyType rawShaderKey);
 
-        thread m_ShaderCompilerThread;
-        mutable mutex m_ShaderCompilationRequestLock;
+        std::thread m_ShaderCompilerThread;
+        mutable std::mutex m_ShaderCompilationRequestLock;
 
         static volatile bool m_RunShaderCompilerThread;
 

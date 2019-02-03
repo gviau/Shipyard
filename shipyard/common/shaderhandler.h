@@ -7,7 +7,6 @@
 #include <system/platform.h>
 
 #include <memory>
-using namespace std;
 
 namespace Shipyard
 {
@@ -31,7 +30,7 @@ namespace Shipyard
     private:
         ShaderKey m_ShaderKey;
 
-        shared_ptr<GFXVertexShader> m_VertexShader;
-        shared_ptr<GFXPixelShader> m_PixelShader;
+        std::shared_ptr<GFXVertexShader> m_VertexShader;
+        std::shared_ptr<GFXPixelShader> m_PixelShader;
     };
 }

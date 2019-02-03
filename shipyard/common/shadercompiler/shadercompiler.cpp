@@ -10,9 +10,7 @@
 
 #pragma warning( default : 4005 )
 
-#include <iostream>
 #include <fstream>
-using namespace std;
 
 namespace Shipyard
 {;
@@ -30,7 +28,7 @@ public:
     {
         StringT filename = ((includeType == D3D_INCLUDE_LOCAL) ? (StringT(ShaderCompiler::GetInstance().GetShaderDirectoryName()) + includeFilename) : includeFilename);
 
-        ifstream includeFile(filename.GetBuffer());
+        std::ifstream includeFile(filename.GetBuffer());
         if (!includeFile.is_open())
         {
             return E_FAIL;
@@ -70,7 +68,7 @@ ShaderCompiler::ShaderCompiler()
     // Make sure the ShaderFamily error is compiled initialy
     CompileShaderFamily(ShaderFamily::Error);
 
-    m_ShaderCompilerThread = thread(&ShaderCompiler::ShaderCompilerThreadFunction, this);
+    m_ShaderCompilerThread = std::thread(&ShaderCompiler::ShaderCompilerThreadFunction, this);
 }
 
 ShaderCompiler::~ShaderCompiler()
@@ -198,7 +196,7 @@ bool ReadShaderFile(const StringT& sourceFilename, StringA& shaderSource, String
     // first save the file's content in a temporary file, and then copy the content to the real file before quickly deleting the
     // temporary file. This means that, sometimes, when saving a file through Visual Studio, we won't be able to open it as
     // the file descriptor is already opened by Visual Studio. To counter that, we try a few times to open the same file.
-    ifstream shaderFile(sourceFilename.GetBuffer());
+    std::ifstream shaderFile(sourceFilename.GetBuffer());
     if (!shaderFile.is_open())
     {
         constexpr uint32_t timesToTryOpeningAgain = 5;
@@ -208,7 +206,7 @@ bool ReadShaderFile(const StringT& sourceFilename, StringA& shaderSource, String
         {
             Sleep(100);
 
-            shaderFile.open(sourceFilename.GetBuffer(), ios_base::in);
+            shaderFile.open(sourceFilename.GetBuffer(), std::ios_base::in);
             if (shaderFile.is_open())
             {
                 break;

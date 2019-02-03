@@ -17,7 +17,7 @@ extern StringA g_ShaderFamilyFilenames[uint8_t(ShaderFamily::Count)];
 
 ShaderWatcher::ShaderWatcher()
 {
-    m_ShaderWatcherThread = thread(&ShaderWatcher::ShaderWatcherThreadFunction, this);
+    m_ShaderWatcherThread = std::thread(&ShaderWatcher::ShaderWatcherThreadFunction, this);
 }
 
 ShaderWatcher::~ShaderWatcher()
@@ -116,7 +116,7 @@ void GetIncludeDirectives(const StringA& fileContent, Array<StringA>& includeDir
 
 bool CheckFileForHlslReference(const StringT& shaderDirectory, const StringA& filenameToCheck, const StringA& touchedHlslFilename)
 {
-    ifstream file(filenameToCheck.GetBuffer());
+    std::ifstream file(filenameToCheck.GetBuffer());
     if (!file.is_open())
     {
         return false;
@@ -173,7 +173,12 @@ void AddShaderFamilyFilesIncludingThisHlslFile(const StringT& shaderDirectory, c
     }
 }
 
-void UpdateFileIfModified(const StringT& shaderDirectory, const StringA& filename, uint64_t lastWriteTimestamp, Array<ShaderWatcher::ShaderFile>& watchedShaderFiles, mutex& shaderWatcherLock)
+void UpdateFileIfModified(
+        const StringT& shaderDirectory,
+        const StringA& filename,
+        uint64_t lastWriteTimestamp,
+        Array<ShaderWatcher::ShaderFile>& watchedShaderFiles,
+        std::mutex& shaderWatcherLock)
 {
     // Filter out filenames with unsupported extensions
     bool isFxFile = false;
@@ -253,7 +258,7 @@ void UpdateFileIfModified(const StringT& shaderDirectory, const StringA& filenam
 void GetModifiedFilesInDirectory(
         const StringT& directoryName,
         Array<ShaderWatcher::ShaderFile>& watchedShaderFiles,
-        mutex& shaderWatcherLock)
+        std::mutex& shaderWatcherLock)
 {
     WIN32_FIND_DATAA findData;
     HANDLE findHandle = INVALID_HANDLE_VALUE;

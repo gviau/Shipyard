@@ -9,7 +9,6 @@
 
 #include <mutex>
 #include <thread>
-using namespace std;
 
 namespace Shipyard
 {
@@ -40,10 +39,10 @@ namespace Shipyard
     private:
         void ShaderWatcherThreadFunction();
 
-        thread m_ShaderWatcherThread;
+        std::thread m_ShaderWatcherThread;
         static volatile bool m_RunShaderWatcherThread;
 
-        mutable mutex m_ShaderWatcherLock;
+        mutable std::mutex m_ShaderWatcherLock;
 
         StringT m_ShaderDirectoryName;
 

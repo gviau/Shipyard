@@ -7,7 +7,6 @@
 #include <system/singleton.h>
 
 #include <map>
-using namespace std;
 
 namespace Shipyard
 {
@@ -27,7 +26,7 @@ namespace Shipyard
         ShaderHandler* GetShaderHandlerForShaderKey(ShaderKey shaderKey, GFXRenderDevice& gfxRenderDevice);
 
     private:
-        map<ShaderKey, ShaderHandler*> m_ShaderHandlers;
+        std::map<ShaderKey, ShaderHandler*> m_ShaderHandlers;
         ShaderDatabase* m_ShaderDatabase;
     };
 }

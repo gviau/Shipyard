@@ -72,7 +72,7 @@ void GetIncludeDirectives(const StringA& fileContent, Array<StringA>& includeDir
 
     while (true)
     {
-        findPosition = fileContent.FindIndexOfFirst(searchString, currentOffset);
+        findPosition = fileContent.FindIndexOfFirstCaseInsensitive(searchString, currentOffset);
         if (findPosition == StringA::InvalidIndex)
         {
             break;
@@ -179,11 +179,11 @@ void UpdateFileIfModified(const StringT& shaderDirectory, const StringA& filenam
     bool isFxFile = false;
     bool isHlslFile = false;
 
-    if (filename.Substring(0, filename.Size() - 3) == ".fx")
+    if (filename.Substring(filename.Size() - 3, 3) == ".fx")
     {
         isFxFile = true;
     }
-    else if (filename.Substring(0, filename.Size() - 5) == ".hlsl")
+    else if (filename.Substring(filename.Size() - 5, 5) == ".hlsl")
     {
         isHlslFile = true;
     }
@@ -207,7 +207,7 @@ void UpdateFileIfModified(const StringT& shaderDirectory, const StringA& filenam
 
         for (uint32_t i = 0; i < uint32_t(ShaderFamily::Count); i++)
         {
-            if (filename.FindIndexOfFirst(g_ShaderFamilyFilenames[i], 0) != StringA::InvalidIndex)
+            if (filename.FindIndexOfFirstCaseInsensitive(g_ShaderFamilyFilenames[i], 0) != StringA::InvalidIndex)
             {
                 shaderFamily = ShaderFamily(i);
                 break;

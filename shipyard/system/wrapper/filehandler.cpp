@@ -8,7 +8,7 @@ BaseFileHandler::BaseFileHandler()
 
 }
 
-BaseFileHandler::BaseFileHandler(const String& filename, FileHandlerOpenFlag openFlag)
+BaseFileHandler::BaseFileHandler(const StringT& filename, FileHandlerOpenFlag openFlag)
 {
 
 }

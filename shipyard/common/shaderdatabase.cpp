@@ -15,7 +15,7 @@ ShaderDatabase::~ShaderDatabase()
     Close();
 }
 
-bool ShaderDatabase::Load(const String& filename)
+bool ShaderDatabase::Load(const StringT& filename)
 {
     m_Filename = filename;
 
@@ -25,10 +25,10 @@ bool ShaderDatabase::Load(const String& filename)
         return false;
     }
 
-    String databaseContent;
+    StringA databaseContent;
     m_FileHandler.ReadWholeFile(databaseContent);
 
-    if (databaseContent.size() < (sizeof(DatabaseHeader) + sizeof(ShaderEntriesHeader)))
+    if (databaseContent.Size() < (sizeof(DatabaseHeader) + sizeof(ShaderEntriesHeader)))
     {
         return false;
     }

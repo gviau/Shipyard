@@ -157,32 +157,30 @@ D3D11_STENCIL_OP ConvertShipyardStencilOperationToDX11(StencilOperation operatio
     return stencilOp;
 }
 
-String GetD3DShaderVersion(D3D_FEATURE_LEVEL featureLevel)
+const char* GetD3DShaderVersion(D3D_FEATURE_LEVEL featureLevel)
 {
-    String version = "";
-
     switch (featureLevel)
     {
     case D3D_FEATURE_LEVEL_11_0:
-        version = "5_0";
+        return "5_0";
         break;
 
     case D3D_FEATURE_LEVEL_10_1:
-        version = "4_1";
+        return "4_1";
         break;
 
     case D3D_FEATURE_LEVEL_10_0:
-        version = "4_0";
+        return "4_0";
         break;
 
     case D3D_FEATURE_LEVEL_9_3:
     case D3D_FEATURE_LEVEL_9_2:
     case D3D_FEATURE_LEVEL_9_1:
-        version = "3_0";
+        return "3_0";
         break;
     }
 
-    return version;
+    return "UNKNOWN_D3D_SHADER_VERSION";
 }
 
 }

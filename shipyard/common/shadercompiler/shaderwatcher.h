@@ -23,7 +23,7 @@ namespace Shipyard
 
         uint64_t GetTimestampForShaderKey(const ShaderKey& shaderKey) const;
 
-        void SetShaderDirectoryName(const String& shaderDirectoryName);
+        void SetShaderDirectoryName(const StringT& shaderDirectoryName);
 
     public:
         struct ShaderFile
@@ -33,7 +33,7 @@ namespace Shipyard
                 , m_LastWriteTimestamp(0)
             {}
 
-            String m_Filename;
+            StringA m_Filename;
             uint64_t m_LastWriteTimestamp;
         };
 
@@ -45,7 +45,7 @@ namespace Shipyard
 
         mutable mutex m_ShaderWatcherLock;
 
-        String m_ShaderDirectoryName;
+        StringT m_ShaderDirectoryName;
 
         Array<ShaderFile> m_WatchedShaderFiles;
     };

@@ -10,16 +10,16 @@ namespace Shipyard
     {
     public:
         MswinFileHandler();
-        MswinFileHandler(const String& filename, FileHandlerOpenFlag openFlag);
+        MswinFileHandler(const StringT& filename, FileHandlerOpenFlag openFlag);
 
-        bool Open(const String& filename, FileHandlerOpenFlag openFlag);
+        bool Open(const StringT& filename, FileHandlerOpenFlag openFlag);
         bool IsOpen() const;
         void Close();
 
         // Returns the number of characters read
         size_t ReadChars(size_t startingPosition, char* content, size_t numChars);
-        size_t ReadChars(size_t startingPosition, String& content, size_t numChars);
-        size_t ReadWholeFile(String& content);
+        size_t ReadChars(size_t startingPosition, StringA& content, size_t numChars);
+        size_t ReadWholeFile(StringA& content);
 
         void WriteChars(size_t startingPosition, const char* chars, size_t numChars, bool flush = false);
         void InsertChars(size_t startingPosition, const char* chars, size_t numChars, bool flush = false);
@@ -32,7 +32,7 @@ namespace Shipyard
         int GetFileMode(FileHandlerOpenFlag openFlag) const;
 
         std::fstream m_File;
-        String m_Filename;
+        StringT m_Filename;
         FileHandlerOpenFlag m_OpenFlag;
     };
 }

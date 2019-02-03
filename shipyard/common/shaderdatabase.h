@@ -78,7 +78,7 @@ namespace Shipyard
         ShaderDatabase();
         ~ShaderDatabase();
 
-        bool Load(const String& filename);
+        bool Load(const StringT& filename);
         void Close();
 
         bool Invalidate();
@@ -97,7 +97,7 @@ namespace Shipyard
     private:
         void LoadNextShaderEntry(uint8_t*& databaseBuffer, BigArray<ShaderEntryKey>& shaderEntryKeys, BigArray<ShaderEntrySet>& shaderEntrySets) const;
 
-        String m_Filename;
+        StringT m_Filename;
         FileHandler m_FileHandler;
 
         BigArray<ShaderEntryKey> m_ShaderEntryKeys;

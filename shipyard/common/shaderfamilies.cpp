@@ -7,7 +7,7 @@ namespace Shipyard
 
 #define START_SHADER_KEY(shaderFamily) #shaderFamily".fx",
 
-String g_ShaderFamilyFilenames[uint8_t(ShaderFamily::Count)] =
+StringA g_ShaderFamilyFilenames[uint8_t(ShaderFamily::Count)] =
 {
 #include <common/shaderkeydefinitions.h>
 };

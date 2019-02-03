@@ -10,12 +10,12 @@ MswinFileHandler::MswinFileHandler()
 
 }
 
-MswinFileHandler::MswinFileHandler(const String& filename, FileHandlerOpenFlag openFlag)
+MswinFileHandler::MswinFileHandler(const StringT& filename, FileHandlerOpenFlag openFlag)
 {
     Open(filename, openFlag);
 }
 
-bool MswinFileHandler::Open(const String& filename, FileHandlerOpenFlag openFlag)
+bool MswinFileHandler::Open(const StringT& filename, FileHandlerOpenFlag openFlag)
 {
     m_Filename = filename;
     m_OpenFlag = openFlag;
@@ -24,7 +24,7 @@ bool MswinFileHandler::Open(const String& filename, FileHandlerOpenFlag openFlag
 
     m_OpenFlag = FileHandlerOpenFlag(m_OpenFlag & ~FileHandlerOpenFlag_Create);
 
-    m_File.open(m_Filename, fileMode);
+    m_File.open(m_Filename.GetBuffer(), fileMode);
 
     return m_File.is_open();
 }
@@ -54,14 +54,14 @@ size_t MswinFileHandler::ReadChars(size_t startingPosition, char* content, size_
     return numChars;
 }
 
-size_t MswinFileHandler::ReadChars(size_t startingPosition, String& content, size_t numChars)
+size_t MswinFileHandler::ReadChars(size_t startingPosition, StringA& content, size_t numChars)
 {
-    content.resize(numChars);
+    content.Resize(numChars);
 
     return ReadChars(startingPosition, &content[0], numChars);
 }
 
-size_t MswinFileHandler::ReadWholeFile(String& content)
+size_t MswinFileHandler::ReadWholeFile(StringA& content)
 {
     size_t fileSize = Size();
 
@@ -91,8 +91,8 @@ void MswinFileHandler::InsertChars(size_t startingPosition, const char* chars, s
 {
     size_t sizeOfFilePartToMove = (Size() - startingPosition);
 
-    String filePartToMove;
-    filePartToMove.resize(sizeOfFilePartToMove);
+    StringA filePartToMove;
+    filePartToMove.Resize(sizeOfFilePartToMove);
 
     if (startingPosition > 0)
     {
@@ -138,18 +138,18 @@ void MswinFileHandler::RemoveChars(size_t startingPosition, size_t numCharsToRem
     size_t startingPositionAfterPartToRemove = (startingPosition + numCharsToRemove);
     size_t sizeAfterPartToRemove = (fileSize - startingPositionAfterPartToRemove);
 
-    String before;
-    String after;
+    StringA before;
+    StringA after;
 
     if (startingPosition > 0)
     {
-        before.resize(startingPosition);
+        before.Resize(startingPosition);
         m_File.read(&before[0], startingPosition);
     }
 
     if (sizeAfterPartToRemove > 0)
     {
-        after.resize(sizeAfterPartToRemove);
+        after.Resize(sizeAfterPartToRemove);
         m_File.seekg(startingPositionAfterPartToRemove, std::ios::beg);
         m_File.read(&after[0], sizeAfterPartToRemove);
     }
@@ -165,16 +165,16 @@ void MswinFileHandler::RemoveChars(size_t startingPosition, size_t numCharsToRem
 
     int fileMode = GetFileMode(openFlag);
 
-    m_File.open(m_Filename, fileMode);
+    m_File.open(m_Filename.GetBuffer(), fileMode);
 
     assert(m_File.is_open());
     
-    m_File.write(&before[0], before.size());
-    m_File.write(&after[0], after.size());
+    m_File.write(&before[0], before.Size());
+    m_File.write(&after[0], after.Size());
 
     m_File.close();
 
-    m_File.open(m_Filename, GetFileMode(m_OpenFlag));
+    m_File.open(m_Filename.GetBuffer(), GetFileMode(m_OpenFlag));
 
     assert(m_File.is_open());
 }

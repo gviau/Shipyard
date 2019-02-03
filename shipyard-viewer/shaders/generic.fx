@@ -58,3 +58,8 @@ ps_output PS_Main(vs_output input)
 	
 	return output;
 }
+
+RenderState
+{
+
+};

@@ -20,5 +20,5 @@ namespace Shipyard
     D3D11_COMPARISON_FUNC ConvertShipyardComparisonFuncToDX11(ComparisonFunc func);
     D3D11_STENCIL_OP ConvertShipyardStencilOperationToDX11(StencilOperation operation);
 
-    String GetD3DShaderVersion(D3D_FEATURE_LEVEL featureLevel);
+    const char* GetD3DShaderVersion(D3D_FEATURE_LEVEL featureLevel);
 }

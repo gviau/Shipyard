@@ -183,7 +183,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
     Shipyard::SingletonStorer singletonStorer;
 
-    Shipyard::String shaderDirectory = "c:\\Sandbox\\shipyard\\shipyard-viewer\\shaders\\";
+    Shipyard::StringT shaderDirectory = "c:\\Sandbox\\shipyard\\shipyard-viewer\\shaders\\";
     Shipyard::ShaderCompiler::GetInstance().SetShaderDirectoryName(shaderDirectory);
     Shipyard::ShaderWatcher::GetInstance().SetShaderDirectoryName(shaderDirectory);
 

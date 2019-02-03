@@ -181,7 +181,7 @@ ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatTy
     assert(g_RegisteredInputLayouts[idx] == nullptr);
 
     // Create a dummy shader just to validate the input layout
-    String dummyShaderSource = "struct VS_INPUT {\nfloat3 position : POSITION;\n";
+    StringA dummyShaderSource = "struct VS_INPUT {\nfloat3 position : POSITION;\n";
 
     if (VertexFormatTypeContainsUV(vertexFormatType))
     {
@@ -214,16 +214,16 @@ ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatTy
     ID3D10Blob* error = nullptr;
 
     D3D_FEATURE_LEVEL featureLevel = device->GetFeatureLevel();
-    String shaderVersion = GetD3DShaderVersion(featureLevel);
+    StringA shaderVersion = GetD3DShaderVersion(featureLevel);
 
-    String version = ("vs_" + shaderVersion);
+    StringA version = ("vs_" + shaderVersion);
     uint32_t flags = 0;
 
 #ifdef _DEBUG
     flags = D3DCOMPILE_DEBUG;
 #endif
 
-    HRESULT hr = D3DCompile(dummyShaderSource.c_str(), dummyShaderSource.size(), nullptr, nullptr, nullptr, "main", version.c_str(), flags, 0, &shaderBlob, &error);
+    HRESULT hr = D3DCompile(dummyShaderSource.GetBuffer(), dummyShaderSource.Size(), nullptr, nullptr, nullptr, "main", version.GetBuffer(), flags, 0, &shaderBlob, &error);
     if (FAILED(hr))
     {
         if (error != nullptr)

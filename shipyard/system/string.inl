@@ -137,14 +137,14 @@ String<CharType>& String<CharType>::operator= (CharType c)
 template <typename CharType>
 CharType& String<CharType>::operator[] (size_t index)
 {
-    assert(index < m_NumChars);
+    assert(index < m_Capacity);
     return m_Buffer[index];
 }
 
 template <typename CharType>
 const CharType& String<CharType>::operator[] (size_t index) const
 {
-    assert(index < m_NumChars);
+    assert(index < m_Capacity);
     return m_Buffer[index];
 }
 
@@ -551,14 +551,14 @@ void String<CharType>::Erase(size_t pos, size_t length)
 template <typename CharType>
 CharType& String<CharType>::At(size_t index)
 {
-    assert(index < m_NumChars);
+    assert(index < m_Capacity);
     return m_Buffer[index];
 }
 
 template <typename CharType>
 const CharType& String<CharType>::At(size_t index) const
 {
-    assert(index < m_NumChars);
+    assert(index < m_Capacity);
     return m_Buffer[index];
 }
 
@@ -663,7 +663,7 @@ size_t String<CharType>::FindIndexOfFirst(const String<CharType>& strToFind, siz
     }
 
     // Naive implementation for now
-    size_t numCharsToIgnoreInSearch = (strToFind.m_NumChars + startingPos);
+    size_t numCharsToIgnoreInSearch = (strToFind.m_NumChars + startingPos) - 1;
     if (numCharsToIgnoreInSearch > m_NumChars)
     {
         return InvalidIndex;
@@ -702,7 +702,7 @@ size_t String<CharType>::FindIndexOfFirst(const CharType* strToFind, size_t numC
     }
 
     // Naive implementation for now
-    size_t numCharsToIgnoreInSearch = (numChars + startingPos);
+    size_t numCharsToIgnoreInSearch = (numChars + startingPos) - 1;
     if (numCharsToIgnoreInSearch > m_NumChars)
     {
         return InvalidIndex;
@@ -755,7 +755,7 @@ size_t String<CharType>::FindIndexOfFirstCaseInsensitive(const String<CharType>&
     }
 
     // Naive implementation for now
-    size_t numCharsToIgnoreInSearch = (strToFind.m_NumChars + startingPos);
+    size_t numCharsToIgnoreInSearch = (strToFind.m_NumChars + startingPos) - 1;
     if (numCharsToIgnoreInSearch > m_NumChars)
     {
         return InvalidIndex;
@@ -794,7 +794,7 @@ size_t String<CharType>::FindIndexOfFirstCaseInsensitive(const CharType* strToFi
     }
 
     // Naive implementation for now
-    size_t numCharsToIgnoreInSearch = (numChars + startingPos);
+    size_t numCharsToIgnoreInSearch = (numChars + startingPos) - 1;
     if (numCharsToIgnoreInSearch > m_NumChars)
     {
         return InvalidIndex;

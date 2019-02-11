@@ -747,6 +747,88 @@ size_t String<CharType>::FindIndexOfFirst(CharType charToFind, size_t startingPo
 }
 
 template <typename CharType>
+size_t String<CharType>::FindIndexOfFirstReverse(const String<CharType>& strToFind, size_t startingPos) const
+{
+    if (strToFind.m_NumChars == 0 || m_NumChars == 0)
+    {
+        return InvalidIndex;
+    }
+
+    // Naive implementation for now
+    for (size_t i = startingPos + 1; i > 0; i--)
+    {
+        size_t idx = i - 1;
+
+        bool foundString = true;
+
+        for (size_t j = 0; j < strToFind.m_NumChars; j++)
+        {
+            if (m_Buffer[idx + j] != strToFind.m_Buffer[j])
+            {
+                foundString = false;
+                break;
+            }
+        }
+
+        if (foundString)
+        {
+            return idx;
+        }
+    }
+
+    return InvalidIndex;
+}
+
+template <typename CharType>
+size_t String<CharType>::FindIndexOfFirstReverse(const CharType* strToFind, size_t numChars, size_t startingPos) const
+{
+    if (numChars == 0 || m_NumChars == 0)
+    {
+        return InvalidIndex;
+    }
+
+    // Naive implementation for now
+    for (size_t i = startingPos + 1; i > 0; i--)
+    {
+        size_t idx = i - 1;
+
+        bool foundString = true;
+
+        for (size_t j = 0; j < numChars; j++)
+        {
+            if (m_Buffer[idx + j] != strToFind[j])
+            {
+                foundString = false;
+                break;
+            }
+        }
+
+        if (foundString)
+        {
+            return idx;
+        }
+    }
+
+    return InvalidIndex;
+}
+
+template <typename CharType>
+size_t String<CharType>::FindIndexOfFirstReverse(CharType charToFind, size_t startingPos) const
+{
+    for (size_t i = startingPos + 1; i > 0; i--)
+    {
+        size_t idx = i - 1;
+
+        if (m_Buffer[idx] == charToFind)
+        {
+            return idx;
+        }
+    }
+
+    return InvalidIndex;
+}
+
+template <typename CharType>
 size_t String<CharType>::FindIndexOfFirstCaseInsensitive(const String<CharType>& strToFind, size_t startingPos) const
 {
     if (strToFind.m_NumChars == 0 || m_NumChars == 0)
@@ -827,11 +909,97 @@ size_t String<CharType>::FindIndexOfFirstCaseInsensitive(const CharType* strToFi
 template <typename CharType>
 size_t String<CharType>::FindIndexOfFirstCaseInsensitive(CharType charToFind, size_t startingPos) const
 {
+    int loweredCharToFind = tolower(charToFind);
+
     for (size_t i = startingPos; i < m_NumChars; i++)
     {
-        if (tolower(m_Buffer[i]) == tolower(charToFind))
+        if (tolower(m_Buffer[i]) == loweredCharToFind)
         {
             return i;
+        }
+    }
+
+    return InvalidIndex;
+}
+
+template <typename CharType>
+size_t String<CharType>::FindIndexOfFirstCaseInsensitiveReverse(const String<CharType>& strToFind, size_t startingPos) const
+{
+    if (strToFind.m_NumChars == 0 || m_NumChars == 0)
+    {
+        return InvalidIndex;
+    }
+
+    // Naive implementation for now
+    for (size_t i = startingPos + 1; i > 0; i--)
+    {
+        size_t idx = i - 1;
+
+        bool foundString = true;
+
+        for (size_t j = 0; j < strToFind.m_NumChars; j++)
+        {
+            if (tolower(m_Buffer[idx + j]) != tolower(strToFind.m_Buffer[j]))
+            {
+                foundString = false;
+                break;
+            }
+        }
+
+        if (foundString)
+        {
+            return idx;
+        }
+    }
+
+    return InvalidIndex;
+}
+
+template <typename CharType>
+size_t String<CharType>::FindIndexOfFirstCaseInsensitiveReverse(const CharType* strToFind, size_t numChars, size_t startingPos) const
+{
+    if (numChars == 0 || m_NumChars == 0)
+    {
+        return InvalidIndex;
+    }
+
+    // Naive implementation for now
+    for (size_t i = startingPos + 1; i > 0; i--)
+    {
+        size_t idx = i - 1;
+
+        bool foundString = true;
+
+        for (size_t j = 0; j < numChars; j++)
+        {
+            if (tolower(m_Buffer[idx + j]) != tolower(strToFind[j]))
+            {
+                foundString = false;
+                break;
+            }
+        }
+
+        if (foundString)
+        {
+            return idx;
+        }
+    }
+
+    return InvalidIndex;
+}
+
+template <typename CharType>
+size_t String<CharType>::FindIndexOfFirstCaseInsensitiveReverse(CharType charToFind, size_t startingPos) const
+{
+    int loweredCharToFind = tolower(charToFind);
+
+    for (size_t i = startingPos + 1; i > 0; i--)
+    {
+        size_t idx = i - 1;
+
+        if (tolower(m_Buffer[idx]) == loweredCharToFind)
+        {
+            return idx;
         }
     }
 

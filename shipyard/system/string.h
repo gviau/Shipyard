@@ -72,9 +72,17 @@ namespace Shipyard
         size_t FindIndexOfFirst(const CharType* strToFind, size_t numChars, size_t startingPos) const;
         size_t FindIndexOfFirst(CharType charToFind, size_t startingPos) const;
 
+        size_t FindIndexOfFirstReverse(const String& strToFind, size_t startingPos) const;
+        size_t FindIndexOfFirstReverse(const CharType* strToFind, size_t numChars, size_t startingPos) const;
+        size_t FindIndexOfFirstReverse(CharType charToFind, size_t startingPos) const;
+
         size_t FindIndexOfFirstCaseInsensitive(const String& strToFind, size_t startingPos) const;
         size_t FindIndexOfFirstCaseInsensitive(const CharType* strToFind, size_t numChars, size_t startingPos) const;
         size_t FindIndexOfFirstCaseInsensitive(CharType charToFind, size_t startingPos) const;
+
+        size_t FindIndexOfFirstCaseInsensitiveReverse(const String& strToFind, size_t startingPos) const;
+        size_t FindIndexOfFirstCaseInsensitiveReverse(const CharType* strToFind, size_t numChars, size_t startingPos) const;
+        size_t FindIndexOfFirstCaseInsensitiveReverse(CharType charToFind, size_t startingPos) const;
 
         String Substring(size_t pos, size_t lengthOfSubstring) const;
 

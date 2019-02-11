@@ -364,6 +364,35 @@ TEST_CASE("Test StringA", "[String]")
         REQUIRE(string.FindIndexOfFirstCaseInsensitive('a', 0) == 6);
     }
 
+    SECTION("String FindIndexOfFirstReverse")
+    {
+        string = "ThisIsATestString";
+
+        Shipyard::StringA stringToFind = "this";
+
+        REQUIRE(string.FindIndexOfFirstReverse(stringToFind, string.Size() - 1) == Shipyard::StringA::InvalidIndex);
+
+        stringToFind[0] = 'T';
+
+        REQUIRE(string.FindIndexOfFirstReverse(stringToFind, string.Size() - 1) == 0);
+
+        REQUIRE(string.FindIndexOfFirstReverse("is", 1) == Shipyard::StringA::InvalidIndex);
+        REQUIRE(string.FindIndexOfFirstReverse("is", 2) == 2);
+        REQUIRE(string.FindIndexOfFirstReverse("is", 3) == 2);
+
+        REQUIRE(string.FindIndexOfFirstReverse('S', string.Size() - 1) == 11);
+
+        REQUIRE(string.FindIndexOfFirstCaseInsensitiveReverse("IS", 5) == 4);
+        REQUIRE(string.FindIndexOfFirstCaseInsensitiveReverse("IS", 4) == 4);
+        REQUIRE(string.FindIndexOfFirstCaseInsensitiveReverse("IS", 3) == 2);
+
+        stringToFind = "teST";
+
+        REQUIRE(string.FindIndexOfFirstCaseInsensitiveReverse(stringToFind, string.Size() - 1) == 7);
+
+        REQUIRE(string.FindIndexOfFirstCaseInsensitiveReverse('a', string.Size() - 1) == 6);
+    }
+
     SECTION("String Substring")
     {
         string = "ThisIsATestString";

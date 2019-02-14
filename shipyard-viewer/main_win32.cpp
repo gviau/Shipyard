@@ -100,7 +100,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     pipelineStateObjectCreationParameters.rasterizerState.m_DepthBiasClamp = 0.0f;
     pipelineStateObjectCreationParameters.rasterizerState.m_DepthClipEnable = false;
     pipelineStateObjectCreationParameters.rasterizerState.m_FillMode = Shipyard::FillMode::Solid;
-    pipelineStateObjectCreationParameters.rasterizerState.m_IsFrontCounterClockWise = false;
+    pipelineStateObjectCreationParameters.rasterizerState.m_IsFrontCounterClockwise = false;
     pipelineStateObjectCreationParameters.rasterizerState.m_MultisampleEnable = false;
     pipelineStateObjectCreationParameters.rasterizerState.m_ScissorEnable = false;
     pipelineStateObjectCreationParameters.rasterizerState.m_SlopeScaledDepthBias = 0.0f;

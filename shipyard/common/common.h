@@ -114,7 +114,7 @@ namespace Shipyard
             , m_FillMode(FillMode::Solid)
             , m_CullMode(CullMode::CullBackFace)
 
-            , m_IsFrontCounterClockWise(false)
+            , m_IsFrontCounterClockwise(false)
             , m_DepthClipEnable(false)
             , m_ScissorEnable(false)
             , m_MultisampleEnable(false)
@@ -130,7 +130,7 @@ namespace Shipyard
         FillMode m_FillMode;
         CullMode m_CullMode;
 
-        bool m_IsFrontCounterClockWise;
+        bool m_IsFrontCounterClockwise;
         bool m_DepthClipEnable;
         bool m_ScissorEnable;
         bool m_MultisampleEnable;
@@ -143,7 +143,7 @@ namespace Shipyard
                     IsAlmostEqual(m_SlopeScaledDepthBias, rhs.m_SlopeScaledDepthBias) &&
                     m_FillMode == rhs.m_FillMode &&
                     m_CullMode == rhs.m_CullMode &&
-                    m_IsFrontCounterClockWise == rhs.m_IsFrontCounterClockWise &&
+                    m_IsFrontCounterClockwise == rhs.m_IsFrontCounterClockwise &&
                     m_DepthClipEnable == rhs.m_DepthClipEnable &&
                     m_ScissorEnable == rhs.m_ScissorEnable &&
                     m_MultisampleEnable == rhs.m_MultisampleEnable &&

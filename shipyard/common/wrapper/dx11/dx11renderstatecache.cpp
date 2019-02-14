@@ -449,7 +449,7 @@ ID3D11RasterizerState* DX11RenderStateCache::CreateRasterizerState(const Rasteri
     D3D11_RASTERIZER_DESC rasterizerDesc;
     rasterizerDesc.FillMode = ConvertShipyardFillModeToDX11(rasterizerState.m_FillMode);
     rasterizerDesc.CullMode = ConvertShipyardCullModeToDX11(rasterizerState.m_CullMode);
-    rasterizerDesc.FrontCounterClockwise = rasterizerState.m_IsFrontCounterClockWise;
+    rasterizerDesc.FrontCounterClockwise = rasterizerState.m_IsFrontCounterClockwise;
     rasterizerDesc.DepthBias = rasterizerState.m_DepthBias;
     rasterizerDesc.DepthBiasClamp = rasterizerState.m_DepthBiasClamp;
     rasterizerDesc.SlopeScaledDepthBias = rasterizerState.m_SlopeScaledDepthBias;

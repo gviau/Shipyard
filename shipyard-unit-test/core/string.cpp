@@ -431,4 +431,24 @@ TEST_CASE("Test StringA", "[String]")
         REQUIRE(string.CompareCaseInsensitive(otherString) > 0);
         REQUIRE(otherString.CompareCaseInsensitive(string) < 0);
     }
+
+    SECTION("String Equal Case Insensitive")
+    {
+        string = "Test";
+
+        Shipyard::StringA otherString = "test";
+
+        REQUIRE(string.EqualCaseInsensitive(otherString) == true);
+        REQUIRE(otherString.EqualCaseInsensitive(string) == true);
+
+        string[0] = 't';
+
+        REQUIRE(string.EqualCaseInsensitive(otherString) == true);
+        REQUIRE(otherString.EqualCaseInsensitive(string) == true);
+
+        string = "test2";
+
+        REQUIRE(string.EqualCaseInsensitive(otherString) == false);
+        REQUIRE(otherString.EqualCaseInsensitive(string) == false);
+    }
 }

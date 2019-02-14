@@ -240,6 +240,12 @@ TEST_CASE("Test StringA", "[String]")
         string.Erase(0, 100);
 
         REQUIRE(string == "");
+
+        string = "SomeTest123";
+
+        string.Erase(4, 4);
+
+        REQUIRE(string == "Some123");
     }
 
     SECTION("String Resize")

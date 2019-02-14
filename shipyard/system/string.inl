@@ -531,7 +531,7 @@ void String<CharType>::Erase(size_t pos, size_t length)
     bool needToMoveChars = (endIndex < m_NumChars);
     if (needToMoveChars)
     {
-        size_t numCharsToMove = m_NumChars - length;
+        size_t numCharsToMove = m_NumChars - length - pos;
 
         memcpy(&m_Buffer[pos], &m_Buffer[endIndex], numCharsToMove);
     }

@@ -1131,6 +1131,54 @@ int String<CharType>::CompareCaseInsensitive(const CharType* str) const
 }
 
 template <typename CharType>
+bool String<CharType>::EqualCaseInsensitive(const String<CharType>& str) const
+{
+    if (m_NumChars != str.m_NumChars)
+    {
+        return false;
+    }
+
+    for (size_t idx = 0; idx < m_NumChars; idx++)
+    {
+        int first = tolower(m_Buffer[idx]);
+        int second = tolower(str.m_Buffer[idx]);
+
+        int diff = (first - second);
+
+        if (diff != 0)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+template <typename CharType>
+bool String<CharType>::EqualCaseInsensitive(const CharType* str, size_t numChars) const
+{
+    if (m_NumChars != numChars)
+    {
+        return false;
+    }
+
+    for (size_t idx = 0; idx < m_NumChars; idx++)
+    {
+        int first = tolower(m_Buffer[idx]);
+        int second = tolower(str[idx]);
+
+        int diff = (first - second);
+
+        if (diff != 0)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+template <typename CharType>
 bool String<CharType>::operator== (const String<CharType>& rhs) const
 {
     if (m_NumChars != rhs.m_NumChars)

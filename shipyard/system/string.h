@@ -92,6 +92,9 @@ namespace Shipyard
         int CompareCaseInsensitive(const String& str) const;
         int CompareCaseInsensitive(const CharType* str) const;
 
+        bool EqualCaseInsensitive(const String& str) const;
+        bool EqualCaseInsensitive(const CharType* str, size_t numChars) const;
+
         bool operator== (const String& rhs) const;
         bool operator== (const CharType* rhs) const;
         bool operator!= (const String& rhs) const;

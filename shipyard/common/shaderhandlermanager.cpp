@@ -15,7 +15,7 @@ namespace Shipyard
 ShaderHandlerManager::ShaderHandlerManager()
     : m_ShaderDatabase(nullptr)
 {
-
+    ShaderKey::InitializeShaderKeyGroups();
 }
 
 ShaderHandlerManager::~ShaderHandlerManager()

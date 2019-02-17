@@ -20,23 +20,20 @@ TEST_CASE("Test RenderStateBlockCompiler", "[ShaderCompiler]")
         Shipyard::Array<Shipyard::ShaderOption> everyPossibleShaderOptionForShaderKey;
         Shipyard::ShaderKey::GetShaderKeyOptionsForShaderFamily(testShaderKey.GetShaderFamily(), everyPossibleShaderOptionForShaderKey);
 
-        Shipyard::RasterizerState rasterizerState;
-        Shipyard::DepthStencilState depthStencilState;
+        Shipyard::RenderStateBlock renderStateBlock;
 
-        Shipyard::RasterizerState oldRasterizerState = rasterizerState;
-        Shipyard::DepthStencilState oldDepthStencilState = depthStencilState;
-
+        Shipyard::RenderStateBlock oldRenderStateBlock = renderStateBlock;
+        
         Shipyard::RenderStateBlockCompilationError renderStateBlockCompilationError = Shipyard::CompileRenderStateBlock(
             testShaderKey,
             everyPossibleShaderOptionForShaderKey,
             renderStateBlockSource,
-            rasterizerState,
-            depthStencilState);
+            renderStateBlock);
 
         REQUIRE(renderStateBlockCompilationError == Shipyard::RenderStateBlockCompilationError::NoError);
 
-        REQUIRE(rasterizerState == oldRasterizerState);
-        REQUIRE(depthStencilState == oldDepthStencilState);
+        REQUIRE(renderStateBlock.rasterizerState == oldRenderStateBlock.rasterizerState);
+        REQUIRE(renderStateBlock.depthStencilState == oldRenderStateBlock.depthStencilState);
     }
 
     SECTION("Simple RenderStateBlock")
@@ -46,20 +43,18 @@ TEST_CASE("Test RenderStateBlockCompiler", "[ShaderCompiler]")
         Shipyard::Array<Shipyard::ShaderOption> everyPossibleShaderOptionForShaderKey;
         Shipyard::ShaderKey::GetShaderKeyOptionsForShaderFamily(testShaderKey.GetShaderFamily(), everyPossibleShaderOptionForShaderKey);
 
-        Shipyard::RasterizerState rasterizerState;
-        Shipyard::DepthStencilState depthStencilState;
+        Shipyard::RenderStateBlock renderStateBlock;
 
         Shipyard::RenderStateBlockCompilationError renderStateBlockCompilationError = Shipyard::CompileRenderStateBlock(
                 testShaderKey,
                 everyPossibleShaderOptionForShaderKey,
                 renderStateBlockSource,
-                rasterizerState,
-                depthStencilState);
+                renderStateBlock);
 
         REQUIRE(renderStateBlockCompilationError == Shipyard::RenderStateBlockCompilationError::NoError);
 
-        REQUIRE(rasterizerState.m_FillMode == Shipyard::FillMode::Wireframe);
-        REQUIRE(rasterizerState.m_CullMode == Shipyard::CullMode::CullFrontFace);
+        REQUIRE(renderStateBlock.rasterizerState.m_FillMode == Shipyard::FillMode::Wireframe);
+        REQUIRE(renderStateBlock.rasterizerState.m_CullMode == Shipyard::CullMode::CullFrontFace);
     }
 
     SECTION("RenderStateBlock With Inline Comment")
@@ -69,20 +64,18 @@ TEST_CASE("Test RenderStateBlockCompiler", "[ShaderCompiler]")
         Shipyard::Array<Shipyard::ShaderOption> everyPossibleShaderOptionForShaderKey;
         Shipyard::ShaderKey::GetShaderKeyOptionsForShaderFamily(testShaderKey.GetShaderFamily(), everyPossibleShaderOptionForShaderKey);
 
-        Shipyard::RasterizerState rasterizerState;
-        Shipyard::DepthStencilState depthStencilState;
+        Shipyard::RenderStateBlock renderStateBlock;
 
         Shipyard::RenderStateBlockCompilationError renderStateBlockCompilationError = Shipyard::CompileRenderStateBlock(
                 testShaderKey,
                 everyPossibleShaderOptionForShaderKey,
                 renderStateBlockSource,
-                rasterizerState,
-                depthStencilState);
+                renderStateBlock);
 
         REQUIRE(renderStateBlockCompilationError == Shipyard::RenderStateBlockCompilationError::NoError);
 
-        REQUIRE(rasterizerState.m_FillMode == Shipyard::FillMode::Solid);
-        REQUIRE(rasterizerState.m_CullMode == Shipyard::CullMode::CullFrontFace);
+        REQUIRE(renderStateBlock.rasterizerState.m_FillMode == Shipyard::FillMode::Solid);
+        REQUIRE(renderStateBlock.rasterizerState.m_CullMode == Shipyard::CullMode::CullFrontFace);
     }
 
     SECTION("RenderStateBlock With Block Comment")
@@ -92,20 +85,18 @@ TEST_CASE("Test RenderStateBlockCompiler", "[ShaderCompiler]")
         Shipyard::Array<Shipyard::ShaderOption> everyPossibleShaderOptionForShaderKey;
         Shipyard::ShaderKey::GetShaderKeyOptionsForShaderFamily(testShaderKey.GetShaderFamily(), everyPossibleShaderOptionForShaderKey);
 
-        Shipyard::RasterizerState rasterizerState;
-        Shipyard::DepthStencilState depthStencilState;
+        Shipyard::RenderStateBlock renderStateBlock;
 
         Shipyard::RenderStateBlockCompilationError renderStateBlockCompilationError = Shipyard::CompileRenderStateBlock(
                 testShaderKey,
                 everyPossibleShaderOptionForShaderKey,
                 renderStateBlockSource,
-                rasterizerState,
-                depthStencilState);
+                renderStateBlock);
 
         REQUIRE(renderStateBlockCompilationError == Shipyard::RenderStateBlockCompilationError::NoError);
 
-        REQUIRE(rasterizerState.m_FillMode == Shipyard::FillMode::Solid);
-        REQUIRE(rasterizerState.m_CullMode == Shipyard::CullMode::CullFrontFace);
+        REQUIRE(renderStateBlock.rasterizerState.m_FillMode == Shipyard::FillMode::Solid);
+        REQUIRE(renderStateBlock.rasterizerState.m_CullMode == Shipyard::CullMode::CullFrontFace);
     }
 
     SECTION("RenderStateBlock With ifdef")
@@ -115,54 +106,48 @@ TEST_CASE("Test RenderStateBlockCompiler", "[ShaderCompiler]")
         Shipyard::Array<Shipyard::ShaderOption> everyPossibleShaderOptionForShaderKey;
         Shipyard::ShaderKey::GetShaderKeyOptionsForShaderFamily(testShaderKey.GetShaderFamily(), everyPossibleShaderOptionForShaderKey);
 
-        Shipyard::RasterizerState rasterizerState;
-        Shipyard::DepthStencilState depthStencilState;
+        Shipyard::RenderStateBlock renderStateBlock;
 
         Shipyard::RenderStateBlockCompilationError renderStateBlockCompilationError = Shipyard::CompileRenderStateBlock(
                 testShaderKey,
                 everyPossibleShaderOptionForShaderKey,
                 renderStateBlockSource,
-                rasterizerState,
-                depthStencilState);
+                renderStateBlock);
 
         REQUIRE(renderStateBlockCompilationError == Shipyard::RenderStateBlockCompilationError::NoError);
 
-        REQUIRE(rasterizerState.m_FillMode == Shipyard::FillMode::Wireframe);
-        REQUIRE(rasterizerState.m_CullMode == Shipyard::CullMode::CullFrontFace);
+        REQUIRE(renderStateBlock.rasterizerState.m_FillMode == Shipyard::FillMode::Wireframe);
+        REQUIRE(renderStateBlock.rasterizerState.m_CullMode == Shipyard::CullMode::CullFrontFace);
 
-        rasterizerState = Shipyard::RasterizerState();
-        depthStencilState = Shipyard::DepthStencilState();
-
+        renderStateBlock = Shipyard::RenderStateBlock();
+        
         renderStateBlockSource = "#if Test2Bits == 1 \n FillMode = Wireframe; \n #endif \n CullMode = CullFrontFace;";
 
         renderStateBlockCompilationError = Shipyard::CompileRenderStateBlock(
                 testShaderKey,
                 everyPossibleShaderOptionForShaderKey,
                 renderStateBlockSource,
-                rasterizerState,
-                depthStencilState);
+                renderStateBlock);
 
         REQUIRE(renderStateBlockCompilationError == Shipyard::RenderStateBlockCompilationError::NoError);
 
-        REQUIRE(rasterizerState.m_FillMode == Shipyard::FillMode::Solid);
-        REQUIRE(rasterizerState.m_CullMode == Shipyard::CullMode::CullFrontFace);
+        REQUIRE(renderStateBlock.rasterizerState.m_FillMode == Shipyard::FillMode::Solid);
+        REQUIRE(renderStateBlock.rasterizerState.m_CullMode == Shipyard::CullMode::CullFrontFace);
 
-        rasterizerState = Shipyard::RasterizerState();
-        depthStencilState = Shipyard::DepthStencilState();
+        renderStateBlock = Shipyard::RenderStateBlock();
 
         SET_SHADER_OPTION(testShaderKey, Test2Bits, 1);
 
         renderStateBlockCompilationError = Shipyard::CompileRenderStateBlock(
-            testShaderKey,
-            everyPossibleShaderOptionForShaderKey,
-            renderStateBlockSource,
-            rasterizerState,
-            depthStencilState);
+                testShaderKey,
+                everyPossibleShaderOptionForShaderKey,
+                renderStateBlockSource,
+                renderStateBlock);
 
         REQUIRE(renderStateBlockCompilationError == Shipyard::RenderStateBlockCompilationError::NoError);
 
-        REQUIRE(rasterizerState.m_FillMode == Shipyard::FillMode::Wireframe);
-        REQUIRE(rasterizerState.m_CullMode == Shipyard::CullMode::CullFrontFace);
+        REQUIRE(renderStateBlock.rasterizerState.m_FillMode == Shipyard::FillMode::Wireframe);
+        REQUIRE(renderStateBlock.rasterizerState.m_CullMode == Shipyard::CullMode::CullFrontFace);
     }
 
     SECTION("Full RenderStateBlock")
@@ -199,42 +184,40 @@ TEST_CASE("Test RenderStateBlockCompiler", "[ShaderCompiler]")
         Shipyard::Array<Shipyard::ShaderOption> everyPossibleShaderOptionForShaderKey;
         Shipyard::ShaderKey::GetShaderKeyOptionsForShaderFamily(testShaderKey.GetShaderFamily(), everyPossibleShaderOptionForShaderKey);
 
-        Shipyard::RasterizerState rasterizerState;
-        Shipyard::DepthStencilState depthStencilState;
+        Shipyard::RenderStateBlock renderStateBlock;
 
         Shipyard::RenderStateBlockCompilationError renderStateBlockCompilationError = Shipyard::CompileRenderStateBlock(
                 testShaderKey,
                 everyPossibleShaderOptionForShaderKey,
                 renderStateBlockSource,
-                rasterizerState,
-                depthStencilState);
+                renderStateBlock);
 
         REQUIRE(renderStateBlockCompilationError == Shipyard::RenderStateBlockCompilationError::NoError);
 
-        REQUIRE(rasterizerState.m_DepthBias == -5);
-        REQUIRE(fabs(rasterizerState.m_DepthBiasClamp - 1.5f) < 0.0001f);
-        REQUIRE(fabs(rasterizerState.m_SlopeScaledDepthBias - 2.25f) < 0.0001f);
-        REQUIRE(rasterizerState.m_FillMode == Shipyard::FillMode::Wireframe);
-        REQUIRE(rasterizerState.m_CullMode == Shipyard::CullMode::CullNone);
-        REQUIRE(rasterizerState.m_IsFrontCounterClockwise == true);
-        REQUIRE(rasterizerState.m_DepthClipEnable == true);
-        REQUIRE(rasterizerState.m_ScissorEnable == true);
-        REQUIRE(rasterizerState.m_MultisampleEnable == true);
-        REQUIRE(rasterizerState.m_AntialiasedLineEnable == true);
-        REQUIRE(depthStencilState.m_DepthComparisonFunc == Shipyard::ComparisonFunc::Greater);
-        REQUIRE(depthStencilState.m_StencilReadMask == 0xff);
-        REQUIRE(depthStencilState.m_StencilWriteMask == 0b11001100);
-        REQUIRE(depthStencilState.m_FrontFaceStencilFailOp == Shipyard::StencilOperation::Keep);
-        REQUIRE(depthStencilState.m_FrontFaceStencilDepthFailOp == Shipyard::StencilOperation::Zero);
-        REQUIRE(depthStencilState.m_FrontFaceStencilPassOp == Shipyard::StencilOperation::Replace);
-        REQUIRE(depthStencilState.m_FrontFaceStencilComparisonFunc == Shipyard::ComparisonFunc::Never);
-        REQUIRE(depthStencilState.m_BackFaceStencilFailOp == Shipyard::StencilOperation::IncrSaturate);
-        REQUIRE(depthStencilState.m_BackFaceStencilDepthFailOp == Shipyard::StencilOperation::DecrSaturate);
-        REQUIRE(depthStencilState.m_BackFaceStencilPassOp == Shipyard::StencilOperation::Invert);
-        REQUIRE(depthStencilState.m_BackFaceStencilComparisonFunc == Shipyard::ComparisonFunc::Equal);
-        REQUIRE(depthStencilState.m_DepthEnable == false);
-        REQUIRE(depthStencilState.m_EnableDepthWrite == false);
-        REQUIRE(depthStencilState.m_StencilEnable == true);
+        REQUIRE(renderStateBlock.rasterizerState.m_DepthBias == -5);
+        REQUIRE(fabs(renderStateBlock.rasterizerState.m_DepthBiasClamp - 1.5f) < 0.0001f);
+        REQUIRE(fabs(renderStateBlock.rasterizerState.m_SlopeScaledDepthBias - 2.25f) < 0.0001f);
+        REQUIRE(renderStateBlock.rasterizerState.m_FillMode == Shipyard::FillMode::Wireframe);
+        REQUIRE(renderStateBlock.rasterizerState.m_CullMode == Shipyard::CullMode::CullNone);
+        REQUIRE(renderStateBlock.rasterizerState.m_IsFrontCounterClockwise == true);
+        REQUIRE(renderStateBlock.rasterizerState.m_DepthClipEnable == true);
+        REQUIRE(renderStateBlock.rasterizerState.m_ScissorEnable == true);
+        REQUIRE(renderStateBlock.rasterizerState.m_MultisampleEnable == true);
+        REQUIRE(renderStateBlock.rasterizerState.m_AntialiasedLineEnable == true);
+        REQUIRE(renderStateBlock.depthStencilState.m_DepthComparisonFunc == Shipyard::ComparisonFunc::Greater);
+        REQUIRE(renderStateBlock.depthStencilState.m_StencilReadMask == 0xff);
+        REQUIRE(renderStateBlock.depthStencilState.m_StencilWriteMask == 0b11001100);
+        REQUIRE(renderStateBlock.depthStencilState.m_FrontFaceStencilFailOp == Shipyard::StencilOperation::Keep);
+        REQUIRE(renderStateBlock.depthStencilState.m_FrontFaceStencilDepthFailOp == Shipyard::StencilOperation::Zero);
+        REQUIRE(renderStateBlock.depthStencilState.m_FrontFaceStencilPassOp == Shipyard::StencilOperation::Replace);
+        REQUIRE(renderStateBlock.depthStencilState.m_FrontFaceStencilComparisonFunc == Shipyard::ComparisonFunc::Never);
+        REQUIRE(renderStateBlock.depthStencilState.m_BackFaceStencilFailOp == Shipyard::StencilOperation::IncrSaturate);
+        REQUIRE(renderStateBlock.depthStencilState.m_BackFaceStencilDepthFailOp == Shipyard::StencilOperation::DecrSaturate);
+        REQUIRE(renderStateBlock.depthStencilState.m_BackFaceStencilPassOp == Shipyard::StencilOperation::Invert);
+        REQUIRE(renderStateBlock.depthStencilState.m_BackFaceStencilComparisonFunc == Shipyard::ComparisonFunc::Equal);
+        REQUIRE(renderStateBlock.depthStencilState.m_DepthEnable == false);
+        REQUIRE(renderStateBlock.depthStencilState.m_EnableDepthWrite == false);
+        REQUIRE(renderStateBlock.depthStencilState.m_StencilEnable == true);
     }
 
     SECTION("Complex RenderStateBlock")
@@ -283,41 +266,39 @@ TEST_CASE("Test RenderStateBlockCompiler", "[ShaderCompiler]")
         Shipyard::Array<Shipyard::ShaderOption> everyPossibleShaderOptionForShaderKey;
         Shipyard::ShaderKey::GetShaderKeyOptionsForShaderFamily(testShaderKey.GetShaderFamily(), everyPossibleShaderOptionForShaderKey);
 
-        Shipyard::RasterizerState rasterizerState;
-        Shipyard::DepthStencilState depthStencilState;
+        Shipyard::RenderStateBlock renderStateBlock;
 
         Shipyard::RenderStateBlockCompilationError renderStateBlockCompilationError = Shipyard::CompileRenderStateBlock(
-            testShaderKey,
-            everyPossibleShaderOptionForShaderKey,
-            renderStateBlockSource,
-            rasterizerState,
-            depthStencilState);
+                testShaderKey,
+                everyPossibleShaderOptionForShaderKey,
+                renderStateBlockSource,
+                renderStateBlock);
 
         REQUIRE(renderStateBlockCompilationError == Shipyard::RenderStateBlockCompilationError::NoError);
 
-        REQUIRE(rasterizerState.m_DepthBias == -5);
-        REQUIRE(fabs(rasterizerState.m_DepthBiasClamp - 1.5f) < 0.0001f);
-        REQUIRE(fabs(rasterizerState.m_SlopeScaledDepthBias - 2.25f) < 0.0001f);
-        REQUIRE(rasterizerState.m_FillMode == Shipyard::FillMode::Wireframe);
-        REQUIRE(rasterizerState.m_CullMode == Shipyard::CullMode::CullFrontFace);
-        REQUIRE(rasterizerState.m_IsFrontCounterClockwise == true);
-        REQUIRE(rasterizerState.m_DepthClipEnable == true);
-        REQUIRE(rasterizerState.m_ScissorEnable == true);
-        REQUIRE(rasterizerState.m_MultisampleEnable == true);
-        REQUIRE(rasterizerState.m_AntialiasedLineEnable == true);
-        REQUIRE(depthStencilState.m_DepthComparisonFunc == Shipyard::ComparisonFunc::Greater);
-        REQUIRE(depthStencilState.m_StencilReadMask == 0);
-        REQUIRE(depthStencilState.m_StencilWriteMask == 0);
-        REQUIRE(depthStencilState.m_FrontFaceStencilFailOp == Shipyard::StencilOperation::Keep);
-        REQUIRE(depthStencilState.m_FrontFaceStencilDepthFailOp == Shipyard::StencilOperation::Keep);
-        REQUIRE(depthStencilState.m_FrontFaceStencilPassOp == Shipyard::StencilOperation::Keep);
-        REQUIRE(depthStencilState.m_FrontFaceStencilComparisonFunc == Shipyard::ComparisonFunc::Always);
-        REQUIRE(depthStencilState.m_BackFaceStencilFailOp == Shipyard::StencilOperation::Keep);
-        REQUIRE(depthStencilState.m_BackFaceStencilDepthFailOp == Shipyard::StencilOperation::Keep);
-        REQUIRE(depthStencilState.m_BackFaceStencilPassOp == Shipyard::StencilOperation::Keep);
-        REQUIRE(depthStencilState.m_BackFaceStencilComparisonFunc == Shipyard::ComparisonFunc::Always);
-        REQUIRE(depthStencilState.m_DepthEnable == false);
-        REQUIRE(depthStencilState.m_EnableDepthWrite == true);
-        REQUIRE(depthStencilState.m_StencilEnable == false);
+        REQUIRE(renderStateBlock.rasterizerState.m_DepthBias == -5);
+        REQUIRE(fabs(renderStateBlock.rasterizerState.m_DepthBiasClamp - 1.5f) < 0.0001f);
+        REQUIRE(fabs(renderStateBlock.rasterizerState.m_SlopeScaledDepthBias - 2.25f) < 0.0001f);
+        REQUIRE(renderStateBlock.rasterizerState.m_FillMode == Shipyard::FillMode::Wireframe);
+        REQUIRE(renderStateBlock.rasterizerState.m_CullMode == Shipyard::CullMode::CullFrontFace);
+        REQUIRE(renderStateBlock.rasterizerState.m_IsFrontCounterClockwise == true);
+        REQUIRE(renderStateBlock.rasterizerState.m_DepthClipEnable == true);
+        REQUIRE(renderStateBlock.rasterizerState.m_ScissorEnable == true);
+        REQUIRE(renderStateBlock.rasterizerState.m_MultisampleEnable == true);
+        REQUIRE(renderStateBlock.rasterizerState.m_AntialiasedLineEnable == true);
+        REQUIRE(renderStateBlock.depthStencilState.m_DepthComparisonFunc == Shipyard::ComparisonFunc::Greater);
+        REQUIRE(renderStateBlock.depthStencilState.m_StencilReadMask == 0);
+        REQUIRE(renderStateBlock.depthStencilState.m_StencilWriteMask == 0);
+        REQUIRE(renderStateBlock.depthStencilState.m_FrontFaceStencilFailOp == Shipyard::StencilOperation::Keep);
+        REQUIRE(renderStateBlock.depthStencilState.m_FrontFaceStencilDepthFailOp == Shipyard::StencilOperation::Keep);
+        REQUIRE(renderStateBlock.depthStencilState.m_FrontFaceStencilPassOp == Shipyard::StencilOperation::Keep);
+        REQUIRE(renderStateBlock.depthStencilState.m_FrontFaceStencilComparisonFunc == Shipyard::ComparisonFunc::Always);
+        REQUIRE(renderStateBlock.depthStencilState.m_BackFaceStencilFailOp == Shipyard::StencilOperation::Keep);
+        REQUIRE(renderStateBlock.depthStencilState.m_BackFaceStencilDepthFailOp == Shipyard::StencilOperation::Keep);
+        REQUIRE(renderStateBlock.depthStencilState.m_BackFaceStencilPassOp == Shipyard::StencilOperation::Keep);
+        REQUIRE(renderStateBlock.depthStencilState.m_BackFaceStencilComparisonFunc == Shipyard::ComparisonFunc::Always);
+        REQUIRE(renderStateBlock.depthStencilState.m_DepthEnable == false);
+        REQUIRE(renderStateBlock.depthStencilState.m_EnableDepthWrite == true);
+        REQUIRE(renderStateBlock.depthStencilState.m_StencilEnable == false);
     }
 }

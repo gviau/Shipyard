@@ -175,15 +175,15 @@ void DX11RenderStateCache::BindPipelineStateObject(const GFXPipelineStateObject&
 {
     const PipelineStateObjectCreationParameters& pipelineStateObjectParameters = pipelineStateObject.GetCreationParameters();
 
-    if (pipelineStateObjectParameters.rasterizerState != m_RasterizerState)
+    if (pipelineStateObjectParameters.renderStateBlock.rasterizerState != m_RasterizerState)
     {
-        m_RasterizerState = pipelineStateObjectParameters.rasterizerState;
+        m_RasterizerState = pipelineStateObjectParameters.renderStateBlock.rasterizerState;
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_RasterizerState);
     }
 
-    if (pipelineStateObjectParameters.depthStencilState != m_DepthStencilState)
+    if (pipelineStateObjectParameters.renderStateBlock.depthStencilState != m_DepthStencilState)
     {
-        m_DepthStencilState = pipelineStateObjectParameters.depthStencilState;
+        m_DepthStencilState = pipelineStateObjectParameters.renderStateBlock.depthStencilState;
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_DepthStencilState);
     }
 

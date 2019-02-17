@@ -8,8 +8,7 @@
 namespace Shipyard
 {
 
-struct DepthStencilState;
-struct RasterizerState;
+struct RenderStateBlock;
 class ShaderKey;
 
 enum class RenderStateBlockCompilationError
@@ -25,7 +24,6 @@ SHIPYARD_API RenderStateBlockCompilationError CompileRenderStateBlock(
         const ShaderKey& shaderKey,
         const Array<ShaderOption>& everyPossibleShaderOption,
         const StringA& renderPipelineBlockSource,
-        RasterizerState& rasterizerState,
-        DepthStencilState& depthhStencilState);
+        RenderStateBlock& renderStateBlock);
 
 }

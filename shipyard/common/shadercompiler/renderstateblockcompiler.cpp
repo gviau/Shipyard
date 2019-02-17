@@ -273,8 +273,7 @@ RenderStateBlockCompilationError InterpretStencilOperation(const StringA& value,
 RenderStateBlockCompilationError InterpretRenderPipelineStateOption(
         const StringA& renderPipelineStateOption,
         const StringA& renderPipelineStateValue,
-        RasterizerState& rasterizerState,
-        DepthStencilState& depthStencilState)
+        RenderStateBlock& renderStateBlock)
 {
     if (renderPipelineStateOption == "")
     {
@@ -285,6 +284,9 @@ RenderStateBlockCompilationError InterpretRenderPipelineStateOption(
     {
         return RenderStateBlockCompilationError::MissingValueForOption;
     }
+
+    RasterizerState& rasterizerState = renderStateBlock.rasterizerState;
+    DepthStencilState& depthStencilState = renderStateBlock.depthStencilState;
 
     RenderStateBlockCompilationError renderStateBlockCompilationError = RenderStateBlockCompilationError::UnrecognizedOption;
 
@@ -476,8 +478,7 @@ SHIPYARD_API RenderStateBlockCompilationError CompileRenderStateBlock(
         const ShaderKey& shaderKey,
         const Array<ShaderOption>& everyPossibleShaderOption,
         const StringA& renderPipelineBlockSource,
-        RasterizerState& rasterizerState,
-        DepthStencilState& depthhStencilState)
+        RenderStateBlock& renderStateBlock)
 {
     if (renderPipelineBlockSource.IsEmpty())
     {
@@ -505,8 +506,7 @@ SHIPYARD_API RenderStateBlockCompilationError CompileRenderStateBlock(
             RenderStateBlockCompilationError renderStateBlockCompilationError = InterpretRenderPipelineStateOption(
                     renderPipelineStateOption,
                     renderPipelineStateValue,
-                    rasterizerState,
-                    depthhStencilState);
+                    renderStateBlock);
 
             if (renderStateBlockCompilationError != RenderStateBlockCompilationError::NoError)
             {

@@ -411,6 +411,12 @@ namespace Shipyard
         ShaderVisibility shaderVisibility;
     };
 
+    struct RenderStateBlock
+    {
+        RasterizerState rasterizerState;
+        DepthStencilState depthStencilState;
+    };
+
     struct PipelineStateObjectCreationParameters
     {
         PipelineStateObjectCreationParameters(RootSignature& rootSignatureToUse)
@@ -426,8 +432,7 @@ namespace Shipyard
         VertexShader* vertexShader;
         PixelShader* pixelShader;
 
-        RasterizerState rasterizerState;
-        DepthStencilState depthStencilState;
+        RenderStateBlock renderStateBlock;
         VertexFormatType vertexFormatType;
         PrimitiveTopology primitiveTopology;
 

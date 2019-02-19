@@ -94,23 +94,23 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
     Shipyard::PipelineStateObjectCreationParameters pipelineStateObjectCreationParameters(*gfxRootSignature.get());
 
-    pipelineStateObjectCreationParameters.rasterizerState.m_AntialiasedLineEnable = false;
-    pipelineStateObjectCreationParameters.rasterizerState.m_CullMode = Shipyard::CullMode::CullBackFace;
-    pipelineStateObjectCreationParameters.rasterizerState.m_DepthBias = 0;
-    pipelineStateObjectCreationParameters.rasterizerState.m_DepthBiasClamp = 0.0f;
-    pipelineStateObjectCreationParameters.rasterizerState.m_DepthClipEnable = false;
-    pipelineStateObjectCreationParameters.rasterizerState.m_FillMode = Shipyard::FillMode::Solid;
-    pipelineStateObjectCreationParameters.rasterizerState.m_IsFrontCounterClockwise = false;
-    pipelineStateObjectCreationParameters.rasterizerState.m_MultisampleEnable = false;
-    pipelineStateObjectCreationParameters.rasterizerState.m_ScissorEnable = false;
-    pipelineStateObjectCreationParameters.rasterizerState.m_SlopeScaledDepthBias = 0.0f;
+    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_AntialiasedLineEnable = false;
+    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_CullMode = Shipyard::CullMode::CullBackFace;
+    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_DepthBias = 0;
+    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_DepthBiasClamp = 0.0f;
+    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_DepthClipEnable = false;
+    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_FillMode = Shipyard::FillMode::Solid;
+    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_IsFrontCounterClockwise = false;
+    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_MultisampleEnable = false;
+    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_ScissorEnable = false;
+    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_SlopeScaledDepthBias = 0.0f;
 
-    pipelineStateObjectCreationParameters.depthStencilState.m_DepthEnable = true;
-    pipelineStateObjectCreationParameters.depthStencilState.m_EnableDepthWrite = true;
-    pipelineStateObjectCreationParameters.depthStencilState.m_DepthComparisonFunc = Shipyard::ComparisonFunc::Less;
-    pipelineStateObjectCreationParameters.depthStencilState.m_StencilEnable = false;
-    pipelineStateObjectCreationParameters.depthStencilState.m_StencilReadMask = 0;
-    pipelineStateObjectCreationParameters.depthStencilState.m_StencilWriteMask = 0;
+    pipelineStateObjectCreationParameters.renderStateBlock.depthStencilState.m_DepthEnable = true;
+    pipelineStateObjectCreationParameters.renderStateBlock.depthStencilState.m_EnableDepthWrite = true;
+    pipelineStateObjectCreationParameters.renderStateBlock.depthStencilState.m_DepthComparisonFunc = Shipyard::ComparisonFunc::Less;
+    pipelineStateObjectCreationParameters.renderStateBlock.depthStencilState.m_StencilEnable = false;
+    pipelineStateObjectCreationParameters.renderStateBlock.depthStencilState.m_StencilReadMask = 0;
+    pipelineStateObjectCreationParameters.renderStateBlock.depthStencilState.m_StencilWriteMask = 0;
 
     pipelineStateObjectCreationParameters.primitiveTopology = Shipyard::PrimitiveTopology::TriangleList;
     pipelineStateObjectCreationParameters.vertexFormatType = Shipyard::VertexFormatType::Pos_UV;

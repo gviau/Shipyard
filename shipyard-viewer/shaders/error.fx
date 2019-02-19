@@ -45,3 +45,18 @@ ps_output PS_Main(vs_output input)
 	
 	return output;
 }
+
+RenderState
+{
+    CullMode = CullBackFace;
+    FillMode = Solid;
+    IsFrontCounterClockwise = false;
+
+    DepthEnable = true;
+    EnableDepthWrite = true;
+    DepthComparisonFunc = Less;
+	
+    StencilEnable = false;
+    StencilReadMask = 0x00;
+    StencilWriteMask = 0x00;
+}

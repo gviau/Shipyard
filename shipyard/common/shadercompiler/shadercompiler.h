@@ -24,6 +24,9 @@ namespace Shipyard
         friend class Singleton<ShaderCompiler>;
 
     public:
+        static const char* RenderStateBlockName;
+
+    public:
         ShaderCompiler();
         virtual ~ShaderCompiler();
 
@@ -57,6 +60,8 @@ namespace Shipyard
             ID3D10Blob* m_CompiledVertexShaderBlob;
             ID3D10Blob* m_CompiledPixelShaderBlob;
             ID3D10Blob* m_CompiledComputeShaderBlob;
+
+            RenderStateBlock m_CompiledRenderStateBlock;
         };
 
     private:
@@ -69,7 +74,8 @@ namespace Shipyard
                 const ShaderKey& shaderKeyToCompile,
                 const Array<ShaderOption>& everyPossibleShaderOptionForShaderKey,
                 const StringT& sourceFilename,
-                const StringA& source);
+                const StringA& shaderSource,
+                const StringA& renderStateBlockSource);
 
         ID3D10Blob* CompileVertexShaderForShaderKey(const StringT& sourceFilename, const StringA& source, _D3D_SHADER_MACRO* shaderOptionDefines);
         ID3D10Blob* CompilePixelShaderForShaderKey(const StringT& sourceFilename, const StringA& source, _D3D_SHADER_MACRO* shaderOptionDefines);

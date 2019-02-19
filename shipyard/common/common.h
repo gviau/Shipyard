@@ -3,6 +3,7 @@
 #include <math/mathutilities.h>
 
 #include <system/array.h>
+#include <system/bitfield.h>
 #include <system/platform.h>
 #include <system/string.h>
 
@@ -453,6 +454,85 @@ namespace Shipyard
         Unknown
     };
 
+    enum RenderStateBlockState : uint8_t
+    {
+        RenderStateBlockState_DepthBias,
+        RenderStateBlockState_DepthBiasClamp,
+        RenderStateBlockState_SlopeScaledDepthBias,
+
+        RenderStateBlockState_FillMode,
+        RenderStateBlockState_CullMode,
+
+        RenderStateBlockState_IsFrontCounterClockwise,
+        RenderStateBlockState_DepthClipEnable,
+        RenderStateBlockState_ScissorEnable,
+        RenderStateBlockState_MultisampleEnable,
+        RenderStateBlockState_AntialiasedLineEnable,
+
+        RenderStateBlockState_DepthComparisonFunc,
+        RenderStateBlockState_StencilReadMask,
+        RenderStateBlockState_StencilWriteMask,
+
+        RenderStateBlockState_FrontFaceStencilFailOp,
+        RenderStateBlockState_FrontFaceStencilDepthFailOp,
+        RenderStateBlockState_FrontFaceStencilPassOp,
+        RenderStateBlockState_FrontFaceStencilComparisonFunc,
+
+        RenderStateBlockState_BackFaceStencilFailOp,
+        RenderStateBlockState_BackFaceStencilDepthFailOp,
+        RenderStateBlockState_BackFaceStencilPassOp,
+        RenderStateBlockState_BackFaceStencilComparisonFunc,
+
+        RenderStateBlockState_DepthEnable,
+        RenderStateBlockState_EnableDepthWrite,
+        RenderStateBlockState_StencilEnable,
+
+        RenderStateBlockState_Count
+    };
+
+    // This class gives control to the programmer to override specific RenderStateBlock's state manually.
+    // Those overriden states will have priority over every other way to set a state (inside of the shader for example).
+    class SHIPYARD_API RenderStateBlockStateOverride
+    {
+    public:
+        void ApplyOverridenValues(RenderStateBlock& renderStateBlock) const;
+
+        void OverrideDepthBiasState(int overrideValue);
+        void OverrideDepthBiasClampState(float overrideValue);
+        void OverrideSlopeScaledDepthBiasState(float overrideValue);
+
+        void OverrideFillModeState(FillMode overrideValue);
+        void OverrideCullModeState(CullMode overrideValue);
+
+        void OverrideIsFrontCounterClockwiseState(bool overrideValue);
+        void OverrideDepthClipEnableState(bool overrideValue);
+        void OverrideScissorEnableState(bool overrideValue);
+        void OverrideMultisampleEnableState(bool overrideValue);
+        void OverrideAntialiasedLineEnableState(bool overrideValue);
+
+        void OverrideDepthComparisonFuncState(ComparisonFunc overrideValue);
+        void OverrideStencilReadMaskState(uint8_t overrideValue);
+        void OverrideStencilWriteMaskState(uint8_t overrideValue);
+
+        void OverrideFrontFaceStencilFailOpState(StencilOperation overrideValue);
+        void OverrideFrontFaceStencilDepthFailOpState(StencilOperation overrideValue);
+        void OverrideFrontFaceStencilPassOpState(StencilOperation overrideValue);
+        void OverrideFrontFaceStencilComparisonFuncState(ComparisonFunc overrideValue);
+
+        void OverrideBackFaceStencilFailOpState(StencilOperation overrideValue);
+        void OverrideBackFaceStencilDepthFailOpState(StencilOperation overrideValue);
+        void OverrideBackFaceStencilPassOpState(StencilOperation overrideValue);
+        void OverrideBackFaceStencilComparisonFuncState(ComparisonFunc overrideValue);
+
+        void OverrideDepthEnableState(bool overrideValue);
+        void OverrideEnableDepthWriteState(bool overrideValue);
+        void OverrideStencilEnableState(bool overrideValue);
+
+    private:
+        Bitfield<RenderStateBlockState::RenderStateBlockState_Count> m_OverridenState;
+        RenderStateBlock m_RenderStateBlockOverride;
+    };
+
     struct DrawItem
     {
         DrawItem(RootSignature& rootSignatureToUse, DescriptorSet& descriptorSetToUse, ShaderHandler& shaderHandlerToUse, PrimitiveTopology primitiveTopologyToUse)
@@ -460,6 +540,7 @@ namespace Shipyard
             , descriptorSet(descriptorSetToUse)
             , shaderHandler(shaderHandlerToUse)
             , primitiveTopology(primitiveTopologyToUse)
+            , pRenderStateBlockStateOverride(nullptr)
         {
         }
 
@@ -469,6 +550,8 @@ namespace Shipyard
         ShaderHandler& shaderHandler;
 
         PrimitiveTopology primitiveTopology;
+
+        RenderStateBlockStateOverride* pRenderStateBlockStateOverride;
     };
 
     enum class GfxResourceType

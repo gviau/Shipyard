@@ -125,6 +125,12 @@ void DX11RenderDeviceContext::PrepareNextDrawCalls(const DrawItem& drawItem, Ver
     pipelineStateObjectCreationParameters.primitiveTopology = drawItem.primitiveTopology;
     pipelineStateObjectCreationParameters.vertexFormatType = vertexFormatType;
 
+    // Apply override, if any.
+    if (drawItem.pRenderStateBlockStateOverride != nullptr)
+    {
+        drawItem.pRenderStateBlockStateOverride->ApplyOverridenValues(pipelineStateObjectCreationParameters.renderStateBlock);
+    }
+
     GFXPipelineStateObject gfxPipelineStateObject(pipelineStateObjectCreationParameters);
 
     m_RenderStateCache.BindRootSignature(gfxRootSignature);

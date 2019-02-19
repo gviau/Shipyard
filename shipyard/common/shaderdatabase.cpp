@@ -170,7 +170,8 @@ void ShaderDatabase::RemoveShadersForShaderKey(const ShaderKey& shaderKey)
 
         size_t shaderEntrySetSize =
                 (shaderEntrySet.rawVertexShaderSize + shaderEntrySet.rawPixelShaderSize + shaderEntrySet.rawHullShaderSize +
-                shaderEntrySet.rawDomainShaderSize + shaderEntrySet.rawGeometryShaderSize + shaderEntrySet.rawComputeShaderSize);
+                 shaderEntrySet.rawDomainShaderSize + shaderEntrySet.rawGeometryShaderSize + shaderEntrySet.rawComputeShaderSize +
+                 sizeof(shaderEntrySet.renderStateBlock));
 
         positionToRemoveInFile += shaderEntrySetSize + sizeof(ShaderEntryHeader);
     }
@@ -179,7 +180,8 @@ void ShaderDatabase::RemoveShadersForShaderKey(const ShaderKey& shaderKey)
 
     size_t numCharsToRemove =
             (shaderEntrySet.rawVertexShaderSize + shaderEntrySet.rawPixelShaderSize + shaderEntrySet.rawHullShaderSize +
-            shaderEntrySet.rawDomainShaderSize + shaderEntrySet.rawGeometryShaderSize + shaderEntrySet.rawComputeShaderSize);
+             shaderEntrySet.rawDomainShaderSize + shaderEntrySet.rawGeometryShaderSize + shaderEntrySet.rawComputeShaderSize +
+             sizeof(shaderEntrySet.renderStateBlock));
 
     numCharsToRemove += sizeof(ShaderEntryHeader);
 
@@ -241,6 +243,7 @@ void ShaderDatabase::AppendShadersForShaderKey(const ShaderKey& shaderKey, Shade
     // We copy the shaders so that the ShaderDatabase owns the memory
     ShaderEntrySet stolenShaderEntrySet;
     stolenShaderEntrySet.lastModifiedTimestamp = shaderEntrySet.lastModifiedTimestamp;
+    stolenShaderEntrySet.renderStateBlock = shaderEntrySet.renderStateBlock;
 
     StealShaderMemory(shaderEntrySet.rawVertexShader, shaderEntrySet.rawVertexShaderSize, stolenShaderEntrySet.rawVertexShader, stolenShaderEntrySet.rawVertexShaderSize);
     StealShaderMemory(shaderEntrySet.rawPixelShader, shaderEntrySet.rawPixelShaderSize, stolenShaderEntrySet.rawPixelShader, stolenShaderEntrySet.rawPixelShaderSize);
@@ -309,6 +312,8 @@ void ShaderDatabase::AppendShadersForShaderKey(const ShaderKey& shaderKey, Shade
     {
         m_FileHandler.AppendChars((const char*)shaderEntrySet.rawComputeShader, shaderEntrySet.rawComputeShaderSize, flush);
     }
+
+    m_FileHandler.AppendChars((const char*)&shaderEntrySet.renderStateBlock, sizeof(shaderEntrySet.renderStateBlock), flush);
 }
 
 void ShaderDatabase::LoadNextShaderEntry(uint8_t*& databaseBuffer, BigArray<ShaderEntryKey>& shaderEntryKeys, BigArray<ShaderEntrySet>& shaderEntrySets) const
@@ -338,6 +343,9 @@ void ShaderDatabase::LoadNextShaderEntry(uint8_t*& databaseBuffer, BigArray<Shad
     LoadShaderFromBuffer(databaseBuffer, newShaderEntrySet.rawDomainShader, newShaderEntrySet.rawDomainShaderSize);
     LoadShaderFromBuffer(databaseBuffer, newShaderEntrySet.rawGeometryShader, newShaderEntrySet.rawGeometryShaderSize);
     LoadShaderFromBuffer(databaseBuffer, newShaderEntrySet.rawComputeShader, newShaderEntrySet.rawComputeShaderSize);
+
+    memcpy((uint8_t*)&newShaderEntrySet.renderStateBlock, databaseBuffer, sizeof(newShaderEntrySet.renderStateBlock));
+    databaseBuffer += sizeof(newShaderEntrySet.renderStateBlock);
 }
 
 }

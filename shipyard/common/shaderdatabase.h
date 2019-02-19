@@ -72,6 +72,8 @@ namespace Shipyard
             uint8_t* rawDomainShader = nullptr;
             uint8_t* rawGeometryShader = nullptr;
             uint8_t* rawComputeShader = nullptr;
+
+            RenderStateBlock renderStateBlock;
         };
 
     public:

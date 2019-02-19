@@ -92,6 +92,11 @@ namespace Shipyard
             RenderStateCacheDirtyFlag_ShaderResourceViews,
             RenderStateCacheDirtyFlag_UnorderedAccessViews,
             RenderStateCacheDirtyFlag_Samplers,
+
+            RenderStateCacheDirtyFlag_PrimitiveTopology,
+            RenderStateCacheDirtyFlag_VertexFormatType,
+
+            RenderStateCacheDirtyFlag_Count
         };
 
     private:
@@ -99,7 +104,7 @@ namespace Shipyard
         ID3D11DeviceContext* m_DeviceContext;
 
         // Redundant render state cache
-        Bitfield<64> m_RenderStateCacheDirtyFlags;
+        Bitfield<RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Count> m_RenderStateCacheDirtyFlags;
 
         GFXVertexShader* m_VertexShader;
         GFXPixelShader* m_PixelShader;

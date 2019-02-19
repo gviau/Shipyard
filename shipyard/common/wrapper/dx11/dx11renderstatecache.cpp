@@ -19,6 +19,8 @@
 namespace Shipyard
 {;
 
+extern ID3D11InputLayout* g_RegisteredInputLayouts[uint32_t(VertexFormatType::VertexFormatType_Count)];
+
 DX11RenderStateCache::DX11RenderStateCache(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
     : m_Device(device)
     , m_DeviceContext(deviceContext)
@@ -28,10 +30,9 @@ DX11RenderStateCache::DX11RenderStateCache(ID3D11Device* device, ID3D11DeviceCon
 {
     Reset();
 
-    // Make sure these states are set the first time: otherwise, a rasterizer state that has the same value as the default
-    // constructor will not detect it as changed
-    m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_RasterizerState);
-    m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_DepthStencilState);
+    // Make sure all states are set the first time: otherwise, state with the same value will not bet set the
+    // first time.
+    m_RenderStateCacheDirtyFlags.SetAllBits();
 }
 
 DX11RenderStateCache::~DX11RenderStateCache()
@@ -209,6 +210,18 @@ void DX11RenderStateCache::BindPipelineStateObject(const GFXPipelineStateObject&
 
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_PixelShader);
     }
+
+    if (pipelineStateObjectParameters.primitiveTopology != m_PrimitiveTopology)
+    {
+        m_PrimitiveTopology = pipelineStateObjectParameters.primitiveTopology;
+        m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_PrimitiveTopology);
+    }
+
+    if (pipelineStateObjectParameters.vertexFormatType != m_VertexFormatType)
+    {
+        m_VertexFormatType = pipelineStateObjectParameters.vertexFormatType;
+        m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexFormatType);
+    }
 }
 
 void DX11RenderStateCache::BindDescriptorSet(const GFXDescriptorSet& descriptorSet, const GFXRootSignature& rootSignature)
@@ -367,6 +380,11 @@ void DX11RenderStateCache::CommitStateChangesForGraphics()
         m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_DepthStencilState);
     }
 
+    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Viewport))
+    {
+        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Viewport);
+    }
+
     // In Direct3D 11, no need to rebind resources when the shader changes.
     if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexShader))
     {
@@ -380,6 +398,26 @@ void DX11RenderStateCache::CommitStateChangesForGraphics()
         m_DeviceContext->PSSetShader(m_PixelShader->GetShader(), nullptr, 0);
 
         m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_PixelShader);
+    }
+
+    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Hull))
+    {
+        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Hull);
+    }
+
+    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Domain))
+    {
+        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Domain);
+    }
+
+    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Geometry))
+    {
+        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Geometry);
+    }
+
+    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Compute))
+    {
+        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Compute);
     }
 
     if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ConstantBufferViews))
@@ -438,6 +476,36 @@ void DX11RenderStateCache::CommitStateChangesForGraphics()
         }
 
         m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ShaderResourceViews);
+    }
+
+    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_UnorderedAccessViews))
+    {
+        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_UnorderedAccessViews);
+    }
+
+    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Samplers))
+    {
+        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Samplers);
+    }
+
+    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_PrimitiveTopology))
+    {
+        D3D11_PRIMITIVE_TOPOLOGY topology = ConvertShipyardPrimitiveTopologyToDX11(m_PrimitiveTopology);
+        m_DeviceContext->IASetPrimitiveTopology(topology);
+
+        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_PrimitiveTopology);
+    }
+
+    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexFormatType))
+    {
+        VertexFormatType vertexFormatType = m_VertexFormatType;
+        VertexFormat* vertexFormat = nullptr;
+
+        GetVertexFormat(vertexFormatType, vertexFormat);
+
+        m_DeviceContext->IASetInputLayout(g_RegisteredInputLayouts[uint32_t(vertexFormatType)]);
+
+        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexFormatType);
     }
 
     // Everything should be accounted for.

@@ -66,6 +66,11 @@ size_t MswinFileHandler::ReadChars(size_t startingPosition, char* content, size_
 
 size_t MswinFileHandler::ReadChars(size_t startingPosition, StringA& content, size_t numChars)
 {
+    if (numChars == 0)
+    {
+        return 0;
+    }
+
     content.Resize(numChars);
 
     return ReadChars(startingPosition, &content[0], numChars);
@@ -179,8 +184,15 @@ void MswinFileHandler::RemoveChars(size_t startingPosition, size_t numCharsToRem
 
     assert(m_File.is_open());
     
-    m_File.write(&before[0], before.Size());
-    m_File.write(&after[0], after.Size());
+    if (before.Size() > 0)
+    {
+        m_File.write(&before[0], before.Size());
+    }
+
+    if (after.Size() > 0)
+    {
+        m_File.write(&after[0], after.Size());
+    }
 
     m_File.close();
 

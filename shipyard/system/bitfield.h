@@ -260,6 +260,30 @@ namespace Shipyard
             return numBitsSet;
         }
 
+        void SetAllBits()
+        {
+            uint32_t remainingBitsToSet = (NumBits - (ms_NumElements - 1) * NUM_BITS_PER_BITFIELD_ELEMENT);
+
+            for (uint32_t elementIndex = 0; elementIndex < ms_NumElements; elementIndex++)
+            {
+                if (elementIndex != (ms_NumElements - 1))
+                {
+                    m_BitField[elementIndex] = BitfieldType(-1);
+                }
+                else
+                {
+                    if (remainingBitsToSet == NUM_BITS_PER_BITFIELD_ELEMENT)
+                    {
+                        m_BitField[elementIndex] = BitfieldType(-1);
+                    }
+                    else
+                    {
+                        m_BitField[elementIndex] = ((BitfieldType(1) << remainingBitsToSet) - 1);
+                    }
+                }
+            }
+        }
+
     private:
         BitfieldType m_BitField[ms_NumElements];
     };

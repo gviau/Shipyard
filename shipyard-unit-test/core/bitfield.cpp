@@ -102,6 +102,16 @@ TEST_CASE("Test bitfield 1 element", "[Bitfield]")
 
         REQUIRE(bitfield.GetLongestRangeWithBitsSet(0) == NUM_BITS_PER_BITFIELD_ELEMENT);
     }
+
+    SECTION("Set All Bit")
+    {
+        bitfield.SetAllBits();
+
+        for (uint32_t i = 0; i < NUM_BITS_PER_BITFIELD_ELEMENT; i++)
+        {
+            REQUIRE(bitfield.IsBitSet(i));
+        }
+    }
 }
 
 TEST_CASE("Test bitfield 2 elements", "[Bitfield]")
@@ -229,6 +239,16 @@ TEST_CASE("Test bitfield 2 elements", "[Bitfield]")
 
             uint32_t bitIndex = startingBitIndex + i;
             REQUIRE(bitfield.GetLongestRangeWithBitsSet(bitIndex) == expectedBitCount);
+        }
+    }
+
+    SECTION("Set All Bit")
+    {
+        bitfield.SetAllBits();
+
+        for (uint32_t i = 0; i < bitfieldSize; i++)
+        {
+            REQUIRE(bitfield.IsBitSet(i));
         }
     }
 }
@@ -370,6 +390,16 @@ TEST_CASE("Test bitfield 3 elements", "[Bitfield]")
             REQUIRE(bitfield.GetLongestRangeWithBitsSet(bitIndex) == expectedBitCount);
         }
     }
+
+    SECTION("Set All Bit")
+    {
+        bitfield.SetAllBits();
+
+        for (uint32_t i = 0; i < bitfieldSize; i++)
+        {
+            REQUIRE(bitfield.IsBitSet(i));
+        }
+    }
 }
 
 TEST_CASE("Test bitfield less than an element", "[Bitfield]")
@@ -459,5 +489,15 @@ TEST_CASE("Test bitfield less than an element", "[Bitfield]")
         bitfield.SetRange(0, bitfieldSize - 1);
 
         REQUIRE(bitfield.GetLongestRangeWithBitsSet(0) == bitfieldSize);
+    }
+
+    SECTION("Set All Bit")
+    {
+        bitfield.SetAllBits();
+
+        for (uint32_t i = 0; i < bitfieldSize; i++)
+        {
+            REQUIRE(bitfield.IsBitSet(i));
+        }
     }
 }

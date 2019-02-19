@@ -14,6 +14,8 @@ void ShaderHandler::ApplyShader(PipelineStateObjectCreationParameters& pipelineS
 {
     pipelineStateObjectCreationParameters.vertexShader = m_VertexShader.get();
     pipelineStateObjectCreationParameters.pixelShader = m_PixelShader.get();
+
+    pipelineStateObjectCreationParameters.renderStateBlock = m_RenderStateBlock;
 }
 
 }

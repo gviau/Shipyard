@@ -145,6 +145,8 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
         }
     }
 
+    shaderHandler->m_RenderStateBlock = compiledShaderEntrySet.renderStateBlock;
+
     return shaderHandler;
 }
 

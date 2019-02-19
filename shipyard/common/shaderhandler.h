@@ -13,6 +13,8 @@ namespace Shipyard
     class ShaderDatabase;
     class ShaderHandlerManager;
 
+    struct RenderStateBlock;
+
     struct PipelineStateObjectCreationParameters;
 
     class SHIPYARD_API ShaderHandler
@@ -32,5 +34,7 @@ namespace Shipyard
 
         std::shared_ptr<GFXVertexShader> m_VertexShader;
         std::shared_ptr<GFXPixelShader> m_PixelShader;
+
+        RenderStateBlock m_RenderStateBlock;
     };
 }

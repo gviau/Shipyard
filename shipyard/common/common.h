@@ -10,8 +10,10 @@
 
 namespace Shipyard
 {
+    class DescriptorSet;
     class PixelShader;
     class RootSignature;
+    class ShaderHandler;
     class VertexShader;
 
     enum class VertexFormatType : uint16_t;
@@ -449,6 +451,24 @@ namespace Shipyard
         DepthStencilView,
 
         Unknown
+    };
+
+    struct DrawItem
+    {
+        DrawItem(RootSignature& rootSignatureToUse, DescriptorSet& descriptorSetToUse, ShaderHandler& shaderHandlerToUse, PrimitiveTopology primitiveTopologyToUse)
+            : rootSignature(rootSignatureToUse)
+            , descriptorSet(descriptorSetToUse)
+            , shaderHandler(shaderHandlerToUse)
+            , primitiveTopology(primitiveTopologyToUse)
+        {
+        }
+
+        RootSignature& rootSignature;
+        DescriptorSet& descriptorSet;
+
+        ShaderHandler& shaderHandler;
+
+        PrimitiveTopology primitiveTopology;
     };
 
     enum class GfxResourceType

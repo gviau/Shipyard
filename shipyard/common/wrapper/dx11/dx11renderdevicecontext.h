@@ -27,17 +27,14 @@ namespace Shipyard
         void ClearRenderTarget(float red, float green, float blue, float alpha, uint32_t renderTarget);
         void ClearDepthStencil(bool clearDepth, bool clearStencil);
 
-        void PrepareNextDrawCalls(
-                const GFXRootSignature& rootSignature,
-                const GFXPipelineStateObject& pipelineStateObject,
-                const GFXDescriptorSet& descriptorSet);
-
-        void Draw(PrimitiveTopology primitiveTopology, const GFXVertexBuffer& vertexBuffer, uint32_t startVertexLocation);
-        void DrawIndexed(PrimitiveTopology primitiveTopology, const GFXVertexBuffer& vertexBuffer, const GFXIndexBuffer& indexBuffer, uint32_t startVertexLocation, uint32_t startIndexLocation);
+        void Draw(const DrawItem& drawItem, const GFXVertexBuffer& vertexBuffer, uint32_t startVertexLocation);
+        void DrawIndexed(const DrawItem& drawItem, const GFXVertexBuffer& vertexBuffer, const GFXIndexBuffer& indexBuffer, uint32_t startVertexLocation, uint32_t startIndexLocation);
 
         void SetViewport(float topLeftX, float topLeftY, float width, float height);
 
     private:
+        void PrepareNextDrawCalls(const DrawItem& drawItem, VertexFormatType vertexFormatType);
+
         ID3D11Device* m_Device;
         ID3D11DeviceContext* m_DeviceContext;
 

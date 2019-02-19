@@ -92,30 +92,6 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
     unique_ptr<Shipyard::GFXRootSignature> gfxRootSignature(gfxRenderDevice.CreateRootSignature(rootSignatureParameters));
 
-    Shipyard::PipelineStateObjectCreationParameters pipelineStateObjectCreationParameters(*gfxRootSignature.get());
-
-    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_AntialiasedLineEnable = false;
-    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_CullMode = Shipyard::CullMode::CullBackFace;
-    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_DepthBias = 0;
-    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_DepthBiasClamp = 0.0f;
-    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_DepthClipEnable = false;
-    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_FillMode = Shipyard::FillMode::Solid;
-    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_IsFrontCounterClockwise = false;
-    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_MultisampleEnable = false;
-    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_ScissorEnable = false;
-    pipelineStateObjectCreationParameters.renderStateBlock.rasterizerState.m_SlopeScaledDepthBias = 0.0f;
-
-    pipelineStateObjectCreationParameters.renderStateBlock.depthStencilState.m_DepthEnable = true;
-    pipelineStateObjectCreationParameters.renderStateBlock.depthStencilState.m_EnableDepthWrite = true;
-    pipelineStateObjectCreationParameters.renderStateBlock.depthStencilState.m_DepthComparisonFunc = Shipyard::ComparisonFunc::Less;
-    pipelineStateObjectCreationParameters.renderStateBlock.depthStencilState.m_StencilEnable = false;
-    pipelineStateObjectCreationParameters.renderStateBlock.depthStencilState.m_StencilReadMask = 0;
-    pipelineStateObjectCreationParameters.renderStateBlock.depthStencilState.m_StencilWriteMask = 0;
-
-    pipelineStateObjectCreationParameters.primitiveTopology = Shipyard::PrimitiveTopology::TriangleList;
-    pipelineStateObjectCreationParameters.vertexFormatType = Shipyard::VertexFormatType::Pos_UV;
-    pipelineStateObjectCreationParameters.numRenderTargets = 1;
-
     gfxRenderDeviceContext.SetViewport(0.0f, 0.0f, 800.0f, 600.0f);
 
     Shipyard::Vertex_Pos_UV vertexBufferData[] =
@@ -225,17 +201,9 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
             Shipyard::ShaderHandler* shaderHandler = Shipyard::ShaderHandlerManager::GetInstance().GetShaderHandlerForShaderKey(shaderKey, gfxRenderDevice);
 
-            shaderHandler->ApplyShader(pipelineStateObjectCreationParameters);
+            Shipyard::DrawItem drawItem(*gfxRootSignature.get(), *gfxDescriptorSet.get(), *shaderHandler, Shipyard::PrimitiveTopology::TriangleList);
 
-            Shipyard::GFXPipelineStateObject* gfxPipelineStateObject = gfxRenderDevice.CreatePipelineStateObject(pipelineStateObjectCreationParameters);
-
-            Shipyard::GFXPipelineStateObject pipelineStateObject = *gfxPipelineStateObject;
-
-            gfxRenderDeviceContext.PrepareNextDrawCalls(*gfxRootSignature.get(), pipelineStateObject, *gfxDescriptorSet.get());
-
-            gfxRenderDeviceContext.DrawIndexed(Shipyard::PrimitiveTopology::TriangleList, *(vertexBuffer.get()), *(indexBuffer.get()), 0, 0);
-
-            MemFree(gfxPipelineStateObject);
+            gfxRenderDeviceContext.DrawIndexed(drawItem, *(vertexBuffer.get()), *(indexBuffer.get()), 0, 0);
 
             gfxViewSurface.Flip();
         }

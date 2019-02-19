@@ -9,6 +9,7 @@
 #include <common/wrapper/dx11/dx11shader.h>
 #include <common/wrapper/dx11/dx11texture.h>
 
+#include <common/shaderhandler.h>
 #include <common/vertexformat.h>
 
 #include <system/array.h>
@@ -113,22 +114,29 @@ void DX11RenderDeviceContext::SetViewport(float topLeftX, float topLeftY, float 
     m_DeviceContext->RSSetViewports(1, &viewport);
 }
 
-void DX11RenderDeviceContext::PrepareNextDrawCalls(
-        const GFXRootSignature& rootSignature,
-        const GFXPipelineStateObject& pipelineStateObject,
-        const GFXDescriptorSet& descriptorSet)
+void DX11RenderDeviceContext::PrepareNextDrawCalls(const DrawItem& drawItem, VertexFormatType vertexFormatType)
 {
-    m_RenderStateCache.BindRootSignature(rootSignature);
-    m_RenderStateCache.BindPipelineStateObject(pipelineStateObject);
-    m_RenderStateCache.BindDescriptorSet(descriptorSet, rootSignature);
+    const GFXRootSignature& gfxRootSignature = *reinterpret_cast<GFXRootSignature*>(&drawItem.rootSignature);
+    const GFXDescriptorSet& gfxDescriptorSet = *reinterpret_cast<GFXDescriptorSet*>(&drawItem.descriptorSet);
+
+    PipelineStateObjectCreationParameters pipelineStateObjectCreationParameters(drawItem.rootSignature);
+    drawItem.shaderHandler.ApplyShader(pipelineStateObjectCreationParameters);
+
+    pipelineStateObjectCreationParameters.primitiveTopology = drawItem.primitiveTopology;
+    pipelineStateObjectCreationParameters.vertexFormatType = vertexFormatType;
+
+    GFXPipelineStateObject gfxPipelineStateObject(pipelineStateObjectCreationParameters);
+
+    m_RenderStateCache.BindRootSignature(gfxRootSignature);
+    m_RenderStateCache.BindPipelineStateObject(gfxPipelineStateObject);
+    m_RenderStateCache.BindDescriptorSet(gfxDescriptorSet, gfxRootSignature);
 }
 
-void DX11RenderDeviceContext::Draw(PrimitiveTopology primitiveTopology, const GFXVertexBuffer& vertexBuffer, uint32_t startVertexLocation)
+void DX11RenderDeviceContext::Draw(const DrawItem& drawItem, const GFXVertexBuffer& vertexBuffer, uint32_t startVertexLocation)
 {
-    m_RenderStateCache.CommitStateChangesForGraphics();
+    PrepareNextDrawCalls(drawItem, vertexBuffer.GetVertexFormatType());
 
-    D3D11_PRIMITIVE_TOPOLOGY topology = ConvertShipyardPrimitiveTopologyToDX11(primitiveTopology);
-    m_DeviceContext->IASetPrimitiveTopology(topology);
+    m_RenderStateCache.CommitStateChangesForGraphics();
 
     ID3D11Buffer* buffer = vertexBuffer.GetBuffer();
 
@@ -140,18 +148,16 @@ void DX11RenderDeviceContext::Draw(PrimitiveTopology primitiveTopology, const GF
     uint32_t stride = vertexFormat->GetSize();
     uint32_t offset = 0;
 
-    m_DeviceContext->IASetInputLayout(g_RegisteredInputLayouts[uint32_t(vertexFormatType)]);
     m_DeviceContext->IASetVertexBuffers(0, 1, &buffer, &stride, &offset);
 
     m_DeviceContext->Draw(vertexBuffer.GetNumVertices(), startVertexLocation);
 }
 
-void DX11RenderDeviceContext::DrawIndexed(PrimitiveTopology primitiveTopology, const GFXVertexBuffer& vertexBuffer, const GFXIndexBuffer& indexBuffer, uint32_t startVertexLocation, uint32_t startIndexLocation)
+void DX11RenderDeviceContext::DrawIndexed(const DrawItem& drawItem, const GFXVertexBuffer& vertexBuffer, const GFXIndexBuffer& indexBuffer, uint32_t startVertexLocation, uint32_t startIndexLocation)
 {
-    m_RenderStateCache.CommitStateChangesForGraphics();
+    PrepareNextDrawCalls(drawItem, vertexBuffer.GetVertexFormatType());
 
-    D3D11_PRIMITIVE_TOPOLOGY topology = ConvertShipyardPrimitiveTopologyToDX11(primitiveTopology);
-    m_DeviceContext->IASetPrimitiveTopology(topology);
+    m_RenderStateCache.CommitStateChangesForGraphics();
 
     ID3D11Buffer* d3dVertexBuffer = vertexBuffer.GetBuffer();
     ID3D11Buffer* d3dIndexBuffer = indexBuffer.GetBuffer();
@@ -164,7 +170,6 @@ void DX11RenderDeviceContext::DrawIndexed(PrimitiveTopology primitiveTopology, c
     uint32_t stride = vertexFormat->GetSize();
     uint32_t offset = 0;
 
-    m_DeviceContext->IASetInputLayout(g_RegisteredInputLayouts[uint32_t(vertexFormatType)]);
     m_DeviceContext->IASetVertexBuffers(0, 1, &d3dVertexBuffer, &stride, &offset);
 
     DXGI_FORMAT indexFormat = (indexBuffer.Uses2BytesPerIndex() ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT);

@@ -9,11 +9,11 @@ namespace Shipyard
 
     inline bool IsAlmostEqual(float a, float b, float epsilon = 0.00001f)
     {
-        return ((fabs(a) - fabs(b)) < epsilon);
+        return ((fabs(a - b)) < epsilon);
     }
 
     inline bool IsAlmostEqual(double a, double b, double epsilon = 0.00001)
     {
-        return ((fabs(a) - fabs(b)) < epsilon);
+        return ((fabs(a - b)) < epsilon);
     }
 }

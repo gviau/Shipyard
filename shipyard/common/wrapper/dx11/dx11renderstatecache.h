@@ -34,6 +34,11 @@ namespace Shipyard
         void BindRenderTarget(const GFXRenderTarget& renderTarget);
         void BindDepthStencilRenderTarget(const GFXDepthStencilRenderTarget& depthStencilRenderTarget);
 
+        void SetViewport(const GfxViewport& gfxViewport);
+
+        void SetVertexBuffers(GFXVertexBuffer* const * vertexBuffers, uint32_t startSlot, uint32_t numVertexBuffers, uint32_t* vertexBufferOffsets);
+        void SetIndexBuffer(const GFXIndexBuffer& indexBuffer, uint32_t indexBufferOffset);
+
         void CommitStateChangesForGraphics();
 
     private:
@@ -102,6 +107,9 @@ namespace Shipyard
             RenderStateCacheDirtyFlag_RenderTargets,
             RenderStateCacheDirtyFlag_DepthStencilRenderTarget,
 
+            RenderStateCacheDirtyFlag_VertexBuffers,
+            RenderStateCacheDirtyFlag_IndexBuffer,
+
             RenderStateCacheDirtyFlag_Count
         };
 
@@ -126,6 +134,15 @@ namespace Shipyard
         GfxFormat m_DepthStencilFormat;
 
         GfxViewport m_Viewport;
+
+        ID3D11Buffer* m_NativeVertexBuffers[GfxConstants::GfxConstants_MaxVertexBuffers];
+        uint32_t m_VertexBufferStartSlot;
+        uint32_t m_NumVertexBuffers;
+        uint32_t m_VertexBufferOffsets[GfxConstants::GfxConstants_MaxVertexBuffers];
+
+        ID3D11Buffer* m_NativeIndexBuffer;
+        uint32_t m_IndexBufferFormat;
+        uint32_t m_IndexBufferOffset;
 
         ShaderVisibility m_ConstantBufferViewsShaderVisibility[GfxConstants::GfxConstants_MaxConstantBufferViewsBoundPerShaderStage];
         ShaderVisibility m_ShaderResourceViewsShaderVisibility[GfxConstants::GfxConstants_MaxShaderResourceViewsBoundPerShaderStage];

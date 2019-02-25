@@ -23,7 +23,7 @@ DX11RenderTarget::DX11RenderTarget(ID3D11Device& device, DX11Texture2D** texture
 {
     memset(m_RenderTargetViews, 0, sizeof(m_RenderTargetViews[0]) * GfxConstants::GfxConstants_MaxRenderTargetsBound);
     memset(m_RenderTargetShaderResourceViews, 0, sizeof(m_RenderTargetShaderResourceViews[0]) * GfxConstants::GfxConstants_MaxRenderTargetsBound);
-    memset(m_Formats, uint16_t(GfxFormat::Uknown), sizeof(m_Formats[0]) * GfxConstants::GfxConstants_MaxRenderTargetsBound);
+    memset(m_Formats, uint16_t(GfxFormat::Unknown), sizeof(m_Formats[0]) * GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
     m_NumRenderTargetsAttached = numTexturesToAttach;
 

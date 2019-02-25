@@ -107,7 +107,13 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
     unique_ptr<Shipyard::GFXRootSignature> gfxRootSignature(gfxRenderDevice.CreateRootSignature(rootSignatureParameters));
 
-    gfxRenderDeviceContext.SetViewport(0.0f, 0.0f, 800.0f, 600.0f);
+    Shipyard::GfxViewport gfxViewport;
+    gfxViewport.topLeftX = 0.0f;
+    gfxViewport.topLeftY = 0.0f;
+    gfxViewport.width = float(windowWidth);
+    gfxViewport.height = float(windowHeight);
+    gfxViewport.minDepth = 0.0f;
+    gfxViewport.maxDepth = 1.0f;
 
     Shipyard::Vertex_Pos_UV vertexBufferData[] =
     {
@@ -227,12 +233,15 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
             Shipyard::DrawItem drawItem(
                     gfxRenderTarget,
                     gfxDepthStencilRenderTarget.get(),
+                    gfxViewport,
                     *gfxRootSignature.get(),
                     *gfxDescriptorSet.get(),
                     *shaderHandler,
                     Shipyard::PrimitiveTopology::TriangleList);
 
-            gfxRenderDeviceContext.DrawIndexed(drawItem, *(vertexBuffer.get()), *(indexBuffer.get()), 0, 0);
+            Shipyard::GFXVertexBuffer* gfxVertexBuffer = vertexBuffer.get();
+            uint32_t vertexBufferOffsets = 0;
+            gfxRenderDeviceContext.DrawIndexed(drawItem, &gfxVertexBuffer, 0, 1, &vertexBufferOffsets, *(indexBuffer.get()), 0, 0, 0);
 
             gfxViewSurface.Flip();
         }

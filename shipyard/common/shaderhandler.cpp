@@ -10,7 +10,7 @@ ShaderHandler::ShaderHandler(ShaderKey shaderKey)
 {
 }
 
-void ShaderHandler::ApplyShader(PipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters)
+void ShaderHandler::ApplyShader(PipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters) const
 {
     pipelineStateObjectCreationParameters.vertexShader = m_VertexShader.get();
     pipelineStateObjectCreationParameters.pixelShader = m_PixelShader.get();

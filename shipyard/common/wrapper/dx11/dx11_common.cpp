@@ -72,7 +72,7 @@ DXGI_FORMAT ConvertShipyardFormatToDX11(GfxFormat format)
         case GfxFormat::D24_UNORM_S8_UINT:      return DXGI_FORMAT_D24_UNORM_S8_UINT;
         case GfxFormat::D32_FLOAT:              return DXGI_FORMAT_D32_FLOAT;
         case GfxFormat::D32_FLOAT_S8X24_UINT:   return DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
-        case GfxFormat::Uknown:                 return DXGI_FORMAT_UNKNOWN;
+        case GfxFormat::Unknown:                return DXGI_FORMAT_UNKNOWN;
 
         default:
             assert(false);

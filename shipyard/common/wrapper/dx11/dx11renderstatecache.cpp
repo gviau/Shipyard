@@ -55,12 +55,21 @@ void DX11RenderStateCache::Reset()
     m_NumRenderTargets = 0;
     for (uint32_t i = 0; i < 8; i++)
     {
-        m_RenderTargetsFormat[i] = GfxFormat::R8G8B8A8_UNORM;
+        m_RenderTargetsFormat[i] = GfxFormat::Unknown;
     }
 
     m_DepthStencilFormat = GfxFormat::R32_UINT;
 
     m_Viewport = GfxViewport();
+
+    memset(m_NativeVertexBuffers, 0, sizeof(m_NativeVertexBuffers));
+    m_VertexBufferStartSlot = 0;
+    m_NumVertexBuffers = 0;
+    memset(m_VertexBufferOffsets, 0, sizeof(m_VertexBufferOffsets));
+
+    m_NativeIndexBuffer = nullptr;
+    m_IndexBufferFormat = DXGI_FORMAT_UNKNOWN;
+    m_IndexBufferOffset = 0;
 
     if (m_NativeRasterizerState != nullptr)
     {
@@ -278,6 +287,85 @@ void DX11RenderStateCache::BindDepthStencilRenderTarget(const GFXDepthStencilRen
     }
 }
 
+void DX11RenderStateCache::SetViewport(const GfxViewport& gfxViewport)
+{
+    if (m_Viewport != gfxViewport)
+    {
+        m_Viewport = gfxViewport;
+
+        m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Viewport);
+    }
+}
+
+void DX11RenderStateCache::SetVertexBuffers(GFXVertexBuffer* const * vertexBuffers, uint32_t startSlot, uint32_t numVertexBuffers, uint32_t* vertexBufferOffsets)
+{
+    if (m_VertexBufferStartSlot != startSlot ||
+        m_NumVertexBuffers != numVertexBuffers)
+    {
+        m_VertexBufferStartSlot = startSlot;
+        m_NumVertexBuffers = numVertexBuffers;
+
+        memset(m_NativeVertexBuffers, 0, sizeof(m_NativeVertexBuffers));
+
+        for (uint32_t i = 0; i < numVertexBuffers; i++)
+        {
+            if (vertexBuffers[i] != nullptr)
+            {
+                m_NativeVertexBuffers[i + startSlot] = vertexBuffers[i]->GetBuffer();
+            }
+
+            m_VertexBufferOffsets[i + startSlot] = vertexBufferOffsets[i];
+        }
+
+        m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexBuffers);
+    }
+    else
+    {
+        bool changeVertexBuffers = false;
+
+        for (uint32_t i = 0; i < numVertexBuffers; i++)
+        {
+            if (vertexBufferOffsets[i] != m_VertexBufferOffsets[i + startSlot])
+            {
+                changeVertexBuffers = true;
+            }
+
+            m_VertexBufferOffsets[i + startSlot] = vertexBufferOffsets[i];
+        }
+
+        for (uint32_t i = 0; i < numVertexBuffers; i++)
+        {
+            if (vertexBuffers[i] == nullptr && m_NativeVertexBuffers[i + startSlot] != nullptr ||
+                vertexBuffers[i]->GetBuffer() != m_NativeVertexBuffers[i + startSlot])
+            {
+                changeVertexBuffers = true;
+            }
+
+            m_NativeVertexBuffers[i + startSlot] = vertexBuffers[i]->GetBuffer();
+        }
+
+        if (changeVertexBuffers)
+        {
+            m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexBuffers);
+        }
+    }
+}
+
+void DX11RenderStateCache::SetIndexBuffer(const GFXIndexBuffer& indexBuffer, uint32_t indexBufferOffset)
+{
+    DXGI_FORMAT indexFormat = (indexBuffer.Uses2BytesPerIndex() ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT);
+    if (DXGI_FORMAT(m_IndexBufferFormat) != indexFormat ||
+        m_IndexBufferOffset != indexBufferOffset ||
+        m_NativeIndexBuffer != indexBuffer.GetBuffer())
+    {
+        m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_IndexBuffer);
+    }
+
+    m_IndexBufferFormat = indexFormat;
+    m_IndexBufferOffset = indexBufferOffset;
+    m_NativeIndexBuffer = indexBuffer.GetBuffer();
+}
+
 void DX11RenderStateCache::BindDescriptorTableFromDescriptorSet(
         const Array<GfxResource*>& descriptorTableResources,
         const RootSignatureParameterEntry& rootSignatureParameter)
@@ -416,6 +504,16 @@ void DX11RenderStateCache::CommitStateChangesForGraphics()
 
     if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Viewport))
     {
+        D3D11_VIEWPORT nativeViewport;
+        nativeViewport.TopLeftX = m_Viewport.topLeftX;
+        nativeViewport.TopLeftY = m_Viewport.topLeftY;
+        nativeViewport.Width = m_Viewport.width;
+        nativeViewport.Height = m_Viewport.height;
+        nativeViewport.MinDepth = m_Viewport.minDepth;
+        nativeViewport.MaxDepth = m_Viewport.maxDepth;
+
+        m_DeviceContext->RSSetViewports(1, &nativeViewport);
+
         m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Viewport);
     }
 
@@ -549,6 +647,35 @@ void DX11RenderStateCache::CommitStateChangesForGraphics()
         m_DeviceContext->IASetInputLayout(g_RegisteredInputLayouts[uint32_t(vertexFormatType)]);
 
         m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexFormatType);
+    }
+
+    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexBuffers))
+    {
+        uint32_t vertexBufferStrides[GfxConstants::GfxConstants_MaxVertexBuffers];
+
+        if (m_NumVertexBuffers != 0)
+        {
+            VertexFormat* vertexFormat = nullptr;
+
+            GetVertexFormat(m_VertexFormatType, vertexFormat);
+
+            uint32_t stride = vertexFormat->GetSize();
+            for (uint32_t i = 0; i < GfxConstants::GfxConstants_MaxVertexBuffers; i++)
+            {
+                vertexBufferStrides[i] = stride;
+            }
+        }
+
+        m_DeviceContext->IASetVertexBuffers(m_VertexBufferStartSlot, m_NumVertexBuffers, m_NativeVertexBuffers, vertexBufferStrides, m_VertexBufferOffsets);
+
+        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexBuffers);
+    }
+
+    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_IndexBuffer))
+    {
+        m_DeviceContext->IASetIndexBuffer(m_NativeIndexBuffer, DXGI_FORMAT(m_IndexBufferFormat), m_IndexBufferOffset);
+
+        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_IndexBuffer);
     }
 
     // Everything should be accounted for.

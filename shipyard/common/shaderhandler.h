@@ -25,7 +25,7 @@ namespace Shipyard
     public:
         ShaderHandler(ShaderKey shaderKey);
 
-        void ApplyShader(PipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters);
+        void ApplyShader(PipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters) const;
 
         const ShaderKey& GetShaderKey() const { return m_ShaderKey; }
 

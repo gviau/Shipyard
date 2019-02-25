@@ -90,7 +90,7 @@ uint32_t GetBytesPerPixel(GfxFormat pixelFormat)
         bytesPerPixel = 8;
         break;
 
-    case GfxFormat::Uknown:
+    case GfxFormat::Unknown:
         bytesPerPixel = 0;
         break;
     default:

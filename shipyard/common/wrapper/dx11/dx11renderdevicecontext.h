@@ -25,10 +25,23 @@ namespace Shipyard
         void ClearSingleRenderTarget(const GFXRenderTarget& renderTarget, uint32_t renderTargetIndex, float red, float green, float blue, float alpha);
         void ClearDepthStencilRenderTarget(const GFXDepthStencilRenderTarget& depthStencilRenderTarget, DepthStencilClearFlag depthStencilClearFlag, float depthValue, uint8_t stencilValue);
 
-        void Draw(const DrawItem& drawItem, const GFXVertexBuffer& vertexBuffer, uint32_t startVertexLocation);
-        void DrawIndexed(const DrawItem& drawItem, const GFXVertexBuffer& vertexBuffer, const GFXIndexBuffer& indexBuffer, uint32_t startVertexLocation, uint32_t startIndexLocation);
-
-        void SetViewport(float topLeftX, float topLeftY, float width, float height);
+        void Draw(
+                const DrawItem& drawItem,
+                GFXVertexBuffer* const * vertexBuffers,
+                uint32_t startSlot,
+                uint32_t numVertexBuffers,
+                uint32_t startVertexLocation,
+                uint32_t* vertexBufferOffsets);
+        void DrawIndexed(
+                const DrawItem& drawItem,
+                GFXVertexBuffer* const * vertexBuffers,
+                uint32_t startSlot,
+                uint32_t numVertexBuffers,
+                uint32_t* vertexBufferOffsets,
+                const GFXIndexBuffer& indexBuffer,
+                uint32_t startVertexLocation,
+                uint32_t startIndexLocation,
+                uint32_t indexBufferOffset);
 
     private:
         void PrepareNextDrawCalls(const DrawItem& drawItem, VertexFormatType vertexFormatType);

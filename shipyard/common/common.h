@@ -28,7 +28,9 @@ namespace Shipyard
         GfxConstants_MaxUnorderedAccessViewsBoundPerShaderStage = 8,
         GfxConstants_MaxSamplersBoundPerShaderStage = 16,
 
-        GfxConstants_MaxRenderTargetsBound = 8
+        GfxConstants_MaxRenderTargetsBound = 8,
+
+        GfxConstants_MaxVertexBuffers = 16,
     };
 
     struct BytesArray
@@ -117,7 +119,7 @@ namespace Shipyard
         D32_FLOAT,
         D32_FLOAT_S8X24_UINT,
 
-        Uknown
+        Unknown
     };
 
     bool IsDepthStencilFormat(GfxFormat format);
@@ -450,7 +452,7 @@ namespace Shipyard
 
     struct PipelineStateObjectCreationParameters
     {
-        PipelineStateObjectCreationParameters(RootSignature& rootSignatureToUse)
+        PipelineStateObjectCreationParameters(const RootSignature& rootSignatureToUse)
             : rootSignature(rootSignatureToUse)
             , vertexShader(nullptr)
             , pixelShader(nullptr)
@@ -458,7 +460,7 @@ namespace Shipyard
         {
         }
 
-        RootSignature& rootSignature;
+        const RootSignature& rootSignature;
 
         VertexShader* vertexShader;
         PixelShader* pixelShader;
@@ -561,38 +563,6 @@ namespace Shipyard
         RenderStateBlock m_RenderStateBlockOverride;
     };
 
-    struct DrawItem
-    {
-        DrawItem(
-                RenderTarget* pRenderTargetToUse,
-                DepthStencilRenderTarget* pDepthStencilRenderTargetToUse,
-                RootSignature& rootSignatureToUse,
-                DescriptorSet& descriptorSetToUse,
-                ShaderHandler& shaderHandlerToUse,
-                PrimitiveTopology primitiveTopologyToUse)
-            : pRenderTarget(pRenderTargetToUse)
-            , pDepthStencilRenderTarget(pDepthStencilRenderTargetToUse)
-            , rootSignature(rootSignatureToUse)
-            , descriptorSet(descriptorSetToUse)
-            , shaderHandler(shaderHandlerToUse)
-            , primitiveTopology(primitiveTopologyToUse)
-            , pRenderStateBlockStateOverride(nullptr)
-        {
-        }
-
-        RenderTarget* pRenderTarget;
-        DepthStencilRenderTarget* pDepthStencilRenderTarget;
-
-        RootSignature& rootSignature;
-        DescriptorSet& descriptorSet;
-
-        ShaderHandler& shaderHandler;
-
-        PrimitiveTopology primitiveTopology;
-
-        RenderStateBlockStateOverride* pRenderStateBlockStateOverride;
-    };
-
     enum TextureUsage : uint8_t
     {
         TextureUsage_Default = 0x00,
@@ -610,21 +580,67 @@ namespace Shipyard
 
     struct GfxViewport
     {
-        GfxViewport()
-            : topLeftX(0.0f)
-            , topLeftY(0.0f)
-            , width(1.0f)
-            , height(1.0f)
-            , minDepth(0.0f)
-            , maxDepth(1.0f)
+        float topLeftX = 0.0f;
+        float topLeftY = 0.0f;
+        float width = 1.0f;
+        float height = 1.0f;
+        float minDepth = 0.0f;
+        float maxDepth = 1.0f;
+
+        bool operator== (const GfxViewport& rhs) const
+        {
+            return (IsAlmostEqual(topLeftX, rhs.topLeftX) &&
+                    IsAlmostEqual(topLeftY, rhs.topLeftY) &&
+                    IsAlmostEqual(width, rhs.width) &&
+                    IsAlmostEqual(height, rhs.height) &&
+                    IsAlmostEqual(minDepth, rhs.minDepth) &&
+                    IsAlmostEqual(maxDepth, rhs.maxDepth));
+        }
+
+        bool operator!= (const GfxViewport& rhs) const
+        {
+            return (!IsAlmostEqual(topLeftX, rhs.topLeftX) ||
+                    !IsAlmostEqual(topLeftY, rhs.topLeftY) ||
+                    !IsAlmostEqual(width, rhs.width) ||
+                    !IsAlmostEqual(height, rhs.height) ||
+                    !IsAlmostEqual(minDepth, rhs.minDepth) ||
+                    !IsAlmostEqual(maxDepth, rhs.maxDepth));
+        }
+    };
+
+    struct DrawItem
+    {
+        DrawItem(
+            const RenderTarget* pRenderTargetToUse,
+            const DepthStencilRenderTarget* pDepthStencilRenderTargetToUse,
+            const GfxViewport& viewportToUse,
+            const RootSignature& rootSignatureToUse,
+            const DescriptorSet& descriptorSetToUse,
+            const ShaderHandler& shaderHandlerToUse,
+            PrimitiveTopology primitiveTopologyToUse)
+            : pRenderTarget(pRenderTargetToUse)
+            , pDepthStencilRenderTarget(pDepthStencilRenderTargetToUse)
+            , viewport(viewportToUse)
+            , rootSignature(rootSignatureToUse)
+            , descriptorSet(descriptorSetToUse)
+            , shaderHandler(shaderHandlerToUse)
+            , primitiveTopology(primitiveTopologyToUse)
+            , pRenderStateBlockStateOverride(nullptr)
         {
         }
 
-        float topLeftX;
-        float topLeftY;
-        float width;
-        float height;
-        float minDepth;
-        float maxDepth;
+        const RenderTarget* pRenderTarget;
+        const DepthStencilRenderTarget* pDepthStencilRenderTarget;
+
+        const GfxViewport& viewport;
+
+        const RootSignature& rootSignature;
+        const DescriptorSet& descriptorSet;
+
+        const ShaderHandler& shaderHandler;
+
+        PrimitiveTopology primitiveTopology;
+
+        const RenderStateBlockStateOverride* pRenderStateBlockStateOverride;
     };
 }

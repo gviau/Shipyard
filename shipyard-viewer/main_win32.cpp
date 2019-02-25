@@ -66,7 +66,10 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         return 1;
     }
 
-    HWND windowHandle = CreateWindowEx(NULL,"ShipyardViewer", "Shipyard Viewer", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, NULL, NULL, hInstance, NULL);
+    uint32_t windowWidth = 800;
+    uint32_t windowHeight = 600;
+
+    HWND windowHandle = CreateWindowEx(NULL,"ShipyardViewer", "Shipyard Viewer", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, windowWidth, windowHeight, NULL, NULL, hInstance, NULL);
     if (windowHandle == NULL)
     {
         MessageBox(NULL, "Couldn't create window", "Win32 error", MB_OK);
@@ -77,7 +80,19 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
     Shipyard::GFXRenderDevice gfxRenderDevice;
     Shipyard::GFXRenderDeviceContext gfxRenderDeviceContext(gfxRenderDevice);
-    Shipyard::GFXViewSurface gfxViewSurface(gfxRenderDevice, gfxRenderDeviceContext, 800, 600, Shipyard::GfxFormat::R8G8B8A8_UNORM, windowHandle);
+
+    Shipyard::GFXViewSurface gfxViewSurface(gfxRenderDevice, gfxRenderDeviceContext, windowWidth, windowHeight, Shipyard::GfxFormat::R8G8B8A8_UNORM, windowHandle);
+
+    shared_ptr<Shipyard::GFXTexture2D> gfxDepthTexture(gfxRenderDevice.CreateTexture2D(
+            windowWidth,
+            windowHeight,
+            Shipyard::GfxFormat::D24_UNORM_S8_UINT,
+            false,
+            nullptr,
+            false,
+            Shipyard::TextureUsage::TextureUsage_DepthStencil));
+
+    shared_ptr<Shipyard::GFXDepthStencilRenderTarget> gfxDepthStencilRenderTarget(gfxRenderDevice.CreateDepthStencilRenderTarget(*gfxDepthTexture.get()));
 
     Shipyard::Array<Shipyard::RootSignatureParameterEntry> rootSignatureParameters;
     rootSignatureParameters.Resize(2);
@@ -153,6 +168,11 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     gfxDescriptorSet->SetDescriptorForRootIndex(0, *constantBuffer.get());
     gfxDescriptorSet->SetDescriptorForRootIndex(1, *texture.get());
 
+    shared_ptr<Shipyard::GFXTexture2D> testTexture(gfxRenderDevice.CreateTexture2D(windowWidth, windowHeight, Shipyard::GfxFormat::R8G8B8A8_UNORM, false, nullptr, false, Shipyard::TextureUsage::TextureUsage_RenderTarget));
+    
+    Shipyard::GFXTexture2D* renderTargetTextures[] = { testTexture.get() };
+    shared_ptr<Shipyard::GFXRenderTarget> testRenderTarget(gfxRenderDevice.CreateRenderTarget(&renderTargetTextures[0], 1));
+
     g_IsOpen = true;
 
     float theta = 0.0f;
@@ -193,7 +213,10 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
             theta += 0.001f;
 
-            gfxViewSurface.PreRender();
+            Shipyard::GFXRenderTarget* gfxRenderTarget = gfxViewSurface.GetBackBufferRenderTarget();
+
+            gfxRenderDeviceContext.ClearFullRenderTarget(*gfxRenderTarget, 0.0f, 0.0f, 0.125f, 1.0f);
+            gfxRenderDeviceContext.ClearDepthStencilRenderTarget(*gfxDepthStencilRenderTarget.get(), Shipyard::DepthStencilClearFlag::Depth, 1.0f, 0);
 
             static volatile uint32_t value = 0;
 
@@ -201,7 +224,13 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
             Shipyard::ShaderHandler* shaderHandler = Shipyard::ShaderHandlerManager::GetInstance().GetShaderHandlerForShaderKey(shaderKey, gfxRenderDevice);
 
-            Shipyard::DrawItem drawItem(*gfxRootSignature.get(), *gfxDescriptorSet.get(), *shaderHandler, Shipyard::PrimitiveTopology::TriangleList);
+            Shipyard::DrawItem drawItem(
+                    gfxRenderTarget,
+                    gfxDepthStencilRenderTarget.get(),
+                    *gfxRootSignature.get(),
+                    *gfxDescriptorSet.get(),
+                    *shaderHandler,
+                    Shipyard::PrimitiveTopology::TriangleList);
 
             gfxRenderDeviceContext.DrawIndexed(drawItem, *(vertexBuffer.get()), *(indexBuffer.get()), 0, 0);
 

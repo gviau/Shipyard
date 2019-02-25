@@ -21,11 +21,9 @@ namespace Shipyard
         DX11RenderDeviceContext(const GFXRenderDevice& renderDevice);
         ~DX11RenderDeviceContext();
 
-        void SetRenderTargetView(uint32_t renderTarget, ID3D11RenderTargetView* renderTargetView);
-        void SetDepthStencilView(ID3D11DepthStencilView* depthStencilView);
-
-        void ClearRenderTarget(float red, float green, float blue, float alpha, uint32_t renderTarget);
-        void ClearDepthStencil(bool clearDepth, bool clearStencil);
+        void ClearFullRenderTarget(const GFXRenderTarget& renderTarget, float red, float green, float blue, float alpha);
+        void ClearSingleRenderTarget(const GFXRenderTarget& renderTarget, uint32_t renderTargetIndex, float red, float green, float blue, float alpha);
+        void ClearDepthStencilRenderTarget(const GFXDepthStencilRenderTarget& depthStencilRenderTarget, DepthStencilClearFlag depthStencilClearFlag, float depthValue, uint8_t stencilValue);
 
         void Draw(const DrawItem& drawItem, const GFXVertexBuffer& vertexBuffer, uint32_t startVertexLocation);
         void DrawIndexed(const DrawItem& drawItem, const GFXVertexBuffer& vertexBuffer, const GFXIndexBuffer& indexBuffer, uint32_t startVertexLocation, uint32_t startIndexLocation);

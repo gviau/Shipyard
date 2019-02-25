@@ -10,11 +10,10 @@ namespace Shipyard
         RenderDeviceContext(const GFXRenderDevice& renderDevice);
         virtual ~RenderDeviceContext();
 
-        void ClearFirstRenderTarget(float red, float green, float blue, float alpha);
-        void ClearRenderTargets(float red, float green, float blue, float alpha, uint32_t start, uint32_t count);
-
 #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
-        virtual void ClearRenderTarget(float red, float green, float blue, float alpha, uint32_t renderTarget) = 0;
+        virtual void ClearFullRenderTarget(const GFXRenderTarget& renderTarget, float red, float green, float blue, float alpha) = 0;
+        virtual void ClearSingleRenderTarget(const GFXRenderTarget& renderTarget, uint32_t renderTargetIndex, float red, float green, float blue, float alpha) = 0;
+        virtual void ClearDepthStencilRenderTarget(const GFXDepthStencilRenderTarget& depthStencilRenderTarget, DepthStencilClearFlag depthStencilClearFlag, float depthValue, uint8_t stencilValue) = 0;
         virtual void SetViewport(float topLeftX, float topLeftY, float width, float height) = 0;
 
         virtual void Draw(const DrawItem& drawItem, const GFXVertexBuffer& vertexBuffer, uint32_t startVertexLocation) = 0;

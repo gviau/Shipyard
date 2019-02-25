@@ -5,6 +5,7 @@
 #include <common/wrapper/dx11/dx11descriptorset.h>
 #include <common/wrapper/dx11/dx11pipelinestateobject.h>
 #include <common/wrapper/dx11/dx11renderdevice.h>
+#include <common/wrapper/dx11/dx11rendertarget.h>
 #include <common/wrapper/dx11/dx11rootsignature.h>
 #include <common/wrapper/dx11/dx11shader.h>
 #include <common/wrapper/dx11/dx11texture.h>
@@ -60,28 +61,11 @@ DX11RenderDeviceContext::~DX11RenderDeviceContext()
     }
 }
 
-void DX11RenderDeviceContext::SetRenderTargetView(uint32_t renderTarget, ID3D11RenderTargetView* renderTargetView)
+void DX11RenderDeviceContext::ClearFullRenderTarget(const GFXRenderTarget& renderTarget, float red, float green, float blue, float alpha)
 {
-    assert(renderTarget < 8);
+    assert(renderTarget.IsValid());
 
-    m_RenderTargets[renderTarget] = renderTargetView;
-
-    m_DeviceContext->OMSetRenderTargets(1, &renderTargetView, m_DepthStencilView);
-}
-
-void DX11RenderDeviceContext::SetDepthStencilView(ID3D11DepthStencilView* depthStencilView)
-{
-    m_DepthStencilView = depthStencilView;
-
-    m_DeviceContext->OMSetRenderTargets(1, &m_RenderTargets[0], m_DepthStencilView);
-}
-
-void DX11RenderDeviceContext::ClearRenderTarget(float red, float green, float blue, float alpha, uint32_t renderTarget)
-{
-    assert(renderTarget < 8);
-
-    ID3D11RenderTargetView* renderTargetView = m_RenderTargets[renderTarget];
-    assert(renderTargetView != nullptr);
+    ID3D11RenderTargetView* const * renderTargetViews = renderTarget.GetRenderTargetViews();
 
     float colorRGBA[] =
     {
@@ -91,14 +75,51 @@ void DX11RenderDeviceContext::ClearRenderTarget(float red, float green, float bl
         alpha
     };
 
-    m_DeviceContext->ClearRenderTargetView(renderTargetView, colorRGBA);
+    for (uint32_t i = 0; i < GfxConstants::GfxConstants_MaxRenderTargetsBound; i++)
+    {
+        if (renderTargetViews[i] == nullptr)
+        {
+            continue;
+        }
+
+        m_DeviceContext->ClearRenderTargetView(renderTargetViews[i], colorRGBA);
+    }
 }
 
-void DX11RenderDeviceContext::ClearDepthStencil(bool clearDepth, bool clearStencil)
+void DX11RenderDeviceContext::ClearSingleRenderTarget(const GFXRenderTarget& renderTarget, uint32_t renderTargetIndex, float red, float green, float blue, float alpha)
 {
-    UINT clearFlag = (clearDepth ? D3D11_CLEAR_DEPTH : 0) | (clearStencil ? D3D11_CLEAR_STENCIL : 0);
+    assert(renderTarget.IsValid());
+    assert(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
-    m_DeviceContext->ClearDepthStencilView(m_DepthStencilView, clearFlag, 1.0f, 0);
+    ID3D11RenderTargetView* const * renderTargetViews = renderTarget.GetRenderTargetViews();
+
+    float colorRGBA[] =
+    {
+        red,
+        green,
+        blue,
+        alpha
+    };
+
+    if (renderTargetViews[renderTargetIndex] == nullptr)
+    {
+        return;
+    }
+
+    m_DeviceContext->ClearRenderTargetView(renderTargetViews[renderTargetIndex], colorRGBA);
+}
+
+void DX11RenderDeviceContext::ClearDepthStencilRenderTarget(const GFXDepthStencilRenderTarget& depthStencilRenderTarget, DepthStencilClearFlag depthStencilClearFlag, float depthValue, uint8_t stencilValue)
+{
+    assert(depthStencilRenderTarget.IsValid());
+
+    ID3D11DepthStencilView* const depthStencilView = depthStencilRenderTarget.GetDepthStencilView();
+
+    uint clearFlag = ((depthStencilClearFlag == DepthStencilClearFlag::Depth) ? D3D11_CLEAR_DEPTH :
+                      (depthStencilClearFlag == DepthStencilClearFlag::Stencil) ? D3D11_CLEAR_STENCIL :
+                      (D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL));
+
+    m_DeviceContext->ClearDepthStencilView(depthStencilView, clearFlag, depthValue, stencilValue);
 }
 
 void DX11RenderDeviceContext::SetViewport(float topLeftX, float topLeftY, float width, float height)
@@ -124,6 +145,36 @@ void DX11RenderDeviceContext::PrepareNextDrawCalls(const DrawItem& drawItem, Ver
 
     pipelineStateObjectCreationParameters.primitiveTopology = drawItem.primitiveTopology;
     pipelineStateObjectCreationParameters.vertexFormatType = vertexFormatType;
+
+    if (drawItem.pRenderTarget == nullptr)
+    {
+        pipelineStateObjectCreationParameters.numRenderTargets = 0;
+    }
+    else
+    {
+        GFXRenderTarget& gfxRenderTarget = *reinterpret_cast<GFXRenderTarget*>(drawItem.pRenderTarget);
+        if (gfxRenderTarget.IsValid())
+        {
+            pipelineStateObjectCreationParameters.numRenderTargets = gfxRenderTarget.GetNumRenderTargetsAttached();
+
+            GfxFormat const * renderTargetFormats = gfxRenderTarget.GetRenderTargetFormats();
+
+            memcpy(&pipelineStateObjectCreationParameters.renderTargetsFormat[0], &renderTargetFormats[0], pipelineStateObjectCreationParameters.numRenderTargets);
+
+            m_RenderStateCache.BindRenderTarget(gfxRenderTarget);
+        }
+    }
+
+    if (drawItem.pDepthStencilRenderTarget != nullptr)
+    {
+        GFXDepthStencilRenderTarget& gfxDepthStencilRenderTarget = *reinterpret_cast<GFXDepthStencilRenderTarget*>(drawItem.pDepthStencilRenderTarget);
+        if (gfxDepthStencilRenderTarget.IsValid())
+        {
+            pipelineStateObjectCreationParameters.depthStencilFormat = gfxDepthStencilRenderTarget.GetDepthStencilFormat();
+
+            m_RenderStateCache.BindDepthStencilRenderTarget(gfxDepthStencilRenderTarget);
+        }
+    }
 
     // Apply override, if any.
     if (drawItem.pRenderStateBlockStateOverride != nullptr)

@@ -68,6 +68,12 @@ DXGI_FORMAT ConvertShipyardFormatToDX11(GfxFormat format)
         case GfxFormat::R8_UINT:                return DXGI_FORMAT_R8_UINT;
         case GfxFormat::R8_SNORM:               return DXGI_FORMAT_R8_SNORM;
         case GfxFormat::R8_SINT:                return DXGI_FORMAT_R8_SINT;
+        case GfxFormat::D16_UNORM:              return DXGI_FORMAT_D16_UNORM;
+        case GfxFormat::D24_UNORM_S8_UINT:      return DXGI_FORMAT_D24_UNORM_S8_UINT;
+        case GfxFormat::D32_FLOAT:              return DXGI_FORMAT_D32_FLOAT;
+        case GfxFormat::D32_FLOAT_S8X24_UINT:   return DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+        case GfxFormat::Uknown:                 return DXGI_FORMAT_UNKNOWN;
+
         default:
             assert(false);
     }

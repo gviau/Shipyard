@@ -4,6 +4,8 @@
 
 #include <common/wrapper/dx11/dx11renderdevice.h>
 #include <common/wrapper/dx11/dx11renderdevicecontext.h>
+#include <common/wrapper/dx11/dx11rendertarget.h>
+#include <common/wrapper/dx11/dx11texture.h>
 
 #include <dxgi.h>
 
@@ -22,69 +24,11 @@ DX11ViewSurface::DX11ViewSurface(DX11RenderDevice& renderDevice, DX11RenderDevic
     , m_ImmediateRenderContext(immediateRenderContext)
     , m_WindowHandle(windowHandle)
     , m_SwapChain(nullptr)
-    , m_BackBuffer(nullptr)
-    , m_DepthStencilView(nullptr)
+    , m_BackBufferRenderTarget(nullptr)
+    , m_BackBufferTexture(nullptr)
 {
     m_SwapChain = renderDevice.CreateSwapchain(m_Width, m_Height, m_ViewSurfaceFormat, m_WindowHandle);
 
-    ID3D11Texture2D* depthStencilTexture = nullptr;
-    renderDevice.CreateDepthStencilBuffer(m_Width, m_Height, depthStencilTexture, m_DepthStencilView);
-
-    if (depthStencilTexture != nullptr)
-    {
-        depthStencilTexture->Release();
-    }
-   
-    CreateBackBuffer();
-}
-
-DX11ViewSurface::~DX11ViewSurface()
-{
-    if (m_SwapChain != nullptr)
-    {
-        m_SwapChain->Release();
-    }
-
-    if (m_BackBuffer != nullptr)
-    {
-        m_BackBuffer->Release();
-    }
-
-    if (m_DepthStencilView != nullptr)
-    {
-        m_DepthStencilView->Release();
-    }
-}
-
-void DX11ViewSurface::PreRender()
-{
-    m_ImmediateRenderContext.SetRenderTargetView(0, m_BackBuffer);
-    m_ImmediateRenderContext.SetDepthStencilView(m_DepthStencilView);
-    m_ImmediateRenderContext.ClearFirstRenderTarget(0.0f, 0.0f, 0.125f, 1.0f);
-    m_ImmediateRenderContext.ClearDepthStencil(true, false);
-}
-
-void DX11ViewSurface::Render()
-{
-
-}
-
-void DX11ViewSurface::PostRender()
-{
-
-}
-
-void DX11ViewSurface::Flip()
-{
-    HRESULT hr = m_SwapChain->Present(0, 0);
-    if (FAILED(hr))
-    {
-        MessageBox(NULL, "Present failed", "error", MB_OK);
-    }
-}
-
-void DX11ViewSurface::CreateBackBuffer()
-{
     ID3D11Texture2D* backBufferTexture = nullptr;
     HRESULT hr = m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBufferTexture);
     if (FAILED(hr))
@@ -94,14 +38,32 @@ void DX11ViewSurface::CreateBackBuffer()
     }
 
     ID3D11Device* device = m_RenderDevice.GetDevice();
-    hr = device->CreateRenderTargetView(backBufferTexture, nullptr, &m_BackBuffer);
-    if (FAILED(hr))
-    {
-        MessageBox(NULL, "DX11ViewSurface CreateRenderTargetView failed", "DX11 error", MB_OK);
-        return;
-    }
+
+    m_BackBufferTexture = MemAlloc(DX11Texture2D)(*device, *backBufferTexture, m_ViewSurfaceFormat);
+    
+    m_BackBufferRenderTarget = m_RenderDevice.CreateRenderTarget((GFXTexture2D**)&m_BackBufferTexture, 1);
 
     backBufferTexture->Release();
+}
+
+DX11ViewSurface::~DX11ViewSurface()
+{
+    if (m_SwapChain != nullptr)
+    {
+        m_SwapChain->Release();
+    }
+
+    MemFree(m_BackBufferTexture);
+    MemFree(m_BackBufferRenderTarget);
+}
+
+void DX11ViewSurface::Flip()
+{
+    HRESULT hr = m_SwapChain->Present(0, 0);
+    if (FAILED(hr))
+    {
+        MessageBox(NULL, "Present failed", "error", MB_OK);
+    }
 }
 
 }

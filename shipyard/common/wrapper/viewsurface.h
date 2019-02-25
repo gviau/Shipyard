@@ -13,9 +13,6 @@ namespace Shipyard
         ~ViewSurface();
 
 #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
-        virtual void PreRender() = 0;
-        virtual void Render() = 0;
-        virtual void PostRender() = 0;
         virtual void Flip() = 0;
 #endif // #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
 

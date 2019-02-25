@@ -6,6 +6,7 @@
 #include <common/wrapper/dx11/dx11buffer.h>
 #include <common/wrapper/dx11/dx11descriptorset.h>
 #include <common/wrapper/dx11/dx11pipelinestateobject.h>
+#include <common/wrapper/dx11/dx11rendertarget.h>
 #include <common/wrapper/dx11/dx11rootsignature.h>
 #include <common/wrapper/dx11/dx11shader.h>
 #include <common/wrapper/dx11/dx11texture.h>
@@ -95,7 +96,7 @@ void DX11RenderStateCache::Reset()
         m_UnorderedAccessViewsShaderVisibility[i] = ShaderVisibility::ShaderVisibility_None;
     }
 
-    for (uint32_t i = 0; i < GfxConstants::GfxConstatns_MaxSamplersBoundPerShaderStage; i++)
+    for (uint32_t i = 0; i < GfxConstants::GfxConstants_MaxSamplersBoundPerShaderStage; i++)
     {
         m_SamplersShaderVisibility[i] = ShaderVisibility::ShaderVisibility_None;
     }
@@ -244,6 +245,39 @@ void DX11RenderStateCache::BindDescriptorSet(const GFXDescriptorSet& descriptorS
     }
 }
 
+void DX11RenderStateCache::BindRenderTarget(const GFXRenderTarget& renderTarget)
+{
+    ID3D11RenderTargetView* const * renderTargetViews = renderTarget.GetRenderTargetViews();
+
+    bool changeRenderTargets = false;
+    for (uint32_t i = 0; i < GfxConstants::GfxConstants_MaxRenderTargetsBound; i++)
+    {
+        if (m_NativeRenderTargets[i] != renderTargetViews[i])
+        {
+            changeRenderTargets = true;
+        }
+
+        m_NativeRenderTargets[i] = renderTargetViews[i];
+    }
+    
+    if (changeRenderTargets)
+    {
+        m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_RenderTargets);
+    }
+}
+
+void DX11RenderStateCache::BindDepthStencilRenderTarget(const GFXDepthStencilRenderTarget& depthStencilRenderTarget)
+{
+    ID3D11DepthStencilView* const depthStencilView = depthStencilRenderTarget.GetDepthStencilView();
+
+    if (m_NativeDepthStencilView != depthStencilView)
+    {
+        m_NativeDepthStencilView = depthStencilView;
+
+        m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_DepthStencilRenderTarget);
+    }
+}
+
 void DX11RenderStateCache::BindDescriptorTableFromDescriptorSet(
         const Array<GfxResource*>& descriptorTableResources,
         const RootSignatureParameterEntry& rootSignatureParameter)
@@ -383,6 +417,15 @@ void DX11RenderStateCache::CommitStateChangesForGraphics()
     if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Viewport))
     {
         m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Viewport);
+    }
+
+    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_RenderTargets) ||
+        m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_DepthStencilRenderTarget))
+    {
+        m_DeviceContext->OMSetRenderTargets(GfxConstants::GfxConstants_MaxRenderTargetsBound, m_NativeRenderTargets, m_NativeDepthStencilView);
+
+        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_RenderTargets);
+        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_DepthStencilRenderTarget);
     }
 
     // In Direct3D 11, no need to rebind resources when the shader changes.

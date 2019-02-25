@@ -31,6 +31,9 @@ namespace Shipyard
         void BindPipelineStateObject(const GFXPipelineStateObject& pipelineStateObject);
         void BindDescriptorSet(const GFXDescriptorSet& descriptorSet, const GFXRootSignature& rootSignature);
 
+        void BindRenderTarget(const GFXRenderTarget& renderTarget);
+        void BindDepthStencilRenderTarget(const GFXDepthStencilRenderTarget& depthStencilRenderTarget);
+
         void CommitStateChangesForGraphics();
 
     private:
@@ -96,6 +99,9 @@ namespace Shipyard
             RenderStateCacheDirtyFlag_PrimitiveTopology,
             RenderStateCacheDirtyFlag_VertexFormatType,
 
+            RenderStateCacheDirtyFlag_RenderTargets,
+            RenderStateCacheDirtyFlag_DepthStencilRenderTarget,
+
             RenderStateCacheDirtyFlag_Count
         };
 
@@ -116,7 +122,7 @@ namespace Shipyard
         PrimitiveTopology m_PrimitiveTopology;
 
         uint32_t m_NumRenderTargets;
-        GfxFormat m_RenderTargetsFormat[8];
+        GfxFormat m_RenderTargetsFormat[GfxConstants::GfxConstants_MaxRenderTargetsBound];
         GfxFormat m_DepthStencilFormat;
 
         GfxViewport m_Viewport;
@@ -124,23 +130,23 @@ namespace Shipyard
         ShaderVisibility m_ConstantBufferViewsShaderVisibility[GfxConstants::GfxConstants_MaxConstantBufferViewsBoundPerShaderStage];
         ShaderVisibility m_ShaderResourceViewsShaderVisibility[GfxConstants::GfxConstants_MaxShaderResourceViewsBoundPerShaderStage];
         ShaderVisibility m_UnorderedAccessViewsShaderVisibility[GfxConstants::GfxConstants_MaxUnorderedAccessViewsBoundPerShaderStage];
-        ShaderVisibility m_SamplersShaderVisibility[GfxConstants::GfxConstatns_MaxSamplersBoundPerShaderStage];
+        ShaderVisibility m_SamplersShaderVisibility[GfxConstants::GfxConstants_MaxSamplersBoundPerShaderStage];
 
         Bitfield<GfxConstants::GfxConstants_MaxShaderResourceViewsBoundPerShaderStage> m_DirtySlotShaderResourceViewsPerShaderStage[ShaderStage::ShaderStage_Count];
         Bitfield<GfxConstants::GfxConstants_MaxConstantBufferViewsBoundPerShaderStage> m_DirtySlotConstantBufferViewsPerShaderStage[ShaderStage::ShaderStage_Count];
         Bitfield<GfxConstants::GfxConstants_MaxUnorderedAccessViewsBoundPerShaderStage> m_DirtySlotUnorderedAccessViewsPerShaderStage[ShaderStage::ShaderStage_Count];
-        Bitfield<GfxConstants::GfxConstatns_MaxSamplersBoundPerShaderStage> m_DirtySlotSamplersPerShaderStage[ShaderStage::ShaderStage_Count];
+        Bitfield<GfxConstants::GfxConstants_MaxSamplersBoundPerShaderStage> m_DirtySlotSamplersPerShaderStage[ShaderStage::ShaderStage_Count];
 
         // Native interface for actual binding
         ID3D11RasterizerState* m_NativeRasterizerState;
         ID3D11DepthStencilState* m_NativeDepthStencilState;
 
-        ID3D11RenderTargetView* m_NativeRenderTargets[8];
+        ID3D11RenderTargetView* m_NativeRenderTargets[GfxConstants::GfxConstants_MaxRenderTargetsBound];
         ID3D11DepthStencilView* m_NativeDepthStencilView;
 
         ID3D11ShaderResourceView* m_NativeShaderResourceViews[GfxConstants::GfxConstants_MaxShaderResourceViewsBoundPerShaderStage];
         ID3D11Buffer* m_NativeConstantBufferViews[GfxConstants::GfxConstants_MaxConstantBufferViewsBoundPerShaderStage];
         ID3D11UnorderedAccessView* m_NativeUnorderedAccessViews[GfxConstants::GfxConstants_MaxUnorderedAccessViewsBoundPerShaderStage];
-        ID3D11SamplerState* m_NativeSamplers[GfxConstants::GfxConstatns_MaxSamplersBoundPerShaderStage];
+        ID3D11SamplerState* m_NativeSamplers[GfxConstants::GfxConstants_MaxSamplersBoundPerShaderStage];
     };
 }

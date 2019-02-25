@@ -3,6 +3,21 @@
 namespace Shipyard
 {;
 
+bool IsDepthStencilFormat(GfxFormat format)
+{
+    switch (format)
+    {
+    case GfxFormat::D16_UNORM:
+    case GfxFormat::D24_UNORM_S8_UINT:
+    case GfxFormat::D32_FLOAT:
+    case GfxFormat::D32_FLOAT_S8X24_UINT:
+        return true;
+
+    default:
+        return false;
+    }
+}
+
 void RenderStateBlockStateOverride::ApplyOverridenValues(RenderStateBlock& renderStateBlock) const
 {
 #define SET_OVERRIDEN_RASTERIZER_STATE(state) if (m_OverridenState.IsBitSet(RenderStateBlockState::RenderStateBlockState_##state)) renderStateBlock.rasterizerState.m_##state = m_RenderStateBlockOverride.rasterizerState.m_##state;

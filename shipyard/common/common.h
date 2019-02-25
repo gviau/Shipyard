@@ -11,13 +11,25 @@
 
 namespace Shipyard
 {
+    class DepthStencilRenderTarget;
     class DescriptorSet;
     class PixelShader;
+    class RenderTarget;
     class RootSignature;
     class ShaderHandler;
     class VertexShader;
 
     enum class VertexFormatType : uint16_t;
+
+    enum GfxConstants
+    {
+        GfxConstants_MaxShaderResourceViewsBoundPerShaderStage = 64,
+        GfxConstants_MaxConstantBufferViewsBoundPerShaderStage = 15,
+        GfxConstants_MaxUnorderedAccessViewsBoundPerShaderStage = 8,
+        GfxConstants_MaxSamplersBoundPerShaderStage = 16,
+
+        GfxConstants_MaxRenderTargetsBound = 8
+    };
 
     struct BytesArray
     {
@@ -41,6 +53,13 @@ namespace Shipyard
         Read_Write,
         Write_Discard,
         Write_No_Overwrite
+    };
+
+    enum class DepthStencilClearFlag : uint8_t
+    {
+        Depth,
+        Stencil,
+        DepthStencil
     };
 
     enum class GfxFormat : uint16_t
@@ -91,8 +110,17 @@ namespace Shipyard
         R8_UNORM,
         R8_UINT,
         R8_SNORM,
-        R8_SINT
+        R8_SINT,
+
+        D16_UNORM,
+        D24_UNORM_S8_UINT,
+        D32_FLOAT,
+        D32_FLOAT_S8X24_UINT,
+
+        Uknown
     };
+
+    bool IsDepthStencilFormat(GfxFormat format);
 
     enum class FillMode : uint8_t
     {
@@ -440,7 +468,7 @@ namespace Shipyard
         PrimitiveTopology primitiveTopology;
 
         uint32_t numRenderTargets;
-        GfxFormat renderTargetsFormat[8];
+        GfxFormat renderTargetsFormat[GfxConstants::GfxConstants_MaxRenderTargetsBound];
         GfxFormat depthStencilFormat;
     };
 
@@ -535,14 +563,25 @@ namespace Shipyard
 
     struct DrawItem
     {
-        DrawItem(RootSignature& rootSignatureToUse, DescriptorSet& descriptorSetToUse, ShaderHandler& shaderHandlerToUse, PrimitiveTopology primitiveTopologyToUse)
-            : rootSignature(rootSignatureToUse)
+        DrawItem(
+                RenderTarget* pRenderTargetToUse,
+                DepthStencilRenderTarget* pDepthStencilRenderTargetToUse,
+                RootSignature& rootSignatureToUse,
+                DescriptorSet& descriptorSetToUse,
+                ShaderHandler& shaderHandlerToUse,
+                PrimitiveTopology primitiveTopologyToUse)
+            : pRenderTarget(pRenderTargetToUse)
+            , pDepthStencilRenderTarget(pDepthStencilRenderTargetToUse)
+            , rootSignature(rootSignatureToUse)
             , descriptorSet(descriptorSetToUse)
             , shaderHandler(shaderHandlerToUse)
             , primitiveTopology(primitiveTopologyToUse)
             , pRenderStateBlockStateOverride(nullptr)
         {
         }
+
+        RenderTarget* pRenderTarget;
+        DepthStencilRenderTarget* pDepthStencilRenderTarget;
 
         RootSignature& rootSignature;
         DescriptorSet& descriptorSet;
@@ -554,20 +593,19 @@ namespace Shipyard
         RenderStateBlockStateOverride* pRenderStateBlockStateOverride;
     };
 
+    enum TextureUsage : uint8_t
+    {
+        TextureUsage_Default = 0x00,
+        TextureUsage_RenderTarget = 0x01,
+        TextureUsage_DepthStencil = 0x02
+    };
+
     enum class GfxResourceType
     {
         ConstantBuffer,
         Texture,
 
         Unknown
-    };
-
-    enum GfxConstants
-    {
-        GfxConstants_MaxShaderResourceViewsBoundPerShaderStage = 64,
-        GfxConstants_MaxConstantBufferViewsBoundPerShaderStage = 15,
-        GfxConstants_MaxUnorderedAccessViewsBoundPerShaderStage = 8,
-        GfxConstatns_MaxSamplersBoundPerShaderStage = 16
     };
 
     struct GfxViewport

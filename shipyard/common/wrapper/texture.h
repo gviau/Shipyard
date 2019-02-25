@@ -11,17 +11,19 @@ namespace Shipyard
     class SHIPYARD_API BaseTexture : public GfxResource
     {
     public:
-        BaseTexture(uint32_t width, uint32_t height, GfxFormat pixelFormat);
+        BaseTexture(uint32_t width, uint32_t height, GfxFormat pixelFormat, TextureUsage textureUsage = TextureUsage::TextureUsage_Default);
         virtual ~BaseTexture();
 
         uint32_t GetWidth() const { return m_Width; }
         uint32_t GetHeight() const { return m_Height; }
         GfxFormat GetPixelFormat() const { return m_PixelFormat; }
+        TextureUsage GetTextureUsage() const { return m_TextureUsage; }
 
     protected:
         uint32_t m_Width;
         uint32_t m_Height;
         GfxFormat m_PixelFormat;
+        TextureUsage m_TextureUsage;
     };
 
     class SHIPYARD_API Texture2D

@@ -4,11 +4,12 @@
 
 namespace Shipyard
 {;
-BaseTexture::BaseTexture(uint32_t width, uint32_t height, GfxFormat pixelFormat)
+BaseTexture::BaseTexture(uint32_t width, uint32_t height, GfxFormat pixelFormat, TextureUsage textureUsage)
     : GfxResource(GfxResourceType::Texture)
     , m_Width(width)
     , m_Height(height)
     , m_PixelFormat(pixelFormat)
+    , m_TextureUsage(textureUsage)
 {
 
 }
@@ -73,6 +74,25 @@ uint32_t GetBytesPerPixel(GfxFormat pixelFormat)
         bytesPerPixel = 16;
         break;
 
+    case GfxFormat::D16_UNORM:
+        bytesPerPixel = 2;
+        break;
+
+    case GfxFormat::D24_UNORM_S8_UINT:
+        bytesPerPixel = 4;
+        break;
+
+    case GfxFormat::D32_FLOAT:
+        bytesPerPixel = 4;
+        break;
+
+    case GfxFormat::D32_FLOAT_S8X24_UINT:
+        bytesPerPixel = 8;
+        break;
+
+    case GfxFormat::Uknown:
+        bytesPerPixel = 0;
+        break;
     default:
         assert(false);
     }

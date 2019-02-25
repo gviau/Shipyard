@@ -53,7 +53,7 @@ void DX11RenderStateCache::Reset()
     m_PrimitiveTopology = PrimitiveTopology::TriangleList;
 
     m_NumRenderTargets = 0;
-    for (uint32_t i = 0; i < 8; i++)
+    for (uint32_t i = 0; i < GfxConstants::GfxConstants_MaxRenderTargetsBound; i++)
     {
         m_RenderTargetsFormat[i] = GfxFormat::Unknown;
     }

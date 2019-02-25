@@ -3,6 +3,7 @@
 #include <common/wrapper/dx11/dx11buffer.h>
 #include <common/wrapper/dx11/dx11descriptorset.h>
 #include <common/wrapper/dx11/dx11pipelinestateobject.h>
+#include <common/wrapper/dx11/dx11rendertarget.h>
 #include <common/wrapper/dx11/dx11rootsignature.h>
 #include <common/wrapper/dx11/dx11shader.h>
 #include <common/wrapper/dx11/dx11texture.h>
@@ -20,7 +21,7 @@ namespace Shipyard
 
 DX11RenderDevice::DX11RenderDevice()
 {
-    UINT flags = 0; // D3D11_CREATE_DEVICE_DEBUG;
+    UINT flags = D3D11_CREATE_DEVICE_DEBUG;
     HRESULT hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, NULL, flags, nullptr, 0, D3D11_SDK_VERSION, &m_Device, nullptr, &m_ImmediateDeviceContext);
     if (FAILED(hr))
     {
@@ -56,9 +57,19 @@ GFXConstantBuffer* DX11RenderDevice::CreateConstantBuffer(uint32_t dataSizeInByt
     return MemAlloc(GFXConstantBuffer)(*m_Device, *m_ImmediateDeviceContext, dataSizeInBytes, dynamic, initialData);
 }
 
-GFXTexture2D* DX11RenderDevice::CreateTexture2D(uint32_t width, uint32_t height, GfxFormat pixelFormat, bool dynamic, void* initialData, bool generateMips)
+GFXTexture2D* DX11RenderDevice::CreateTexture2D(uint32_t width, uint32_t height, GfxFormat pixelFormat, bool dynamic, void* initialData, bool generateMips, TextureUsage textureUsage)
 {
-    return MemAlloc(GFXTexture2D)(*m_Device, width, height, pixelFormat, dynamic, initialData, generateMips);
+    return MemAlloc(GFXTexture2D)(*m_Device, width, height, pixelFormat, dynamic, initialData, generateMips, textureUsage);
+}
+
+GFXRenderTarget* DX11RenderDevice::CreateRenderTarget(GFXTexture2D** texturesToAttach, uint32_t numTexturesToAttach)
+{
+    return MemAlloc(GFXRenderTarget)(*m_Device, texturesToAttach, numTexturesToAttach);
+}
+
+GFXDepthStencilRenderTarget* DX11RenderDevice::CreateDepthStencilRenderTarget(GFXTexture2D& depthStencilTexture)
+{
+    return MemAlloc(GFXDepthStencilRenderTarget)(*m_Device, depthStencilTexture);
 }
 
 GFXVertexShader* DX11RenderDevice::CreateVertexShader(void* shaderData, uint64_t shaderDataSize)

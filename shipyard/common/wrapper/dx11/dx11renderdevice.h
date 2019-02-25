@@ -22,7 +22,17 @@ namespace Shipyard
         GFXIndexBuffer* CreateIndexBuffer(uint32_t numIndices, bool uses2BytesPerIndex, bool dynamic, void* initialData);
         GFXConstantBuffer* CreateConstantBuffer(uint32_t dataSizeInBytes, bool dynamic, void* initialData);
 
-        GFXTexture2D* CreateTexture2D(uint32_t width, uint32_t height, GfxFormat pixelFormat, bool dynamic, void* initialData, bool generateMips);
+        GFXTexture2D* CreateTexture2D(
+                uint32_t width,
+                uint32_t height,
+                GfxFormat pixelFormat,
+                bool dynamic,
+                void* initialData,
+                bool generateMips,
+                TextureUsage textureUsage = TextureUsage::TextureUsage_Default);
+
+        GFXRenderTarget* CreateRenderTarget(GFXTexture2D** texturesToAttach, uint32_t numTexturesToAttach);
+        GFXDepthStencilRenderTarget* CreateDepthStencilRenderTarget(GFXTexture2D& depthStencilTexture);
 
         GFXVertexShader* CreateVertexShader(void* shaderData, uint64_t shaderDataSize);
         GFXPixelShader* CreatePixelShader(void* shaderData, uint64_t shaderDataSize);

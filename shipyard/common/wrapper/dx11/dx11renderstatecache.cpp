@@ -521,7 +521,7 @@ void DX11RenderStateCache::CommitStateChangesForGraphics()
 
         m_NativeBlendState = CreateBlendState(m_BlendState);
 
-        m_DeviceContext->OMSetBlendState(m_NativeBlendState, &m_BlendState.redBlendUserFactor, 0xffffffff);
+        m_DeviceContext->OMSetBlendState(m_NativeBlendState, &m_BlendState.m_RedBlendUserFactor, 0xffffffff);
 
         m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_BlendState);
     }
@@ -765,22 +765,22 @@ ID3D11DepthStencilState* DX11RenderStateCache::CreateDepthStencilState(const Dep
 ID3D11BlendState* DX11RenderStateCache::CreateBlendState(const BlendState& blendState) const
 {
     D3D11_BLEND_DESC blendDesc;
-    blendDesc.AlphaToCoverageEnable = blendState.alphaToCoverageEnable;
-    blendDesc.IndependentBlendEnable = blendState.independentBlendEnable;
+    blendDesc.AlphaToCoverageEnable = blendState.m_AlphaToCoverageEnable;
+    blendDesc.IndependentBlendEnable = blendState.m_IndependentBlendEnable;
 
     for (uint32_t i = 0; i < GfxConstants::GfxConstants_MaxRenderTargetsBound; i++)
     {
         D3D11_RENDER_TARGET_BLEND_DESC& renderTargetBlendDesc = blendDesc.RenderTarget[i];
         const RenderTargetBlendState& renderTargetBlendState = blendState.renderTargetBlendStates[i];
 
-        renderTargetBlendDesc.BlendEnable = renderTargetBlendState.blendEnable;
-        renderTargetBlendDesc.SrcBlend = ConvertShipyardBlendFactorToDX11(renderTargetBlendState.sourceBlend);
-        renderTargetBlendDesc.DestBlend = ConvertShipyardBlendFactorToDX11(renderTargetBlendState.destBlend);
-        renderTargetBlendDesc.BlendOp = ConvertShipyardBlendOperatorToDX11(renderTargetBlendState.blendOperator);
-        renderTargetBlendDesc.SrcBlendAlpha = ConvertShipyardBlendFactorToDX11(renderTargetBlendState.sourceAlphaBlend);
-        renderTargetBlendDesc.DestBlendAlpha = ConvertShipyardBlendFactorToDX11(renderTargetBlendState.destAlphaBlend);
-        renderTargetBlendDesc.BlendOpAlpha = ConvertShipyardBlendOperatorToDX11(renderTargetBlendState.alphaBlendOperator);
-        renderTargetBlendDesc.RenderTargetWriteMask = ConvertShipyardRenderTargetWriteMaskToDX11(renderTargetBlendState.renderTargetWriteMask);
+        renderTargetBlendDesc.BlendEnable = renderTargetBlendState.m_BlendEnable;
+        renderTargetBlendDesc.SrcBlend = ConvertShipyardBlendFactorToDX11(renderTargetBlendState.m_SourceBlend);
+        renderTargetBlendDesc.DestBlend = ConvertShipyardBlendFactorToDX11(renderTargetBlendState.m_DestBlend);
+        renderTargetBlendDesc.BlendOp = ConvertShipyardBlendOperatorToDX11(renderTargetBlendState.m_BlendOperator);
+        renderTargetBlendDesc.SrcBlendAlpha = ConvertShipyardBlendFactorToDX11(renderTargetBlendState.m_SourceAlphaBlend);
+        renderTargetBlendDesc.DestBlendAlpha = ConvertShipyardBlendFactorToDX11(renderTargetBlendState.m_DestAlphaBlend);
+        renderTargetBlendDesc.BlendOpAlpha = ConvertShipyardBlendOperatorToDX11(renderTargetBlendState.m_AlphaBlendOperator);
+        renderTargetBlendDesc.RenderTargetWriteMask = ConvertShipyardRenderTargetWriteMaskToDX11(renderTargetBlendState.m_RenderTargetWriteMask);
     }
 
     ID3D11BlendState* nativeBlendState = nullptr;

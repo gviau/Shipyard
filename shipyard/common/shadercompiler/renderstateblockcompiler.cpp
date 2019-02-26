@@ -474,35 +474,35 @@ RenderStateBlockCompilationError InterpretRenderPipelineStateOption(
     {
         if (renderPipelineStateOption.FindIndexOfFirstCaseInsensitive("BlendEnable", 0) == 0)
         {
-            renderStateBlockCompilationError = InterpretBooleanValue(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].blendEnable);
+            renderStateBlockCompilationError = InterpretBooleanValue(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].m_BlendEnable);
         }
         else if (renderPipelineStateOption.FindIndexOfFirstCaseInsensitive("SourceBlend", 0) == 0)
         {
-            renderStateBlockCompilationError = InterpretBlendFactor(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].sourceBlend);
+            renderStateBlockCompilationError = InterpretBlendFactor(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].m_SourceBlend);
         }
         else if (renderPipelineStateOption.FindIndexOfFirstCaseInsensitive("DestBlend", 0) == 0)
         {
-            renderStateBlockCompilationError = InterpretBlendFactor(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].destBlend);
+            renderStateBlockCompilationError = InterpretBlendFactor(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].m_DestBlend);
         }
         else if (renderPipelineStateOption.FindIndexOfFirstCaseInsensitive("BlendOperator", 0) == 0)
         {
-            renderStateBlockCompilationError = InterpretBlendOperator(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].blendOperator);
+            renderStateBlockCompilationError = InterpretBlendOperator(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].m_BlendOperator);
         }
         else if (renderPipelineStateOption.FindIndexOfFirstCaseInsensitive("SourceAlphaBlend", 0) == 0)
         {
-            renderStateBlockCompilationError = InterpretBlendFactor(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].sourceAlphaBlend);
+            renderStateBlockCompilationError = InterpretBlendFactor(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].m_SourceAlphaBlend);
         }
         else if (renderPipelineStateOption.FindIndexOfFirstCaseInsensitive("DestAlphaBlend", 0) == 0)
         {
-            renderStateBlockCompilationError = InterpretBlendFactor(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].destAlphaBlend);
+            renderStateBlockCompilationError = InterpretBlendFactor(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].m_DestAlphaBlend);
         }
         else if (renderPipelineStateOption.FindIndexOfFirstCaseInsensitive("AlphaBlendOperator", 0) == 0)
         {
-            renderStateBlockCompilationError = InterpretBlendOperator(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].alphaBlendOperator);
+            renderStateBlockCompilationError = InterpretBlendOperator(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].m_AlphaBlendOperator);
         }
         else if (renderPipelineStateOption.FindIndexOfFirstCaseInsensitive("RenderTargetWriteMask", 0) == 0)
         {
-            renderStateBlockCompilationError = InterpretRenderTargetWriteMask(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].renderTargetWriteMask);
+            renderStateBlockCompilationError = InterpretRenderTargetWriteMask(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].m_RenderTargetWriteMask);
         }
     }
     else if (renderPipelineStateOption.EqualCaseInsensitive("IsFrontCounterClockwise"))
@@ -603,27 +603,27 @@ RenderStateBlockCompilationError InterpretRenderPipelineStateOption(
     }
     else if (renderPipelineStateOption.EqualCaseInsensitive("RedBlendUserFactor"))
     {
-        renderStateBlockCompilationError = InterpretFloatValue(renderPipelineStateValue, &blendState.redBlendUserFactor);
+        renderStateBlockCompilationError = InterpretFloatValue(renderPipelineStateValue, &blendState.m_RedBlendUserFactor);
     }
     else if (renderPipelineStateOption.EqualCaseInsensitive("GreenBlendUserFactor"))
     {
-        renderStateBlockCompilationError = InterpretFloatValue(renderPipelineStateValue, &blendState.greenBlendUserFactor);
+        renderStateBlockCompilationError = InterpretFloatValue(renderPipelineStateValue, &blendState.m_GreenBlendUserFactor);
     }
     else if (renderPipelineStateOption.EqualCaseInsensitive("BlueBlendUserFactor"))
     {
-        renderStateBlockCompilationError = InterpretFloatValue(renderPipelineStateValue, &blendState.blueBlendUserFactor);
+        renderStateBlockCompilationError = InterpretFloatValue(renderPipelineStateValue, &blendState.m_BlueBlendUserFactor);
     }
     else if (renderPipelineStateOption.EqualCaseInsensitive("AlphaBlendUserFactor"))
     {
-        renderStateBlockCompilationError = InterpretFloatValue(renderPipelineStateValue, &blendState.alphaBlendUserFactor);
+        renderStateBlockCompilationError = InterpretFloatValue(renderPipelineStateValue, &blendState.m_AlphaBlendUserFactor);
     }
     else if (renderPipelineStateOption.EqualCaseInsensitive("AlphaToCoverageEnable"))
     {
-        renderStateBlockCompilationError = InterpretBooleanValue(renderPipelineStateValue, &blendState.alphaToCoverageEnable);
+        renderStateBlockCompilationError = InterpretBooleanValue(renderPipelineStateValue, &blendState.m_AlphaToCoverageEnable);
     }
     else if (renderPipelineStateOption.EqualCaseInsensitive("IndependentBlendEnable"))
     {
-        renderStateBlockCompilationError = InterpretBooleanValue(renderPipelineStateValue, &blendState.independentBlendEnable);
+        renderStateBlockCompilationError = InterpretBooleanValue(renderPipelineStateValue, &blendState.m_IndependentBlendEnable);
     }
 
     return renderStateBlockCompilationError;

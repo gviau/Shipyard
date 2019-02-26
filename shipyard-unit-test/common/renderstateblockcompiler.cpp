@@ -233,19 +233,19 @@ TEST_CASE("Test RenderStateBlockCompiler", "[ShaderCompiler]")
         REQUIRE(renderStateBlock.depthStencilState.m_DepthEnable == false);
         REQUIRE(renderStateBlock.depthStencilState.m_EnableDepthWrite == false);
         REQUIRE(renderStateBlock.depthStencilState.m_StencilEnable == true);
-        REQUIRE(renderStateBlock.blendState.renderTargetBlendStates[0].blendEnable == true);
-        REQUIRE(renderStateBlock.blendState.renderTargetBlendStates[0].sourceBlend == Shipyard::BlendFactor::SrcColor);
-        REQUIRE(renderStateBlock.blendState.renderTargetBlendStates[0].destBlend == Shipyard::BlendFactor::DestColor);
-        REQUIRE(renderStateBlock.blendState.renderTargetBlendStates[0].blendOperator == Shipyard::BlendOperator::Subtract);
-        REQUIRE(renderStateBlock.blendState.renderTargetBlendStates[0].renderTargetWriteMask == Shipyard::RenderTargetWriteMask(Shipyard::RenderTargetWriteMask::RenderTargetWriteMask_R | Shipyard::RenderTargetWriteMask::RenderTargetWriteMask_G));
-        REQUIRE(renderStateBlock.blendState.renderTargetBlendStates[2].blendEnable == true);
-        REQUIRE(renderStateBlock.blendState.renderTargetBlendStates[1].sourceAlphaBlend == Shipyard::BlendFactor::InvDestAlpha);
-        REQUIRE(renderStateBlock.blendState.renderTargetBlendStates[3].destAlphaBlend == Shipyard::BlendFactor::UserFactor);
-        REQUIRE(renderStateBlock.blendState.renderTargetBlendStates[7].alphaBlendOperator == Shipyard::BlendOperator::Max);
-        REQUIRE(renderStateBlock.blendState.alphaToCoverageEnable == true);
-        REQUIRE(renderStateBlock.blendState.independentBlendEnable == true);
-        REQUIRE(Shipyard::IsAlmostEqual(renderStateBlock.blendState.redBlendUserFactor, 0.5f));
-        REQUIRE(Shipyard::IsAlmostEqual(renderStateBlock.blendState.alphaBlendUserFactor, 1.0f));
+        REQUIRE(renderStateBlock.blendState.renderTargetBlendStates[0].m_BlendEnable == true);
+        REQUIRE(renderStateBlock.blendState.renderTargetBlendStates[0].m_SourceBlend == Shipyard::BlendFactor::SrcColor);
+        REQUIRE(renderStateBlock.blendState.renderTargetBlendStates[0].m_DestBlend == Shipyard::BlendFactor::DestColor);
+        REQUIRE(renderStateBlock.blendState.renderTargetBlendStates[0].m_BlendOperator == Shipyard::BlendOperator::Subtract);
+        REQUIRE(renderStateBlock.blendState.renderTargetBlendStates[0].m_RenderTargetWriteMask == Shipyard::RenderTargetWriteMask(Shipyard::RenderTargetWriteMask::RenderTargetWriteMask_R | Shipyard::RenderTargetWriteMask::RenderTargetWriteMask_G));
+        REQUIRE(renderStateBlock.blendState.renderTargetBlendStates[2].m_BlendEnable == true);
+        REQUIRE(renderStateBlock.blendState.renderTargetBlendStates[1].m_SourceAlphaBlend == Shipyard::BlendFactor::InvDestAlpha);
+        REQUIRE(renderStateBlock.blendState.renderTargetBlendStates[3].m_DestAlphaBlend == Shipyard::BlendFactor::UserFactor);
+        REQUIRE(renderStateBlock.blendState.renderTargetBlendStates[7].m_AlphaBlendOperator == Shipyard::BlendOperator::Max);
+        REQUIRE(renderStateBlock.blendState.m_AlphaToCoverageEnable == true);
+        REQUIRE(renderStateBlock.blendState.m_IndependentBlendEnable == true);
+        REQUIRE(Shipyard::IsAlmostEqual(renderStateBlock.blendState.m_RedBlendUserFactor, 0.5f));
+        REQUIRE(Shipyard::IsAlmostEqual(renderStateBlock.blendState.m_AlphaBlendUserFactor, 1.0f));
     }
 
     SECTION("Complex RenderStateBlock")

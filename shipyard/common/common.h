@@ -355,25 +355,25 @@ namespace Shipyard
 
     struct RenderTargetBlendState
     {
-        bool blendEnable = false;
-        BlendFactor sourceBlend = BlendFactor::One;
-        BlendFactor destBlend = BlendFactor::Zero;
-        BlendOperator blendOperator = BlendOperator::Add;
-        BlendFactor sourceAlphaBlend = BlendFactor::One;
-        BlendFactor destAlphaBlend = BlendFactor::Zero;
-        BlendOperator alphaBlendOperator = BlendOperator::Add;
-        RenderTargetWriteMask renderTargetWriteMask = RenderTargetWriteMask::RenderTargetWriteMask_RGBA;
+        bool m_BlendEnable = false;
+        BlendFactor m_SourceBlend = BlendFactor::One;
+        BlendFactor m_DestBlend = BlendFactor::Zero;
+        BlendOperator m_BlendOperator = BlendOperator::Add;
+        BlendFactor m_SourceAlphaBlend = BlendFactor::One;
+        BlendFactor m_DestAlphaBlend = BlendFactor::Zero;
+        BlendOperator m_AlphaBlendOperator = BlendOperator::Add;
+        RenderTargetWriteMask m_RenderTargetWriteMask = RenderTargetWriteMask::RenderTargetWriteMask_RGBA;
 
         bool operator== (const RenderTargetBlendState& rhs) const
         {
-            return (blendEnable == rhs.blendEnable &&
-                    sourceBlend == rhs.sourceBlend &&
-                    destBlend == rhs.destBlend &&
-                    blendOperator == rhs.blendOperator &&
-                    sourceAlphaBlend == rhs.sourceAlphaBlend &&
-                    destAlphaBlend == rhs.destAlphaBlend &&
-                    alphaBlendOperator == rhs.alphaBlendOperator &&
-                    renderTargetWriteMask == rhs.renderTargetWriteMask);
+            return (m_BlendEnable == rhs.m_BlendEnable &&
+                    m_SourceBlend == rhs.m_SourceBlend &&
+                    m_DestBlend == rhs.m_DestBlend &&
+                    m_BlendOperator == rhs.m_BlendOperator &&
+                    m_SourceAlphaBlend == rhs.m_SourceAlphaBlend &&
+                    m_DestAlphaBlend == rhs.m_DestAlphaBlend &&
+                    m_AlphaBlendOperator == rhs.m_AlphaBlendOperator &&
+                    m_RenderTargetWriteMask == rhs.m_RenderTargetWriteMask);
         }
 
         bool operator!= (const RenderTargetBlendState& rhs) const
@@ -387,13 +387,13 @@ namespace Shipyard
         RenderTargetBlendState renderTargetBlendStates[GfxConstants::GfxConstants_MaxRenderTargetsBound];
 
         // Those are only used if at least one render target uses a BlendFactor of BlendFactor::UserFactor or BlendFactor::InvUserFactor
-        float redBlendUserFactor = 1.0f;
-        float greenBlendUserFactor = 1.0f;
-        float blueBlendUserFactor = 1.0f;
-        float alphaBlendUserFactor = 1.0f;
+        float m_RedBlendUserFactor = 1.0f;
+        float m_GreenBlendUserFactor = 1.0f;
+        float m_BlueBlendUserFactor = 1.0f;
+        float m_AlphaBlendUserFactor = 1.0f;
 
-        bool alphaToCoverageEnable = false;
-        bool independentBlendEnable = false;
+        bool m_AlphaToCoverageEnable = false;
+        bool m_IndependentBlendEnable = false;
 
         bool operator== (const BlendState& rhs) const
         {
@@ -405,12 +405,12 @@ namespace Shipyard
                 }
             }
 
-            return (IsAlmostEqual(redBlendUserFactor, rhs.redBlendUserFactor) &&
-                    IsAlmostEqual(greenBlendUserFactor, rhs.greenBlendUserFactor) &&
-                    IsAlmostEqual(blueBlendUserFactor, rhs.blueBlendUserFactor) &&
-                    IsAlmostEqual(alphaBlendUserFactor, rhs.alphaBlendUserFactor) &&
-                    alphaToCoverageEnable == rhs.alphaToCoverageEnable &&
-                    independentBlendEnable == rhs.independentBlendEnable);
+            return (IsAlmostEqual(m_RedBlendUserFactor, rhs.m_RedBlendUserFactor) &&
+                    IsAlmostEqual(m_GreenBlendUserFactor, rhs.m_GreenBlendUserFactor) &&
+                    IsAlmostEqual(m_BlueBlendUserFactor, rhs.m_BlueBlendUserFactor) &&
+                    IsAlmostEqual(m_AlphaBlendUserFactor, rhs.m_AlphaBlendUserFactor) &&
+                    m_AlphaToCoverageEnable == rhs.m_AlphaToCoverageEnable &&
+                    m_IndependentBlendEnable == rhs.m_IndependentBlendEnable);
         }
 
         bool operator!= (const BlendState& rhs) const
@@ -573,42 +573,6 @@ namespace Shipyard
         Unknown
     };
 
-    enum RenderStateBlockState : uint8_t
-    {
-        RenderStateBlockState_DepthBias,
-        RenderStateBlockState_DepthBiasClamp,
-        RenderStateBlockState_SlopeScaledDepthBias,
-
-        RenderStateBlockState_FillMode,
-        RenderStateBlockState_CullMode,
-
-        RenderStateBlockState_IsFrontCounterClockwise,
-        RenderStateBlockState_DepthClipEnable,
-        RenderStateBlockState_ScissorEnable,
-        RenderStateBlockState_MultisampleEnable,
-        RenderStateBlockState_AntialiasedLineEnable,
-
-        RenderStateBlockState_DepthComparisonFunc,
-        RenderStateBlockState_StencilReadMask,
-        RenderStateBlockState_StencilWriteMask,
-
-        RenderStateBlockState_FrontFaceStencilFailOp,
-        RenderStateBlockState_FrontFaceStencilDepthFailOp,
-        RenderStateBlockState_FrontFaceStencilPassOp,
-        RenderStateBlockState_FrontFaceStencilComparisonFunc,
-
-        RenderStateBlockState_BackFaceStencilFailOp,
-        RenderStateBlockState_BackFaceStencilDepthFailOp,
-        RenderStateBlockState_BackFaceStencilPassOp,
-        RenderStateBlockState_BackFaceStencilComparisonFunc,
-
-        RenderStateBlockState_DepthEnable,
-        RenderStateBlockState_EnableDepthWrite,
-        RenderStateBlockState_StencilEnable,
-
-        RenderStateBlockState_Count
-    };
-
     // This class gives control to the programmer to override specific RenderStateBlock's state manually.
     // Those overriden states will have priority over every other way to set a state (inside of the shader for example).
     class SHIPYARD_API RenderStateBlockStateOverride
@@ -647,8 +611,25 @@ namespace Shipyard
         void OverrideEnableDepthWriteState(bool overrideValue);
         void OverrideStencilEnableState(bool overrideValue);
 
+        void OverrideRedBlendUserFactor(float overrideValue);
+        void OverrideGreenBlendUserFactor(float overrideValue);
+        void OverrideBlueBlendUserFactor(float overrideValue);
+        void OverrideAlphaBlendUserFactor(float overrideValue);
+
+        void OverrideAlphaToCoverageEnable(bool overrideValue);
+        void OverrideIndependentBlendEnable(bool overrideValue);
+
+        void OverrideBlendEnable(bool overrideValue, uint32_t renderTargetIndex);
+        void OverrideSourceBlend(BlendFactor overrideValue, uint32_t renderTargetIndex);
+        void OverrideDestBlend(BlendFactor overrideValue, uint32_t renderTargetIndex);
+        void OverrideBlendOperator(BlendOperator overrideValue, uint32_t renderTargetIndex);
+        void OverrideSourceAlphaBlend(BlendFactor overrideValue, uint32_t renderTargetIndex);
+        void OverrideDestAlphaBlend(BlendFactor overrideValue, uint32_t renderTargetIndex);
+        void OverrideAlphaBlendOperator(BlendOperator overrideValue, uint32_t renderTargetIndex);
+        void OverrideRenderTargetWriteMask(RenderTargetWriteMask overrideValue, uint32_t renderTargetIndex);
+
     private:
-        Bitfield<RenderStateBlockState::RenderStateBlockState_Count> m_OverridenState;
+        Bitfield<128> m_OverridenState;
         RenderStateBlock m_RenderStateBlockOverride;
     };
 

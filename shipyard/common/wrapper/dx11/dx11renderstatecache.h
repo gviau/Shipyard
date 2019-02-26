@@ -4,6 +4,7 @@
 
 #include <system/bitfield.h>
 
+struct ID3D11BlendState;
 struct ID3D11Buffer;
 struct ID3D11DepthStencilState;
 struct ID3D11DepthStencilView;
@@ -81,12 +82,14 @@ namespace Shipyard
 
         ID3D11RasterizerState* CreateRasterizerState(const RasterizerState& rasterizerState) const;
         ID3D11DepthStencilState* CreateDepthStencilState(const DepthStencilState& depthStencilState) const;
+        ID3D11BlendState* CreateBlendState(const BlendState& blendState) const;
 
     private:
         enum RenderStateCacheDirtyFlag : uint8_t
         {
             RenderStateCacheDirtyFlag_RasterizerState,
             RenderStateCacheDirtyFlag_DepthStencilState,
+            RenderStateCacheDirtyFlag_BlendState,
             RenderStateCacheDirtyFlag_Viewport,
 
             RenderStateCacheDirtyFlag_VertexShader,
@@ -125,6 +128,7 @@ namespace Shipyard
 
         RasterizerState m_RasterizerState;
         DepthStencilState m_DepthStencilState;
+        BlendState m_BlendState;
 
         VertexFormatType m_VertexFormatType;
         PrimitiveTopology m_PrimitiveTopology;
@@ -157,6 +161,7 @@ namespace Shipyard
         // Native interface for actual binding
         ID3D11RasterizerState* m_NativeRasterizerState;
         ID3D11DepthStencilState* m_NativeDepthStencilState;
+        ID3D11BlendState* m_NativeBlendState;
 
         ID3D11RenderTargetView* m_NativeRenderTargets[GfxConstants::GfxConstants_MaxRenderTargetsBound];
         ID3D11DepthStencilView* m_NativeDepthStencilView;

@@ -19,6 +19,9 @@ namespace Shipyard
     const char* ConvertShipyardSemanticNameToDX11(SemanticName semanticName);
     D3D11_COMPARISON_FUNC ConvertShipyardComparisonFuncToDX11(ComparisonFunc func);
     D3D11_STENCIL_OP ConvertShipyardStencilOperationToDX11(StencilOperation operation);
+    D3D11_BLEND ConvertShipyardBlendFactorToDX11(BlendFactor blendFactor);
+    D3D11_BLEND_OP ConvertShipyardBlendOperatorToDX11(BlendOperator blendOperator);
+    uint8_t ConvertShipyardRenderTargetWriteMaskToDX11(RenderTargetWriteMask renderTargetWriteMask);
 
     const char* GetD3DShaderVersion(D3D_FEATURE_LEVEL featureLevel);
 }

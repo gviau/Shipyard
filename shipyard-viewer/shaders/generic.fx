@@ -72,4 +72,6 @@ RenderState
     StencilEnable = false;
     StencilReadMask = 0x00;
     StencilWriteMask = 0x00;
+	
+	RenderTargetWriteMask[0] = RGBA;
 }

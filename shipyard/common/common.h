@@ -363,6 +363,23 @@ namespace Shipyard
         BlendFactor destAlphaBlend = BlendFactor::Zero;
         BlendOperator alphaBlendOperator = BlendOperator::Add;
         RenderTargetWriteMask renderTargetWriteMask = RenderTargetWriteMask::RenderTargetWriteMask_RGBA;
+
+        bool operator== (const RenderTargetBlendState& rhs) const
+        {
+            return (blendEnable == rhs.blendEnable &&
+                    sourceBlend == rhs.sourceBlend &&
+                    destBlend == rhs.destBlend &&
+                    blendOperator == rhs.blendOperator &&
+                    sourceAlphaBlend == rhs.sourceAlphaBlend &&
+                    destAlphaBlend == rhs.destAlphaBlend &&
+                    alphaBlendOperator == rhs.alphaBlendOperator &&
+                    renderTargetWriteMask == rhs.renderTargetWriteMask);
+        }
+
+        bool operator!= (const RenderTargetBlendState& rhs) const
+        {
+            return !(*this == rhs);
+        }
     };
 
     struct BlendState
@@ -377,6 +394,29 @@ namespace Shipyard
 
         bool alphaToCoverageEnable = false;
         bool independentBlendEnable = false;
+
+        bool operator== (const BlendState& rhs) const
+        {
+            for (uint32_t i = 0; i < GfxConstants::GfxConstants_MaxRenderTargetsBound; i++)
+            {
+                if (renderTargetBlendStates[i] != rhs.renderTargetBlendStates[i])
+                {
+                    return false;
+                }
+            }
+
+            return (IsAlmostEqual(redBlendUserFactor, rhs.redBlendUserFactor) &&
+                    IsAlmostEqual(greenBlendUserFactor, rhs.greenBlendUserFactor) &&
+                    IsAlmostEqual(blueBlendUserFactor, rhs.blueBlendUserFactor) &&
+                    IsAlmostEqual(alphaBlendUserFactor, rhs.alphaBlendUserFactor) &&
+                    alphaToCoverageEnable == rhs.alphaToCoverageEnable &&
+                    independentBlendEnable == rhs.independentBlendEnable);
+        }
+
+        bool operator!= (const BlendState& rhs) const
+        {
+            return !(*this == rhs);
+        }
     };
 
     enum class RootSignatureParameterType

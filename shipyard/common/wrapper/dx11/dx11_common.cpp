@@ -155,12 +155,80 @@ D3D11_STENCIL_OP ConvertShipyardStencilOperationToDX11(StencilOperation operatio
     case StencilOperation::Keep:            stencilOp = D3D11_STENCIL_OP_KEEP; break;
     case StencilOperation::Replace:         stencilOp = D3D11_STENCIL_OP_REPLACE; break;
     case StencilOperation::Zero:            stencilOp = D3D11_STENCIL_OP_ZERO; break;
-    {
-
-    };
     }
 
     return stencilOp;
+}
+
+D3D11_BLEND ConvertShipyardBlendFactorToDX11(BlendFactor blendFactor)
+{
+    D3D11_BLEND blend = D3D11_BLEND_ONE;
+
+    switch (blendFactor)
+    {
+    case BlendFactor::Zero:             blend = D3D11_BLEND_ZERO; break;
+    case BlendFactor::One:              blend = D3D11_BLEND_ONE; break;
+    case BlendFactor::SrcColor:         blend = D3D11_BLEND_SRC_COLOR; break;
+    case BlendFactor::InvSrcColor:      blend = D3D11_BLEND_INV_SRC_COLOR; break;
+    case BlendFactor::SrcAlpha:         blend = D3D11_BLEND_SRC_ALPHA; break;
+    case BlendFactor::InvSrcAlpha:      blend = D3D11_BLEND_INV_SRC_ALPHA; break;
+    case BlendFactor::DestAlpha:        blend = D3D11_BLEND_DEST_ALPHA; break;
+    case BlendFactor::InvDestAlpha:     blend = D3D11_BLEND_INV_DEST_ALPHA; break;
+    case BlendFactor::DestColor:        blend = D3D11_BLEND_DEST_COLOR; break;
+    case BlendFactor::InvDestColor:     blend = D3D11_BLEND_INV_DEST_COLOR; break;
+    case BlendFactor::SrcAlphaSat:      blend = D3D11_BLEND_SRC_ALPHA_SAT; break;
+    case BlendFactor::UserFactor:       blend = D3D11_BLEND_BLEND_FACTOR; break;
+    case BlendFactor::InvUserFactor:    blend = D3D11_BLEND_INV_BLEND_FACTOR; break;
+    case BlendFactor::DualSrcColor:     blend = D3D11_BLEND_SRC1_COLOR; break;
+    case BlendFactor::DualInvSrcColor:  blend = D3D11_BLEND_INV_SRC1_COLOR; break;
+    case BlendFactor::DualSrcAlpha:     blend = D3D11_BLEND_SRC1_ALPHA; break;
+    case BlendFactor::DualInvSrcAlpha:  blend = D3D11_BLEND_INV_SRC1_ALPHA; break;
+    }
+
+    return blend;
+}
+
+D3D11_BLEND_OP ConvertShipyardBlendOperatorToDX11(BlendOperator blendOperator)
+{
+    D3D11_BLEND_OP blendOp = D3D11_BLEND_OP_ADD;
+
+    switch (blendOperator)
+    {
+    case Shipyard::BlendOperator::Add:                  blendOp = D3D11_BLEND_OP_ADD; break;
+    case Shipyard::BlendOperator::Subtract:             blendOp = D3D11_BLEND_OP_SUBTRACT; break;
+    case Shipyard::BlendOperator::ReverseSubstract:     blendOp = D3D11_BLEND_OP_REV_SUBTRACT; break;
+    case Shipyard::BlendOperator::Min:                  blendOp = D3D11_BLEND_OP_MIN; break;
+    case Shipyard::BlendOperator::Max:                  blendOp = D3D11_BLEND_OP_MAX; break;
+    }
+
+    return blendOp;
+}
+
+uint8_t ConvertShipyardRenderTargetWriteMaskToDX11(RenderTargetWriteMask renderTargetWriteMask)
+{
+    uint8_t mask = 0;
+
+    if ((renderTargetWriteMask & RenderTargetWriteMask::RenderTargetWriteMask_R) > 0)
+    {
+        mask |= D3D11_COLOR_WRITE_ENABLE_RED;
+    }
+
+    if ((renderTargetWriteMask & RenderTargetWriteMask::RenderTargetWriteMask_G) > 0)
+    {
+        mask |= D3D11_COLOR_WRITE_ENABLE_GREEN;
+    }
+
+    if ((renderTargetWriteMask & RenderTargetWriteMask::RenderTargetWriteMask_B) > 0)
+    {
+        mask |= D3D11_COLOR_WRITE_ENABLE_BLUE;
+    }
+
+    if ((renderTargetWriteMask & RenderTargetWriteMask::RenderTargetWriteMask_A) > 0)
+    {
+        mask |= D3D11_COLOR_WRITE_ENABLE_ALPHA;
+    }
+
+    return mask;
 }
 
 const char* GetD3DShaderVersion(D3D_FEATURE_LEVEL featureLevel)

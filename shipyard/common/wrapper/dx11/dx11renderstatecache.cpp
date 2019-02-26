@@ -27,6 +27,7 @@ DX11RenderStateCache::DX11RenderStateCache(ID3D11Device* device, ID3D11DeviceCon
     , m_DeviceContext(deviceContext)
     , m_NativeRasterizerState(nullptr)
     , m_NativeDepthStencilState(nullptr)
+    , m_NativeBlendState(nullptr)
     , m_NativeDepthStencilView(nullptr)
 {
     Reset();
@@ -43,9 +44,6 @@ DX11RenderStateCache::~DX11RenderStateCache()
 
 void DX11RenderStateCache::Reset()
 {
-    m_VertexShader = nullptr;
-    m_PixelShader = nullptr;
-
     m_RasterizerState = RasterizerState();
     m_DepthStencilState = DepthStencilState();
 
@@ -81,6 +79,12 @@ void DX11RenderStateCache::Reset()
     {
         m_NativeDepthStencilState->Release();
         m_NativeDepthStencilState = nullptr;
+    }
+
+    if (m_NativeBlendState != nullptr)
+    {
+        m_NativeBlendState->Release();
+        m_NativeBlendState = nullptr;
     }
 
     // The render state cache is not the owner of those interfaces, therefore, we don't release them.
@@ -196,6 +200,12 @@ void DX11RenderStateCache::BindPipelineStateObject(const GFXPipelineStateObject&
     {
         m_DepthStencilState = pipelineStateObjectParameters.renderStateBlock.depthStencilState;
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_DepthStencilState);
+    }
+
+    if (pipelineStateObjectParameters.renderStateBlock.blendState != m_BlendState)
+    {
+        m_BlendState = pipelineStateObjectParameters.renderStateBlock.blendState;
+        m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_BlendState);
     }
 
     if (pipelineStateObjectParameters.vertexShader != m_VertexShader)
@@ -502,6 +512,20 @@ void DX11RenderStateCache::CommitStateChangesForGraphics()
         m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_DepthStencilState);
     }
 
+    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_BlendState))
+    {
+        if (m_NativeBlendState != nullptr)
+        {
+            m_NativeBlendState->Release();
+        }
+
+        m_NativeBlendState = CreateBlendState(m_BlendState);
+
+        m_DeviceContext->OMSetBlendState(m_NativeBlendState, &m_BlendState.redBlendUserFactor, 0xffffffff);
+
+        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_BlendState);
+    }
+
     if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Viewport))
     {
         D3D11_VIEWPORT nativeViewport;
@@ -736,6 +760,39 @@ ID3D11DepthStencilState* DX11RenderStateCache::CreateDepthStencilState(const Dep
     }
 
     return nativeDepthStencilState;
+}
+
+ID3D11BlendState* DX11RenderStateCache::CreateBlendState(const BlendState& blendState) const
+{
+    D3D11_BLEND_DESC blendDesc;
+    blendDesc.AlphaToCoverageEnable = blendState.alphaToCoverageEnable;
+    blendDesc.IndependentBlendEnable = blendState.independentBlendEnable;
+
+    for (uint32_t i = 0; i < GfxConstants::GfxConstants_MaxRenderTargetsBound; i++)
+    {
+        D3D11_RENDER_TARGET_BLEND_DESC& renderTargetBlendDesc = blendDesc.RenderTarget[i];
+        const RenderTargetBlendState& renderTargetBlendState = blendState.renderTargetBlendStates[i];
+
+        renderTargetBlendDesc.BlendEnable = renderTargetBlendState.blendEnable;
+        renderTargetBlendDesc.SrcBlend = ConvertShipyardBlendFactorToDX11(renderTargetBlendState.sourceBlend);
+        renderTargetBlendDesc.DestBlend = ConvertShipyardBlendFactorToDX11(renderTargetBlendState.destBlend);
+        renderTargetBlendDesc.BlendOp = ConvertShipyardBlendOperatorToDX11(renderTargetBlendState.blendOperator);
+        renderTargetBlendDesc.SrcBlendAlpha = ConvertShipyardBlendFactorToDX11(renderTargetBlendState.sourceAlphaBlend);
+        renderTargetBlendDesc.DestBlendAlpha = ConvertShipyardBlendFactorToDX11(renderTargetBlendState.destAlphaBlend);
+        renderTargetBlendDesc.BlendOpAlpha = ConvertShipyardBlendOperatorToDX11(renderTargetBlendState.alphaBlendOperator);
+        renderTargetBlendDesc.RenderTargetWriteMask = ConvertShipyardRenderTargetWriteMaskToDX11(renderTargetBlendState.renderTargetWriteMask);
+    }
+
+    ID3D11BlendState* nativeBlendState = nullptr;
+
+    HRESULT hr = m_Device->CreateBlendState(&blendDesc, &nativeBlendState);
+    if (FAILED(hr))
+    {
+        MessageBox(NULL, "Failed to create blend state", "DX11 Error", MB_OK);
+        return nullptr;
+    }
+
+    return nativeBlendState;
 }
 
 }

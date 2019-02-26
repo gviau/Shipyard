@@ -312,12 +312,28 @@ namespace Shipyard
         }
     };
 
-    enum class BlendFactor
+    enum class BlendFactor : uint8_t
     {
-
+        Zero,
+        One,
+        SrcColor,
+        InvSrcColor,
+        SrcAlpha,
+        InvSrcAlpha,
+        DestAlpha,
+        InvDestAlpha,
+        DestColor,
+        InvDestColor,
+        SrcAlphaSat,
+        UserFactor,
+        InvUserFactor,
+        DualSrcColor,
+        DualInvSrcColor,
+        DualSrcAlpha,
+        DualInvSrcAlpha
     };
 
-    enum class BlendOperator
+    enum class BlendOperator : uint8_t
     {
         Add,
         Subtract,
@@ -326,9 +342,41 @@ namespace Shipyard
         Max
     };
 
+    enum RenderTargetWriteMask : uint8_t
+    {
+        RenderTargetWriteMask_None = 0x00,
+        RenderTargetWriteMask_R = 0x01,
+        RenderTargetWriteMask_G = 0x02,
+        RenderTargetWriteMask_B = 0x04,
+        RenderTargetWriteMask_A = 0x08,
+
+        RenderTargetWriteMask_RGBA = (RenderTargetWriteMask_R | RenderTargetWriteMask_G | RenderTargetWriteMask_B | RenderTargetWriteMask_A),
+    };
+
     struct RenderTargetBlendState
     {
+        bool blendEnable = false;
+        BlendFactor sourceBlend = BlendFactor::One;
+        BlendFactor destBlend = BlendFactor::Zero;
+        BlendOperator blendOperator = BlendOperator::Add;
+        BlendFactor sourceAlphaBlend = BlendFactor::One;
+        BlendFactor destAlphaBlend = BlendFactor::Zero;
+        BlendOperator alphaBlendOperator = BlendOperator::Add;
+        RenderTargetWriteMask renderTargetWriteMask = RenderTargetWriteMask::RenderTargetWriteMask_RGBA;
+    };
 
+    struct BlendState
+    {
+        RenderTargetBlendState renderTargetBlendStates[GfxConstants::GfxConstants_MaxRenderTargetsBound];
+
+        // Those are only used if at least one render target uses a BlendFactor of BlendFactor::UserFactor or BlendFactor::InvUserFactor
+        float redBlendUserFactor = 1.0f;
+        float greenBlendUserFactor = 1.0f;
+        float blueBlendUserFactor = 1.0f;
+        float alphaBlendUserFactor = 1.0f;
+
+        bool alphaToCoverageEnable = false;
+        bool independentBlendEnable = false;
     };
 
     enum class RootSignatureParameterType
@@ -448,6 +496,7 @@ namespace Shipyard
     {
         RasterizerState rasterizerState;
         DepthStencilState depthStencilState;
+        BlendState blendState;
     };
 
     struct PipelineStateObjectCreationParameters

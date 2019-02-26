@@ -17,6 +17,27 @@
 namespace Shipyard
 {;
 
+bool GetArrayIndexIfOptionIsAnArray(const StringA& value, uint32_t* outValue)
+{
+    size_t indexOfEndingBracket = value.FindIndexOfFirstReverse(']', value.Size() - 1);
+    if (indexOfEndingBracket == StringA::InvalidIndex)
+    {
+        return false;
+    }
+
+    size_t indexOfStartingBracket = value.FindIndexOfFirstReverse('[', indexOfEndingBracket);
+    if (indexOfStartingBracket == StringA::InvalidIndex)
+    {
+        return false;
+    }
+
+    StringA numberString = value.Substring(indexOfStartingBracket + 1, indexOfEndingBracket - indexOfStartingBracket - 1);
+
+    *outValue = uint32_t(atoi(numberString.GetBuffer()));
+
+    return true;
+}
+
 RenderStateBlockCompilationError InterpretBooleanValue(const StringA& value, bool* outValue)
 {
     RenderStateBlockCompilationError renderStateBlockCompilationError = RenderStateBlockCompilationError::NoError;
@@ -270,6 +291,162 @@ RenderStateBlockCompilationError InterpretStencilOperation(const StringA& value,
     return renderStateBlockCompilationError;
 }
 
+RenderStateBlockCompilationError InterpretBlendFactor(const StringA& value, BlendFactor* outValue)
+{
+    RenderStateBlockCompilationError renderStateBlockCompilationError = RenderStateBlockCompilationError::NoError;
+
+    if (value.EqualCaseInsensitive("Zero"))
+    {
+        *outValue = BlendFactor::Zero;
+    }
+    else if (value.EqualCaseInsensitive("One"))
+    {
+        *outValue = BlendFactor::One;
+    }
+    else if (value.EqualCaseInsensitive("SrcColor"))
+    {
+        *outValue = BlendFactor::SrcColor;
+    }
+    else if (value.EqualCaseInsensitive("InvSrcColor"))
+    {
+        *outValue = BlendFactor::InvSrcColor;
+    }
+    else if (value.EqualCaseInsensitive("SrcAlpha"))
+    {
+        *outValue = BlendFactor::SrcAlpha;
+    }
+    else if (value.EqualCaseInsensitive("InvSrcAlpha"))
+    {
+        *outValue = BlendFactor::InvSrcAlpha;
+    }
+    else if (value.EqualCaseInsensitive("DestAlpha"))
+    {
+        *outValue = BlendFactor::DestAlpha;
+    }
+    else if (value.EqualCaseInsensitive("InvDestAlpha"))
+    {
+        *outValue = BlendFactor::InvDestAlpha;
+    }
+    else if (value.EqualCaseInsensitive("DestColor"))
+    {
+        *outValue = BlendFactor::DestColor;
+    }
+    else if (value.EqualCaseInsensitive("InvDestColor"))
+    {
+        *outValue = BlendFactor::InvDestColor;
+    }
+    else if (value.EqualCaseInsensitive("SrcAlphaSat"))
+    {
+        *outValue = BlendFactor::SrcAlphaSat;
+    }
+    else if (value.EqualCaseInsensitive("UserFactor"))
+    {
+        *outValue = BlendFactor::UserFactor;
+    }
+    else if (value.EqualCaseInsensitive("InvUserFactor"))
+    {
+        *outValue = BlendFactor::InvUserFactor;
+    }
+    else if (value.EqualCaseInsensitive("DualSrcColor"))
+    {
+        *outValue = BlendFactor::DualSrcColor;
+    }
+    else if (value.EqualCaseInsensitive("DualInvSrcColor"))
+    {
+        *outValue = BlendFactor::DualInvSrcColor;
+    }
+    else if (value.EqualCaseInsensitive("DualSrcAlpha"))
+    {
+        *outValue = BlendFactor::DualSrcAlpha;
+    }
+    else if (value.EqualCaseInsensitive("DualInvSrcAlpha"))
+    {
+        *outValue = BlendFactor::DualInvSrcAlpha;
+    }
+    else
+    {
+        renderStateBlockCompilationError = RenderStateBlockCompilationError::InvalidValueTypeForOption;
+    }
+
+    return renderStateBlockCompilationError;
+}
+
+RenderStateBlockCompilationError InterpretBlendOperator(const StringA& value, BlendOperator* outValue)
+{
+    RenderStateBlockCompilationError renderStateBlockCompilationError = RenderStateBlockCompilationError::NoError;
+
+    if (value.EqualCaseInsensitive("Add"))
+    {
+        *outValue = BlendOperator::Add;
+    }
+    else if (value.EqualCaseInsensitive("Subtract"))
+    {
+        *outValue = BlendOperator::Subtract;
+    }
+    else if (value.EqualCaseInsensitive("ReverseSubstract"))
+    {
+        *outValue = BlendOperator::ReverseSubstract;
+    }
+    else if (value.EqualCaseInsensitive("Min"))
+    {
+        *outValue = BlendOperator::Min;
+    }
+    else if (value.EqualCaseInsensitive("Max"))
+    {
+        *outValue = BlendOperator::Max;
+    }
+    else
+    {
+        renderStateBlockCompilationError = RenderStateBlockCompilationError::InvalidValueTypeForOption;
+    }
+
+    return renderStateBlockCompilationError;
+}
+
+RenderStateBlockCompilationError InterpretRenderTargetWriteMask(const StringA& value, RenderTargetWriteMask* outValue)
+{
+    RenderStateBlockCompilationError renderStateBlockCompilationError = RenderStateBlockCompilationError::NoError;
+
+    if (value.Size() > 4)
+    {
+        renderStateBlockCompilationError = RenderStateBlockCompilationError::InvalidValueTypeForOption;
+    }
+    else
+    {
+        RenderTargetWriteMask renderTargetWriteMask = RenderTargetWriteMask::RenderTargetWriteMask_None;
+
+        for (uint32_t i = 0; i < value.Size(); i++)
+        {
+            char c = value[i];
+
+            if (tolower(c) == tolower('R'))
+            {
+                renderTargetWriteMask = RenderTargetWriteMask(renderTargetWriteMask | RenderTargetWriteMask::RenderTargetWriteMask_R);
+            }
+            else if (tolower(c) == tolower('G'))
+            {
+                renderTargetWriteMask = RenderTargetWriteMask(renderTargetWriteMask | RenderTargetWriteMask::RenderTargetWriteMask_G);
+            }
+            else if (tolower(c) == tolower('B'))
+            {
+                renderTargetWriteMask = RenderTargetWriteMask(renderTargetWriteMask | RenderTargetWriteMask::RenderTargetWriteMask_B);
+            }
+            else if (tolower(c) == tolower('A'))
+            {
+                renderTargetWriteMask = RenderTargetWriteMask(renderTargetWriteMask | RenderTargetWriteMask::RenderTargetWriteMask_A);
+            }
+            else
+            {
+                return RenderStateBlockCompilationError::InvalidValueTypeForOption;
+            }
+        }
+
+        *outValue = renderTargetWriteMask;
+    }
+
+    return renderStateBlockCompilationError;
+}
+
 RenderStateBlockCompilationError InterpretRenderPipelineStateOption(
         const StringA& renderPipelineStateOption,
         const StringA& renderPipelineStateValue,
@@ -287,10 +464,48 @@ RenderStateBlockCompilationError InterpretRenderPipelineStateOption(
 
     RasterizerState& rasterizerState = renderStateBlock.rasterizerState;
     DepthStencilState& depthStencilState = renderStateBlock.depthStencilState;
+    BlendState& blendState = renderStateBlock.blendState;
+    RenderTargetBlendState* pRenderTargetBlendState = blendState.renderTargetBlendStates;
 
     RenderStateBlockCompilationError renderStateBlockCompilationError = RenderStateBlockCompilationError::UnrecognizedOption;
 
-    if (renderPipelineStateOption.EqualCaseInsensitive("IsFrontCounterClockwise"))
+    uint32_t arrayIndex = 0;
+    if (GetArrayIndexIfOptionIsAnArray(renderPipelineStateOption, &arrayIndex))
+    {
+        if (renderPipelineStateOption.FindIndexOfFirstCaseInsensitive("BlendEnable", 0) == 0)
+        {
+            renderStateBlockCompilationError = InterpretBooleanValue(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].blendEnable);
+        }
+        else if (renderPipelineStateOption.FindIndexOfFirstCaseInsensitive("SourceBlend", 0) == 0)
+        {
+            renderStateBlockCompilationError = InterpretBlendFactor(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].sourceBlend);
+        }
+        else if (renderPipelineStateOption.FindIndexOfFirstCaseInsensitive("DestBlend", 0) == 0)
+        {
+            renderStateBlockCompilationError = InterpretBlendFactor(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].destBlend);
+        }
+        else if (renderPipelineStateOption.FindIndexOfFirstCaseInsensitive("BlendOperator", 0) == 0)
+        {
+            renderStateBlockCompilationError = InterpretBlendOperator(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].blendOperator);
+        }
+        else if (renderPipelineStateOption.FindIndexOfFirstCaseInsensitive("SourceAlphaBlend", 0) == 0)
+        {
+            renderStateBlockCompilationError = InterpretBlendFactor(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].sourceAlphaBlend);
+        }
+        else if (renderPipelineStateOption.FindIndexOfFirstCaseInsensitive("DestAlphaBlend", 0) == 0)
+        {
+            renderStateBlockCompilationError = InterpretBlendFactor(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].destAlphaBlend);
+        }
+        else if (renderPipelineStateOption.FindIndexOfFirstCaseInsensitive("AlphaBlendOperator", 0) == 0)
+        {
+            renderStateBlockCompilationError = InterpretBlendOperator(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].alphaBlendOperator);
+        }
+        else if (renderPipelineStateOption.FindIndexOfFirstCaseInsensitive("RenderTargetWriteMask", 0) == 0)
+        {
+            renderStateBlockCompilationError = InterpretRenderTargetWriteMask(renderPipelineStateValue, &pRenderTargetBlendState[arrayIndex].renderTargetWriteMask);
+        }
+    }
+    else if (renderPipelineStateOption.EqualCaseInsensitive("IsFrontCounterClockwise"))
     {
         renderStateBlockCompilationError = InterpretBooleanValue(renderPipelineStateValue, &rasterizerState.m_IsFrontCounterClockwise);
     }
@@ -385,6 +600,30 @@ RenderStateBlockCompilationError InterpretRenderPipelineStateOption(
     else if (renderPipelineStateOption.EqualCaseInsensitive("BackFaceStencilComparisonFunc"))
     {
         renderStateBlockCompilationError = InterpretComparisonFunc(renderPipelineStateValue, &depthStencilState.m_BackFaceStencilComparisonFunc);
+    }
+    else if (renderPipelineStateOption.EqualCaseInsensitive("RedBlendUserFactor"))
+    {
+        renderStateBlockCompilationError = InterpretFloatValue(renderPipelineStateValue, &blendState.redBlendUserFactor);
+    }
+    else if (renderPipelineStateOption.EqualCaseInsensitive("GreenBlendUserFactor"))
+    {
+        renderStateBlockCompilationError = InterpretFloatValue(renderPipelineStateValue, &blendState.greenBlendUserFactor);
+    }
+    else if (renderPipelineStateOption.EqualCaseInsensitive("BlueBlendUserFactor"))
+    {
+        renderStateBlockCompilationError = InterpretFloatValue(renderPipelineStateValue, &blendState.blueBlendUserFactor);
+    }
+    else if (renderPipelineStateOption.EqualCaseInsensitive("AlphaBlendUserFactor"))
+    {
+        renderStateBlockCompilationError = InterpretFloatValue(renderPipelineStateValue, &blendState.alphaBlendUserFactor);
+    }
+    else if (renderPipelineStateOption.EqualCaseInsensitive("AlphaToCoverageEnable"))
+    {
+        renderStateBlockCompilationError = InterpretBooleanValue(renderPipelineStateValue, &blendState.alphaToCoverageEnable);
+    }
+    else if (renderPipelineStateOption.EqualCaseInsensitive("IndependentBlendEnable"))
+    {
+        renderStateBlockCompilationError = InterpretBooleanValue(renderPipelineStateValue, &blendState.independentBlendEnable);
     }
 
     return renderStateBlockCompilationError;
@@ -523,7 +762,7 @@ SHIPYARD_API RenderStateBlockCompilationError CompileRenderStateBlock(
         }
         else
         {
-            if (!isalnum(c) && c != '-' && c != '.')
+            if (!isalnum(c) && c != '-' && c != '.' && c != '[' && c != ']')
             {
                 continue;
             }

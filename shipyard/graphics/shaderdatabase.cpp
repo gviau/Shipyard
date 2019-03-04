@@ -137,7 +137,7 @@ bool ShaderDatabase::RetrieveShadersForShaderKey(const ShaderKey& shaderKey, uin
     }
 
     shaderEntrySet = m_ShaderEntrySets[shaderSetIndex];
-    assert((shaderEntrySet.rawVertexShaderSize + shaderEntrySet.rawPixelShaderSize + shaderEntrySet.rawHullShaderSize +
+    SHIP_ASSERT((shaderEntrySet.rawVertexShaderSize + shaderEntrySet.rawPixelShaderSize + shaderEntrySet.rawHullShaderSize +
             shaderEntrySet.rawDomainShaderSize + shaderEntrySet.rawGeometryShaderSize + shaderEntrySet.rawComputeShaderSize) > 0);
 
     return true;
@@ -202,7 +202,7 @@ void ShaderDatabase::RemoveShadersForShaderKey(const ShaderKey& shaderKey)
     size_t shaderEntriesHeaderPosition = sizeof(DatabaseHeader);
     m_FileHandler.ReadChars(shaderEntriesHeaderPosition, (char*)&shaderEntriesHeader, sizeof(shaderEntriesHeader));
 
-    assert(shaderEntriesHeader.numShaderEntries - 1 == m_ShaderEntryKeys.Size());
+    SHIP_ASSERT(shaderEntriesHeader.numShaderEntries - 1 == m_ShaderEntryKeys.Size());
 
     shaderEntriesHeader.numShaderEntries -= 1;
 
@@ -264,7 +264,7 @@ void ShaderDatabase::AppendShadersForShaderKey(const ShaderKey& shaderKey, Shade
     size_t shaderEntriesHeaderPosition = sizeof(DatabaseHeader);
     m_FileHandler.ReadChars(shaderEntriesHeaderPosition, (char*)&shaderEntriesHeader, sizeof(shaderEntriesHeader));
 
-    assert(shaderEntriesHeader.numShaderEntries + 1 == m_ShaderEntryKeys.Size());
+    SHIP_ASSERT(shaderEntriesHeader.numShaderEntries + 1 == m_ShaderEntryKeys.Size());
 
     shaderEntriesHeader.numShaderEntries += 1;
     m_FileHandler.WriteChars(shaderEntriesHeaderPosition, (char*)&shaderEntriesHeader, sizeof(shaderEntriesHeader));

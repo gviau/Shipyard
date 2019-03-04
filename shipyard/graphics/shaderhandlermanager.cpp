@@ -53,7 +53,7 @@ void ShaderHandlerManager::SetShaderDatabase(ShaderDatabase& shaderDatabase)
 
 ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shaderKey, GFXRenderDevice& gfxRenderDevice)
 {
-    assert(m_ShaderDatabase != nullptr);
+    SHIP_ASSERT(m_ShaderDatabase != nullptr);
 
     ShaderWatcher& shaderWatcher = ShaderWatcher::GetInstance();
     ShaderCompiler& shaderCompiler = ShaderCompiler::GetInstance();
@@ -112,7 +112,7 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
         {
             foundValidShaderInDatabase = m_ShaderDatabase->RetrieveShadersForShaderKey(shaderKey, lastModifiedTimestamp, compiledShaderEntrySet);
 
-            assert(foundValidShaderInDatabase);
+            SHIP_ASSERT(foundValidShaderInDatabase);
         }
 
         createShaders = true;

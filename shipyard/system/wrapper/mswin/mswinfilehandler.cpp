@@ -1,6 +1,6 @@
 #include <system/wrapper/mswin/mswinfilehandler.h>
 
-#include <cassert>
+#include <system/systemcommon.h>
 
 namespace Shipyard
 {;
@@ -147,7 +147,7 @@ void MswinFileHandler::AppendChars(const char* chars, size_t numChars, bool flus
 
 void MswinFileHandler::RemoveChars(size_t startingPosition, size_t numCharsToRemove)
 {
-    assert(numCharsToRemove > 0);
+    SHIP_ASSERT(numCharsToRemove > 0);
 
     size_t fileSize = Size();
     size_t startingPositionAfterPartToRemove = (startingPosition + numCharsToRemove);
@@ -182,7 +182,7 @@ void MswinFileHandler::RemoveChars(size_t startingPosition, size_t numCharsToRem
 
     m_File.open(m_Filename.GetBuffer(), fileMode);
 
-    assert(m_File.is_open());
+    SHIP_ASSERT(m_File.is_open());
     
     if (before.Size() > 0)
     {
@@ -198,7 +198,7 @@ void MswinFileHandler::RemoveChars(size_t startingPosition, size_t numCharsToRem
 
     m_File.open(m_Filename.GetBuffer(), GetFileMode(m_OpenFlag));
 
-    assert(m_File.is_open());
+    SHIP_ASSERT(m_File.is_open());
 }
 
 size_t MswinFileHandler::Size()

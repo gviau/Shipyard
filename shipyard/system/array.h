@@ -4,8 +4,8 @@
 
 #include <system/memory.h>
 #include <system/platform.h>
+#include <system/systemdebug.h>
 
-#include <cassert>
 #include <cinttypes>
 #include <stdlib.h>
 
@@ -219,20 +219,20 @@ namespace Shipyard
 
         T& operator[] (uint32_t index)
         {
-            assert(index < Size());
+            SHIP_ASSERT(index < Size());
             return m_Array[index];
         }
 
         const T& operator[] (uint32_t index) const
         {
-            assert(index < Size());
+            SHIP_ASSERT(index < Size());
             return m_Array[index];
         }
 
         T& Front()
         {
             uint32_t currentSize = Size();
-            assert(currentSize > 0);
+            SHIP_ASSERT(currentSize > 0);
 
             return m_Array[0];
         }
@@ -240,7 +240,7 @@ namespace Shipyard
         const T& Front() const
         {
             uint32_t currentSize = Size();
-            assert(currentSize > 0);
+            SHIP_ASSERT(currentSize > 0);
 
             return m_Array[0];
         }
@@ -248,7 +248,7 @@ namespace Shipyard
         T& Back()
         {
             uint32_t currentSize = Size();
-            assert(currentSize > 0);
+            SHIP_ASSERT(currentSize > 0);
 
             return m_Array[currentSize - 1];
         }
@@ -256,7 +256,7 @@ namespace Shipyard
         const T& Back() const
         {
             uint32_t currentSize = Size();
-            assert(currentSize > 0);
+            SHIP_ASSERT(currentSize > 0);
 
             return m_Array[currentSize - 1];
         }
@@ -264,7 +264,7 @@ namespace Shipyard
         void Add(const T& element)
         {
             uint32_t currentSize = Size();
-            assert(currentSize < 16383);
+            SHIP_ASSERT(currentSize < 16383);
 
             uint32_t currentCapacity = Capacity();
 
@@ -288,7 +288,7 @@ namespace Shipyard
         void Pop()
         {
             uint32_t currentSize = Size();
-            assert(currentSize > 0);
+            SHIP_ASSERT(currentSize > 0);
 
             m_Array[currentSize - 1].~T();
 
@@ -316,7 +316,7 @@ namespace Shipyard
         void RemoveAt(uint32_t indexToRemove)
         {
             uint32_t currentSize = Size();
-            assert(indexToRemove < currentSize);
+            SHIP_ASSERT(indexToRemove < currentSize);
 
             // Fast remove by swapping the index to remove with the last one.
             m_Array[indexToRemove] = m_Array[currentSize - 1];
@@ -327,7 +327,7 @@ namespace Shipyard
         void RemoveAtPreserveOrder(uint32_t indexToRemove)
         {
             uint32_t currentSize = Size();
-            assert(indexToRemove < currentSize);
+            SHIP_ASSERT(indexToRemove < currentSize);
 
             if (currentSize > 1)
             {
@@ -365,7 +365,7 @@ namespace Shipyard
         void InsertAt(uint32_t indexToInsertAt, const T& elementToInsert)
         {
             uint32_t currentSize = Size();
-            assert(currentSize < 16384);
+            SHIP_ASSERT(currentSize < 16384);
 
             uint32_t currentCapacity = Capacity();
 
@@ -392,8 +392,8 @@ namespace Shipyard
 
         void Reserve(uint32_t newCapacity)
         {
-            assert(newCapacity > 0);
-            assert(newCapacity <= 16383);
+            SHIP_ASSERT(newCapacity > 0);
+            SHIP_ASSERT(newCapacity <= 16383);
 
             if (newCapacity <= Capacity())
             {
@@ -422,7 +422,7 @@ namespace Shipyard
 
         void Resize(uint32_t newSize)
         {
-            assert(newSize <= 16383);
+            SHIP_ASSERT(newSize <= 16383);
 
             uint32_t currentSize = Size();
 
@@ -480,10 +480,10 @@ namespace Shipyard
 
         void SetUserPointer(T* userArray, uint32_t numElements, uint32_t startingSize)
         {
-            assert(userArray != nullptr);
-            assert(numElements > 0);
-            assert(numElements < 16384);
-            assert(startingSize <= numElements);
+            SHIP_ASSERT(userArray != nullptr);
+            SHIP_ASSERT(numElements > 0);
+            SHIP_ASSERT(numElements < 16384);
+            SHIP_ASSERT(startingSize <= numElements);
 
             Clear();
 
@@ -608,47 +608,47 @@ namespace Shipyard
 
         T& operator[] (uint32_t index)
         {
-            assert(index < m_Size);
+            SHIP_ASSERT(index < m_Size);
             return m_Array[index];
         }
 
         const T& operator[] (uint32_t index) const
         {
-            assert(index < m_Size);
+            SHIP_ASSERT(index < m_Size);
             return m_Array[index];
         }
 
         T& Front()
         {
-            assert(m_Size > 0);
+            SHIP_ASSERT(m_Size > 0);
 
             return m_Array[0];
         }
 
         const T& Front() const
         {
-            assert(m_Size > 0);
+            SHIP_ASSERT(m_Size > 0);
 
             return m_Array[0];
         }
 
         T& Back()
         {
-            assert(m_Size > 0);
+            SHIP_ASSERT(m_Size > 0);
 
             return m_Array[m_Size - 1];
         }
 
         const T& Back() const
         {
-            assert(m_Size > 0);
+            SHIP_ASSERT(m_Size > 0);
 
             return m_Array[m_Size - 1];
         }
 
         void Add(const T& element)
         {
-            assert(m_Size < 0xFFFFFFFF);
+            SHIP_ASSERT(m_Size < 0xFFFFFFFF);
 
             if ((m_Size + 1) > m_Capacity)
             {
@@ -669,7 +669,7 @@ namespace Shipyard
 
         void Pop()
         {
-            assert(m_Size > 0);
+            SHIP_ASSERT(m_Size > 0);
 
             m_Array[m_Size - 1].~T();
 
@@ -695,7 +695,7 @@ namespace Shipyard
 
         void RemoveAt(uint32_t indexToRemove)
         {
-            assert(indexToRemove < m_Size);
+            SHIP_ASSERT(indexToRemove < m_Size);
 
             // Fast remove by swapping the index to remove with the last one.
             m_Array[indexToRemove] = m_Array[m_Size - 1];
@@ -705,7 +705,7 @@ namespace Shipyard
 
         void RemoveAtPreserveOrder(uint32_t indexToRemove)
         {
-            assert(indexToRemove < m_Size);
+            SHIP_ASSERT(indexToRemove < m_Size);
 
             if (m_Size > 1)
             {
@@ -740,7 +740,7 @@ namespace Shipyard
 
         void InsertAt(uint32_t indexToInsertAt, const T& elementToInsert)
         {
-            assert(m_Size < 0xFFFFFFFF);
+            SHIP_ASSERT(m_Size < 0xFFFFFFFF);
 
             if ((m_Size + 1) > m_Capacity)
             {
@@ -765,8 +765,8 @@ namespace Shipyard
 
         void Reserve(uint32_t newCapacity)
         {
-            assert(newCapacity > 0);
-            assert(newCapacity <= 0xFFFFFFFF);
+            SHIP_ASSERT(newCapacity > 0);
+            SHIP_ASSERT(newCapacity <= 0xFFFFFFFF);
 
             if (newCapacity <= m_Capacity)
             {
@@ -789,7 +789,7 @@ namespace Shipyard
 
         void Resize(uint32_t newSize)
         {
-            assert(newSize <= 0xFFFFFFFF);
+            SHIP_ASSERT(newSize <= 0xFFFFFFFF);
 
             if (newSize < m_Size)
             {

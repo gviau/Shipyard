@@ -1,10 +1,10 @@
 #include <cstring>
 
-#include <cassert>
 #include <cstdarg>
 #include <cstdio>
 
 #include <system/memory.h>
+#include <system/systemdebug.h>
 
 namespace Shipyard
 {;
@@ -139,14 +139,14 @@ String<CharType>& String<CharType>::operator= (CharType c)
 template <typename CharType>
 CharType& String<CharType>::operator[] (size_t index)
 {
-    assert(index < m_NumChars);
+    SHIP_ASSERT(index < m_NumChars);
     return m_Buffer[index];
 }
 
 template <typename CharType>
 const CharType& String<CharType>::operator[] (size_t index) const
 {
-    assert(index < m_NumChars);
+    SHIP_ASSERT(index < m_NumChars);
     return m_Buffer[index];
 }
 
@@ -571,14 +571,14 @@ void String<CharType>::Erase(size_t pos, size_t length)
 template <typename CharType>
 CharType& String<CharType>::At(size_t index)
 {
-    assert(index < m_NumChars);
+    SHIP_ASSERT(index < m_NumChars);
     return m_Buffer[index];
 }
 
 template <typename CharType>
 const CharType& String<CharType>::At(size_t index) const
 {
-    assert(index < m_NumChars);
+    SHIP_ASSERT(index < m_NumChars);
     return m_Buffer[index];
 }
 

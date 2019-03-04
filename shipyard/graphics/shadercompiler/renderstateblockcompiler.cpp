@@ -4,6 +4,7 @@
 #include <graphics/shaderkey.h>
 
 #include <system/string.h>
+#include <system/systemcommon.h>
 
 #include <locale>
 

@@ -2,7 +2,7 @@
 
 #include <system/platform.h>
 
-#include <cassert>
+#include <system/systemcommon.h>
 
 namespace Shipyard
 {
@@ -12,13 +12,13 @@ namespace Shipyard
     public:
         static T& GetInstance()
         {
-            assert(ms_Instance != nullptr);
+            SHIP_ASSERT(ms_Instance != nullptr);
             return *ms_Instance;
         }
 
         static void CreateInstance()
         {
-            assert(ms_Instance == nullptr);
+            SHIP_ASSERT(ms_Instance == nullptr);
             ms_Instance = new T();
         }
 

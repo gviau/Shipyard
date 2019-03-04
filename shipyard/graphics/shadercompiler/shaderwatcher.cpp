@@ -4,8 +4,9 @@
 
 #include <graphics/shaderfamilies.h>
 
+#include <system/systemcommon.h>
+
 #include <algorithm>
-#include <cassert>
 
 #include <windows.h>
 

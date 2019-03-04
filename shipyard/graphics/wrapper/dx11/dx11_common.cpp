@@ -1,7 +1,5 @@
 #include <graphics/wrapper/dx11/dx11_common.h>
 
-#include <cassert>
-
 namespace Shipyard
 {;
 
@@ -75,7 +73,7 @@ DXGI_FORMAT ConvertShipyardFormatToDX11(GfxFormat format)
         case GfxFormat::Unknown:                return DXGI_FORMAT_UNKNOWN;
 
         default:
-            assert(false);
+            SHIP_ASSERT(false);
     }
 
     return DXGI_FORMAT_UNKNOWN;
@@ -88,7 +86,7 @@ D3D11_FILL_MODE ConvertShipyardFillModeToDX11(FillMode fillMode)
     case FillMode::Solid:       return D3D11_FILL_SOLID;
     case FillMode::Wireframe:   return D3D11_FILL_WIREFRAME;
     default:
-        assert(false);
+        SHIP_ASSERT(false);
     }
 
     return D3D11_FILL_SOLID;
@@ -102,7 +100,7 @@ D3D11_CULL_MODE ConvertShipyardCullModeToDX11(CullMode cullMode)
     case CullMode::CullFrontFace:   return D3D11_CULL_FRONT;
     case CullMode::CullBackFace:    return D3D11_CULL_BACK;
     default:
-        assert(false);
+        SHIP_ASSERT(false);
     }
 
     return D3D11_CULL_NONE;

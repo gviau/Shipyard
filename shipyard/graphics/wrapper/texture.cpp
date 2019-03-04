@@ -1,7 +1,5 @@
 #include <graphics/wrapper/texture.h>
 
-#include <cassert>
-
 namespace Shipyard
 {;
 BaseTexture::BaseTexture(uint32_t width, uint32_t height, GfxFormat pixelFormat, TextureUsage textureUsage)
@@ -94,7 +92,7 @@ uint32_t GetBytesPerPixel(GfxFormat pixelFormat)
         bytesPerPixel = 0;
         break;
     default:
-        assert(false);
+        SHIP_ASSERT(false);
     }
 
     return bytesPerPixel;

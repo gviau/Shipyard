@@ -1,7 +1,5 @@
 #include <graphics/wrapper/dx11/dx11buffer.h>
 
-#include <cassert>
-
 #include <graphics/wrapper/dx11/dx11_common.h>
 
 #include <system/logger.h>
@@ -163,7 +161,7 @@ D3D11_MAP GetD3D11MapFlag(MapFlag mapFlag)
     case MapFlag::Write_No_Overwrite:   return D3D11_MAP_WRITE_NO_OVERWRITE;
     default:
         // Should never happen
-        assert(false);
+        SHIP_ASSERT(false);
         break;
     }
 

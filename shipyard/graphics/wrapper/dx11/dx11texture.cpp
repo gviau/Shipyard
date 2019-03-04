@@ -1,7 +1,5 @@
 #include <graphics/wrapper/dx11/dx11texture.h>
 
-#include <cassert>
-
 #include <graphics/wrapper/dx11/dx11_common.h>
 
 #include <system/logger.h>
@@ -84,7 +82,7 @@ ID3D11ShaderResourceView* DX11BaseTexture::CreateShaderResourceView(ID3D11Device
         break;
 
     default:
-        assert(false);
+        SHIP_ASSERT(false);
     }
 
     ID3D11ShaderResourceView* shaderResourceView = nullptr;

@@ -14,8 +14,8 @@
 #include <graphics/vertexformat.h>
 
 #include <system/array.h>
-
 #include <system/logger.h>
+#include <system/systemcommon.h>
 
 #pragma warning( disable : 4005 )
 
@@ -23,8 +23,6 @@
 #include <d3dcompiler.h>
 
 #pragma warning( default : 4005 )
-
-#include <cassert>
 
 namespace Shipyard
 {;
@@ -65,7 +63,7 @@ DX11RenderDeviceContext::~DX11RenderDeviceContext()
 
 void DX11RenderDeviceContext::ClearFullRenderTarget(const GFXRenderTarget& renderTarget, float red, float green, float blue, float alpha)
 {
-    assert(renderTarget.IsValid());
+    SHIP_ASSERT(renderTarget.IsValid());
 
     ID3D11RenderTargetView* const * renderTargetViews = renderTarget.GetRenderTargetViews();
 
@@ -90,8 +88,8 @@ void DX11RenderDeviceContext::ClearFullRenderTarget(const GFXRenderTarget& rende
 
 void DX11RenderDeviceContext::ClearSingleRenderTarget(const GFXRenderTarget& renderTarget, uint32_t renderTargetIndex, float red, float green, float blue, float alpha)
 {
-    assert(renderTarget.IsValid());
-    assert(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
+    SHIP_ASSERT(renderTarget.IsValid());
+    SHIP_ASSERT(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
     ID3D11RenderTargetView* const * renderTargetViews = renderTarget.GetRenderTargetViews();
 
@@ -113,7 +111,7 @@ void DX11RenderDeviceContext::ClearSingleRenderTarget(const GFXRenderTarget& ren
 
 void DX11RenderDeviceContext::ClearDepthStencilRenderTarget(const GFXDepthStencilRenderTarget& depthStencilRenderTarget, DepthStencilClearFlag depthStencilClearFlag, float depthValue, uint8_t stencilValue)
 {
-    assert(depthStencilRenderTarget.IsValid());
+    SHIP_ASSERT(depthStencilRenderTarget.IsValid());
 
     ID3D11DepthStencilView* const depthStencilView = depthStencilRenderTarget.GetDepthStencilView();
 
@@ -227,7 +225,7 @@ ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatTy
     static_assert(uint32_t(VertexFormatType::VertexFormatType_Count) == 5, "Update the RegisterVertexFormatType function if you add or remove vertex formats");
 
     uint32_t idx = uint32_t(vertexFormatType);
-    assert(g_RegisteredInputLayouts[idx] == nullptr);
+    SHIP_ASSERT(g_RegisteredInputLayouts[idx] == nullptr);
 
     // Create a dummy shader just to validate the input layout
     StringA dummyShaderSource = "struct VS_INPUT {\nfloat3 position : POSITION;\n";

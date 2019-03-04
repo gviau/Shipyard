@@ -1,6 +1,7 @@
 #pragma once
 
 #include <system/systemcommon.h>
+#include <system/systemdebug.h>
 
 namespace Shipyard
 {
@@ -52,7 +53,7 @@ namespace Shipyard
 
         void SetBit(uint32_t bitIndex)
         {
-            assert(bitIndex < NumBits);
+            SHIP_ASSERT(bitIndex < NumBits);
 
             uint32_t elementIndex = bitIndex / NUM_BITS_PER_BITFIELD_ELEMENT;
             uint32_t bit = bitIndex % NUM_BITS_PER_BITFIELD_ELEMENT;
@@ -62,7 +63,7 @@ namespace Shipyard
 
         void UnsetBit(uint32_t bitIndex)
         {
-            assert(bitIndex < NumBits);
+            SHIP_ASSERT(bitIndex < NumBits);
 
             uint32_t elementIndex = bitIndex / NUM_BITS_PER_BITFIELD_ELEMENT;
             uint32_t bit = bitIndex % NUM_BITS_PER_BITFIELD_ELEMENT;
@@ -72,7 +73,7 @@ namespace Shipyard
 
         bool IsBitSet(uint32_t bitIndex) const
         {
-            assert(bitIndex < NumBits);
+            SHIP_ASSERT(bitIndex < NumBits);
 
             uint32_t elementIndex = bitIndex / NUM_BITS_PER_BITFIELD_ELEMENT;
             uint32_t bit = bitIndex % NUM_BITS_PER_BITFIELD_ELEMENT;
@@ -82,8 +83,8 @@ namespace Shipyard
 
         void SetRange(uint32_t startingBitIndexInclusive, uint32_t endingBitIndexInclusive)
         {
-            assert(startingBitIndexInclusive < NumBits);
-            assert(endingBitIndexInclusive < NumBits);
+            SHIP_ASSERT(startingBitIndexInclusive < NumBits);
+            SHIP_ASSERT(endingBitIndexInclusive < NumBits);
 
             uint32_t startingElementIndex = startingBitIndexInclusive / NUM_BITS_PER_BITFIELD_ELEMENT;
             uint32_t endingElementIndex = endingBitIndexInclusive / NUM_BITS_PER_BITFIELD_ELEMENT;
@@ -130,8 +131,8 @@ namespace Shipyard
 
         void UnsetRange(uint32_t startingBitIndexInclusive, uint32_t endingBitIndexInclusive)
         {
-            assert(startingBitIndexInclusive < NumBits);
-            assert(endingBitIndexInclusive < NumBits);
+            SHIP_ASSERT(startingBitIndexInclusive < NumBits);
+            SHIP_ASSERT(endingBitIndexInclusive < NumBits);
 
             uint32_t startingElementIndex = startingBitIndexInclusive / NUM_BITS_PER_BITFIELD_ELEMENT;
             uint32_t endingElementIndex = endingBitIndexInclusive / NUM_BITS_PER_BITFIELD_ELEMENT;
@@ -179,7 +180,7 @@ namespace Shipyard
         // Returns false if a bit set to 1 after the starting bit index, including it, couldn't be found.
         bool GetFirstBitSet(uint32_t startingBitIndex, uint32_t& firstBitSet) const
         {
-            assert(startingBitIndex < NumBits);
+            SHIP_ASSERT(startingBitIndex < NumBits);
 
             uint32_t elementIndex = startingBitIndex / NUM_BITS_PER_BITFIELD_ELEMENT;
             
@@ -220,7 +221,7 @@ namespace Shipyard
         // The starting bit is assumed to be set to 1 in the bitfield.
         uint32_t GetLongestRangeWithBitsSet(uint32_t startingBitIndex) const
         {
-            assert(startingBitIndex < NumBits);
+            SHIP_ASSERT(startingBitIndex < NumBits);
 
             uint32_t elementIndex = startingBitIndex / NUM_BITS_PER_BITFIELD_ELEMENT;
             

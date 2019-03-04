@@ -2,6 +2,8 @@
 
 #include <graphics/wrapper/rootsignature.h>
 
+#include <system/systemcommon.h>
+
 namespace Shipyard
 {;
 
@@ -15,7 +17,7 @@ void DescriptorSet::SetDescriptorForRootIndex(uint32_t rootIndex, GfxResource& d
 {
     RootSignatureParameterType paramType = m_RootSignature->GetRootSignatureParameters()[rootIndex].parameterType;
 
-    assert(paramType == RootSignatureParameterType::ConstantBufferView ||
+    SHIP_ASSERT(paramType == RootSignatureParameterType::ConstantBufferView ||
            paramType == RootSignatureParameterType::ShaderResourceView ||
            paramType == RootSignatureParameterType::UnorderedAccessView);
     
@@ -26,8 +28,8 @@ void DescriptorSet::SetDescriptorForRootIndex(uint32_t rootIndex, GfxResource& d
 
 void DescriptorSet::SetDescriptorTableForRootIndex(uint32_t rootIndex, const Array<GfxResource*>& descriptorTableResources)
 {
-    assert(descriptorTableResources.Size() > 0);
-    assert(m_RootSignature->GetRootSignatureParameters()[rootIndex].parameterType == RootSignatureParameterType::DescriptorTable);
+    SHIP_ASSERT(descriptorTableResources.Size() > 0);
+    SHIP_ASSERT(m_RootSignature->GetRootSignatureParameters()[rootIndex].parameterType == RootSignatureParameterType::DescriptorTable);
 
     DescriptorSetEntry& newDescriptorSetEntry = m_Resources.Grow();
     newDescriptorSetEntry.rootIndex = uint16_t(rootIndex);

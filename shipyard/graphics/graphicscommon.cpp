@@ -453,7 +453,7 @@ void RenderStateBlockStateOverride::OverrideIndependentBlendEnable(bool override
 
 void RenderStateBlockStateOverride::OverrideBlendEnable(bool overrideValue, uint32_t renderTargetIndex)
 {
-    assert(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
+    SHIP_ASSERT(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
     m_RenderStateBlockOverride.blendState.renderTargetBlendStates[renderTargetIndex].m_BlendEnable = overrideValue;
     m_OverridenState.SetBit((RenderStateBlockState_1_BlendEnable - RenderStateBlockState_0_BlendEnable) * renderTargetIndex + RenderStateBlockState_0_BlendEnable);
@@ -461,7 +461,7 @@ void RenderStateBlockStateOverride::OverrideBlendEnable(bool overrideValue, uint
 
 void RenderStateBlockStateOverride::OverrideSourceBlend(BlendFactor overrideValue, uint32_t renderTargetIndex)
 {
-    assert(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
+    SHIP_ASSERT(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
     m_RenderStateBlockOverride.blendState.renderTargetBlendStates[renderTargetIndex].m_SourceBlend = overrideValue;
     m_OverridenState.SetBit((RenderStateBlockState_1_SourceBlend - RenderStateBlockState_0_SourceBlend) * renderTargetIndex + RenderStateBlockState_0_SourceBlend);
@@ -469,7 +469,7 @@ void RenderStateBlockStateOverride::OverrideSourceBlend(BlendFactor overrideValu
 
 void RenderStateBlockStateOverride::OverrideDestBlend(BlendFactor overrideValue, uint32_t renderTargetIndex)
 {
-    assert(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
+    SHIP_ASSERT(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
     m_RenderStateBlockOverride.blendState.renderTargetBlendStates[renderTargetIndex].m_DestBlend = overrideValue;
     m_OverridenState.SetBit((RenderStateBlockState_1_DestBlend - RenderStateBlockState_0_DestBlend) * renderTargetIndex + RenderStateBlockState_0_DestBlend);
@@ -477,7 +477,7 @@ void RenderStateBlockStateOverride::OverrideDestBlend(BlendFactor overrideValue,
 
 void RenderStateBlockStateOverride::OverrideBlendOperator(BlendOperator overrideValue, uint32_t renderTargetIndex)
 {
-    assert(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
+    SHIP_ASSERT(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
     m_RenderStateBlockOverride.blendState.renderTargetBlendStates[renderTargetIndex].m_BlendOperator = overrideValue;
     m_OverridenState.SetBit((RenderStateBlockState_1_BlendOperator - RenderStateBlockState_0_BlendOperator) * renderTargetIndex + RenderStateBlockState_0_BlendOperator);
@@ -485,7 +485,7 @@ void RenderStateBlockStateOverride::OverrideBlendOperator(BlendOperator override
 
 void RenderStateBlockStateOverride::OverrideSourceAlphaBlend(BlendFactor overrideValue, uint32_t renderTargetIndex)
 {
-    assert(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
+    SHIP_ASSERT(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
     m_RenderStateBlockOverride.blendState.renderTargetBlendStates[renderTargetIndex].m_SourceAlphaBlend = overrideValue;
     m_OverridenState.SetBit((RenderStateBlockState_1_SourceAlphaBlend - RenderStateBlockState_0_SourceAlphaBlend) * renderTargetIndex + RenderStateBlockState_0_SourceAlphaBlend);
@@ -493,7 +493,7 @@ void RenderStateBlockStateOverride::OverrideSourceAlphaBlend(BlendFactor overrid
 
 void RenderStateBlockStateOverride::OverrideDestAlphaBlend(BlendFactor overrideValue, uint32_t renderTargetIndex)
 {
-    assert(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
+    SHIP_ASSERT(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
     m_RenderStateBlockOverride.blendState.renderTargetBlendStates[renderTargetIndex].m_DestAlphaBlend = overrideValue;
     m_OverridenState.SetBit((RenderStateBlockState_1_DestAlphaBlend - RenderStateBlockState_0_DestAlphaBlend) * renderTargetIndex + RenderStateBlockState_0_DestAlphaBlend);
@@ -501,7 +501,7 @@ void RenderStateBlockStateOverride::OverrideDestAlphaBlend(BlendFactor overrideV
 
 void RenderStateBlockStateOverride::OverrideAlphaBlendOperator(BlendOperator overrideValue, uint32_t renderTargetIndex)
 {
-    assert(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
+    SHIP_ASSERT(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
     m_RenderStateBlockOverride.blendState.renderTargetBlendStates[renderTargetIndex].m_AlphaBlendOperator = overrideValue;
     m_OverridenState.SetBit((RenderStateBlockState_1_AlphaBlendOperator - RenderStateBlockState_0_AlphaBlendOperator) * renderTargetIndex + RenderStateBlockState_0_AlphaBlendOperator);
@@ -509,7 +509,7 @@ void RenderStateBlockStateOverride::OverrideAlphaBlendOperator(BlendOperator ove
 
 void RenderStateBlockStateOverride::OverrideRenderTargetWriteMask(RenderTargetWriteMask overrideValue, uint32_t renderTargetIndex)
 {
-    assert(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
+    SHIP_ASSERT(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
     m_RenderStateBlockOverride.blendState.renderTargetBlendStates[renderTargetIndex].m_RenderTargetWriteMask = overrideValue;
     m_OverridenState.SetBit((RenderStateBlockState_1_RenderTargetWriteMask - RenderStateBlockState_0_RenderTargetWriteMask) * renderTargetIndex + RenderStateBlockState_0_RenderTargetWriteMask);

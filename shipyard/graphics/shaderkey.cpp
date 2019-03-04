@@ -3,7 +3,7 @@
 #include <graphics/shaderfamilies.h>
 #include <graphics/shaderoptions.h>
 
-#include <cassert>
+#include <system/systemcommon.h>
 
 namespace Shipyard
 {;
@@ -72,7 +72,7 @@ void ShaderKey::InitializeShaderKeyGroups()
     for (uint32_t i = 0; i < uint32_t(ShaderOption::Count); i++)
     {
         // Maximum of 24 bits per shader option (32 bits shader key with 8 bits for the shader family)
-        assert(g_NumBitsForShaderOption[i] > 0 && g_NumBitsForShaderOption[i] <= 24);
+        SHIP_ASSERT(g_NumBitsForShaderOption[i] > 0 && g_NumBitsForShaderOption[i] <= 24);
     }
     
 #define START_SHADER_KEY(shaderFamily) \
@@ -84,7 +84,7 @@ void ShaderKey::InitializeShaderKeyGroups()
 void ShaderKey::GetShaderKeyOptionsForShaderFamily(ShaderFamily shaderFamily, Array<ShaderOption>& shaderOptions)
 {
     ShaderKeyGroupBase* shaderKeyGroup = g_ShaderKeyGroups[uint32_t(shaderFamily)];
-    assert(shaderKeyGroup != nullptr);
+    SHIP_ASSERT(shaderKeyGroup != nullptr);
 
     shaderKeyGroup->GetShaderOptions(shaderOptions);
 }
@@ -108,7 +108,7 @@ void ShaderKey::SetShaderOption(ShaderOption shaderOption, uint32_t value)
     uint32_t numBitsForShaderOption = g_NumBitsForShaderOption[uint32_t(shaderOption)];
     uint32_t shaderOptionBitMask = (1 << numBitsForShaderOption) - 1;
 
-    assert(value <= shaderOptionBitMask);
+    SHIP_ASSERT(value <= shaderOptionBitMask);
 
     uint32_t shiftForShaderOption = g_ShaderKeyGroups[uint32_t(GetShaderFamily())]->GetShiftForShaderOption(shaderOption);
 

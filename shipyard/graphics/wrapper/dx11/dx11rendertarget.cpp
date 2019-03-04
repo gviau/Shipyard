@@ -12,8 +12,6 @@
 
 #pragma warning( default : 4005 )
 
-#include <cassert>
-
 namespace Shipyard
 {;
 

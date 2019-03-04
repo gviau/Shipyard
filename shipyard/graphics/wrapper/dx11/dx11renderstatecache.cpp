@@ -183,7 +183,7 @@ void DX11RenderStateCache::BindRootSignature(const GFXRootSignature& rootSignatu
 
         default:
             // Not yet implemented
-            assert(false);
+            SHIP_ASSERT(false);
         }
     }
 }
@@ -212,7 +212,7 @@ void DX11RenderStateCache::BindPipelineStateObject(const GFXPipelineStateObject&
 
     if (pipelineStateObjectParameters.vertexShader != m_VertexShader)
     {
-        assert(pipelineStateObjectParameters.vertexShader != nullptr);
+        SHIP_ASSERT(pipelineStateObjectParameters.vertexShader != nullptr);
 
         m_VertexShader = static_cast<GFXVertexShader*>(pipelineStateObjectParameters.vertexShader);
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexShader);
@@ -383,7 +383,7 @@ void DX11RenderStateCache::BindDescriptorTableFromDescriptorSet(
         const RootSignatureParameterEntry& rootSignatureParameter)
 {
     // Not yet implemented
-    assert(false);
+    SHIP_ASSERT(false);
 }
 
 void DX11RenderStateCache::BindDescriptorFromDescriptorSet(GfxResource* descriptorResource, const RootSignatureParameterEntry& rootSignatureParameter)
@@ -426,7 +426,7 @@ void DX11RenderStateCache::BindDescriptorFromDescriptorSet(GfxResource* descript
                 else
                 {
                     // Not yet implemented
-                    assert(false);
+                    SHIP_ASSERT(false);
                 }
 
                 if (m_NativeShaderResourceViews[bindingSlot] != nativeShaderResourceView)
@@ -443,7 +443,7 @@ void DX11RenderStateCache::BindDescriptorFromDescriptorSet(GfxResource* descript
 
         default:
             // Not yet implemented
-            assert(false);
+            SHIP_ASSERT(false);
             break;
         }
     }
@@ -705,7 +705,7 @@ void DX11RenderStateCache::CommitStateChangesForGraphics()
     }
 
     // Everything should be accounted for.
-    assert(m_RenderStateCacheDirtyFlags.IsClear());
+    SHIP_ASSERT(m_RenderStateCacheDirtyFlags.IsClear());
 }
 
 ID3D11RasterizerState* DX11RenderStateCache::CreateRasterizerState(const RasterizerState& rasterizerState) const

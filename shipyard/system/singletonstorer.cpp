@@ -1,8 +1,8 @@
 #include <system/singletonstorer.h>
 
-#include <common/shaderhandlermanager.h>
-#include <common/shadercompiler/shadercompiler.h>
-#include <common/shadercompiler/shaderwatcher.h>
+#include <graphics/shaderhandlermanager.h>
+#include <graphics/shadercompiler/shadercompiler.h>
+#include <graphics/shadercompiler/shaderwatcher.h>
 
 #include <system/logger.h>
 

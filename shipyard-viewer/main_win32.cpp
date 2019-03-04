@@ -1,14 +1,14 @@
-#include <common/wrapper/wrapper.h>
+#include <graphics/wrapper/wrapper.h>
 
-#include <common/shadercompiler/shadercompiler.h>
-#include <common/shadercompiler/shaderwatcher.h>
+#include <graphics/shadercompiler/shadercompiler.h>
+#include <graphics/shadercompiler/shaderwatcher.h>
 
-#include <common/shaderdatabase.h>
-#include <common/shaderfamilies.h>
-#include <common/shaderhandler.h>
-#include <common/shaderhandlermanager.h>
-#include <common/shaderkey.h>
-#include <common/shaderoptions.h>
+#include <graphics/shaderdatabase.h>
+#include <graphics/shaderfamilies.h>
+#include <graphics/shaderhandler.h>
+#include <graphics/shaderhandlermanager.h>
+#include <graphics/shaderkey.h>
+#include <graphics/shaderoptions.h>
 
 #include <system/singletonstorer.h>
 

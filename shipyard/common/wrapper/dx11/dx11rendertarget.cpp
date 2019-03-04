@@ -4,6 +4,8 @@
 
 #include <common/wrapper/dx11/dx11texture.h>
 
+#include <system/logger.h>
+
 #pragma warning( disable : 4005 )
 
 #include <d3d11.h>
@@ -42,7 +44,7 @@ DX11RenderTarget::DX11RenderTarget(ID3D11Device& device, DX11Texture2D** texture
         {
             m_IsValid = false;
 
-            MessageBox(NULL, "Couldn't attach texture to render target as it is either nullptr or not marked to be used a RenderTarget.", "DX11 Error", MB_OK);
+            SHIP_LOG_ERROR("DX11RenderTarget::DX11RenderTarget() --> Couldn't attach texture to render target as it is either nullptr or not marked to be used as a RenderTarget.");
             return;
         }
 
@@ -59,7 +61,7 @@ DX11RenderTarget::DX11RenderTarget(ID3D11Device& device, DX11Texture2D** texture
             {
                 m_IsValid = false;
 
-                MessageBox(NULL, "Render target does not all have the same dimension.", "DX11 Error", MB_OK);
+                SHIP_LOG_ERROR("DX11RenderTarget::DX11RenderTarget() --> Rendre targets do not all have the same dimension.");
                 return;
             }
         }
@@ -98,7 +100,7 @@ DX11DepthStencilRenderTarget::DX11DepthStencilRenderTarget(ID3D11Device& device,
 {
     if ((depthStencilTexture.GetTextureUsage() & TextureUsage::TextureUsage_DepthStencil) == 0)
     {
-        MessageBox(NULL, "Couldn't attach texture to render target as it is either nullptr or not marked to be used a RenderTarget.", "DX11 Error", MB_OK);
+        SHIP_LOG_ERROR("DX11DepthStencilRenderTarget::DX11DepthStencilRenderTarget() --> Couldn't attach texture to render target as it is either nullptr or not marked to be used as a RenderTarget.");
         return;
     }
 
@@ -129,7 +131,7 @@ ID3D11RenderTargetView* CreateRenderTargetView(ID3D11Device& device, ID3D11Textu
     HRESULT hr = device.CreateRenderTargetView(d3dTexture, &renderTargetViewDesc, &renderTargetView);
     if (FAILED(hr))
     {
-        MessageBox(NULL, "CreateRenderTargetView failed for RenderTarget", "DX11 error", MB_OK);
+        SHIP_LOG_ERROR("CreateRenderTargetView() --> Couldn't create render target view.");
         return nullptr;
     }
 
@@ -148,7 +150,7 @@ ID3D11DepthStencilView* CreateDepthStencilView(ID3D11Device& device, ID3D11Textu
     HRESULT hr = device.CreateDepthStencilView(d3dTexture, &depthStencilViewDesc, &depthStencilView);
     if (FAILED(hr))
     {
-        MessageBox(NULL, "CreateDepthStencilView failed for RenderTarget", "DX11 error", MB_OK);
+        SHIP_LOG_ERROR("CreateDepthStencilView() --> Couldn't create depth stencil view.");
         return nullptr;
     }
 

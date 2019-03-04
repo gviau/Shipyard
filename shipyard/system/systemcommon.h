@@ -2,6 +2,8 @@
 
 #include <system/platform.h>
 
+#include <system/string.h>
+
 #if PLATFORM == PLATFORM_WINDOWS
 #include <intrin.h>
 #endif // #if PLATFORM == PLATFORM_WINDOWS
@@ -16,4 +18,7 @@ namespace Shipyard
 #       define FindFirstBitSet(pOutFirstBitSet, scanMask) _BitScanForward(pOutFirstBitSet, scanMask)
 #   endif // #if CPU_BITS == CPU_BITS_64
 #endif // #if COMPILER == COMPILER_MSVC
+
+    // Returns the current time in a formatted output: year-month-day-hour-minutes-seconds-milliseconds.
+    SHIPYARD_API void GetCurrentTimeFullyFormatted(StringA& formattedOutput);
 }

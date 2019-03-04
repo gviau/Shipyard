@@ -268,6 +268,13 @@ void RenderStateBlockStateOverride::ApplyOverridenValues(RenderStateBlock& rende
 #undef SET_OVERRIDDEN_RENDERTARGET_BLENDSTATE_STATE_4
 #undef SET_OVERRIDDEN_RENDERTARGET_BLENDSTATE_STATE_5
 #undef SET_OVERRIDDEN_RENDERTARGET_BLENDSTATE_STATE_6
+#undef SET_OVERRIDDEN_RENDERTARGET_BLENDSTATE_STATE_7
+}
+
+void RenderStateBlockStateOverride::OverrideDepthBiasState(int overrideValue)
+{
+    m_RenderStateBlockOverride.rasterizerState.m_DepthBias = overrideValue;
+    m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_DepthBias);
 }
 
 void RenderStateBlockStateOverride::OverrideDepthBiasClampState(float overrideValue)

@@ -2,6 +2,8 @@
 
 #include <common/wrapper/dx11/dx11_common.h>
 
+#include <system/logger.h>
+
 #pragma warning( disable : 4005 )
 
 #include <d3d11.h>
@@ -32,7 +34,7 @@ DX11VertexShader::DX11VertexShader(ID3D11Device& device, void* shaderData, uint6
     HRESULT hr = device.CreateVertexShader(shaderData, SIZE_T(shaderDataSize), nullptr, &m_VertexShader);
     if (FAILED(hr))
     {
-        MessageBox(NULL, "CreateVertexShader failed", "DX11 error", MB_OK);
+        SHIP_LOG_ERROR("DX11VertexShader::DX11VertexShader() --> Couldn't create vertex shader.");
     }
 }
 
@@ -51,7 +53,7 @@ DX11PixelShader::DX11PixelShader(ID3D11Device& device, void* shaderData, uint64_
     HRESULT hr = device.CreatePixelShader(shaderData, SIZE_T(shaderDataSize), nullptr, &m_PixelShader);
     if (FAILED(hr))
     {
-        MessageBox(NULL, "CreatePixelShader failed", "DX11 error", MB_OK);
+        SHIP_LOG_ERROR("DX11PixelShader::DX11PixelShader() --> Couldn't create vertex shader.");
     }
 }
 

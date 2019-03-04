@@ -2,7 +2,7 @@
 
 #include <common/common.h>
 
-#include <system/common.h>
+#include <system/systemcommon.h>
 
 #include <system/array.h>
 #include <system/wrapper/wrapper.h>

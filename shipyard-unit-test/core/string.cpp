@@ -457,4 +457,11 @@ TEST_CASE("Test StringA", "[String]")
         REQUIRE(string.EqualCaseInsensitive(otherString) == false);
         REQUIRE(otherString.EqualCaseInsensitive(string) == false);
     }
+
+    SECTION("String format")
+    {
+        string.Format("%s%s=%d", "This", "test", 5);
+
+        REQUIRE(string == "Thistest=5");
+    }
 }

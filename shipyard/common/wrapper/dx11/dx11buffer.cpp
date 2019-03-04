@@ -4,6 +4,8 @@
 
 #include <common/wrapper/dx11/dx11_common.h>
 
+#include <system/logger.h>
+
 #pragma warning( disable : 4005 )
 
 #include <d3d11.h>
@@ -34,6 +36,7 @@ void* DX11BaseBuffer::Map(MapFlag mapFlag)
 {
     if (m_Buffer == nullptr)
     {
+        SHIP_LOG_WARNING("DX11BaseBuffer::Map() --> Calling map with a nullptr buffer.");
         return nullptr;
     }
 
@@ -43,7 +46,7 @@ void* DX11BaseBuffer::Map(MapFlag mapFlag)
     HRESULT hr = m_DeviceContext.Map(m_Buffer, 0, d3d11MapFlag, 0, &mappedResource);
     if (FAILED(hr))
     {
-        MessageBox(NULL, "DX11BaseBuffer::Map failed", "DX11 error", MB_OK);
+        SHIP_LOG_ERROR("DX11BaseBuffer::Map() --> Couldn't map buffer.");
         return nullptr;
     }
 
@@ -82,7 +85,7 @@ DX11VertexBuffer::DX11VertexBuffer(ID3D11Device& device, ID3D11DeviceContext& de
     HRESULT hr = device.CreateBuffer(&desc, &data, &m_Buffer);
     if (FAILED(hr))
     {
-        MessageBox(NULL, "DX11VertexBuffer::DX11VertexBuffer() failed", "DX11 error", MB_OK);
+        SHIP_LOG_ERROR("DX11VertexBuffer::DX11VertexBuffer() --> Couldn't create vertex buffer.");
     }
 }
 
@@ -109,7 +112,7 @@ DX11IndexBuffer::DX11IndexBuffer(ID3D11Device& device, ID3D11DeviceContext& devi
     HRESULT hr = device.CreateBuffer(&desc, &data, &m_Buffer);
     if (FAILED(hr))
     {
-        MessageBox(NULL, "DX11IndexBuffer::DX11IndexBuffer() failed", "DX11 error", MB_OK);
+        SHIP_LOG_ERROR("DX11IndexBuffer::DX11IndexBuffer() --> Couldn't create index buffer.");
     }
 }
 
@@ -143,7 +146,7 @@ DX11ConstantBuffer::DX11ConstantBuffer(ID3D11Device& device, ID3D11DeviceContext
     HRESULT hr = device.CreateBuffer(&desc, pData, &m_Buffer);
     if (FAILED(hr))
     {
-        MessageBox(NULL, "DX11ConstantBuffer::DX11ConstantBuffer() failed", "DX11 error", MB_OK);
+        SHIP_LOG_ERROR("DX11ConstantBuffer::DX11ConstantBuffer() --> Couldn't create constant buffer.");
     }
 
     m_ResourceType = GfxResourceType::ConstantBuffer;

@@ -7,6 +7,8 @@
 #include <common/wrapper/dx11/dx11rendertarget.h>
 #include <common/wrapper/dx11/dx11texture.h>
 
+#include <system/logger.h>
+
 #include <dxgi.h>
 
 #pragma warning( disable : 4005 )
@@ -33,7 +35,7 @@ DX11ViewSurface::DX11ViewSurface(DX11RenderDevice& renderDevice, DX11RenderDevic
     HRESULT hr = m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBufferTexture);
     if (FAILED(hr))
     {
-        MessageBox(NULL, "BackBufferTexture creation failed", "DX11 error", MB_OK);
+        SHIP_LOG_ERROR("DX11ViewSurface::DX11ViewSurface() --> Couldn't create view surface.");
         return;
     }
 
@@ -62,7 +64,7 @@ void DX11ViewSurface::Flip()
     HRESULT hr = m_SwapChain->Present(0, 0);
     if (FAILED(hr))
     {
-        MessageBox(NULL, "Present failed", "error", MB_OK);
+        SHIP_LOG_ERROR("DX11ViewSurface::Flip() --> Couldn't flip front buffer.");
     }
 }
 

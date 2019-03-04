@@ -11,6 +11,8 @@
 #include <common/wrapper/dx11/dx11shader.h>
 #include <common/wrapper/dx11/dx11texture.h>
 
+#include <system/logger.h>
+
 #pragma warning( disable : 4005 )
 
 #include <d3d11.h>
@@ -725,7 +727,7 @@ ID3D11RasterizerState* DX11RenderStateCache::CreateRasterizerState(const Rasteri
     HRESULT hr = m_Device->CreateRasterizerState(&rasterizerDesc, &nativeRasterizerState);
     if (FAILED(hr))
     {
-        MessageBox(NULL, "CreateRasterizerState failed", "DX11 error", MB_OK);
+        SHIP_LOG_ERROR("DX11RenderStateCache::CreateRasterizerState() --> Couldn't create rasterizer state.");
         return nullptr;
     }
 
@@ -755,7 +757,7 @@ ID3D11DepthStencilState* DX11RenderStateCache::CreateDepthStencilState(const Dep
     HRESULT hr = m_Device->CreateDepthStencilState(&depthStencilDesc, &nativeDepthStencilState);
     if (FAILED(hr))
     {
-        MessageBox(NULL, "CreateDepthStencilState failed", "DX11 error", MB_OK);
+        SHIP_LOG_ERROR("DX11RenderStateCache::CreateDepthStencilState() --> Couldn't create depth stencil state.");
         return nullptr;
     }
 
@@ -788,7 +790,7 @@ ID3D11BlendState* DX11RenderStateCache::CreateBlendState(const BlendState& blend
     HRESULT hr = m_Device->CreateBlendState(&blendDesc, &nativeBlendState);
     if (FAILED(hr))
     {
-        MessageBox(NULL, "Failed to create blend state", "DX11 Error", MB_OK);
+        SHIP_LOG_ERROR("DX11RenderStateCache::CreateBlendState() --> Couldn't create blend state.");
         return nullptr;
     }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <system/common.h>
+#include <system/systemcommon.h>
 
 namespace Shipyard
 {

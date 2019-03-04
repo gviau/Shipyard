@@ -2,7 +2,7 @@
 
 #include <common/common.h>
 
-#include <system/common.h>
+#include <system/systemcommon.h>
 
 // TODO
 // Move this in project configuration

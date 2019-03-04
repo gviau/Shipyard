@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstdarg>
+#include <cstdio>
 
 #include <system/memory.h>
 

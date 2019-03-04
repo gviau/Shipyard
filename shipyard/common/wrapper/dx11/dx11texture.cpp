@@ -4,6 +4,8 @@
 
 #include <common/wrapper/dx11/dx11_common.h>
 
+#include <system/logger.h>
+
 #pragma warning( disable : 4005 )
 
 #include <d3d11.h>
@@ -89,7 +91,7 @@ ID3D11ShaderResourceView* DX11BaseTexture::CreateShaderResourceView(ID3D11Device
     HRESULT hr = device.CreateShaderResourceView(&resource, &shaderResourceViewDesc, &shaderResourceView);
     if (FAILED(hr))
     {
-        MessageBox(NULL, "CreateShaderResourceView", "DX11 error", MB_OK);
+        SHIP_LOG_ERROR("DX11BaseTexture::CreateShaderResourceView() --> Couldn't create shader resource view.");
         return nullptr;
     }
 
@@ -176,7 +178,7 @@ DX11Texture2D::DX11Texture2D(
 
     if (FAILED(hr))
     {
-        MessageBox(NULL, "CreateTexture2D failed", "DX11 error", MB_OK);
+        SHIP_LOG_ERROR("DX11Texture2D::DX11Texture2D() --> Couldn't create Texture2D.");
         return;
     }
 

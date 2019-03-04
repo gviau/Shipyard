@@ -15,6 +15,8 @@
 
 #include <system/array.h>
 
+#include <system/logger.h>
+
 #pragma warning( disable : 4005 )
 
 #include <d3d11.h>
@@ -281,6 +283,8 @@ ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatTy
             error->Release();
         }
 
+        SHIP_LOG_ERROR("RegisterVertexFormatType() --> Couldn't compile dummy shader for registering vertex layout.");
+
         return nullptr;
     }
 
@@ -290,6 +294,8 @@ ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatTy
     if (FAILED(hr))
     {
         success = false;
+
+        SHIP_LOG_ERROR("RegisterVertexFormatType() --> Couldn't create dummy vertex shader for registering vertex layout.");
     }
 
     if (error != nullptr)
@@ -327,6 +333,8 @@ ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatTy
     hr = device->CreateInputLayout(&inputElements[0], inputElements.Size(), shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), &inputLayout);
     if (FAILED(hr))
     {
+        SHIP_LOG_ERROR("RegisterVertexFormatType() --> Couldn't create input layout.");
+
         shader->Release();
         return nullptr;
     }

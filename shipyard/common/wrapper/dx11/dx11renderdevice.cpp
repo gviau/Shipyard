@@ -8,6 +8,7 @@
 #include <common/wrapper/dx11/dx11shader.h>
 #include <common/wrapper/dx11/dx11texture.h>
 
+#include <system/logger.h>
 #include <system/memory.h>
 
 #pragma warning( disable : 4005 )
@@ -25,7 +26,7 @@ DX11RenderDevice::DX11RenderDevice()
     HRESULT hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, NULL, flags, nullptr, 0, D3D11_SDK_VERSION, &m_Device, nullptr, &m_ImmediateDeviceContext);
     if (FAILED(hr))
     {
-        MessageBox(NULL, "DX11RenderDevice::DX11RenderDevice() failed", "DX11 error", MB_OK);
+        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create D3D11 device.");
     }
 }
 
@@ -133,47 +134,11 @@ IDXGISwapChain* DX11RenderDevice::CreateSwapchain(uint32_t width, uint32_t heigh
 
     if (FAILED(hr))
     {
-        MessageBox(NULL, "IDXGIFactor1::CreateSwapChain failed", "DX11 error", MB_OK);
+        SHIP_LOG_ERROR("DX11RenderDevice::CreateSwapchain() --> Couldn't create swapchain.");
         return nullptr;
     }
 
     return swapChain;
-}
-
-void DX11RenderDevice::CreateDepthStencilBuffer(uint32_t width, uint32_t height, ID3D11Texture2D*& depthStencilTexture, ID3D11DepthStencilView*& depthStencilTextureView)
-{
-    D3D11_TEXTURE2D_DESC depthStencilTextureDesc;
-    depthStencilTextureDesc.Width = width;
-    depthStencilTextureDesc.Height = height;
-    depthStencilTextureDesc.MipLevels = 1;
-    depthStencilTextureDesc.ArraySize = 1;
-    depthStencilTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    depthStencilTextureDesc.SampleDesc.Count = 1;
-    depthStencilTextureDesc.SampleDesc.Quality = 0;
-    depthStencilTextureDesc.Usage = D3D11_USAGE_DEFAULT;
-    depthStencilTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-    depthStencilTextureDesc.CPUAccessFlags = 0;
-    depthStencilTextureDesc.MiscFlags = 0;
-
-    HRESULT hr = m_Device->CreateTexture2D(&depthStencilTextureDesc, nullptr, &depthStencilTexture);
-    if (FAILED(hr))
-    {
-        MessageBox(NULL, "DepthStencilTexture creation failed", "DX11 error", MB_OK);
-        return;
-    }
-
-    D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
-    depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-    depthStencilViewDesc.Texture2D.MipSlice = 0;
-    depthStencilViewDesc.Flags = 0;
-
-    hr = m_Device->CreateDepthStencilView(depthStencilTexture, &depthStencilViewDesc, &depthStencilTextureView);
-    if (FAILED(hr))
-    {
-        MessageBox(NULL, "CreateDepthStencilView failed", "DX11 error", MB_OK);
-        return;
-    }
 }
 
 }

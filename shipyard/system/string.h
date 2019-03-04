@@ -43,11 +43,14 @@ namespace Shipyard
         friend String operator+ (CharType c, const String& rhs);
 
         void Assign(const CharType* sz, size_t numChars);
+        void Assign(const CharType* sz);
         void Append(const CharType* sz, size_t numChars);
+        void Append(const CharType* sz);
 
         void Insert(size_t pos, const String& str);
         void InsertSubstring(size_t pos, const String& str, size_t substringPos, size_t substringLength);
         void Insert(size_t pos, const CharType* str, size_t numChars);
+        void Insert(size_t pos, const CharType* str);
 
         void Erase(size_t pos, size_t length);
 
@@ -70,18 +73,22 @@ namespace Shipyard
 
         size_t FindIndexOfFirst(const String& strToFind, size_t startingPos) const;
         size_t FindIndexOfFirst(const CharType* strToFind, size_t numChars, size_t startingPos) const;
+        size_t FindIndexOfFirst(const CharType* strToFind, size_t startingPos) const;
         size_t FindIndexOfFirst(CharType charToFind, size_t startingPos) const;
 
         size_t FindIndexOfFirstReverse(const String& strToFind, size_t startingPos) const;
         size_t FindIndexOfFirstReverse(const CharType* strToFind, size_t numChars, size_t startingPos) const;
+        size_t FindIndexOfFirstReverse(const CharType* strToFind, size_t startingPos) const;
         size_t FindIndexOfFirstReverse(CharType charToFind, size_t startingPos) const;
 
         size_t FindIndexOfFirstCaseInsensitive(const String& strToFind, size_t startingPos) const;
         size_t FindIndexOfFirstCaseInsensitive(const CharType* strToFind, size_t numChars, size_t startingPos) const;
+        size_t FindIndexOfFirstCaseInsensitive(const CharType* strToFind, size_t startingPos) const;
         size_t FindIndexOfFirstCaseInsensitive(CharType charToFind, size_t startingPos) const;
 
         size_t FindIndexOfFirstCaseInsensitiveReverse(const String& strToFind, size_t startingPos) const;
         size_t FindIndexOfFirstCaseInsensitiveReverse(const CharType* strToFind, size_t numChars, size_t startingPos) const;
+        size_t FindIndexOfFirstCaseInsensitiveReverse(const CharType* strToFind, size_t startingPos) const;
         size_t FindIndexOfFirstCaseInsensitiveReverse(CharType charToFind, size_t startingPos) const;
 
         String Substring(size_t pos, size_t lengthOfSubstring) const;
@@ -94,6 +101,7 @@ namespace Shipyard
 
         bool EqualCaseInsensitive(const String& str) const;
         bool EqualCaseInsensitive(const CharType* str, size_t numChars) const;
+        bool EqualCaseInsensitive(const CharType* str) const;
 
         bool operator== (const String& rhs) const;
         bool operator== (const CharType* rhs) const;

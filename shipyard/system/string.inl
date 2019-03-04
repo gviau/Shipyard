@@ -344,6 +344,12 @@ void String<CharType>::Assign(const CharType* sz, size_t numChars)
 }
 
 template <typename CharType>
+void String<CharType>::Assign(const CharType* sz)
+{
+    Assign(sz, strlen(sz));
+}
+
+template <typename CharType>
 void String<CharType>::Append(const CharType* sz, size_t numChars)
 {
     size_t newSize = m_NumChars + numChars;
@@ -364,6 +370,12 @@ void String<CharType>::Append(const CharType* sz, size_t numChars)
     m_NumChars = newSize;
 
     m_Buffer[m_NumChars] = '\0';
+}
+
+template <typename CharType>
+void String<CharType>::Append(const CharType* sz)
+{
+    Append(sz, strlen(sz));
 }
 
 template <typename CharType>
@@ -516,6 +528,12 @@ void String<CharType>::Insert(size_t pos, const CharType* str, size_t numChars)
 
     m_NumChars = newSize;
     m_Buffer[m_NumChars] = '\0';
+}
+
+template <typename CharType>
+void String<CharType>::Insert(size_t pos, const CharType* str)
+{
+    Insert(pos, str, strlen(str));
 }
 
 template <typename CharType>
@@ -733,6 +751,12 @@ size_t String<CharType>::FindIndexOfFirst(const CharType* strToFind, size_t numC
 }
 
 template <typename CharType>
+size_t String<CharType>::FindIndexOfFirst(const CharType* strToFind, size_t startingPos) const
+{
+    return FindIndexOfFirst(strToFind, strlen(strToFind), startingPos);
+}
+
+template <typename CharType>
 size_t String<CharType>::FindIndexOfFirst(CharType charToFind, size_t startingPos) const
 {
     for (size_t i = startingPos; i < m_NumChars; i++)
@@ -810,6 +834,12 @@ size_t String<CharType>::FindIndexOfFirstReverse(const CharType* strToFind, size
     }
 
     return InvalidIndex;
+}
+
+template <typename CharType>
+size_t String<CharType>::FindIndexOfFirstReverse(const CharType* strToFind, size_t startingPos) const
+{
+    return FindIndexOfFirstReverse(strToFind, strlen(strToFind), startingPos);
 }
 
 template <typename CharType>
@@ -904,6 +934,12 @@ size_t String<CharType>::FindIndexOfFirstCaseInsensitive(const CharType* strToFi
     }
 
     return InvalidIndex;
+}
+
+template <typename CharType>
+size_t String<CharType>::FindIndexOfFirstCaseInsensitive(const CharType* strToFind, size_t startingPos) const
+{
+    return FindIndexOfFirstCaseInsensitive(strToFind, strlen(strToFind), startingPos);
 }
 
 template <typename CharType>
@@ -1004,6 +1040,12 @@ size_t String<CharType>::FindIndexOfFirstCaseInsensitiveReverse(CharType charToF
     }
 
     return InvalidIndex;
+}
+
+template <typename CharType>
+size_t String<CharType>::FindIndexOfFirstCaseInsensitiveReverse(const CharType* strToFind, size_t startingPos) const
+{
+    return FindIndexOfFirstCaseInsensitiveReverse(strToFind, strlen(strToFind), startingPos);
 }
 
 template <typename CharType>
@@ -1176,6 +1218,12 @@ bool String<CharType>::EqualCaseInsensitive(const CharType* str, size_t numChars
     }
 
     return true;
+}
+
+template <typename CharType>
+bool String<CharType>::EqualCaseInsensitive(const CharType* str) const
+{
+    return EqualCaseInsensitive(str, strlen(str));
 }
 
 template <typename CharType>

@@ -103,6 +103,8 @@ namespace Shipyard
         bool EqualCaseInsensitive(const CharType* str, size_t numChars) const;
         bool EqualCaseInsensitive(const CharType* str) const;
 
+        void Format(const char* format, ...);
+
         bool operator== (const String& rhs) const;
         bool operator== (const CharType* rhs) const;
         bool operator!= (const String& rhs) const;

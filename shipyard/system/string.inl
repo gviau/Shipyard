@@ -1,6 +1,7 @@
 #include <cstring>
 
 #include <cassert>
+#include <cstdarg>
 
 #include <system/memory.h>
 
@@ -1224,6 +1225,26 @@ template <typename CharType>
 bool String<CharType>::EqualCaseInsensitive(const CharType* str) const
 {
     return EqualCaseInsensitive(str, strlen(str));
+}
+
+template <typename CharType>
+void String<CharType>::Format(const char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    int requiredLength = vsnprintf(nullptr, 0, format, args);
+    va_end(args);
+
+    if (requiredLength < 0)
+    {
+        return;
+    }
+
+    Resize(requiredLength);
+
+    va_start(args, format);
+    vsnprintf(m_Buffer, requiredLength + 1, format, args);
+    va_end(args);
 }
 
 template <typename CharType>

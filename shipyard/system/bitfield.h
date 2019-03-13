@@ -25,9 +25,16 @@ namespace Shipyard
         static constexpr uint32_t ms_NumElements = ((NumBits + NUM_BITS_PER_BITFIELD_ELEMENT - 1) / NUM_BITS_PER_BITFIELD_ELEMENT);
 
     public:
-        Bitfield()
+        Bitfield(bool setAllBits = false)
         {
-            Clear();
+            if (setAllBits)
+            {
+                SetAllBits();
+            }
+            else
+            {
+                Clear();
+            }
         }
 
         void Clear()
@@ -228,6 +235,7 @@ namespace Shipyard
             BitfieldType maskOfEveryBitsBeforeSet = ((BitfieldType(1) << BitfieldType(startingBitIndex)) - 1);
 
             uint32_t numBitsSet = 0;
+            uint32_t bitIndexInFirstElementToSearch = startingBitIndex;
 
 #if COMPILER == COMPILER_MSVC
             for (; elementIndex < ms_NumElements; elementIndex++)
@@ -243,13 +251,15 @@ namespace Shipyard
 
                 if (foundBitSet)
                 {
-                    numBitsSet = uint32_t(firstBitSet) + NUM_BITS_PER_BITFIELD_ELEMENT * elementIndex - startingBitIndex;
+                    numBitsSet = uint32_t(firstBitSet) + NUM_BITS_PER_BITFIELD_ELEMENT * elementIndex - bitIndexInFirstElementToSearch;
                     break;
                 }
                 else
                 {
                     maskOfEveryBitsBeforeSet = 0;
                     numBitsSet += (NUM_BITS_PER_BITFIELD_ELEMENT - startingBitIndex);
+
+                    startingBitIndex = 0;
                 }
             }
 #else

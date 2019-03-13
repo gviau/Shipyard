@@ -20,16 +20,7 @@ namespace Shipyard
     class SHIPYARD_API DX11BaseTexture : public BaseTexture
     {
     public:
-        DX11BaseTexture(
-                ID3D11Device& device,
-                uint32_t width,
-                uint32_t height,
-                GfxFormat pixelFormat,
-                bool dynamic,
-                void* initialData,
-                bool generateMips,
-                TextureUsage textureUsage = TextureUsage::TextureUsage_Default);
-        ~DX11BaseTexture();
+        DX11BaseTexture();
 
         ID3D11ShaderResourceView* GetShaderResourceView() const { return m_ShaderResourceView; }
 
@@ -42,7 +33,10 @@ namespace Shipyard
     class SHIPYARD_API DX11Texture2D : public Texture2D, public DX11BaseTexture
     {
     public:
-        DX11Texture2D(
+        DX11Texture2D();
+        DX11Texture2D(ID3D11Device& device, ID3D11Texture2D& texture, GfxFormat format);
+
+        bool Create(
                 ID3D11Device& device,
                 uint32_t width,
                 uint32_t height,
@@ -51,10 +45,7 @@ namespace Shipyard
                 void* initialData,
                 bool generateMips,
                 TextureUsage textureUsage = TextureUsage::TextureUsage_Default);
-
-        DX11Texture2D(ID3D11Device& device, ID3D11Texture2D& texture, GfxFormat format);
-
-        ~DX11Texture2D();
+        void Destroy();
 
         ID3D11Texture2D* GetTexture() const { return m_Texture; }
 

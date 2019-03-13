@@ -3,9 +3,14 @@
 namespace Shipyard
 {;
 
-DX11PipelineStateObject::DX11PipelineStateObject(const PipelineStateObjectCreationParameters& creationParameters)
-    : PipelineStateObject(creationParameters)
-    , m_CreationParameters(creationParameters)
+bool DX11PipelineStateObject::Create(const PipelineStateObjectCreationParameters& creationParameters)
+{
+    memcpy(&m_CreationParameters, &creationParameters, sizeof(creationParameters));
+
+    return true;
+}
+
+void DX11PipelineStateObject::Destroy()
 {
 
 }

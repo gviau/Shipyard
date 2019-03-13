@@ -18,6 +18,7 @@ struct ID3D11UnorderedAccessView;
 
 namespace Shipyard
 {
+    class GfxRenderDevice;
     class GfxResource;
 
     class DX11RenderStateCache
@@ -40,7 +41,7 @@ namespace Shipyard
         void SetVertexBuffers(GFXVertexBuffer* const * vertexBuffers, uint32_t startSlot, uint32_t numVertexBuffers, uint32_t* vertexBufferOffsets);
         void SetIndexBuffer(const GFXIndexBuffer& indexBuffer, uint32_t indexBufferOffset);
 
-        void CommitStateChangesForGraphics();
+        void CommitStateChangesForGraphics(GFXRenderDevice& gfxRenderDevice);
 
     private:
         void BindDescriptorTableFromDescriptorSet(const Array<GfxResource*>& descriptorTableResources, const RootSignatureParameterEntry& rootSignatureParameter);
@@ -123,8 +124,8 @@ namespace Shipyard
         // Redundant render state cache
         Bitfield<RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Count> m_RenderStateCacheDirtyFlags;
 
-        GFXVertexShader* m_VertexShader;
-        GFXPixelShader* m_PixelShader;
+        GFXVertexShaderHandle m_VertexShaderHandle;
+        GFXPixelShaderHandle m_PixelShaderHandle;
 
         RasterizerState m_RasterizerState;
         DepthStencilState m_DepthStencilState;

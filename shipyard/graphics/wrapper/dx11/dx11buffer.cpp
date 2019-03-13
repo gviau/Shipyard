@@ -15,19 +15,21 @@ namespace Shipyard
 
 D3D11_MAP GetD3D11MapFlag(MapFlag mapFlag);
 
-DX11BaseBuffer::DX11BaseBuffer(ID3D11DeviceContext& deviceContext)
-    : m_DeviceContext(deviceContext)
+DX11BaseBuffer::DX11BaseBuffer()
+    : m_DeviceContext(nullptr)
     , m_Buffer(nullptr)
 {
 
 }
 
-DX11BaseBuffer::~DX11BaseBuffer()
+void DX11BaseBuffer::Destroy()
 {
-    if (m_Buffer != nullptr)
-    {
-        m_Buffer->Release();
-    }
+    SHIP_ASSERT_MSG(m_Buffer != nullptr, "Can't call Destroy on invalid buffer 0x%p", this);
+
+    m_Buffer->Release();
+    m_Buffer = nullptr;
+
+    m_DeviceContext = nullptr;
 }
 
 void* DX11BaseBuffer::Map(MapFlag mapFlag)
@@ -41,7 +43,7 @@ void* DX11BaseBuffer::Map(MapFlag mapFlag)
     D3D11_MAP d3d11MapFlag = GetD3D11MapFlag(mapFlag);
 
     D3D11_MAPPED_SUBRESOURCE mappedResource;
-    HRESULT hr = m_DeviceContext.Map(m_Buffer, 0, d3d11MapFlag, 0, &mappedResource);
+    HRESULT hr = m_DeviceContext->Map(m_Buffer, 0, d3d11MapFlag, 0, &mappedResource);
     if (FAILED(hr))
     {
         SHIP_LOG_ERROR("DX11BaseBuffer::Map() --> Couldn't map buffer.");
@@ -55,14 +57,16 @@ void DX11BaseBuffer::Unmap()
 {
     if (m_Buffer != nullptr)
     {
-        m_DeviceContext.Unmap(m_Buffer, 0);
+        m_DeviceContext->Unmap(m_Buffer, 0);
     }
 }
 
-DX11VertexBuffer::DX11VertexBuffer(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t numVertices, VertexFormatType vertexFormatType, bool dynamic, void* initialData)
-    : DX11BaseBuffer(deviceContext)
-    , VertexBuffer(numVertices, vertexFormatType, dynamic, initialData)
+bool DX11VertexBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t numVertices, VertexFormatType vertexFormatType, bool dynamic, void* initialData)
 {
+    m_NumVertices = numVertices;
+    m_VertexFormatType = vertexFormatType;
+    m_DeviceContext = &deviceContext;
+
     D3D11_USAGE usage = (dynamic) ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
 
     VertexFormat* vertexFormat = nullptr;
@@ -84,13 +88,18 @@ DX11VertexBuffer::DX11VertexBuffer(ID3D11Device& device, ID3D11DeviceContext& de
     if (FAILED(hr))
     {
         SHIP_LOG_ERROR("DX11VertexBuffer::DX11VertexBuffer() --> Couldn't create vertex buffer.");
+        return false;
     }
+
+    return true;
 }
 
-DX11IndexBuffer::DX11IndexBuffer(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t numIndices, bool uses2BytesPerIndex, bool dynamic, void* initialData)
-    : DX11BaseBuffer(deviceContext)
-    , IndexBuffer(numIndices, uses2BytesPerIndex, dynamic, initialData)
+bool DX11IndexBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t numIndices, bool uses2BytesPerIndex, bool dynamic, void* initialData)
 {
+    m_NumIndices = numIndices;
+    m_Uses2BytesPerIndex = uses2BytesPerIndex;
+    m_DeviceContext = &deviceContext;
+
     D3D11_USAGE usage = (dynamic) ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
 
     uint32_t indexSizeInBytes = (uses2BytesPerIndex ? 2 : 4);
@@ -111,13 +120,16 @@ DX11IndexBuffer::DX11IndexBuffer(ID3D11Device& device, ID3D11DeviceContext& devi
     if (FAILED(hr))
     {
         SHIP_LOG_ERROR("DX11IndexBuffer::DX11IndexBuffer() --> Couldn't create index buffer.");
+        return false;
     }
+
+    return true;
 }
 
-DX11ConstantBuffer::DX11ConstantBuffer(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t dataSizeInBytes, bool dynamic, void* initialData)
-    : DX11BaseBuffer(deviceContext)
-    , ConstantBuffer(dataSizeInBytes, dynamic, initialData)
+bool DX11ConstantBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t dataSizeInBytes, bool dynamic, void* initialData)
 {
+    m_DeviceContext = &deviceContext;
+
     D3D11_USAGE usage = (dynamic) ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
 
     D3D11_BUFFER_DESC desc;
@@ -145,9 +157,12 @@ DX11ConstantBuffer::DX11ConstantBuffer(ID3D11Device& device, ID3D11DeviceContext
     if (FAILED(hr))
     {
         SHIP_LOG_ERROR("DX11ConstantBuffer::DX11ConstantBuffer() --> Couldn't create constant buffer.");
+        return false;
     }
 
     m_ResourceType = GfxResourceType::ConstantBuffer;
+
+    return true;
 }
 
 D3D11_MAP GetD3D11MapFlag(MapFlag mapFlag)

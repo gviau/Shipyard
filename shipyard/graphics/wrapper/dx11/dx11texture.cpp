@@ -14,27 +14,10 @@
 namespace Shipyard
 {;
 
-DX11BaseTexture::DX11BaseTexture(
-        ID3D11Device& device,
-        uint32_t width,
-        uint32_t height,
-        GfxFormat pixelFormat,
-        bool dynamic,
-        void* initialData,
-        bool generateMips,
-        TextureUsage textureUsage)
-    : BaseTexture(width, height, pixelFormat, textureUsage)
-    , m_ShaderResourceView(nullptr)
+DX11BaseTexture::DX11BaseTexture()
+    : m_ShaderResourceView(nullptr)
 {
 
-}
-
-DX11BaseTexture::~DX11BaseTexture()
-{
-    if (m_ShaderResourceView != nullptr)
-    {
-        m_ShaderResourceView->Release();
-    }
 }
 
 ID3D11ShaderResourceView* DX11BaseTexture::CreateShaderResourceView(ID3D11Device& device, ID3D11Resource& resource, GfxFormat pixelFormat, TextureViewType textureViewType, TextureUsage textureUsage)
@@ -96,7 +79,30 @@ ID3D11ShaderResourceView* DX11BaseTexture::CreateShaderResourceView(ID3D11Device
     return shaderResourceView;
 }
 
-DX11Texture2D::DX11Texture2D(
+DX11Texture2D::DX11Texture2D()
+    : m_Texture(nullptr)
+{
+
+}
+
+DX11Texture2D::DX11Texture2D(ID3D11Device& device, ID3D11Texture2D& texture, GfxFormat format)
+    : m_Texture(nullptr)
+{
+    m_Texture = &texture;
+
+    m_Texture->AddRef();
+
+    D3D11_TEXTURE2D_DESC textureDesc;
+    m_Texture->GetDesc(&textureDesc);
+
+    m_Width = textureDesc.Width;
+    m_Height = textureDesc.Height;
+    m_TextureUsage = TextureUsage::TextureUsage_RenderTarget;
+
+    m_PixelFormat = format;
+}
+
+bool DX11Texture2D::Create(
         ID3D11Device& device,
         uint32_t width,
         uint32_t height,
@@ -105,9 +111,12 @@ DX11Texture2D::DX11Texture2D(
         void* initialData,
         bool generateMips,
         TextureUsage textureUsage)
-    : DX11BaseTexture(device, width, height, pixelFormat, dynamic, initialData, generateMips, textureUsage)
-    , m_Texture(nullptr)
 {
+    m_Width = width;
+    m_Height = height;
+    m_PixelFormat = pixelFormat;
+    m_TextureUsage = textureUsage;
+
     D3D11_USAGE usage = (dynamic ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT);
 
     D3D11_TEXTURE2D_DESC textureDesc;
@@ -177,33 +186,34 @@ DX11Texture2D::DX11Texture2D(
     if (FAILED(hr))
     {
         SHIP_LOG_ERROR("DX11Texture2D::DX11Texture2D() --> Couldn't create Texture2D.");
-        return;
+        return false;
     }
 
     m_ShaderResourceView = DX11BaseTexture::CreateShaderResourceView(device, *m_Texture, m_PixelFormat, TextureViewType::Tex2D, textureUsage);
-}
 
-DX11Texture2D::DX11Texture2D(ID3D11Device& device, ID3D11Texture2D& texture, GfxFormat format)
-    : DX11BaseTexture(device, 0, 0, format, false, nullptr, false, TextureUsage::TextureUsage_RenderTarget)
-    , m_Texture(nullptr)
-{
-    m_Texture = &texture;
-
-    m_Texture->AddRef();
-
-    D3D11_TEXTURE2D_DESC textureDesc;
-    m_Texture->GetDesc(&textureDesc);
-
-    m_Width = textureDesc.Width;
-    m_Height = textureDesc.Height;
-}
-
-DX11Texture2D::~DX11Texture2D()
-{
-    if (m_Texture != nullptr)
+    if (m_ShaderResourceView == nullptr)
     {
         m_Texture->Release();
+        m_Texture = nullptr;
+
+        return false;
     }
+
+    return true;
+}
+
+void DX11Texture2D::Destroy()
+{
+    SHIP_ASSERT_MSG(m_Texture != nullptr, "Can't call Destroy on invalid texture2D 0x%p", this);
+
+    if (m_ShaderResourceView != nullptr)
+    {
+        m_ShaderResourceView->Release();
+        m_ShaderResourceView = nullptr;
+    }
+
+    m_Texture->Release();
+    m_Texture = nullptr;
 }
 
 }

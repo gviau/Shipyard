@@ -20,12 +20,12 @@ namespace Shipyard
     class SHIPYARD_API VertexBuffer
     {
     public:
-        VertexBuffer(uint32_t numVertices, VertexFormatType vertexFormatType, bool dynamic, void* initialData);
+        VertexBuffer();
 
         uint32_t GetNumVertices() const { return m_NumVertices; }
         VertexFormatType GetVertexFormatType() const { return m_VertexFormatType; }
 
-    private:
+    protected:
         uint32_t m_NumVertices;
         VertexFormatType m_VertexFormatType;
     };
@@ -33,20 +33,19 @@ namespace Shipyard
     class SHIPYARD_API IndexBuffer
     {
     public:
-        IndexBuffer(uint32_t numIndices, bool uses2BytesPerIndex, bool dynamic, void* initialData);
+        IndexBuffer();
 
         uint32_t GetNumIndices() const { return m_NumIndices; }
         bool Uses2BytesPerIndex() const { return m_Uses2BytesPerIndex; }
 
-    private:
+    protected:
         uint32_t m_NumIndices;
         bool m_Uses2BytesPerIndex;
     };
 
     class SHIPYARD_API ConstantBuffer
     {
-    public:
-        ConstantBuffer(uint32_t dataSizeInBytes, bool dynamic, void* initialData);
+
     };
 
     class StructuredBuffer
@@ -58,5 +57,4 @@ namespace Shipyard
     {
 
     };
-
 }

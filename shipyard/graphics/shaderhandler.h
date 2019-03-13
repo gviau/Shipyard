@@ -4,9 +4,9 @@
 
 #include <graphics/wrapper/wrapper_common.h>
 
-#include <system/platform.h>
+#include <graphics/wrapper/shader.h>
 
-#include <memory>
+#include <system/platform.h>
 
 namespace Shipyard
 {
@@ -24,6 +24,7 @@ namespace Shipyard
 
     public:
         ShaderHandler(ShaderKey shaderKey);
+        ~ShaderHandler();
 
         void ApplyShader(PipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters) const;
 
@@ -32,8 +33,8 @@ namespace Shipyard
     private:
         ShaderKey m_ShaderKey;
 
-        std::shared_ptr<GFXVertexShader> m_VertexShader;
-        std::shared_ptr<GFXPixelShader> m_PixelShader;
+        GFXVertexShaderHandle m_VertexShaderHandle;
+        GFXPixelShaderHandle m_PixelShaderHandle;
 
         RenderStateBlock m_RenderStateBlock;
     };

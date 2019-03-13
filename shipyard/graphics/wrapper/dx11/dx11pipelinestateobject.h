@@ -2,12 +2,15 @@
 
 #include <graphics/wrapper/pipelinestateobject.h>
 
+#include <graphics/graphicscommon.h>
+
 namespace Shipyard
 {
     class SHIPYARD_API DX11PipelineStateObject : public PipelineStateObject
     {
     public:
-        DX11PipelineStateObject(const PipelineStateObjectCreationParameters& creationParameters);
+        bool Create(const PipelineStateObjectCreationParameters& creationParameters);
+        void Destroy();
 
         const PipelineStateObjectCreationParameters& GetCreationParameters() const;
 

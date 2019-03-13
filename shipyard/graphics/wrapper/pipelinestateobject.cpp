@@ -3,8 +3,4 @@
 namespace Shipyard
 {;
 
-PipelineStateObject::PipelineStateObject(const PipelineStateObjectCreationParameters& creationParameters)
-{
-}
-
 }

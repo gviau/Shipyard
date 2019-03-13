@@ -15,10 +15,10 @@ namespace Shipyard
     class SHIPYARD_API DX11RenderTarget : public RenderTarget
     {
     public:
-        DX11RenderTarget(ID3D11Device& device, DX11Texture2D** texturesToAttach, uint32_t numTexturesToAttach);
-        ~DX11RenderTarget();
+        DX11RenderTarget();
 
-        bool IsValid() const { return m_IsValid; }
+        bool Create(ID3D11Device& device, DX11Texture2D** texturesToAttach, uint32_t numTexturesToAttach);
+        void Destroy();
 
         uint32_t GetNumRenderTargetsAttached() const { return m_NumRenderTargetsAttached; }
 
@@ -38,10 +38,10 @@ namespace Shipyard
     class SHIPYARD_API DX11DepthStencilRenderTarget : public DepthStencilRenderTarget
     {
     public:
-        DX11DepthStencilRenderTarget(ID3D11Device& device, DX11Texture2D& depthStencilTexture);
-        ~DX11DepthStencilRenderTarget();
+        DX11DepthStencilRenderTarget();
 
-        bool IsValid() const { return (m_DepthStencilView != nullptr); }
+        bool Create(ID3D11Device& device, DX11Texture2D& depthStencilTexture);
+        void Destroy();
 
         ID3D11DepthStencilView* const GetDepthStencilView() const { return m_DepthStencilView; }
         ID3D11ShaderResourceView* const GetDepthStencilShaderResourceView() const { return m_DepthStencilShaderResourceView; }

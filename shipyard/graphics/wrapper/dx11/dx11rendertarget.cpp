@@ -18,16 +18,18 @@ namespace Shipyard
 ID3D11RenderTargetView* CreateRenderTargetView(ID3D11Device& device,ID3D11Texture2D* d3dTexture, DXGI_FORMAT format);
 ID3D11DepthStencilView* CreateDepthStencilView(ID3D11Device& device, ID3D11Texture2D* d3dTexture, DXGI_FORMAT format);
 
-DX11RenderTarget::DX11RenderTarget(ID3D11Device& device, DX11Texture2D** texturesToAttach, uint32_t numTexturesToAttach)
+DX11RenderTarget::DX11RenderTarget()
     : m_NumRenderTargetsAttached(0)
 {
     memset(m_RenderTargetViews, 0, sizeof(m_RenderTargetViews[0]) * GfxConstants::GfxConstants_MaxRenderTargetsBound);
     memset(m_RenderTargetShaderResourceViews, 0, sizeof(m_RenderTargetShaderResourceViews[0]) * GfxConstants::GfxConstants_MaxRenderTargetsBound);
     memset(m_Formats, uint16_t(GfxFormat::Unknown), sizeof(m_Formats[0]) * GfxConstants::GfxConstants_MaxRenderTargetsBound);
+}
 
+bool DX11RenderTarget::Create(ID3D11Device& device, DX11Texture2D** texturesToAttach, uint32_t numTexturesToAttach)
+{
     m_NumRenderTargetsAttached = numTexturesToAttach;
 
-    m_IsValid = true;
     bool isFirstRenderTarget = true;
 
     for (uint32_t i = 0; i < m_NumRenderTargetsAttached; i++)
@@ -40,10 +42,8 @@ DX11RenderTarget::DX11RenderTarget(ID3D11Device& device, DX11Texture2D** texture
 
         if ((gfxTexture->GetTextureUsage() & TextureUsage::TextureUsage_RenderTarget) == 0)
         {
-            m_IsValid = false;
-
             SHIP_LOG_ERROR("DX11RenderTarget::DX11RenderTarget() --> Couldn't attach texture to render target as it is either nullptr or not marked to be used as a RenderTarget.");
-            return;
+            return false;
         }
 
         if (isFirstRenderTarget)
@@ -57,10 +57,8 @@ DX11RenderTarget::DX11RenderTarget(ID3D11Device& device, DX11Texture2D** texture
         {
             if (m_Width != gfxTexture->GetWidth() || m_Height != gfxTexture->GetHeight())
             {
-                m_IsValid = false;
-
                 SHIP_LOG_ERROR("DX11RenderTarget::DX11RenderTarget() --> Rendre targets do not all have the same dimension.");
-                return;
+                return false;
             }
         }
 
@@ -74,9 +72,13 @@ DX11RenderTarget::DX11RenderTarget(ID3D11Device& device, DX11Texture2D** texture
             m_RenderTargetShaderResourceViews[i]->AddRef();
         }
     }
+
+    m_IsValid = true;
+
+    return true;
 }
 
-DX11RenderTarget::~DX11RenderTarget()
+void DX11RenderTarget::Destroy()
 {
     for (uint32_t i = 0; i < m_NumRenderTargetsAttached; i++)
     {
@@ -84,22 +86,34 @@ DX11RenderTarget::~DX11RenderTarget()
         {
             m_RenderTargetViews[i]->Release();
         }
-        
+
         if (m_RenderTargetShaderResourceViews[i] != nullptr)
         {
             m_RenderTargetShaderResourceViews[i]->Release();
         }
     }
+
+    memset(m_RenderTargetViews, 0, sizeof(m_RenderTargetViews[0]) * GfxConstants::GfxConstants_MaxRenderTargetsBound);
+    memset(m_RenderTargetShaderResourceViews, 0, sizeof(m_RenderTargetShaderResourceViews[0]) * GfxConstants::GfxConstants_MaxRenderTargetsBound);
+    memset(m_Formats, uint16_t(GfxFormat::Unknown), sizeof(m_Formats[0]) * GfxConstants::GfxConstants_MaxRenderTargetsBound);
+
+    m_NumRenderTargetsAttached = 0;
 }
 
-DX11DepthStencilRenderTarget::DX11DepthStencilRenderTarget(ID3D11Device& device, DX11Texture2D& depthStencilTexture)
+DX11DepthStencilRenderTarget::DX11DepthStencilRenderTarget()
     : m_DepthStencilView(nullptr)
     , m_DepthStencilShaderResourceView(nullptr)
+    , m_Format(GfxFormat::Unknown)
+{
+
+}
+
+bool DX11DepthStencilRenderTarget::Create(ID3D11Device& device, GFXTexture2D& depthStencilTexture)
 {
     if ((depthStencilTexture.GetTextureUsage() & TextureUsage::TextureUsage_DepthStencil) == 0)
     {
         SHIP_LOG_ERROR("DX11DepthStencilRenderTarget::DX11DepthStencilRenderTarget() --> Couldn't attach texture to render target as it is either nullptr or not marked to be used as a RenderTarget.");
-        return;
+        return false;
     }
 
     m_Width = depthStencilTexture.GetWidth();
@@ -110,12 +124,24 @@ DX11DepthStencilRenderTarget::DX11DepthStencilRenderTarget(ID3D11Device& device,
 
     m_DepthStencilShaderResourceView = depthStencilTexture.GetShaderResourceView();
     m_DepthStencilShaderResourceView->AddRef();
+
+    return true;
 }
 
-DX11DepthStencilRenderTarget::~DX11DepthStencilRenderTarget()
+void DX11DepthStencilRenderTarget::Destroy()
 {
-    m_DepthStencilView->Release();
-    m_DepthStencilShaderResourceView->Release();
+    if (m_DepthStencilView != nullptr)
+    {
+        m_DepthStencilView->Release();
+
+        m_DepthStencilView = nullptr;
+    }
+
+    if (m_DepthStencilShaderResourceView != nullptr)
+    {
+        m_DepthStencilShaderResourceView->Release();
+        m_DepthStencilShaderResourceView = nullptr;
+    }
 }
 
 ID3D11RenderTargetView* CreateRenderTargetView(ID3D11Device& device, ID3D11Texture2D* d3dTexture, DXGI_FORMAT format)

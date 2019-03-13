@@ -9,21 +9,16 @@ BaseBuffer::BaseBuffer()
 
 }
 
-VertexBuffer::VertexBuffer(uint32_t numVertices, VertexFormatType vertexFormatType, bool dynamic, void* initialData)
-    : m_NumVertices(numVertices)
-    , m_VertexFormatType(vertexFormatType)
+VertexBuffer::VertexBuffer()
+    : m_NumVertices(0)
+    , m_VertexFormatType(VertexFormatType::VertexFormatType_Count)
 {
 
 }
 
-IndexBuffer::IndexBuffer(uint32_t numIndices, bool uses2BytesPerIndex, bool dynamic, void* initialData)
-    : m_NumIndices(numIndices)
-    , m_Uses2BytesPerIndex(uses2BytesPerIndex)
-{
-
-}
-
-ConstantBuffer::ConstantBuffer(uint32_t dataSizeInBytes, bool dynamic, void* initialData)
+IndexBuffer::IndexBuffer()
+    : m_NumIndices(0)
+    , m_Uses2BytesPerIndex(true)
 {
 
 }

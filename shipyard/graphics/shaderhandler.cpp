@@ -10,10 +10,14 @@ ShaderHandler::ShaderHandler(ShaderKey shaderKey)
 {
 }
 
+ShaderHandler::~ShaderHandler()
+{
+}
+
 void ShaderHandler::ApplyShader(PipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters) const
 {
-    pipelineStateObjectCreationParameters.vertexShader = m_VertexShader.get();
-    pipelineStateObjectCreationParameters.pixelShader = m_PixelShader.get();
+    pipelineStateObjectCreationParameters.vertexShaderHandle = m_VertexShaderHandle;
+    pipelineStateObjectCreationParameters.pixelShaderHandle = m_PixelShaderHandle;
 
     pipelineStateObjectCreationParameters.renderStateBlock = m_RenderStateBlock;
 }

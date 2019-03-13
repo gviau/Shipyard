@@ -6,6 +6,7 @@
 #include <graphics/wrapper/dx11/dx11buffer.h>
 #include <graphics/wrapper/dx11/dx11descriptorset.h>
 #include <graphics/wrapper/dx11/dx11pipelinestateobject.h>
+#include <graphics/wrapper/dx11/dx11renderdevice.h>
 #include <graphics/wrapper/dx11/dx11rendertarget.h>
 #include <graphics/wrapper/dx11/dx11rootsignature.h>
 #include <graphics/wrapper/dx11/dx11shader.h>
@@ -89,9 +90,8 @@ void DX11RenderStateCache::Reset()
         m_NativeBlendState = nullptr;
     }
 
-    // The render state cache is not the owner of those interfaces, therefore, we don't release them.
-    m_VertexShader = nullptr;
-    m_PixelShader = nullptr;
+    m_VertexShaderHandle.handle = InvalidGfxHandle;
+    m_PixelShaderHandle.handle = InvalidGfxHandle;
 
     memset(m_NativeRenderTargets, 0, sizeof(m_NativeRenderTargets));
     m_NativeDepthStencilView = nullptr;
@@ -210,24 +210,24 @@ void DX11RenderStateCache::BindPipelineStateObject(const GFXPipelineStateObject&
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_BlendState);
     }
 
-    if (pipelineStateObjectParameters.vertexShader != m_VertexShader)
+    if (pipelineStateObjectParameters.vertexShaderHandle.handle != m_VertexShaderHandle.handle)
     {
-        SHIP_ASSERT(pipelineStateObjectParameters.vertexShader != nullptr);
+        SHIP_ASSERT(pipelineStateObjectParameters.vertexShaderHandle.handle != InvalidGfxHandle);
 
-        m_VertexShader = static_cast<GFXVertexShader*>(pipelineStateObjectParameters.vertexShader);
+        m_VertexShaderHandle = pipelineStateObjectParameters.vertexShaderHandle;
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexShader);
     }
 
-    if (pipelineStateObjectParameters.pixelShader != m_PixelShader)
+    if (pipelineStateObjectParameters.pixelShaderHandle.handle != m_PixelShaderHandle.handle)
     {
         // Null pixel shader is actually okay (for example, depth rendering only).
-        if (pipelineStateObjectParameters.pixelShader == nullptr)
+        if (pipelineStateObjectParameters.pixelShaderHandle.handle == InvalidGfxHandle)
         {
-            m_PixelShader = nullptr;
+            m_PixelShaderHandle.handle = InvalidGfxHandle;
         }
         else
         {
-            m_PixelShader = static_cast<GFXPixelShader*>(pipelineStateObjectParameters.pixelShader);
+            m_PixelShaderHandle = pipelineStateObjectParameters.pixelShaderHandle;
         }
 
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_PixelShader);
@@ -478,7 +478,7 @@ namespace
     };
 }
 
-void DX11RenderStateCache::CommitStateChangesForGraphics()
+void DX11RenderStateCache::CommitStateChangesForGraphics(GFXRenderDevice& gfxRenderDevice)
 {
     if (m_RenderStateCacheDirtyFlags.IsClear())
     {
@@ -555,14 +555,23 @@ void DX11RenderStateCache::CommitStateChangesForGraphics()
     // In Direct3D 11, no need to rebind resources when the shader changes.
     if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexShader))
     {
-        m_DeviceContext->VSSetShader(m_VertexShader->GetShader(), nullptr, 0);
+        GFXVertexShader& gfxVertexShader = gfxRenderDevice.GetVertexShader(m_VertexShaderHandle);
+        m_DeviceContext->VSSetShader(gfxVertexShader.GetShader(), nullptr, 0);
 
         m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexShader);
     }
 
     if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_PixelShader))
     {
-        m_DeviceContext->PSSetShader(m_PixelShader->GetShader(), nullptr, 0);
+        if (m_PixelShaderHandle.handle == InvalidGfxHandle)
+        {
+            m_DeviceContext->PSSetShader(nullptr, nullptr, 0);
+        }
+        else
+        {
+            GFXPixelShader& gfxPixelShader = gfxRenderDevice.GetPixelShader(m_PixelShaderHandle);
+            m_DeviceContext->PSSetShader(gfxPixelShader.GetShader(), nullptr, 0);
+        }
 
         m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_PixelShader);
     }

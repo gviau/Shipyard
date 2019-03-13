@@ -2,18 +2,14 @@
 
 namespace Shipyard
 {;
-BaseTexture::BaseTexture(uint32_t width, uint32_t height, GfxFormat pixelFormat, TextureUsage textureUsage)
+BaseTexture::BaseTexture()
     : GfxResource(GfxResourceType::Texture)
-    , m_Width(width)
-    , m_Height(height)
-    , m_PixelFormat(pixelFormat)
-    , m_TextureUsage(textureUsage)
+    , m_Width(0)
+    , m_Height(0)
+    , m_PixelFormat(GfxFormat::Unknown)
+    , m_TextureUsage(TextureUsage::TextureUsage_Default)
 {
 
-}
-
-BaseTexture::~BaseTexture()
-{
 }
 
 uint32_t GetBytesPerPixel(GfxFormat pixelFormat)

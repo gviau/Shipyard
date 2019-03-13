@@ -18,27 +18,27 @@ namespace Shipyard
     class SHIPYARD_API DX11RenderDeviceContext : public RenderDeviceContext
     {
     public:
-        DX11RenderDeviceContext(const GFXRenderDevice& renderDevice);
+        DX11RenderDeviceContext(GFXRenderDevice& renderDevice);
         ~DX11RenderDeviceContext();
 
-        void ClearFullRenderTarget(const GFXRenderTarget& renderTarget, float red, float green, float blue, float alpha);
-        void ClearSingleRenderTarget(const GFXRenderTarget& renderTarget, uint32_t renderTargetIndex, float red, float green, float blue, float alpha);
-        void ClearDepthStencilRenderTarget(const GFXDepthStencilRenderTarget& depthStencilRenderTarget, DepthStencilClearFlag depthStencilClearFlag, float depthValue, uint8_t stencilValue);
+        void ClearFullRenderTarget(GFXRenderTargetHandle gfxRenderTargetHandle, float red, float green, float blue, float alpha);
+        void ClearSingleRenderTarget(GFXRenderTargetHandle gfxRenderTargetHandle, uint32_t renderTargetIndex, float red, float green, float blue, float alpha);
+        void ClearDepthStencilRenderTarget(GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTarget, DepthStencilClearFlag depthStencilClearFlag, float depthValue, uint8_t stencilValue);
 
         void Draw(
                 const DrawItem& drawItem,
-                GFXVertexBuffer* const * vertexBuffers,
+                GFXVertexBufferHandle* gfxVertexBufferHandles,
                 uint32_t startSlot,
                 uint32_t numVertexBuffers,
                 uint32_t startVertexLocation,
                 uint32_t* vertexBufferOffsets);
         void DrawIndexed(
                 const DrawItem& drawItem,
-                GFXVertexBuffer* const * vertexBuffers,
+                GFXVertexBufferHandle* gfxVertexBufferHandles,
                 uint32_t startSlot,
                 uint32_t numVertexBuffers,
                 uint32_t* vertexBufferOffsets,
-                const GFXIndexBuffer& indexBuffer,
+                GFXIndexBufferHandle gfxIndexBufferHandle,
                 uint32_t startVertexLocation,
                 uint32_t startIndexLocation,
                 uint32_t indexBufferOffset);

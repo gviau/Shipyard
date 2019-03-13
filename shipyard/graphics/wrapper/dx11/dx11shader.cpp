@@ -14,55 +14,56 @@
 namespace Shipyard
 {;
 
-DX11BaseShader::DX11BaseShader()
-    : m_ShaderBlob(nullptr)
+DX11VertexShader::DX11VertexShader()
+    : m_VertexShader(nullptr)
 {
+
 }
 
-DX11BaseShader::~DX11BaseShader()
-{
-    if (m_ShaderBlob != nullptr)
-    {
-        m_ShaderBlob->Release();
-    }
-}
-
-DX11VertexShader::DX11VertexShader(ID3D11Device& device, void* shaderData, uint64_t shaderDataSize)
-    : VertexShader(shaderData, shaderDataSize)
-    , m_VertexShader(nullptr)
+bool DX11VertexShader::Create(ID3D11Device& device, void* shaderData, uint64_t shaderDataSize)
 {
     HRESULT hr = device.CreateVertexShader(shaderData, SIZE_T(shaderDataSize), nullptr, &m_VertexShader);
     if (FAILED(hr))
     {
         SHIP_LOG_ERROR("DX11VertexShader::DX11VertexShader() --> Couldn't create vertex shader.");
+        return false;
     }
+
+    return true;
 }
 
-DX11VertexShader::~DX11VertexShader()
+void DX11VertexShader::Destroy()
 {
-    if (m_VertexShader != nullptr)
-    {
-        m_VertexShader->Release();
-    }
+    SHIP_ASSERT_MSG(m_VertexShader != nullptr, "Can't call Destroy on invalid vertex shader 0x%p", this);
+
+    m_VertexShader->Release();
+    m_VertexShader = nullptr;
 }
 
-DX11PixelShader::DX11PixelShader(ID3D11Device& device, void* shaderData, uint64_t shaderDataSize)
-    : PixelShader(shaderData, shaderDataSize)
-    , m_PixelShader(nullptr)
+DX11PixelShader::DX11PixelShader()
+    : m_PixelShader(nullptr)
+{
+
+}
+
+bool DX11PixelShader::Create(ID3D11Device& device, void* shaderData, uint64_t shaderDataSize)
 {
     HRESULT hr = device.CreatePixelShader(shaderData, SIZE_T(shaderDataSize), nullptr, &m_PixelShader);
     if (FAILED(hr))
     {
-        SHIP_LOG_ERROR("DX11PixelShader::DX11PixelShader() --> Couldn't create vertex shader.");
+        SHIP_LOG_ERROR("DX11PixelShader::DX11PixelShader() --> Couldn't create pixel shader.");
+        return false;
     }
+
+    return true;
 }
 
-DX11PixelShader::~DX11PixelShader()
+void DX11PixelShader::Destroy()
 {
-    if (m_PixelShader != nullptr)
-    {
-        m_PixelShader->Release();
-    }
+    SHIP_ASSERT_MSG(m_PixelShader != nullptr, "Can't call Destroy on invalid pixel shader 0x%p", this);
+
+    m_PixelShader->Release();
+    m_PixelShader = nullptr;
 }
 
 }

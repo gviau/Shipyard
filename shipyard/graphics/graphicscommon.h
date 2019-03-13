@@ -2,15 +2,18 @@
 
 #include <math/mathutilities.h>
 
+#include <graphics/graphicsconfig.h>
+
+#include <graphics/graphicstypes.h>
+
 #include <system/array.h>
 #include <system/bitfield.h>
 #include <system/platform.h>
 #include <system/string.h>
 
-#include <cinttypes>
-
 namespace Shipyard
 {
+
     class DepthStencilRenderTarget;
     class DescriptorSet;
     class PixelShader;
@@ -541,18 +544,16 @@ namespace Shipyard
 
     struct PipelineStateObjectCreationParameters
     {
-        PipelineStateObjectCreationParameters(const RootSignature& rootSignatureToUse)
-            : rootSignature(rootSignatureToUse)
-            , vertexShader(nullptr)
-            , pixelShader(nullptr)
+        PipelineStateObjectCreationParameters()
+            : rootSignature(nullptr)
             , numRenderTargets(0)
         {
         }
 
-        const RootSignature& rootSignature;
+        const RootSignature* rootSignature;
 
-        VertexShader* vertexShader;
-        PixelShader* pixelShader;
+        GFXVertexShaderHandle vertexShaderHandle;
+        GFXPixelShaderHandle pixelShaderHandle;
 
         RenderStateBlock renderStateBlock;
         VertexFormatType vertexFormatType;
@@ -681,36 +682,35 @@ namespace Shipyard
     struct DrawItem
     {
         DrawItem(
-            const RenderTarget* pRenderTargetToUse,
-            const DepthStencilRenderTarget* pDepthStencilRenderTargetToUse,
-            const GfxViewport& viewportToUse,
-            const RootSignature& rootSignatureToUse,
-            const DescriptorSet& descriptorSetToUse,
-            const ShaderHandler& shaderHandlerToUse,
-            PrimitiveTopology primitiveTopologyToUse)
-            : pRenderTarget(pRenderTargetToUse)
-            , pDepthStencilRenderTarget(pDepthStencilRenderTargetToUse)
-            , viewport(viewportToUse)
-            , rootSignature(rootSignatureToUse)
-            , descriptorSet(descriptorSetToUse)
+                GFXRenderTargetHandle gfxRenderTargetHandle,
+                GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle,
+                const GfxViewport& gfxViewport,
+                GFXRootSignatureHandle gfxRootSignatureHandle,
+                GFXDescriptorSetHandle gfxDescriptorSetHandle,
+                const ShaderHandler& shaderHandlerToUse,
+                PrimitiveTopology primitiveTopologyToUse)
+            : renderTargetHandle(gfxRenderTargetHandle)
+            , depthStencilRenderTargetHandle(gfxDepthStencilRenderTargetHandle)
+            , viewport(gfxViewport)
+            , rootSignatureHandle(gfxRootSignatureHandle)
+            , descriptorSetHandle(gfxDescriptorSetHandle)
             , shaderHandler(shaderHandlerToUse)
             , primitiveTopology(primitiveTopologyToUse)
             , pRenderStateBlockStateOverride(nullptr)
-        {
-        }
+        {}
 
-        const RenderTarget* pRenderTarget;
-        const DepthStencilRenderTarget* pDepthStencilRenderTarget;
+        GFXRenderTargetHandle renderTargetHandle;
+        GFXDepthStencilRenderTargetHandle depthStencilRenderTargetHandle;
 
         const GfxViewport& viewport;
 
-        const RootSignature& rootSignature;
-        const DescriptorSet& descriptorSet;
+        GFXRootSignatureHandle rootSignatureHandle;
+        GFXDescriptorSetHandle descriptorSetHandle;
 
         const ShaderHandler& shaderHandler;
 
         PrimitiveTopology primitiveTopology;
 
-        const RenderStateBlockStateOverride* pRenderStateBlockStateOverride;
+        const RenderStateBlockStateOverride* pRenderStateBlockStateOverride = nullptr;
     };
 }

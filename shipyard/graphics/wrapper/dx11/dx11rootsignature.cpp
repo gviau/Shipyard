@@ -3,9 +3,16 @@
 namespace Shipyard
 {;
 
-DX11RootSignature::DX11RootSignature(const Array<RootSignatureParameterEntry>& rootSignatureParameters)
-    : RootSignature(rootSignatureParameters)
+bool DX11RootSignature::Create(const Array<RootSignatureParameterEntry>& rootSignatureParameters)
 {
+    m_RootSignatureParameters = rootSignatureParameters;
+
+    return true;
+}
+
+void DX11RootSignature::Destroy()
+{
+
 }
 
 }

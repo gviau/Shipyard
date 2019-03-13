@@ -2,6 +2,9 @@
 
 #include <graphics/wrapper/viewsurface.h>
 
+#include <graphics/wrapper/dx11/dx11rendertarget.h>
+#include <graphics/wrapper/dx11/dx11texture.h>
+
 #include <windows.h>
 
 struct IDXGISwapChain;
@@ -12,32 +15,32 @@ namespace Shipyard
 {
     class DX11RenderDevice;
     class DX11RenderDeviceContext;
-    class DX11RenderTarget;
-    class DX11Texture2D;
 
     class SHIPYARD_API DX11ViewSurface : public ViewSurface
     {
     public:
-        DX11ViewSurface(
+        DX11ViewSurface();
+
+        bool Create(
                 DX11RenderDevice& renderDevice,
                 DX11RenderDeviceContext& immediateRenderContext,
                 uint32_t width,
                 uint32_t height,
                 GfxFormat viewSurfaceFormat,
                 HWND windowHandle);
-        ~DX11ViewSurface();
+        void Destroy();
 
         void Flip();
 
-        DX11RenderTarget* GetBackBufferRenderTarget() const { return m_BackBufferRenderTarget; }
+        GFXRenderTargetHandle GetBackBufferRenderTargetHandle() { return m_BackBufferRenderTargetHandle; }
 
     private:
-        DX11RenderDevice& m_RenderDevice;
-        DX11RenderDeviceContext& m_ImmediateRenderContext;
+        GFXRenderDevice* m_RenderDevice;
+        GFXRenderDeviceContext* m_ImmediateRenderContext;
         HWND m_WindowHandle;
         IDXGISwapChain* m_SwapChain;
 
-        DX11RenderTarget* m_BackBufferRenderTarget;
-        DX11Texture2D* m_BackBufferTexture;
+        GFXRenderTargetHandle m_BackBufferRenderTargetHandle;
+        GFXTexture2DHandle m_BackBufferTextureHandle;
     };
 }

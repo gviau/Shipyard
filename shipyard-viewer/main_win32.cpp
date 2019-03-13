@@ -78,21 +78,30 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
     ShowWindow(windowHandle, nShowCmd);
 
-    Shipyard::GFXRenderDevice gfxRenderDevice;
+    Shipyard::SingletonStorer singletonStorer;
+
+    Shipyard::GFXRenderDevice* pGfxRenderDevice = new Shipyard::GFXRenderDevice();
+
+    Shipyard::GFXRenderDevice& gfxRenderDevice = *pGfxRenderDevice;
+    gfxRenderDevice.Create();
+
     Shipyard::GFXRenderDeviceContext gfxRenderDeviceContext(gfxRenderDevice);
 
-    Shipyard::GFXViewSurface gfxViewSurface(gfxRenderDevice, gfxRenderDeviceContext, windowWidth, windowHeight, Shipyard::GfxFormat::R8G8B8A8_UNORM, windowHandle);
+    Shipyard::GFXViewSurface gfxViewSurface;
+    bool isValid = gfxViewSurface.Create(gfxRenderDevice, gfxRenderDeviceContext, windowWidth, windowHeight, Shipyard::GfxFormat::R8G8B8A8_UNORM, windowHandle);
 
-    shared_ptr<Shipyard::GFXTexture2D> gfxDepthTexture(gfxRenderDevice.CreateTexture2D(
+    SHIP_ASSERT(isValid);
+
+    Shipyard::GFXTexture2DHandle gfxDepthTextureHandle = gfxRenderDevice.CreateTexture2D(
             windowWidth,
             windowHeight,
             Shipyard::GfxFormat::D24_UNORM_S8_UINT,
             false,
             nullptr,
             false,
-            Shipyard::TextureUsage::TextureUsage_DepthStencil));
+            Shipyard::TextureUsage::TextureUsage_DepthStencil);
 
-    shared_ptr<Shipyard::GFXDepthStencilRenderTarget> gfxDepthStencilRenderTarget(gfxRenderDevice.CreateDepthStencilRenderTarget(*gfxDepthTexture.get()));
+    Shipyard::GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle = gfxRenderDevice.CreateDepthStencilRenderTarget(gfxDepthTextureHandle);
 
     Shipyard::Array<Shipyard::RootSignatureParameterEntry> rootSignatureParameters;
     rootSignatureParameters.Resize(2);
@@ -105,7 +114,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     rootSignatureParameters[1].shaderVisibility = Shipyard::ShaderVisibility_Pixel;
     rootSignatureParameters[1].descriptor.shaderBindingSlot = 0;
 
-    unique_ptr<Shipyard::GFXRootSignature> gfxRootSignature(gfxRenderDevice.CreateRootSignature(rootSignatureParameters));
+    Shipyard::GFXRootSignatureHandle gfxRootSignatureHandle = gfxRenderDevice.CreateRootSignature(rootSignatureParameters);
+    Shipyard::GFXRootSignature& gfxRootSignature = gfxRenderDevice.GetRootSignature(gfxRootSignatureHandle);
 
     Shipyard::GfxViewport gfxViewport;
     gfxViewport.topLeftX = 0.0f;
@@ -163,27 +173,30 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         255, 0, 0, 255, 255, 0, 0, 255
     };
 
-    unique_ptr<Shipyard::GFXVertexBuffer> vertexBuffer(gfxRenderDevice.CreateVertexBuffer(8, Shipyard::VertexFormatType::Pos_UV, false, vertexBufferData));
-    unique_ptr<Shipyard::GFXIndexBuffer> indexBuffer(gfxRenderDevice.CreateIndexBuffer(36, true, false, indices));
-    unique_ptr<Shipyard::GFXConstantBuffer> constantBuffer(gfxRenderDevice.CreateConstantBuffer(sizeof(data), true, &data));
-    unique_ptr<Shipyard::GFXTexture2D> texture(gfxRenderDevice.CreateTexture2D(2, 2, Shipyard::GfxFormat::R8G8B8A8_UNORM, false, textureData, false));
+    Shipyard::GFXVertexBufferHandle vertexBufferHandle = gfxRenderDevice.CreateVertexBuffer(8, Shipyard::VertexFormatType::Pos_UV, false, vertexBufferData);
+    Shipyard::GFXIndexBufferHandle indexBufferHandle = gfxRenderDevice.CreateIndexBuffer(36, true, false, indices);
+    Shipyard::GFXConstantBufferHandle constantBufferHandle = gfxRenderDevice.CreateConstantBuffer(sizeof(data), true, &data);
+    Shipyard::GFXTexture2DHandle textureHandle = gfxRenderDevice.CreateTexture2D(2, 2, Shipyard::GfxFormat::R8G8B8A8_UNORM, false, textureData, false);
 
-    unique_ptr<Shipyard::GFXDescriptorSet> gfxDescriptorSet(
-            gfxRenderDevice.CreateDescriptorSet(Shipyard::DescriptorSetType::ConstantBuffer_ShaderResource_UnorderedAccess_Views, *gfxRootSignature.get()));
+    Shipyard::GFXConstantBuffer& constantBuffer = gfxRenderDevice.GetConstantBuffer(constantBufferHandle);
+    Shipyard::GFXTexture2D& texture = gfxRenderDevice.GetTexture2D(textureHandle);
 
-    gfxDescriptorSet->SetDescriptorForRootIndex(0, *constantBuffer.get());
-    gfxDescriptorSet->SetDescriptorForRootIndex(1, *texture.get());
+    Shipyard::GFXDescriptorSetHandle gfxDescriptorSetHandle =
+            gfxRenderDevice.CreateDescriptorSet(Shipyard::DescriptorSetType::ConstantBuffer_ShaderResource_UnorderedAccess_Views, gfxRootSignature);
 
-    shared_ptr<Shipyard::GFXTexture2D> testTexture(gfxRenderDevice.CreateTexture2D(windowWidth, windowHeight, Shipyard::GfxFormat::R8G8B8A8_UNORM, false, nullptr, false, Shipyard::TextureUsage::TextureUsage_RenderTarget));
+    Shipyard::GFXDescriptorSet& gfxDescriptorSet = gfxRenderDevice.GetDescriptorSet(gfxDescriptorSetHandle);
+
+    gfxDescriptorSet.SetDescriptorForRootIndex(0, constantBuffer);
+    gfxDescriptorSet.SetDescriptorForRootIndex(1, texture);
+
+    Shipyard::GFXTexture2DHandle testTextureHandle = gfxRenderDevice.CreateTexture2D(windowWidth, windowHeight, Shipyard::GfxFormat::R8G8B8A8_UNORM, false, nullptr, false, Shipyard::TextureUsage::TextureUsage_RenderTarget);
     
-    Shipyard::GFXTexture2D* renderTargetTextures[] = { testTexture.get() };
-    shared_ptr<Shipyard::GFXRenderTarget> testRenderTarget(gfxRenderDevice.CreateRenderTarget(&renderTargetTextures[0], 1));
+    Shipyard::GFXTexture2DHandle renderTargetTextures[] = { testTextureHandle };
+    Shipyard::GFXRenderTargetHandle testRenderTargetHandle = gfxRenderDevice.CreateRenderTarget(&renderTargetTextures[0], 1);
 
     g_IsOpen = true;
 
     float theta = 0.0f;
-
-    Shipyard::SingletonStorer singletonStorer;
 
     Shipyard::StringT shaderDirectory = "c:\\Sandbox\\shipyard\\shipyard-viewer\\shaders\\";
     Shipyard::ShaderCompiler::GetInstance().SetShaderDirectoryName(shaderDirectory);
@@ -192,7 +205,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     Shipyard::ShaderDatabase shaderDatabase;
     shaderDatabase.Load("C:\\Sandbox\\shipyard\\generated-projects\\ShipyardShaderDatabase.bin");
 
-    Shipyard::ShaderHandlerManager::GetInstance().SetShaderDatabase(shaderDatabase);
+    Shipyard::ShaderHandlerManager::GetInstance().Initialize(gfxRenderDevice, shaderDatabase);
 
     Shipyard::ShaderKey shaderKey;
     shaderKey.SetShaderFamily(Shipyard::ShaderFamily::Generic);
@@ -207,7 +220,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         }
         else
         {
-            void* mappedData = constantBuffer->Map(Shipyard::MapFlag::Write_Discard);
+            void* mappedData = constantBuffer.Map(Shipyard::MapFlag::Write_Discard);
 
             glm::mat4 matrix(1.0f, 0.0f, 0.0f, 0.0f,
                              0.0f, 1.0f, 0.0f, 0.0f,
@@ -215,37 +228,41 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
                              0.0f, 0.0f, 0.0f, 1.0f);
             ((SimpleConstantBuffer*)mappedData)->m_Matrix = glm::rotate(matrix, theta, glm::vec3(0.0f, 1.0f, 0.0f));
 
-            constantBuffer->Unmap();
+            constantBuffer.Unmap();
 
             theta += 0.001f;
 
-            Shipyard::GFXRenderTarget* gfxRenderTarget = gfxViewSurface.GetBackBufferRenderTarget();
+            Shipyard::GFXRenderTargetHandle gfxRenderTargetHandle = gfxViewSurface.GetBackBufferRenderTargetHandle();
 
-            gfxRenderDeviceContext.ClearFullRenderTarget(*gfxRenderTarget, 0.0f, 0.0f, 0.125f, 1.0f);
-            gfxRenderDeviceContext.ClearDepthStencilRenderTarget(*gfxDepthStencilRenderTarget.get(), Shipyard::DepthStencilClearFlag::Depth, 1.0f, 0);
+            gfxRenderDeviceContext.ClearFullRenderTarget(gfxRenderTargetHandle, 0.0f, 0.0f, 0.125f, 1.0f);
+            gfxRenderDeviceContext.ClearDepthStencilRenderTarget(gfxDepthStencilRenderTargetHandle, Shipyard::DepthStencilClearFlag::Depth, 1.0f, 0);
 
             static volatile uint32_t value = 0;
 
             SET_SHADER_OPTION(shaderKey, Test2Bits, value);
 
-            Shipyard::ShaderHandler* shaderHandler = Shipyard::ShaderHandlerManager::GetInstance().GetShaderHandlerForShaderKey(shaderKey, gfxRenderDevice);
+            Shipyard::ShaderHandler* shaderHandler = Shipyard::ShaderHandlerManager::GetInstance().GetShaderHandlerForShaderKey(shaderKey);
 
             Shipyard::DrawItem drawItem(
-                    gfxRenderTarget,
-                    gfxDepthStencilRenderTarget.get(),
+                    gfxRenderTargetHandle,
+                    gfxDepthStencilRenderTargetHandle,
                     gfxViewport,
-                    *gfxRootSignature.get(),
-                    *gfxDescriptorSet.get(),
+                    gfxRootSignatureHandle,
+                    gfxDescriptorSetHandle,
                     *shaderHandler,
                     Shipyard::PrimitiveTopology::TriangleList);
 
-            Shipyard::GFXVertexBuffer* gfxVertexBuffer = vertexBuffer.get();
+            Shipyard::GFXVertexBufferHandle* gfxVertexBufferHandle = &vertexBufferHandle;
             uint32_t vertexBufferOffsets = 0;
-            gfxRenderDeviceContext.DrawIndexed(drawItem, &gfxVertexBuffer, 0, 1, &vertexBufferOffsets, *(indexBuffer.get()), 0, 0, 0);
+            gfxRenderDeviceContext.DrawIndexed(drawItem, gfxVertexBufferHandle, 0, 1, &vertexBufferOffsets, indexBufferHandle, 0, 0, 0);
 
             gfxViewSurface.Flip();
         }
     }
+
+    Shipyard::ShaderHandlerManager::GetInstance().Destroy();
+
+    delete pGfxRenderDevice;
 
     return 0;
 }

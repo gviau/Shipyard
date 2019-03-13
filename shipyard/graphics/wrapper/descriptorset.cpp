@@ -7,12 +7,6 @@
 namespace Shipyard
 {;
 
-DescriptorSet::DescriptorSet(DescriptorSetType descriptorSetType, const RootSignature& rootSignature)
-    : m_RootSignature(&rootSignature)
-    , m_DescriptorSetType(descriptorSetType)
-{
-}
-
 void DescriptorSet::SetDescriptorForRootIndex(uint32_t rootIndex, GfxResource& descriptorResource)
 {
     RootSignatureParameterType paramType = m_RootSignature->GetRootSignatureParameters()[rootIndex].parameterType;

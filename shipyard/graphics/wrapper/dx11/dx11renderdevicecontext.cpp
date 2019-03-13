@@ -32,7 +32,7 @@ ID3D11InputLayout* g_RegisteredInputLayouts[uint32_t(VertexFormatType::VertexFor
 
 ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatType vertexFormatType);
 
-DX11RenderDeviceContext::DX11RenderDeviceContext(const GFXRenderDevice& renderDevice)
+DX11RenderDeviceContext::DX11RenderDeviceContext(GFXRenderDevice& renderDevice)
     : RenderDeviceContext(renderDevice)
     , m_Device(renderDevice.GetDevice())
     , m_DeviceContext(renderDevice.GetImmediateDeviceContext())
@@ -61,11 +61,13 @@ DX11RenderDeviceContext::~DX11RenderDeviceContext()
     }
 }
 
-void DX11RenderDeviceContext::ClearFullRenderTarget(const GFXRenderTarget& renderTarget, float red, float green, float blue, float alpha)
+void DX11RenderDeviceContext::ClearFullRenderTarget(GFXRenderTargetHandle gfxRenderTargetHandle, float red, float green, float blue, float alpha)
 {
-    SHIP_ASSERT(renderTarget.IsValid());
+    SHIP_ASSERT(gfxRenderTargetHandle.handle != InvalidGfxHandle);
 
-    ID3D11RenderTargetView* const * renderTargetViews = renderTarget.GetRenderTargetViews();
+    const GFXRenderTarget& gfxRenderTarget = m_RenderDevice.GetRenderTarget(gfxRenderTargetHandle);
+
+    ID3D11RenderTargetView* const * renderTargetViews = gfxRenderTarget.GetRenderTargetViews();
 
     float colorRGBA[] =
     {
@@ -86,12 +88,14 @@ void DX11RenderDeviceContext::ClearFullRenderTarget(const GFXRenderTarget& rende
     }
 }
 
-void DX11RenderDeviceContext::ClearSingleRenderTarget(const GFXRenderTarget& renderTarget, uint32_t renderTargetIndex, float red, float green, float blue, float alpha)
+void DX11RenderDeviceContext::ClearSingleRenderTarget(GFXRenderTargetHandle gfxRenderTargetHandle, uint32_t renderTargetIndex, float red, float green, float blue, float alpha)
 {
-    SHIP_ASSERT(renderTarget.IsValid());
+    SHIP_ASSERT(gfxRenderTargetHandle.handle != InvalidGfxHandle);
     SHIP_ASSERT(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
-    ID3D11RenderTargetView* const * renderTargetViews = renderTarget.GetRenderTargetViews();
+    const GFXRenderTarget& gfxRenderTarget = m_RenderDevice.GetRenderTarget(gfxRenderTargetHandle);
+
+    ID3D11RenderTargetView* const * renderTargetViews = gfxRenderTarget.GetRenderTargetViews();
 
     float colorRGBA[] =
     {
@@ -109,11 +113,13 @@ void DX11RenderDeviceContext::ClearSingleRenderTarget(const GFXRenderTarget& ren
     m_DeviceContext->ClearRenderTargetView(renderTargetViews[renderTargetIndex], colorRGBA);
 }
 
-void DX11RenderDeviceContext::ClearDepthStencilRenderTarget(const GFXDepthStencilRenderTarget& depthStencilRenderTarget, DepthStencilClearFlag depthStencilClearFlag, float depthValue, uint8_t stencilValue)
+void DX11RenderDeviceContext::ClearDepthStencilRenderTarget(GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle, DepthStencilClearFlag depthStencilClearFlag, float depthValue, uint8_t stencilValue)
 {
-    SHIP_ASSERT(depthStencilRenderTarget.IsValid());
+    SHIP_ASSERT(gfxDepthStencilRenderTargetHandle.handle != InvalidGfxHandle);
 
-    ID3D11DepthStencilView* const depthStencilView = depthStencilRenderTarget.GetDepthStencilView();
+    const GFXDepthStencilRenderTarget& gfxDepthStencilRenderTarget = m_RenderDevice.GetDepthStencilRenderTarget(gfxDepthStencilRenderTargetHandle);
+
+    ID3D11DepthStencilView* const depthStencilView = gfxDepthStencilRenderTarget.GetDepthStencilView();
 
     uint clearFlag = ((depthStencilClearFlag == DepthStencilClearFlag::Depth) ? D3D11_CLEAR_DEPTH :
                       (depthStencilClearFlag == DepthStencilClearFlag::Stencil) ? D3D11_CLEAR_STENCIL :
@@ -124,43 +130,42 @@ void DX11RenderDeviceContext::ClearDepthStencilRenderTarget(const GFXDepthStenci
 
 void DX11RenderDeviceContext::PrepareNextDrawCalls(const DrawItem& drawItem, VertexFormatType vertexFormatType)
 {
-    const GFXRootSignature& gfxRootSignature = *reinterpret_cast<const GFXRootSignature*>(&drawItem.rootSignature);
-    const GFXDescriptorSet& gfxDescriptorSet = *reinterpret_cast<const GFXDescriptorSet*>(&drawItem.descriptorSet);
+    const GFXRootSignature& gfxRootSignature = m_RenderDevice.GetRootSignature(drawItem.rootSignatureHandle);
+    
+    const GFXDescriptorSet& gfxDescriptorSet = m_RenderDevice.GetDescriptorSet(drawItem.descriptorSetHandle);
 
-    PipelineStateObjectCreationParameters pipelineStateObjectCreationParameters(drawItem.rootSignature);
+    PipelineStateObjectCreationParameters pipelineStateObjectCreationParameters;
+    pipelineStateObjectCreationParameters.rootSignature = &gfxRootSignature;
+
     drawItem.shaderHandler.ApplyShader(pipelineStateObjectCreationParameters);
 
     pipelineStateObjectCreationParameters.primitiveTopology = drawItem.primitiveTopology;
     pipelineStateObjectCreationParameters.vertexFormatType = vertexFormatType;
 
-    if (drawItem.pRenderTarget == nullptr)
+    if (drawItem.renderTargetHandle.handle == InvalidGfxHandle)
     {
         pipelineStateObjectCreationParameters.numRenderTargets = 0;
     }
     else
     {
-        const GFXRenderTarget& gfxRenderTarget = *reinterpret_cast<const GFXRenderTarget*>(drawItem.pRenderTarget);
-        if (gfxRenderTarget.IsValid())
-        {
-            pipelineStateObjectCreationParameters.numRenderTargets = gfxRenderTarget.GetNumRenderTargetsAttached();
+        const GFXRenderTarget& gfxRenderTarget = m_RenderDevice.GetRenderTarget(drawItem.renderTargetHandle);
 
-            GfxFormat const * renderTargetFormats = gfxRenderTarget.GetRenderTargetFormats();
+        pipelineStateObjectCreationParameters.numRenderTargets = gfxRenderTarget.GetNumRenderTargetsAttached();
 
-            memcpy(&pipelineStateObjectCreationParameters.renderTargetsFormat[0], &renderTargetFormats[0], pipelineStateObjectCreationParameters.numRenderTargets);
+        GfxFormat const * renderTargetFormats = gfxRenderTarget.GetRenderTargetFormats();
 
-            m_RenderStateCache.BindRenderTarget(gfxRenderTarget);
-        }
+        memcpy(&pipelineStateObjectCreationParameters.renderTargetsFormat[0], &renderTargetFormats[0], pipelineStateObjectCreationParameters.numRenderTargets);
+
+        m_RenderStateCache.BindRenderTarget(gfxRenderTarget);
     }
 
-    if (drawItem.pDepthStencilRenderTarget != nullptr)
+    if (drawItem.depthStencilRenderTargetHandle.handle != InvalidGfxHandle)
     {
-        const GFXDepthStencilRenderTarget& gfxDepthStencilRenderTarget = *reinterpret_cast<const GFXDepthStencilRenderTarget*>(drawItem.pDepthStencilRenderTarget);
-        if (gfxDepthStencilRenderTarget.IsValid())
-        {
-            pipelineStateObjectCreationParameters.depthStencilFormat = gfxDepthStencilRenderTarget.GetDepthStencilFormat();
+        const GFXDepthStencilRenderTarget& gfxDepthStencilRenderTarget = m_RenderDevice.GetDepthStencilRenderTarget(drawItem.depthStencilRenderTargetHandle);
+        
+        pipelineStateObjectCreationParameters.depthStencilFormat = gfxDepthStencilRenderTarget.GetDepthStencilFormat();
 
-            m_RenderStateCache.BindDepthStencilRenderTarget(gfxDepthStencilRenderTarget);
-        }
+        m_RenderStateCache.BindDepthStencilRenderTarget(gfxDepthStencilRenderTarget);
     }
 
     // Apply override, if any.
@@ -169,7 +174,8 @@ void DX11RenderDeviceContext::PrepareNextDrawCalls(const DrawItem& drawItem, Ver
         drawItem.pRenderStateBlockStateOverride->ApplyOverridenValues(pipelineStateObjectCreationParameters.renderStateBlock);
     }
 
-    GFXPipelineStateObject gfxPipelineStateObject(pipelineStateObjectCreationParameters);
+    GFXPipelineStateObject gfxPipelineStateObject;
+    gfxPipelineStateObject.Create(pipelineStateObjectCreationParameters);
 
     m_RenderStateCache.BindRootSignature(gfxRootSignature);
     m_RenderStateCache.BindPipelineStateObject(gfxPipelineStateObject);
@@ -180,44 +186,61 @@ void DX11RenderDeviceContext::PrepareNextDrawCalls(const DrawItem& drawItem, Ver
 
 void DX11RenderDeviceContext::Draw(
         const DrawItem& drawItem,
-        GFXVertexBuffer* const * vertexBuffers,
+        GFXVertexBufferHandle* gfxVertexBufferHandles,
         uint32_t startSlot,
         uint32_t numVertexBuffers,
         uint32_t startVertexLocation,
         uint32_t* vertexBufferOffsets)
 {
-    VertexFormatType vertexFormatType = ((numVertexBuffers > 0) ? vertexBuffers[startSlot]->GetVertexFormatType() : VertexFormatType::VertexFormatType_Count);
+    VertexFormatType vertexFormatType = ((numVertexBuffers > 0) ? m_RenderDevice.GetVertexBuffer(gfxVertexBufferHandles[startSlot]).GetVertexFormatType() : VertexFormatType::VertexFormatType_Count);
     PrepareNextDrawCalls(drawItem, vertexFormatType);
 
-    m_RenderStateCache.SetVertexBuffers(vertexBuffers, startSlot, numVertexBuffers, vertexBufferOffsets);
+    SHIP_ASSERT(numVertexBuffers < GfxConstants_MaxVertexBuffers);
+    GFXVertexBuffer* gfxVertexBuffers[GfxConstants_MaxVertexBuffers];
+    for (uint32_t i = startSlot; i < (startSlot + numVertexBuffers); i++)
+    {
+        gfxVertexBuffers[i] = &m_RenderDevice.GetVertexBuffer(gfxVertexBufferHandles[i]);
+    }
 
-    m_RenderStateCache.CommitStateChangesForGraphics();
+    m_RenderStateCache.SetVertexBuffers(gfxVertexBuffers, startSlot, numVertexBuffers, vertexBufferOffsets);
 
-    uint32_t numVertices = ((numVertexBuffers > 0) ? vertexBuffers[startSlot]->GetNumVertices() : 1);
+    m_RenderStateCache.CommitStateChangesForGraphics(m_RenderDevice);
+
+    uint32_t numVertices = ((numVertexBuffers > 0) ? m_RenderDevice.GetVertexBuffer(gfxVertexBufferHandles[startSlot]).GetNumVertices() : 1);
     m_DeviceContext->Draw(numVertices, startVertexLocation);
 }
 
 void DX11RenderDeviceContext::DrawIndexed(
         const DrawItem& drawItem,
-        GFXVertexBuffer* const * vertexBuffers,
+        GFXVertexBufferHandle* gfxVertexBufferHandles,
         uint32_t startSlot,
         uint32_t numVertexBuffers,
         uint32_t* vertexBufferOffsets,
-        const GFXIndexBuffer& indexBuffer,
+        GFXIndexBufferHandle gfxIndexBufferHandle,
         uint32_t startVertexLocation,
         uint32_t startIndexLocation,
         uint32_t indexBufferOffset)
 {
-    VertexFormatType vertexFormatType = ((numVertexBuffers > 0) ? vertexBuffers[startSlot]->GetVertexFormatType() : VertexFormatType::VertexFormatType_Count);
+    SHIP_ASSERT(gfxIndexBufferHandle.handle != InvalidGfxHandle);
+    const GFXIndexBuffer& gfxIndexBuffer = m_RenderDevice.GetIndexBuffer(gfxIndexBufferHandle);
+
+    m_RenderStateCache.SetIndexBuffer(gfxIndexBuffer, indexBufferOffset);
+
+    VertexFormatType vertexFormatType = ((numVertexBuffers > 0) ? m_RenderDevice.GetVertexBuffer(gfxVertexBufferHandles[startSlot]).GetVertexFormatType() : VertexFormatType::VertexFormatType_Count);
     PrepareNextDrawCalls(drawItem, vertexFormatType);
 
-    m_RenderStateCache.SetVertexBuffers(vertexBuffers, startSlot, numVertexBuffers, vertexBufferOffsets);
+    SHIP_ASSERT(numVertexBuffers < GfxConstants_MaxVertexBuffers);
+    GFXVertexBuffer* gfxVertexBuffers[GfxConstants_MaxVertexBuffers];
+    for (uint32_t i = startSlot; i < (startSlot + numVertexBuffers); i++)
+    {
+        gfxVertexBuffers[i] = &m_RenderDevice.GetVertexBuffer(gfxVertexBufferHandles[i]);
+    }
 
-    m_RenderStateCache.SetIndexBuffer(indexBuffer, indexBufferOffset);
+    m_RenderStateCache.SetVertexBuffers(gfxVertexBuffers, startSlot, numVertexBuffers, vertexBufferOffsets);
 
-    m_RenderStateCache.CommitStateChangesForGraphics();
+    m_RenderStateCache.CommitStateChangesForGraphics(m_RenderDevice);
 
-    m_DeviceContext->DrawIndexed(indexBuffer.GetNumIndices(), startIndexLocation, startVertexLocation);
+    m_DeviceContext->DrawIndexed(gfxIndexBuffer.GetNumIndices(), startIndexLocation, startVertexLocation);
 }
 
 ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatType vertexFormatType)

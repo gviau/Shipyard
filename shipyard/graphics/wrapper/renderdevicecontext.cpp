@@ -3,7 +3,8 @@
 namespace Shipyard
 {;
 
-RenderDeviceContext::RenderDeviceContext(const GFXRenderDevice& renderDevice)
+RenderDeviceContext::RenderDeviceContext(GFXRenderDevice& renderDevice)
+    : m_RenderDevice(renderDevice)
 {
 
 }

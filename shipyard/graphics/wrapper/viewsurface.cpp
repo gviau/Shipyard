@@ -3,14 +3,10 @@
 namespace Shipyard
 {;
 
-ViewSurface::ViewSurface(uint32_t width, uint32_t height, GfxFormat viewSurfaceFormat)
-    : m_Width(width)
-    , m_Height(height)
-    , m_ViewSurfaceFormat(viewSurfaceFormat)
-{
-}
-
-ViewSurface::~ViewSurface()
+ViewSurface::ViewSurface()
+    : m_Width(0)
+    , m_Height(0)
+    , m_ViewSurfaceFormat(GfxFormat::Unknown)
 {
 }
 

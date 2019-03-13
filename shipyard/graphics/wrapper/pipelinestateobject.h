@@ -1,8 +1,6 @@
 #pragma once
 
-#include <graphics/wrapper/wrapper_common.h>
-
-#include <graphics/vertexformat.h>
+#include <system/platform.h>
 
 namespace Shipyard
 {
@@ -10,10 +8,6 @@ namespace Shipyard
     
     class SHIPYARD_API PipelineStateObject
     {
-    public:
-        PipelineStateObject(const PipelineStateObjectCreationParameters& creationParameters);
 
-#ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
-#endif // #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
     };
 }

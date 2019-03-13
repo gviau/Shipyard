@@ -21,11 +21,13 @@ namespace Shipyard
         ShaderHandlerManager();
         virtual ~ShaderHandlerManager();
 
-        void SetShaderDatabase(ShaderDatabase& shaderDatabase);
+        bool Initialize(GFXRenderDevice& gfxRenderDevice, ShaderDatabase& shaderDatabase);
+        void Destroy();
 
-        ShaderHandler* GetShaderHandlerForShaderKey(ShaderKey shaderKey, GFXRenderDevice& gfxRenderDevice);
+        ShaderHandler* GetShaderHandlerForShaderKey(ShaderKey shaderKey);
 
     private:
+        GFXRenderDevice* m_RenderDevice;
         std::map<ShaderKey, ShaderHandler*> m_ShaderHandlers;
         ShaderDatabase* m_ShaderDatabase;
     };

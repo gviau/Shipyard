@@ -24,8 +24,6 @@ namespace Shipyard
         };
 
     public:
-        DescriptorSet(DescriptorSetType descriptorSetType, const RootSignature& rootSignature);
-
         void SetDescriptorForRootIndex(uint32_t rootIndex, GfxResource& descriptorResource);
         void SetDescriptorTableForRootIndex(uint32_t rootIndex, const Array<GfxResource*>& descriptorTableResources);
 

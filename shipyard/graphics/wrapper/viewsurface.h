@@ -9,8 +9,7 @@ namespace Shipyard
     class SHIPYARD_API ViewSurface
     {
     public:
-        ViewSurface(uint32_t width, uint32_t height, GfxFormat viewSurfaceFormat);
-        ~ViewSurface();
+        ViewSurface();
 
 #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
         virtual void Flip() = 0;

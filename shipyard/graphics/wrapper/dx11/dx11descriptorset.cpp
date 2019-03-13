@@ -3,9 +3,17 @@
 namespace Shipyard
 {;
 
-DX11DescriptorSet::DX11DescriptorSet(DescriptorSetType descriptorSetType, const RootSignature& rootSignature)
-    : DescriptorSet(descriptorSetType, rootSignature)
+bool DX11DescriptorSet::Create(DescriptorSetType descriptorSetType, const RootSignature& rootSignature)
 {
+    m_DescriptorSetType = descriptorSetType;
+    m_RootSignature = &rootSignature;
+
+    return true;
+}
+
+void DX11DescriptorSet::Destroy()
+{
+
 }
 
 }

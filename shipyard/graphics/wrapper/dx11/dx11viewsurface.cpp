@@ -20,43 +20,45 @@
 namespace Shipyard
 {;
 
-DX11ViewSurface::DX11ViewSurface(DX11RenderDevice& renderDevice, DX11RenderDeviceContext& immediateRenderContext, uint32_t width, uint32_t height, GfxFormat viewSurfaceFormat, HWND windowHandle)
-    : ViewSurface(width, height, viewSurfaceFormat)
-    , m_RenderDevice(renderDevice)
-    , m_ImmediateRenderContext(immediateRenderContext)
-    , m_WindowHandle(windowHandle)
+DX11ViewSurface::DX11ViewSurface()
+    : m_ImmediateRenderContext(nullptr)
+    , m_WindowHandle(nullptr)
     , m_SwapChain(nullptr)
-    , m_BackBufferRenderTarget(nullptr)
-    , m_BackBufferTexture(nullptr)
 {
-    m_SwapChain = renderDevice.CreateSwapchain(m_Width, m_Height, m_ViewSurfaceFormat, m_WindowHandle);
-
-    ID3D11Texture2D* backBufferTexture = nullptr;
-    HRESULT hr = m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBufferTexture);
-    if (FAILED(hr))
-    {
-        SHIP_LOG_ERROR("DX11ViewSurface::DX11ViewSurface() --> Couldn't create view surface.");
-        return;
-    }
-
-    ID3D11Device* device = m_RenderDevice.GetDevice();
-
-    m_BackBufferTexture = MemAlloc(DX11Texture2D)(*device, *backBufferTexture, m_ViewSurfaceFormat);
-    
-    m_BackBufferRenderTarget = m_RenderDevice.CreateRenderTarget((GFXTexture2D**)&m_BackBufferTexture, 1);
-
-    backBufferTexture->Release();
 }
 
-DX11ViewSurface::~DX11ViewSurface()
+bool DX11ViewSurface::Create(
+        DX11RenderDevice& renderDevice,
+        DX11RenderDeviceContext& immediateRenderContext,
+        uint32_t width,
+        uint32_t height,
+        GfxFormat viewSurfaceFormat,
+        HWND windowHandle)
 {
-    if (m_SwapChain != nullptr)
-    {
-        m_SwapChain->Release();
-    }
+    m_RenderDevice = &renderDevice;
+    m_ImmediateRenderContext = &immediateRenderContext;
+    m_Width = width;
+    m_Height = height;
+    m_ViewSurfaceFormat = viewSurfaceFormat;
+    m_WindowHandle = windowHandle;
 
-    MemFree(m_BackBufferTexture);
-    MemFree(m_BackBufferRenderTarget);
+    m_SwapChain = renderDevice.CreateSwapchain(m_Width, m_Height, m_ViewSurfaceFormat, m_WindowHandle, m_BackBufferTextureHandle);
+
+    GFXTexture2DHandle* pBackBufferTexture = &m_BackBufferTextureHandle;
+
+    m_BackBufferRenderTargetHandle = renderDevice.CreateRenderTarget(pBackBufferTexture, 1);
+
+    return true;
+}
+
+void DX11ViewSurface::Destroy()
+{
+    SHIP_ASSERT_MSG(m_SwapChain != nullptr, "Can't call Destroy on invalid view surface 0x%p", this);
+
+    m_RenderDevice->DestroyTexture2D(m_BackBufferTextureHandle);
+
+    m_SwapChain->Release();
+    m_SwapChain = nullptr;
 }
 
 void DX11ViewSurface::Flip()

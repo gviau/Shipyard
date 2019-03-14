@@ -4,7 +4,8 @@ namespace ShipyardSharpmake
 {
     abstract class BaseShipyardProject : Project
     {
-        public BaseShipyardProject(string projectName, string baseSourcePath, ITarget target)
+        public BaseShipyardProject(string projectName, string baseSourcePath, ShipyardTarget target)
+            : base(typeof(ShipyardTarget))
         {
             IsFileNameToLower = false;
 
@@ -18,7 +19,7 @@ namespace ShipyardSharpmake
             ResourceFilesExtensions.Add(".hlsl");
         }
 
-        public virtual void ConfigureAll(Configuration configuration, Target target)
+        public virtual void ConfigureAll(Configuration configuration, ShipyardTarget target)
         {
             bool isMswinPlatform = (target.Platform == Platform.win32 || target.Platform == Platform.win64);
 
@@ -51,7 +52,7 @@ namespace ShipyardSharpmake
 
             ConfigureIncludePaths(configuration);
             ConfigurePlatform(configuration, target.Platform);
-            ConfigureDefines(configuration, target.Platform);
+            ConfigureDefines(configuration, target);
 
             ConfigureProjectDependencies(configuration, target);
 
@@ -64,7 +65,7 @@ namespace ShipyardSharpmake
             {
                 configuration.Output = Configuration.OutputType.Lib;
 
-                if (target.Optimization == Optimization.Debug)
+                if (target.Optimization == OptimizationLevel.Debug)
                 {
                     configuration.Options.Add(Options.Vc.Compiler.RuntimeLibrary.MultiThreadedDebug);
                 }
@@ -77,7 +78,7 @@ namespace ShipyardSharpmake
             {
                 configuration.Output = Configuration.OutputType.Dll;
 
-                if (target.Optimization == Optimization.Debug)
+                if (target.Optimization == OptimizationLevel.Debug)
                 {
                     configuration.Options.Add(Options.Vc.Compiler.RuntimeLibrary.MultiThreadedDebugDLL);
                 }
@@ -102,17 +103,31 @@ namespace ShipyardSharpmake
             configuration.Options.Add(Options.Vc.Compiler.MinimalRebuild.Disable);
         }
 
-        protected virtual void ConfigureDefines(Configuration configuration, Platform platform)
+        protected virtual void ConfigureDefines(Configuration configuration, ShipyardTarget target)
+        {
+            switch (target.Optimization)
+            {
+                case OptimizationLevel.Debug:
+                    configuration.Defines.Add("SHIP_DEBUG");
+                    break;
+
+                case OptimizationLevel.Profile:
+                    configuration.Defines.Add("SHIP_OPTIMIZED");
+                    break;
+
+                case OptimizationLevel.Master:
+                    configuration.Defines.Add("SHIP_OPTIMIZED");
+                    configuration.Defines.Add("SHIP_MASTER");
+                    break;
+            }
+        }
+
+        protected virtual void ConfigureProjectDependencies(Configuration configuration, ShipyardTarget target)
         {
 
         }
 
-        protected virtual void ConfigureProjectDependencies(Configuration configuration, Target target)
-        {
-
-        }
-
-        protected virtual void ConfigureDisabledWarnings(Configuration configuration, Target target)
+        protected virtual void ConfigureDisabledWarnings(Configuration configuration, ShipyardTarget target)
         {
             const string disableUnreferencedFormalParameterWarning = "4100";
             const string disableNamelessStructUnionWarning = "4201";

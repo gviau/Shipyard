@@ -20,50 +20,50 @@ namespace ShipyardSharpmake
             }
         }
 
-        public static Optimization DefaultShipyardOptimization
+        public static OptimizationLevel DefaultShipyardOptimization
         {
             get
             {
-                return Optimization.Debug | Optimization.Release;
+                return OptimizationLevel.Debug | OptimizationLevel.Develop | OptimizationLevel.Profile | OptimizationLevel.Master;
             }
         }
 
-        private static Target ms_DefaultShipyardTarget;
-        public static Target DefaultShipyardTarget
+        private static ShipyardTarget ms_DefaultShipyardTarget;
+        public static ShipyardTarget DefaultShipyardTarget
         {
             get
             {
                 if (ms_DefaultShipyardTarget == null)
                 {
-                    ms_DefaultShipyardTarget = new Target(DefaultShipyardPlatforms, DefaultShipyardDevEnv, DefaultShipyardOptimization);
+                    ms_DefaultShipyardTarget = new ShipyardTarget(DefaultShipyardPlatforms, DefaultShipyardDevEnv, DefaultShipyardOptimization, OutputType.Lib);
                 }
 
                 return ms_DefaultShipyardTarget;
             }
         }
 
-        private static Target ms_DefaultShipyardTargetLib;
-        public static Target DefaultShipyardTargetLib
+        private static ShipyardTarget ms_DefaultShipyardTargetLib;
+        public static ShipyardTarget DefaultShipyardTargetLib
         {
             get
             {
                 if (ms_DefaultShipyardTargetLib == null)
                 {
-                    ms_DefaultShipyardTargetLib = new Target(DefaultShipyardPlatforms, DefaultShipyardDevEnv, DefaultShipyardOptimization, OutputType.Dll);
+                    ms_DefaultShipyardTargetLib = new ShipyardTarget(DefaultShipyardPlatforms, DefaultShipyardDevEnv, DefaultShipyardOptimization, OutputType.Dll);
                 }
 
                 return ms_DefaultShipyardTargetLib;
             }
         }
 
-        private static Target ms_DefaultShipyardTargetSolution;
-        public static Target DefaultShipyardTargetSolution
+        private static ShipyardTarget ms_DefaultShipyardTargetSolution;
+        public static ShipyardTarget DefaultShipyardTargetSolution
         {
             get
             {
                 if (ms_DefaultShipyardTargetSolution == null)
                 {
-                    ms_DefaultShipyardTargetSolution = new Target(DefaultShipyardPlatforms, DefaultShipyardDevEnv, DefaultShipyardOptimization, OutputType.Dll | OutputType.Lib);
+                    ms_DefaultShipyardTargetSolution = new ShipyardTarget(DefaultShipyardPlatforms, DefaultShipyardDevEnv, DefaultShipyardOptimization, OutputType.Dll | OutputType.Lib);
                 }
 
                 return ms_DefaultShipyardTargetSolution;

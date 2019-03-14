@@ -12,14 +12,14 @@ namespace ShipyardSharpmake
         }
 
         [Configure]
-        public override void ConfigureAll(Configuration configuration, Target target)
+        public override void ConfigureAll(Configuration configuration, ShipyardTarget target)
         {
             base.ConfigureAll(configuration, target);
 
             configuration.Options.Add(Sharpmake.Options.Vc.Linker.SubSystem.Application);
         }
 
-        protected override void ConfigureProjectDependencies(Configuration configuration, Target target)
+        protected override void ConfigureProjectDependencies(Configuration configuration, ShipyardTarget target)
         {
             base.ConfigureProjectDependencies(configuration, target);
 

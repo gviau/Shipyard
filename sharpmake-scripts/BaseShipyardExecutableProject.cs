@@ -10,7 +10,7 @@ namespace ShipyardSharpmake
 
         }
 
-        public override void ConfigureAll(Configuration configuration, Target target)
+        public override void ConfigureAll(Configuration configuration, ShipyardTarget target)
         {
             base.ConfigureAll(configuration, target);
 

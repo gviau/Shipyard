@@ -12,7 +12,7 @@ namespace ShipyardSharpmake
         }
 
         [Configure]
-        public override void ConfigureAll(Configuration configuration, Target target)
+        public override void ConfigureAll(Configuration configuration, ShipyardTarget target)
         {
             base.ConfigureAll(configuration, target);
         }
@@ -37,9 +37,9 @@ namespace ShipyardSharpmake
             }
         }
 
-        protected override void ConfigureDefines(Configuration configuration, Platform platform)
+        protected override void ConfigureDefines(Configuration configuration, ShipyardTarget target)
         {
-            base.ConfigureDefines(configuration, platform);
+            base.ConfigureDefines(configuration, target);
 
             configuration.Defines.Add("SHIPYARD_NONCLIENT_BUILD");
         }

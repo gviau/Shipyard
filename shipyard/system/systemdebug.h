@@ -5,6 +5,7 @@
 #if PLATFORM == PLATFORM_WINDOWS
 #include <cassert>
 #include <windows.h>
+#include <stdio.h>
 #endif // #if PLATFORM == PLATFORM_WINDOWS
 
 namespace Shipyard

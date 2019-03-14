@@ -29,9 +29,10 @@ namespace ShipyardSharpmake
                 platformString = @"Mswin\";
             }
 
-            configuration.ProjectFileName  = platformString + @"[target.DevEnv]\[project.Name]";
-            configuration.ProjectPath      = @"[project.SharpmakeCsPath]\..\generated-projects\";
-            configuration.IntermediatePath = configuration.ProjectPath + @"intermediate\[target.DevEnv]\[project.Name]\";
+            configuration.ProjectFileName   = platformString + @"[target.DevEnv]\[project.Name]";
+            configuration.ProjectPath       = @"[project.SharpmakeCsPath]\..\generated-projects\";
+            configuration.IntermediatePath  = configuration.ProjectPath + @"intermediate\[target.DevEnv]\[project.Name]\";
+            configuration.Name              = @"[target.Optimization]";
 
             string targetOutputPath = GetTargetOutputPath();
 

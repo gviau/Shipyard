@@ -18,6 +18,7 @@ namespace ShipyardSharpmake
         {
             configuration.SolutionFileName = "[solution.Name]";
             configuration.SolutionPath = @"[solution.SharpmakeCsPath]\..\generated-projects\";
+            configuration.Name = @"[target.Optimization]";
         }
     }
 }

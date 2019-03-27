@@ -60,6 +60,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ShipyardProject.cs" />
     <Compile Include="ShipyardSolution.cs" />
+    <Compile Include="ShipyardTarget.cs" />
     <Compile Include="ShipyardUnitTestProject.cs" />
     <Compile Include="ShipyardUnitTestSolution.cs" />
     <Compile Include="ShipyardUtils.cs" />

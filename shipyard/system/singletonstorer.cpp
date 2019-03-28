@@ -11,7 +11,9 @@ namespace Shipyard
 
 SingletonStorer::SingletonStorer()
 {
+#ifdef SHIP_ENABLE_LOGGING
     Logger::CreateInstance();
+#endif // #ifdef SHIP_ENABLE_LOGGING
 
     ShaderCompiler::CreateInstance();
     ShaderWatcher::CreateInstance();
@@ -24,7 +26,9 @@ SingletonStorer::~SingletonStorer()
     ShaderWatcher::DestroyInstance();
     ShaderCompiler::DestroyInstance();
 
+#ifdef SHIP_ENABLE_LOGGING
     Logger::DestroyInstance();
+#endif // #ifdef SHIP_ENABLE_LOGGING
 }
 
 }

@@ -50,7 +50,8 @@ namespace Shipyard
         } \
     }
 #else
-#    define SHIP_ASSERT(cond, fmt, ...)
+#    define SHIP_ASSERT(cond) (void)(cond)
+#    define SHIP_ASSERT_MSG(cond, fmt, ...) (void)(cond)
 #endif // #ifdef _DEBUG
 
 #else

@@ -75,6 +75,8 @@ namespace Shipyard
 
 #if defined(SHIPYARD_NONCLIENT_BUILD)
 #   define SHIPYARD_API SHIPYARD_API_EXPORT
+#elif defined(SHIPYARD_STATIC_LINK)
+#   define SHIPYARD_API
 #else
 #   define SHIPYARD_API SHIPYARD_API_IMPORT
 #endif // #if defined(SHIPYARD_NONCLIENT_BUILD)

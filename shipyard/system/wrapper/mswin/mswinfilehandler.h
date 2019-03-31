@@ -6,7 +6,7 @@
 
 namespace Shipyard
 {
-    class MswinFileHandler : public BaseFileHandler
+    class SHIPYARD_API MswinFileHandler : public BaseFileHandler
     {
     public:
         MswinFileHandler();

@@ -41,6 +41,28 @@ namespace
 
         void* pBuffer = nullptr;
     };
+
+    size_t g_TestObjectCount = 0;
+
+    class TestObject
+    {
+    public:
+        TestObject()
+        {
+            g_TestObjectCount += 1;
+        }
+
+        ~TestObject()
+        {
+            g_TestObjectCount -= 1;
+        }
+
+    private:
+        void* pDummy;
+        uint32_t dummy1;
+        float dummy2;
+        bool dummy3;
+    };
 }
 
 TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
@@ -839,6 +861,98 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
 
         // One last time, to make sure we can properly realloc after last case
         deallocationPatternTestCase(0, 1, 2, 3, 4, 5, 13, 31);
+    }
+
+    SECTION("Array allocations")
+    {
+        const size_t arrayLength = 10;
+        const size_t heapSize = (minHeapSize + 64 + sizeof(TestObject) * arrayLength) * 4;
+        ScoppedBuffer scoppedBuffer(heapSize);
+
+        fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
+
+        auto deallocationPatternTestCase = [&fixedHeapAllocator, arrayLength](
+            uint32_t first, uint32_t second, uint32_t third, uint32_t fourth,
+            uint32_t alignment1, uint32_t alignment2, uint32_t alignment3, uint32_t alignment4)
+        {
+            TestObject* pAlloc1 = SHIP_NEW_ARRAY(fixedHeapAllocator, TestObject, arrayLength, alignment1);
+
+            REQUIRE(pAlloc1 != nullptr);
+            REQUIRE(g_TestObjectCount == arrayLength);
+
+            TestObject* pAlloc2 = SHIP_NEW_ARRAY(fixedHeapAllocator, TestObject, arrayLength, alignment2);
+
+            REQUIRE(pAlloc2 != nullptr);
+            REQUIRE(g_TestObjectCount == arrayLength * 2);
+
+            TestObject* pAlloc3 = SHIP_NEW_ARRAY(fixedHeapAllocator, TestObject, arrayLength, alignment3);
+
+            REQUIRE(pAlloc3 != nullptr);
+            REQUIRE(g_TestObjectCount == arrayLength * 3);
+
+            TestObject* pAlloc4 = SHIP_NEW_ARRAY(fixedHeapAllocator, TestObject, arrayLength, alignment4);
+
+            REQUIRE(pAlloc4 != nullptr);
+            REQUIRE(g_TestObjectCount == arrayLength * 4);
+
+            TestObject* pAllocs[] = { pAlloc1, pAlloc2, pAlloc3, pAlloc4 };
+
+            SHIP_DELETE_ARRAY(fixedHeapAllocator, pAllocs[first]);
+            SHIP_DELETE_ARRAY(fixedHeapAllocator, pAllocs[second]);
+            SHIP_DELETE_ARRAY(fixedHeapAllocator, pAllocs[third]);
+            SHIP_DELETE_ARRAY(fixedHeapAllocator, pAllocs[fourth]);
+
+            REQUIRE(g_TestObjectCount == 0);
+        };
+
+        deallocationPatternTestCase(0, 1, 2, 3, 4, 4, 4, 4);
+        deallocationPatternTestCase(1, 2, 3, 0, 4, 4, 4, 4);
+        deallocationPatternTestCase(2, 3, 0, 1, 4, 4, 4, 4);
+        deallocationPatternTestCase(3, 0, 1, 2, 4, 4, 4, 4);
+        deallocationPatternTestCase(0, 2, 1, 3, 4, 4, 4, 4);
+        deallocationPatternTestCase(2, 1, 3, 0, 4, 4, 4, 4);
+        deallocationPatternTestCase(1, 3, 0, 2, 4, 4, 4, 4);
+        deallocationPatternTestCase(3, 0, 2, 1, 4, 4, 4, 4);
+        deallocationPatternTestCase(0, 1, 3, 2, 4, 4, 4, 4);
+        deallocationPatternTestCase(1, 3, 2, 0, 4, 4, 4, 4);
+        deallocationPatternTestCase(3, 2, 0, 1, 4, 4, 4, 4);
+        deallocationPatternTestCase(2, 0, 1, 3, 4, 4, 4, 4);
+        deallocationPatternTestCase(3, 1, 2, 0, 4, 4, 4, 4);
+        deallocationPatternTestCase(1, 2, 0, 3, 4, 4, 4, 4);
+        deallocationPatternTestCase(2, 0, 3, 1, 4, 4, 4, 4);
+        deallocationPatternTestCase(0, 3, 1, 2, 4, 4, 4, 4);
+        deallocationPatternTestCase(3, 2, 1, 0, 4, 4, 4, 4);
+        deallocationPatternTestCase(2, 1, 0, 3, 4, 4, 4, 4);
+        deallocationPatternTestCase(1, 0, 3, 2, 4, 4, 4, 4);
+        deallocationPatternTestCase(0, 3, 2, 1, 4, 4, 4, 4);
+
+        // One last time, to make sure we can properly realloc after last case
+        deallocationPatternTestCase(0, 1, 2, 3, 4, 4, 4, 4);
+
+        deallocationPatternTestCase(0, 1, 2, 3, 4, 5, 13, 31);
+        deallocationPatternTestCase(1, 2, 3, 0, 4, 5, 13, 31);
+        deallocationPatternTestCase(2, 3, 0, 1, 4, 5, 13, 31);
+        deallocationPatternTestCase(3, 0, 1, 2, 4, 5, 13, 31);
+        deallocationPatternTestCase(0, 2, 1, 3, 4, 5, 13, 31);
+        deallocationPatternTestCase(2, 1, 3, 0, 4, 5, 13, 31);
+        deallocationPatternTestCase(1, 3, 0, 2, 4, 5, 13, 31);
+        deallocationPatternTestCase(3, 0, 2, 1, 4, 5, 13, 31);
+        deallocationPatternTestCase(0, 1, 3, 2, 4, 5, 13, 31);
+        deallocationPatternTestCase(1, 3, 2, 0, 4, 5, 13, 31);
+        deallocationPatternTestCase(3, 2, 0, 1, 4, 5, 13, 31);
+        deallocationPatternTestCase(2, 0, 1, 3, 4, 5, 13, 31);
+        deallocationPatternTestCase(3, 1, 2, 0, 4, 5, 13, 31);
+        deallocationPatternTestCase(1, 2, 0, 3, 4, 5, 13, 31);
+        deallocationPatternTestCase(2, 0, 3, 1, 4, 5, 13, 31);
+        deallocationPatternTestCase(0, 3, 1, 2, 4, 5, 13, 31);
+        deallocationPatternTestCase(3, 2, 1, 0, 4, 5, 13, 31);
+        deallocationPatternTestCase(2, 1, 0, 3, 4, 5, 13, 31);
+        deallocationPatternTestCase(1, 0, 3, 2, 4, 5, 13, 31);
+        deallocationPatternTestCase(0, 3, 2, 1, 4, 5, 13, 31);
+
+        // One last time, to make sure we can properly realloc after last case
+        deallocationPatternTestCase(0, 1, 2, 3, 4, 5, 13, 31);
+
     }
 
     fixedHeapAllocator.Destroy();

@@ -18,6 +18,16 @@
 
 namespace Shipyard
 {
+    SHIP_INLINE size_t AlignAddress(size_t address, size_t alignment)
+    {
+        return (address + (alignment - 1)) & (~(alignment - 1));
+    }
+
+    SHIP_INLINE bool IsAddressAligned(size_t address, size_t alignment)
+    {
+        return ((address & (alignment - 1)) == 0);
+    }
+
     class SHIPYARD_API BaseAllocator
     {
     public:
@@ -38,8 +48,6 @@ namespace Shipyard
 
 namespace
 {
-    const size_t sizeForArraySizeHeader = sizeof(size_t) * 2;
-
     template <typename T>
     T* NewArray(Shipyard::BaseAllocator& allocator, size_t length, size_t alignment
 
@@ -54,6 +62,7 @@ namespace
         // Moreover, since we also need to respect alignment restrictions, we'll need to allocate a little
         // bit more space to be sure we can properly align the user pointer.
         const size_t sizeForArray = sizeof(T) * length;
+        const size_t sizeForArraySizeHeader = sizeof(size_t) * 2;
         size_t requiredSize = sizeForArray + sizeForArraySizeHeader + alignment;
 
         // Since we're taking care of alignment manually here, no need to respect it at the allocation level.
@@ -78,7 +87,7 @@ namespace
         // location that has an extra sizeof(size_t) bytes behind it so that we can place the header, even if the user pointer is already
         // aligned.
         size_t userPointerAddress = size_t(pMem);
-        size_t forwardAlignedAddress = (userPointerAddress + (alignment - 1)) & (~(alignment - 1));
+        size_t forwardAlignedAddress = Shipyard::AlignAddress(userPointerAddress, alignment);
 
         size_t diffAddress = (forwardAlignedAddress - userPointerAddress);
 
@@ -88,7 +97,7 @@ namespace
         if (needToAlignToNextBoundary)
         {
             forwardAlignedAddress += (sizeForArraySizeHeader - MAX(diffAddress, 1));
-            forwardAlignedAddress = (forwardAlignedAddress + (alignment - 1)) & (~(alignment - 1));
+            forwardAlignedAddress = Shipyard::AlignAddress(forwardAlignedAddress, alignment);
         }
 
         // Required header so that we know how many objects to destroy when deleting the array.
@@ -118,6 +127,8 @@ namespace
     {
         // The small header before the user pointer contains the number of items that were created and the address of the user pointer
         // that we need to deallocate
+        const size_t sizeForArraySizeHeader = sizeof(size_t) * 2;
+
         size_t* pArrayHeader = reinterpret_cast<size_t*>(size_t(pArray) - sizeForArraySizeHeader);
         size_t length = *pArrayHeader;
         size_t addressOfUserPointer = *(pArrayHeader + 1);

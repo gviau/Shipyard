@@ -1,19 +1,10 @@
 #include <catch.hpp>
 
 #include <system/memory/fixedheapallocator.h>
+#include <system/memory/poolallocator.h>
 
 namespace
 {
-    size_t AlignAddress(size_t address, size_t alignment)
-    {
-        return (address + (alignment - 1)) & (~(alignment - 1));
-    }
-
-    bool IsAddressAligned(size_t address, size_t alignment)
-    {
-        return ((address & (alignment - 1)) == 0);
-    }
-
     bool AllocsAreDontOverlap(void* pAlloc1, size_t allocSize1, void* pAlloc2, size_t allocSize2)
     {
         size_t start1 = size_t(pAlloc1);
@@ -31,15 +22,23 @@ namespace
     {
         ScoppedBuffer(size_t size)
         {
-            pBuffer = malloc(size);
+            pInternalBuffer = malloc(size);
+            pBuffer = pInternalBuffer;
+        }
+
+        ScoppedBuffer(size_t size, size_t alignment)
+        {
+            pInternalBuffer = malloc(size);
+            pBuffer = reinterpret_cast<void*>(Shipyard::AlignAddress(size_t(pInternalBuffer), alignment));
         }
 
         ~ScoppedBuffer()
         {
-            free(pBuffer);
+            free(pInternalBuffer);
         }
 
         void* pBuffer = nullptr;
+        void* pInternalBuffer = nullptr;
     };
 
     size_t g_TestObjectCount = 0;
@@ -122,7 +121,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         void* pAlloc = SHIP_ALLOC(fixedHeapAllocator, allocSize, alignment);
 
         REQUIRE(pAlloc != nullptr);
-        REQUIRE(IsAddressAligned(size_t(pAlloc), alignment));
+        REQUIRE(Shipyard::IsAddressAligned(size_t(pAlloc), alignment));
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 1);
@@ -554,7 +553,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         void* pAlloc1 = SHIP_ALLOC(fixedHeapAllocator, allocSize1, alignment);
 
         REQUIRE(pAlloc1 != nullptr);
-        REQUIRE(IsAddressAligned(size_t(pAlloc1), alignment));
+        REQUIRE(Shipyard::IsAddressAligned(size_t(pAlloc1), alignment));
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 1);
@@ -564,7 +563,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         void* pAlloc2 = SHIP_ALLOC(fixedHeapAllocator, allocSize2, alignment);
 
         REQUIRE(pAlloc2 != nullptr);
-        REQUIRE(IsAddressAligned(size_t(pAlloc2), alignment));
+        REQUIRE(Shipyard::IsAddressAligned(size_t(pAlloc2), alignment));
 
         REQUIRE(AllocsAreDontOverlap(pAlloc1, allocSize1, pAlloc2, allocSize2));
 
@@ -603,7 +602,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             void* pAlloc1 = SHIP_ALLOC(fixedHeapAllocator, allocSize1, alignment);
 
             REQUIRE(pAlloc1 != nullptr);
-            REQUIRE(IsAddressAligned(size_t(pAlloc1), alignment));
+            REQUIRE(Shipyard::IsAddressAligned(size_t(pAlloc1), alignment));
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 1);
@@ -613,7 +612,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             void* pAlloc2 = SHIP_ALLOC(fixedHeapAllocator, allocSize2, alignment);
 
             REQUIRE(pAlloc2 != nullptr);
-            REQUIRE(IsAddressAligned(size_t(pAlloc2), alignment));
+            REQUIRE(Shipyard::IsAddressAligned(size_t(pAlloc2), alignment));
 
             REQUIRE(AllocsAreDontOverlap(pAlloc1, allocSize1, pAlloc2, allocSize2));
 
@@ -956,4 +955,454 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
     }
 
     fixedHeapAllocator.Destroy();
+}
+
+TEST_CASE("Test PoolAllocator", "[Allocator]")
+{
+    Shipyard::PoolAllocator poolAllocator;
+
+    const size_t minChunkSize = sizeof(void*);
+    const size_t minHeapSize = minChunkSize * 2;
+
+    SECTION("creating allocator")
+    {
+        const size_t heapSize = 64;
+        ScoppedBuffer scoppedBuffer(heapSize, minChunkSize);
+
+        poolAllocator.Create(scoppedBuffer.pBuffer, 1, minChunkSize);
+    }
+
+    SECTION("simple allocation")
+    {
+        const size_t chunkSize = minChunkSize;
+        const size_t heapSize = chunkSize * 2;
+        ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
+
+        poolAllocator.Create(scoppedBuffer.pBuffer, 1, chunkSize);
+
+        void* pAlloc = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+
+        REQUIRE(pAlloc != nullptr);
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+        REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 1);
+        REQUIRE(poolAllocator.GetMemoryInfo().numBytesUsed == chunkSize);
+        REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+        SHIP_FREE(poolAllocator, pAlloc);
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+        REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 0);
+        REQUIRE(poolAllocator.GetMemoryInfo().numBytesUsed == 0);
+        REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == 0);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+    }
+
+    SECTION("simple aligned allocation")
+    {
+        const size_t alignment = 16;
+        const size_t chunkSize = 8;
+        const size_t heapSize = alignment * 2 + chunkSize;
+        ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
+
+        poolAllocator.Create(scoppedBuffer.pBuffer, 4, chunkSize);
+
+        void* pAlloc = SHIP_ALLOC(poolAllocator, chunkSize, alignment);
+
+        REQUIRE(pAlloc != nullptr);
+        REQUIRE(Shipyard::IsAddressAligned(size_t(pAlloc), alignment));
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+        REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 1);
+        REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+        SHIP_FREE(poolAllocator, pAlloc);
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+        REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 0);
+        REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == 0);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+    }
+
+    SECTION("two allocations same size")
+    {
+        const size_t chunkSize = minChunkSize;
+        const size_t heapSize = chunkSize * 2 + chunkSize;
+        ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
+
+        poolAllocator.Create(scoppedBuffer.pBuffer, 2, chunkSize);
+
+        void* pAlloc1 = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+
+        REQUIRE(pAlloc1 != nullptr);
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+        REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 1);
+        REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+        void* pAlloc2 = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+
+        REQUIRE(pAlloc2 != nullptr);
+
+        REQUIRE(AllocsAreDontOverlap(pAlloc1, chunkSize, pAlloc2, chunkSize));
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+        REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 2);
+        REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize * 2);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+        SHIP_FREE(poolAllocator, pAlloc1);
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+        REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 1);
+        REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+        SHIP_FREE(poolAllocator, pAlloc2);
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+        REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 0);
+        REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == 0);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+    }
+
+    SECTION("two aligned allocations same size")
+    {
+        const size_t chunkSize = minChunkSize;
+        const size_t alignment = 16;
+        const size_t heapSize = alignment * 4 + chunkSize;
+        ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
+
+        poolAllocator.Create(scoppedBuffer.pBuffer, 8, chunkSize);
+
+        void* pAlloc1 = SHIP_ALLOC(poolAllocator, chunkSize, alignment);
+
+        REQUIRE(pAlloc1 != nullptr);
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+        REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 1);
+        REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+        void* pAlloc2 = SHIP_ALLOC(poolAllocator, chunkSize, alignment);
+
+        REQUIRE(pAlloc2 != nullptr);
+
+        REQUIRE(AllocsAreDontOverlap(pAlloc1, chunkSize, pAlloc2, chunkSize));
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+        REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 2);
+        REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize * 2);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+        SHIP_FREE(poolAllocator, pAlloc1);
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+        REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 1);
+        REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+        SHIP_FREE(poolAllocator, pAlloc2);
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+        REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 0);
+        REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == 0);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+    }
+
+    SECTION("three allocations")
+    {
+        const size_t chunkSize = 32;
+        const size_t heapSize = chunkSize * 3 + chunkSize;
+        ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
+
+        poolAllocator.Create(scoppedBuffer.pBuffer, 3, chunkSize);
+
+        auto deallocationPatternTestCase = [&poolAllocator](
+            uint32_t first, uint32_t second, uint32_t third,
+            size_t chunkSize)
+        {
+            void* pAlloc1 = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+
+            REQUIRE(pAlloc1 != nullptr);
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+            REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 1);
+            REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+            void* pAlloc2 = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+
+            REQUIRE(pAlloc2 != nullptr);
+
+            REQUIRE(AllocsAreDontOverlap(pAlloc1, chunkSize, pAlloc2, chunkSize));
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+            REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 2);
+            REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize + chunkSize);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+            void* pAlloc3 = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+
+            REQUIRE(pAlloc3 != nullptr);
+
+            REQUIRE(AllocsAreDontOverlap(pAlloc1, chunkSize, pAlloc3, chunkSize));
+            REQUIRE(AllocsAreDontOverlap(pAlloc2, chunkSize, pAlloc3, chunkSize));
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+            REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 3);
+            REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize + chunkSize + chunkSize);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+            void* pAllocs[] = { pAlloc1, pAlloc2, pAlloc3 };
+            size_t allocSizes[] = { chunkSize, chunkSize, chunkSize };
+
+            SHIP_FREE(poolAllocator, pAllocs[first]);
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+            REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 2);
+            REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == allocSizes[second] + allocSizes[third]);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+            SHIP_FREE(poolAllocator, pAllocs[second]);
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+            REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 1);
+            REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == allocSizes[third]);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+            SHIP_FREE(poolAllocator, pAllocs[third]);
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+            REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 0);
+            REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == 0);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+        };
+
+        deallocationPatternTestCase(0, 1, 2, chunkSize);
+        deallocationPatternTestCase(1, 2, 0, chunkSize);
+        deallocationPatternTestCase(2, 1, 0, chunkSize);
+        deallocationPatternTestCase(2, 0, 1, chunkSize);
+        deallocationPatternTestCase(0, 2, 1, chunkSize);
+        deallocationPatternTestCase(1, 0, 2, chunkSize);
+
+        // One last time, to make sure we can properly realloc after last case
+        deallocationPatternTestCase(0, 1, 2, chunkSize);
+    }
+
+    SECTION("four allocations")
+    {
+        const size_t chunkSize = 16;
+        const size_t heapSize = 16 * 4 + chunkSize;
+        ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
+
+        poolAllocator.Create(scoppedBuffer.pBuffer, 4, chunkSize);
+
+        auto deallocationPatternTestCase = [&poolAllocator](
+            uint32_t first, uint32_t second, uint32_t third, uint32_t fourth,
+            size_t chunkSize)
+        {
+            void* pAlloc1 = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+
+            REQUIRE(pAlloc1 != nullptr);
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+            REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 1);
+            REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+            void* pAlloc2 = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+
+            REQUIRE(pAlloc2 != nullptr);
+
+            REQUIRE(AllocsAreDontOverlap(pAlloc1, chunkSize, pAlloc2, chunkSize));
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+            REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 2);
+            REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize + chunkSize);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+            void* pAlloc3 = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+
+            REQUIRE(pAlloc3 != nullptr);
+
+            REQUIRE(AllocsAreDontOverlap(pAlloc1, chunkSize, pAlloc3, chunkSize));
+            REQUIRE(AllocsAreDontOverlap(pAlloc2, chunkSize, pAlloc3, chunkSize));
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+            REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 3);
+            REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize + chunkSize + chunkSize);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+            void* pAlloc4 = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+
+            REQUIRE(pAlloc4 != nullptr);
+
+            REQUIRE(AllocsAreDontOverlap(pAlloc1, chunkSize, pAlloc4, chunkSize));
+            REQUIRE(AllocsAreDontOverlap(pAlloc2, chunkSize, pAlloc4, chunkSize));
+            REQUIRE(AllocsAreDontOverlap(pAlloc3, chunkSize, pAlloc4, chunkSize));
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+            REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 4);
+            REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize + chunkSize + chunkSize + chunkSize);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+            void* pAllocs[] = { pAlloc1, pAlloc2, pAlloc3, pAlloc4 };
+            size_t allocSizes[] = { chunkSize, chunkSize, chunkSize, chunkSize };
+
+            SHIP_FREE(poolAllocator, pAllocs[first]);
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+            REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 3);
+            REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == allocSizes[second] + allocSizes[third] + allocSizes[fourth]);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+            SHIP_FREE(poolAllocator, pAllocs[second]);
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+            REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 2);
+            REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == allocSizes[third] + allocSizes[fourth]);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+            SHIP_FREE(poolAllocator, pAllocs[third]);
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+            REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 1);
+            REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == allocSizes[fourth]);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+            SHIP_FREE(poolAllocator, pAllocs[fourth]);
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+            REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 0);
+            REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == 0);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+        };
+
+        deallocationPatternTestCase(0, 1, 2, 3, chunkSize);
+        deallocationPatternTestCase(1, 2, 3, 0, chunkSize);
+        deallocationPatternTestCase(2, 3, 0, 1, chunkSize);
+        deallocationPatternTestCase(3, 0, 1, 2, chunkSize);
+        deallocationPatternTestCase(0, 2, 1, 3, chunkSize);
+        deallocationPatternTestCase(2, 1, 3, 0, chunkSize);
+        deallocationPatternTestCase(1, 3, 0, 2, chunkSize);
+        deallocationPatternTestCase(3, 0, 2, 1, chunkSize);
+        deallocationPatternTestCase(0, 1, 3, 2, chunkSize);
+        deallocationPatternTestCase(1, 3, 2, 0, chunkSize);
+        deallocationPatternTestCase(3, 2, 0, 1, chunkSize);
+        deallocationPatternTestCase(2, 0, 1, 3, chunkSize);
+        deallocationPatternTestCase(3, 1, 2, 0, chunkSize);
+        deallocationPatternTestCase(1, 2, 0, 3, chunkSize);
+        deallocationPatternTestCase(2, 0, 3, 1, chunkSize);
+        deallocationPatternTestCase(0, 3, 1, 2, chunkSize);
+        deallocationPatternTestCase(3, 2, 1, 0, chunkSize);
+        deallocationPatternTestCase(2, 1, 0, 3, chunkSize);
+        deallocationPatternTestCase(1, 0, 3, 2, chunkSize);
+        deallocationPatternTestCase(0, 3, 2, 1, chunkSize);
+
+        // One last time, to make sure we can properly realloc after last case
+        deallocationPatternTestCase(0, 1, 2, 3, chunkSize);
+    }
+
+    SECTION("Array allocations")
+    {
+        const size_t arrayLength = 10;
+        const size_t chunkSize = ((sizeof(TestObject) << 1) & (~sizeof(TestObject))) * 10;
+        const size_t sizeForArraySizeHeader = sizeof(size_t) * 2;
+
+        const size_t heapSize = (chunkSize * arrayLength + sizeForArraySizeHeader + 32) * 4 + chunkSize;
+        ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
+
+        const size_t numChunks = heapSize / chunkSize;
+
+        poolAllocator.Create(scoppedBuffer.pBuffer, numChunks, chunkSize);
+
+        auto deallocationPatternTestCase = [&poolAllocator, arrayLength](
+            uint32_t first, uint32_t second, uint32_t third, uint32_t fourth,
+            uint32_t alignment1, uint32_t alignment2, uint32_t alignment3, uint32_t alignment4)
+        {
+            TestObject* pAlloc1 = SHIP_NEW_ARRAY(poolAllocator, TestObject, arrayLength, alignment1);
+
+            REQUIRE(pAlloc1 != nullptr);
+            REQUIRE(g_TestObjectCount == arrayLength);
+
+            TestObject* pAlloc2 = SHIP_NEW_ARRAY(poolAllocator, TestObject, arrayLength, alignment2);
+
+            REQUIRE(pAlloc2 != nullptr);
+            REQUIRE(g_TestObjectCount == arrayLength * 2);
+
+            TestObject* pAlloc3 = SHIP_NEW_ARRAY(poolAllocator, TestObject, arrayLength, alignment3);
+
+            REQUIRE(pAlloc3 != nullptr);
+            REQUIRE(g_TestObjectCount == arrayLength * 3);
+
+            TestObject* pAlloc4 = SHIP_NEW_ARRAY(poolAllocator, TestObject, arrayLength, alignment4);
+
+            REQUIRE(pAlloc4 != nullptr);
+            REQUIRE(g_TestObjectCount == arrayLength * 4);
+
+            TestObject* pAllocs[] = { pAlloc1, pAlloc2, pAlloc3, pAlloc4 };
+
+            SHIP_DELETE_ARRAY(poolAllocator, pAllocs[first]);
+            SHIP_DELETE_ARRAY(poolAllocator, pAllocs[second]);
+            SHIP_DELETE_ARRAY(poolAllocator, pAllocs[third]);
+            SHIP_DELETE_ARRAY(poolAllocator, pAllocs[fourth]);
+
+            REQUIRE(g_TestObjectCount == 0);
+        };
+
+        deallocationPatternTestCase(0, 1, 2, 3, 4, 4, 4, 4);
+        deallocationPatternTestCase(1, 2, 3, 0, 4, 4, 4, 4);
+        deallocationPatternTestCase(2, 3, 0, 1, 4, 4, 4, 4);
+        deallocationPatternTestCase(3, 0, 1, 2, 4, 4, 4, 4);
+        deallocationPatternTestCase(0, 2, 1, 3, 4, 4, 4, 4);
+        deallocationPatternTestCase(2, 1, 3, 0, 4, 4, 4, 4);
+        deallocationPatternTestCase(1, 3, 0, 2, 4, 4, 4, 4);
+        deallocationPatternTestCase(3, 0, 2, 1, 4, 4, 4, 4);
+        deallocationPatternTestCase(0, 1, 3, 2, 4, 4, 4, 4);
+        deallocationPatternTestCase(1, 3, 2, 0, 4, 4, 4, 4);
+        deallocationPatternTestCase(3, 2, 0, 1, 4, 4, 4, 4);
+        deallocationPatternTestCase(2, 0, 1, 3, 4, 4, 4, 4);
+        deallocationPatternTestCase(3, 1, 2, 0, 4, 4, 4, 4);
+        deallocationPatternTestCase(1, 2, 0, 3, 4, 4, 4, 4);
+        deallocationPatternTestCase(2, 0, 3, 1, 4, 4, 4, 4);
+        deallocationPatternTestCase(0, 3, 1, 2, 4, 4, 4, 4);
+        deallocationPatternTestCase(3, 2, 1, 0, 4, 4, 4, 4);
+        deallocationPatternTestCase(2, 1, 0, 3, 4, 4, 4, 4);
+        deallocationPatternTestCase(1, 0, 3, 2, 4, 4, 4, 4);
+        deallocationPatternTestCase(0, 3, 2, 1, 4, 4, 4, 4);
+
+        // One last time, to make sure we can properly realloc after last case
+        deallocationPatternTestCase(0, 1, 2, 3, 4, 4, 4, 4);
+
+        deallocationPatternTestCase(0, 1, 2, 3, 4, 8, 16, 32);
+        deallocationPatternTestCase(1, 2, 3, 0, 4, 8, 16, 32);
+        deallocationPatternTestCase(2, 3, 0, 1, 4, 8, 16, 32);
+        deallocationPatternTestCase(3, 0, 1, 2, 4, 8, 16, 32);
+        deallocationPatternTestCase(0, 2, 1, 3, 4, 8, 16, 32);
+        deallocationPatternTestCase(2, 1, 3, 0, 4, 8, 16, 32);
+        deallocationPatternTestCase(1, 3, 0, 2, 4, 8, 16, 32);
+        deallocationPatternTestCase(3, 0, 2, 1, 4, 8, 16, 32);
+        deallocationPatternTestCase(0, 1, 3, 2, 4, 8, 16, 32);
+        deallocationPatternTestCase(1, 3, 2, 0, 4, 8, 16, 32);
+        deallocationPatternTestCase(3, 2, 0, 1, 4, 8, 16, 32);
+        deallocationPatternTestCase(2, 0, 1, 3, 4, 8, 16, 32);
+        deallocationPatternTestCase(3, 1, 2, 0, 4, 8, 16, 32);
+        deallocationPatternTestCase(1, 2, 0, 3, 4, 8, 16, 32);
+        deallocationPatternTestCase(2, 0, 3, 1, 4, 8, 16, 32);
+        deallocationPatternTestCase(0, 3, 1, 2, 4, 8, 16, 32);
+        deallocationPatternTestCase(3, 2, 1, 0, 4, 8, 16, 32);
+        deallocationPatternTestCase(2, 1, 0, 3, 4, 8, 16, 32);
+        deallocationPatternTestCase(1, 0, 3, 2, 4, 8, 16, 32);
+        deallocationPatternTestCase(0, 3, 2, 1, 4, 8, 16, 32);
+
+        // One last time, to make sure we can properly realloc after last case
+        deallocationPatternTestCase(0, 1, 2, 3, 4, 8, 16, 32);
+
+    }
+
+    poolAllocator.Destroy();
 }

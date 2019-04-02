@@ -73,6 +73,13 @@ namespace Shipyard
 #   define SHIPYARD_API_IMPORT
 #endif // #if !defined(SHIPYARD_BUILD_STATIC)
 
+    // Inline
+#if COMPILER == COMPILER_MSVC
+#   define SHIP_INLINE inline
+#else
+#   pragma error "Unreconized compiler"
+#endif // #if COMPILER == COMPILER_MSVC
+
 #if defined(SHIPYARD_NONCLIENT_BUILD)
 #   define SHIPYARD_API SHIPYARD_API_EXPORT
 #elif defined(SHIPYARD_STATIC_LINK)

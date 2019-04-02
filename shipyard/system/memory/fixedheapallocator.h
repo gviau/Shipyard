@@ -72,6 +72,7 @@ namespace Shipyard
             size_t numUserBytesAllocated = 0;
             size_t maxAllocatedUserSize = 0;
             size_t minAllocatedUserSize = size_t(-1);
+            size_t peakUserBytesAllocated = 0;
         };
 
     public:

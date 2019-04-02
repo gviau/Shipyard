@@ -86,11 +86,6 @@ void FixedHeapAllocator::Destroy()
     m_HeapSize = 0;
 }
 
-bool IsAddressAligned(size_t address, size_t alignment)
-{
-    return ((address & (alignment - 1)) == 0);
-}
-
 void* FixedHeapAllocator::Allocate(size_t size, size_t alignment
 
         #ifdef SHIP_ALLOCATOR_DEBUG_INFO
@@ -135,7 +130,7 @@ void* FixedHeapAllocator::Allocate(size_t size, size_t alignment
 
         if (requiresAlignmentPadding)
         {
-            size_t alignedStartingAddressOfUserBuffer = (startingAddressOfUserBuffer + (alignment - 1)) & (~(alignment - 1));
+            size_t alignedStartingAddressOfUserBuffer = AlignAddress(startingAddressOfUserBuffer, alignment);
             requiredSize = size + (alignedStartingAddressOfUserBuffer - startingAddressOfBlock);
 
             startingAddressOfUserBuffer = alignedStartingAddressOfUserBuffer;
@@ -238,8 +233,9 @@ void* FixedHeapAllocator::Allocate(size_t size, size_t alignment
         m_MemoryInfo.numBlocksAllocated += 1;
         m_MemoryInfo.numBytesUsed += requiredSize + ((canCreateNewFreeBlock) ? 0 : remainingSizeForFreeBlock);
         m_MemoryInfo.numUserBytesAllocated += size;
-        m_MemoryInfo.maxAllocatedUserSize = MAX(m_MemoryInfo.minAllocatedUserSize, size);
+        m_MemoryInfo.maxAllocatedUserSize = MAX(m_MemoryInfo.maxAllocatedUserSize, size);
         m_MemoryInfo.minAllocatedUserSize = MIN(m_MemoryInfo.minAllocatedUserSize, size);
+        m_MemoryInfo.peakUserBytesAllocated = MAX(m_MemoryInfo.maxAllocatedUserSize, m_MemoryInfo.numUserBytesAllocated);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
 #ifdef SHIP_ALLOCATOR_DEBUG_MEMORY_FILL

@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include <system/platform.h>
+
 namespace Shipyard
 {
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))

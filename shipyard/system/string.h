@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include <system/memory.h>
+
 namespace Shipyard
 {
     // Null-terminated string implementation
@@ -10,13 +12,14 @@ namespace Shipyard
     {
     public:
         static const size_t InvalidIndex = size_t(-1);
+        static const size_t DefaultStringCapacity = 16;
 
     public:
-        String();
-        String(const CharType* sz);
+        String(BaseAllocator* pAllocator = nullptr);
+        String(const CharType* sz, BaseAllocator* pAllocator = nullptr);
 
-        // It is the caller's responsability to make sure that numChars <= strlen(sz)
-        String(const CharType* sz, size_t numChars);
+        // It is the caller's responsibility to make sure that numChars <= strlen(sz)
+        String(const CharType* sz, size_t numChars, BaseAllocator* pAllocator = nullptr);
 
         String(const String& src);
         ~String();
@@ -111,6 +114,7 @@ namespace Shipyard
         bool operator!= (const CharType* rhs) const;
 
     protected:
+        BaseAllocator* m_pAllocator;
         CharType* m_Buffer;
         size_t m_NumChars;
         size_t m_Capacity;

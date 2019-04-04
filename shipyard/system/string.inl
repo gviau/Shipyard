@@ -3,7 +3,6 @@
 #include <cstdarg>
 #include <cstdio>
 
-#include <system/memory.h>
 #include <system/systemdebug.h>
 
 namespace Shipyard
@@ -14,32 +13,47 @@ namespace Shipyard
 #endif // #ifndef MIN
 
 template <typename CharType>
-String<CharType>::String()
+String<CharType>::String(BaseAllocator* pAllocator)
+    : m_pAllocator(pAllocator)
 {
-    m_NumChars = 0;
-    m_Capacity = 1;
+    if (pAllocator == nullptr)
+    {
+        m_pAllocator = &GlobalAllocator::GetInstance();
+    }
 
-    m_Buffer = new CharType[m_Capacity];
+    m_NumChars = 0;
+    m_Capacity = DefaultStringCapacity;
+
+    size_t requiredSize = sizeof(CharType) * m_Capacity;
+    m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
 
     m_Buffer[m_NumChars] = '\0';
 }
 
 template <typename CharType>
-String<CharType>::String(const CharType* sz)
+String<CharType>::String(const CharType* sz, BaseAllocator* pAllocator)
 {
+    if (pAllocator == nullptr)
+    {
+        m_pAllocator = &GlobalAllocator::GetInstance();
+    }
+
     if (sz == nullptr)
     {
         m_NumChars = 0;
-        m_Capacity = 1;
+        m_Capacity = DefaultStringCapacity;
 
-        m_Buffer = new CharType[m_Capacity];
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
     }
     else
     {
         m_NumChars = strlen(sz);
         m_Capacity = m_NumChars + 1;
 
-        m_Buffer = new CharType[m_Capacity];
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+
         memcpy(m_Buffer, sz, m_NumChars);
     }
 
@@ -47,21 +61,29 @@ String<CharType>::String(const CharType* sz)
 }
 
 template <typename CharType>
-String<CharType>::String(const CharType* sz, size_t numChars)
+String<CharType>::String(const CharType* sz, size_t numChars, BaseAllocator* pAllocator)
 {
+    if (pAllocator == nullptr)
+    {
+        m_pAllocator = &GlobalAllocator::GetInstance();
+    }
+
     if (sz == nullptr || numChars == 0)
     {
         m_NumChars = 0;
         m_Capacity = 1;
 
-        m_Buffer = new CharType[m_Capacity];
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
     }
     else
     {
         m_NumChars = numChars;
         m_Capacity = m_NumChars + 1;
 
-        m_Buffer = new CharType[m_Capacity];
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+
         memcpy(m_Buffer, sz, m_NumChars);
     }
 
@@ -70,11 +92,14 @@ String<CharType>::String(const CharType* sz, size_t numChars)
 
 template <typename CharType>
 String<CharType>::String(const String<CharType>& src)
+    : m_pAllocator(src.m_pAllocator)
 {
     m_NumChars = src.m_NumChars;
     m_Capacity = src.m_Capacity;
 
-    m_Buffer = new CharType[m_Capacity];
+    size_t requiredSize = sizeof(CharType) * m_Capacity;
+    m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+
     memcpy(m_Buffer, src.m_Buffer, m_NumChars);
 
     m_Buffer[m_NumChars] = '\0';
@@ -83,7 +108,7 @@ String<CharType>::String(const String<CharType>& src)
 template <typename CharType>
 String<CharType>::~String()
 {
-    MemArrayFree(m_Buffer);
+    SHIP_FREE_EX(m_pAllocator, m_Buffer);
 }
 
 template <typename CharType>
@@ -91,12 +116,16 @@ String<CharType>& String<CharType>::operator= (const String <CharType>& rhs)
 {
     if (&rhs != this)
     {
-        MemArrayFree(m_Buffer);
+        SHIP_FREE_EX(m_pAllocator, m_Buffer);
+
+        m_pAllocator = rhs.m_pAllocator;
 
         m_NumChars = rhs.m_NumChars;
         m_Capacity = rhs.m_Capacity;
 
-        m_Buffer = new CharType[m_Capacity];
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+
         memcpy(m_Buffer, rhs.m_Buffer, m_NumChars);
 
         m_Buffer[m_NumChars] = '\0';
@@ -108,12 +137,14 @@ String<CharType>& String<CharType>::operator= (const String <CharType>& rhs)
 template <typename CharType>
 String<CharType>& String<CharType>::operator= (const CharType* rhs)
 {
-    MemArrayFree(m_Buffer);
+    SHIP_FREE_EX(m_pAllocator, m_Buffer);
 
     m_NumChars = strlen(rhs);
     m_Capacity = m_NumChars + 1;
 
-    m_Buffer = new CharType[m_Capacity];
+    size_t requiredSize = sizeof(CharType) * m_Capacity;
+    m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+
     memcpy(m_Buffer, rhs, m_NumChars);
 
     m_Buffer[m_NumChars] = '\0';
@@ -124,12 +155,14 @@ String<CharType>& String<CharType>::operator= (const CharType* rhs)
 template <typename CharType>
 String<CharType>& String<CharType>::operator= (CharType c)
 {
-    MemArrayFree(m_Buffer);
+    SHIP_FREE_EX(m_pAllocator, m_Buffer);
 
     m_NumChars = 1;
     m_Capacity = 2;
 
-    m_Buffer = new CharType[m_Capacity];
+    size_t requiredSize = sizeof(CharType) * m_Capacity;
+    m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+
     m_Buffer[0] = c;
     m_Buffer[1] = '\0';
 
@@ -159,10 +192,12 @@ void String<CharType>::operator+= (const String<CharType>& rhs)
     {
         m_Capacity = newSize + 1;
 
-        CharType* newBuffer = new CharType[m_Capacity];
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        CharType* newBuffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+
         memcpy(newBuffer, m_Buffer, m_NumChars);
 
-        MemArrayFree(m_Buffer);
+        SHIP_FREE_EX(m_pAllocator, m_Buffer);
         m_Buffer = newBuffer;
     }
 
@@ -184,10 +219,12 @@ void String<CharType>::operator+= (const CharType* rhs)
     {
         m_Capacity = newSize + 1;
 
-        CharType* newBuffer = new CharType[m_Capacity];
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        CharType* newBuffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+
         memcpy(newBuffer, m_Buffer, m_NumChars);
 
-        MemArrayFree(m_Buffer);
+        SHIP_FREE_EX(m_pAllocator, m_Buffer);
         m_Buffer = newBuffer;
     }
 
@@ -207,10 +244,12 @@ void String<CharType>::operator+= (CharType c)
     {
         m_Capacity = newSize + 1;
 
-        CharType* newBuffer = new CharType[m_Capacity];
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        CharType* newBuffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+
         memcpy(newBuffer, m_Buffer, m_NumChars);
 
-        MemArrayFree(m_Buffer);
+        SHIP_FREE_EX(m_pAllocator, m_Buffer);
         m_Buffer = newBuffer;
     }
 
@@ -334,12 +373,14 @@ String<CharType> operator+ (CharType c, const String<CharType>& rhs)
 template <typename CharType>
 void String<CharType>::Assign(const CharType* sz, size_t numChars)
 {
-    MemArrayFree(m_Buffer);
+    SHIP_FREE_EX(m_pAllocator, m_Buffer);
 
     m_NumChars = numChars;
     m_Capacity = m_NumChars + 1;
 
-    m_Buffer = new CharType[m_Capacity];
+    size_t requiredSize = sizeof(CharType) * m_Capacity;
+    m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+
     memcpy(m_Buffer, sz, m_NumChars);
 
     m_Buffer[m_NumChars] = '\0';
@@ -360,10 +401,12 @@ void String<CharType>::Append(const CharType* sz, size_t numChars)
     {
         m_Capacity = newSize + 1;
 
-        CharType* newBuffer = new CharType[m_Capacity];
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        CharType* newBuffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+
         memcpy(newBuffer, m_Buffer, m_NumChars);
 
-        MemArrayFree(m_Buffer);
+        SHIP_FREE_EX(m_pAllocator, m_Buffer);
         m_Buffer = newBuffer;
     }
 
@@ -406,7 +449,8 @@ void String<CharType>::Insert(size_t pos, const String<CharType>& str)
     {
         m_Capacity = newSize + 1;
 
-        CharType* newBuffer = new CharType[m_Capacity];
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        CharType* newBuffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
 
         if (pos > 0)
         {
@@ -420,7 +464,7 @@ void String<CharType>::Insert(size_t pos, const String<CharType>& str)
             memcpy(&newBuffer[endInsertIdx], &m_Buffer[pos], numCharsToMove);
         }
 
-        MemArrayFree(m_Buffer);
+        SHIP_FREE_EX(m_pAllocator, m_Buffer);
         m_Buffer = newBuffer;
     }
 
@@ -462,7 +506,8 @@ void String<CharType>::InsertSubstring(size_t pos, const String<CharType>& str, 
     {
         m_Capacity = newSize + 1;
 
-        CharType* newBuffer = new CharType[m_Capacity];
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        CharType* newBuffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
 
         if (pos > 0)
         {
@@ -476,7 +521,7 @@ void String<CharType>::InsertSubstring(size_t pos, const String<CharType>& str, 
             memcpy(&newBuffer[endInsertIdx], &m_Buffer[pos], numCharsToMove);
         }
 
-        MemArrayFree(m_Buffer);
+        SHIP_FREE_EX(m_pAllocator, m_Buffer);
         m_Buffer = newBuffer;
     }
 
@@ -510,7 +555,8 @@ void String<CharType>::Insert(size_t pos, const CharType* str, size_t numChars)
     {
         m_Capacity = newSize + 1;
 
-        CharType* newBuffer = new CharType[m_Capacity];
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        CharType* newBuffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
 
         if (pos > 0)
         {
@@ -524,7 +570,7 @@ void String<CharType>::Insert(size_t pos, const CharType* str, size_t numChars)
             memcpy(&newBuffer[endInsertIdx], &m_Buffer[pos], numCharsToMove);
         }
 
-        MemArrayFree(m_Buffer);
+        SHIP_FREE_EX(m_pAllocator, m_Buffer);
         m_Buffer = newBuffer;
     }
 
@@ -607,11 +653,12 @@ void String<CharType>::Resize(size_t newSize)
         {
             m_Capacity = newSize + 1;
 
-            CharType* newBuffer = new CharType[m_Capacity];
+            size_t requiredSize = sizeof(CharType) * m_Capacity;
+            CharType* newBuffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
 
             memcpy(newBuffer, m_Buffer, m_NumChars);
 
-            MemArrayFree(m_Buffer);
+            SHIP_FREE_EX(m_pAllocator, m_Buffer);
             m_Buffer = newBuffer;
         }
     }
@@ -630,12 +677,13 @@ void String<CharType>::Reserve(size_t newCapacity)
 
     m_Capacity = newCapacity;
 
-    CharType* newBuffer = new CharType[m_Capacity];
+    size_t requiredSize = sizeof(CharType) * m_Capacity;
+    CharType* newBuffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
     
     size_t numCharsToCopy = MIN(newCapacity - 1, m_NumChars);
     memcpy(newBuffer, m_Buffer, numCharsToCopy);
 
-    MemArrayFree(m_Buffer);
+    SHIP_FREE_EX(m_pAllocator, m_Buffer);
     m_Buffer = newBuffer;
 
     m_NumChars = MIN(m_NumChars, newCapacity - 1);
@@ -646,12 +694,13 @@ void String<CharType>::Reserve(size_t newCapacity)
 template <typename CharType>
 void String<CharType>::Clear()
 {
-    MemArrayFree(m_Buffer);
+    SHIP_FREE_EX(m_pAllocator, m_Buffer);
     
     m_NumChars = 0;
-    m_Capacity = 1;
+    m_Capacity = DefaultStringCapacity;
     
-    m_Buffer = new CharType[m_Capacity];
+    size_t requiredSize = sizeof(CharType) * m_Capacity;
+    m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
 
     m_Buffer[m_NumChars] = '\0';
 }

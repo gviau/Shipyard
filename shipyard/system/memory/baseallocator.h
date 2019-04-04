@@ -123,7 +123,7 @@ namespace
 
         for (size_t i = 0; i < length; i++)
         {
-            new (&pArray)T;
+            new(pArray + i)T;
         }
 
         return pArray;

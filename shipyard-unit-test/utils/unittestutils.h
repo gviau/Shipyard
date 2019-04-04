@@ -82,4 +82,27 @@ namespace Shipyard
 
         void* m_pHeap;
     };
+
+    struct ScoppedBuffer
+    {
+        ScoppedBuffer(size_t size)
+        {
+            pInternalBuffer = malloc(size);
+            pBuffer = pInternalBuffer;
+        }
+
+        ScoppedBuffer(size_t size, size_t alignment)
+        {
+            pInternalBuffer = malloc(size);
+            pBuffer = reinterpret_cast<void*>(Shipyard::AlignAddress(size_t(pInternalBuffer), alignment));
+        }
+
+        ~ScoppedBuffer()
+        {
+            free(pInternalBuffer);
+        }
+
+        void* pBuffer = nullptr;
+        void* pInternalBuffer = nullptr;
+    };
 }

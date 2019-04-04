@@ -1,7 +1,6 @@
 #include <catch.hpp>
 
-#include <system/memory/fixedheapallocator.h>
-#include <system/memory/poolallocator.h>
+#include <utils/unittestutils.h>
 
 namespace
 {
@@ -17,29 +16,6 @@ namespace
                  (start2 <= start1 && end2 <= start1) ||
                  (start2 >= end1 && end2 >= end1) );
     }
-
-    struct ScoppedBuffer
-    {
-        ScoppedBuffer(size_t size)
-        {
-            pInternalBuffer = malloc(size);
-            pBuffer = pInternalBuffer;
-        }
-
-        ScoppedBuffer(size_t size, size_t alignment)
-        {
-            pInternalBuffer = malloc(size);
-            pBuffer = reinterpret_cast<void*>(Shipyard::AlignAddress(size_t(pInternalBuffer), alignment));
-        }
-
-        ~ScoppedBuffer()
-        {
-            free(pInternalBuffer);
-        }
-
-        void* pBuffer = nullptr;
-        void* pInternalBuffer = nullptr;
-    };
 
     size_t g_TestObjectCount = 0;
 
@@ -77,7 +53,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
     SECTION("creating allocator")
     {
         const size_t heapSize = 64;
-        ScoppedBuffer scoppedBuffer(heapSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
     }
@@ -86,7 +62,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
     {
         const size_t allocSize = 4;
         const size_t heapSize = minHeapSize + allocSize;
-        ScoppedBuffer scoppedBuffer(heapSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
@@ -114,7 +90,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         const size_t allocSize = 4;
         const size_t alignment = 16;
         const size_t heapSize = minHeapSize + allocSize + alignment;
-        ScoppedBuffer scoppedBuffer(heapSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
@@ -140,7 +116,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
     {
         const size_t allocSize = 4;
         const size_t heapSize = (minHeapSize + allocSize) * 2;
-        ScoppedBuffer scoppedBuffer(heapSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
@@ -184,7 +160,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         const size_t allocSize = 4;
         const size_t alignment = 16;
         const size_t heapSize = (minHeapSize + allocSize + alignment) * 2;
-        ScoppedBuffer scoppedBuffer(heapSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
@@ -227,7 +203,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
     {
         const size_t allocSize = 4;
         const size_t heapSize = (minHeapSize + allocSize) * 2;
-        ScoppedBuffer scoppedBuffer(heapSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
@@ -273,7 +249,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
     {
         const size_t allocSize = 4;
         const size_t heapSize = (minHeapSize + allocSize) * 2;
-        ScoppedBuffer scoppedBuffer(heapSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
@@ -316,7 +292,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
     {
         const size_t allocSize = 4;
         const size_t heapSize = (minHeapSize + allocSize) * 2;
-        ScoppedBuffer scoppedBuffer(heapSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
@@ -363,7 +339,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         const size_t allocSize1 = 4;
         const size_t allocSize2 = 12;
         const size_t heapSize = minHeapSize + minHeapSize + allocSize1 + allocSize2;
-        ScoppedBuffer scoppedBuffer(heapSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
@@ -407,7 +383,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         const size_t allocSize1 = 4;
         const size_t allocSize2 = 12;
         const size_t heapSize = minHeapSize + minHeapSize + allocSize1 + allocSize2;
-        ScoppedBuffer scoppedBuffer(heapSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
@@ -454,7 +430,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         const size_t allocSize1 = 4;
         const size_t allocSize2 = 12;
         const size_t heapSize = minHeapSize + minHeapSize + allocSize1 + allocSize2;
-        ScoppedBuffer scoppedBuffer(heapSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
@@ -498,7 +474,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         const size_t allocSize1 = 4;
         const size_t allocSize2 = 12;
         const size_t heapSize = minHeapSize + minHeapSize + allocSize1 + allocSize2;
-        ScoppedBuffer scoppedBuffer(heapSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
@@ -546,7 +522,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         const size_t allocSize2 = 12;
         const size_t alignment = 32;
         const size_t heapSize = minHeapSize + minHeapSize + allocSize1 + allocSize2 + alignment + alignment;
-        ScoppedBuffer scoppedBuffer(heapSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
@@ -593,7 +569,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         const size_t allocSize2 = 12;
         const size_t alignment = 32;
         const size_t heapSize = minHeapSize + minHeapSize + allocSize1 + allocSize2 + alignment + alignment;
-        ScoppedBuffer scoppedBuffer(heapSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
@@ -639,7 +615,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
     SECTION("three allocations")
     {
         const size_t heapSize = (minHeapSize + 32) * 3;
-        ScoppedBuffer scoppedBuffer(heapSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
@@ -728,7 +704,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
     SECTION("four allocations")
     {
         const size_t heapSize = (minHeapSize + 32) * 4;
-        ScoppedBuffer scoppedBuffer(heapSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
@@ -866,7 +842,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
     {
         const size_t arrayLength = 10;
         const size_t heapSize = (minHeapSize + 64 + sizeof(TestObject) * arrayLength) * 4;
-        ScoppedBuffer scoppedBuffer(heapSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
@@ -967,7 +943,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
     SECTION("creating allocator")
     {
         const size_t heapSize = 64;
-        ScoppedBuffer scoppedBuffer(heapSize, minChunkSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize, minChunkSize);
 
         poolAllocator.Create(scoppedBuffer.pBuffer, 1, minChunkSize);
     }
@@ -976,7 +952,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
     {
         const size_t chunkSize = minChunkSize;
         const size_t heapSize = chunkSize * 2;
-        ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
 
         poolAllocator.Create(scoppedBuffer.pBuffer, 1, chunkSize);
 
@@ -1004,7 +980,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
         const size_t alignment = 16;
         const size_t chunkSize = 8;
         const size_t heapSize = alignment * 2 + chunkSize;
-        ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
 
         poolAllocator.Create(scoppedBuffer.pBuffer, 4, chunkSize);
 
@@ -1030,7 +1006,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
     {
         const size_t chunkSize = minChunkSize;
         const size_t heapSize = chunkSize * 2 + chunkSize;
-        ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
 
         poolAllocator.Create(scoppedBuffer.pBuffer, 2, chunkSize);
 
@@ -1074,7 +1050,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
         const size_t chunkSize = minChunkSize;
         const size_t alignment = 16;
         const size_t heapSize = alignment * 4 + chunkSize;
-        ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
 
         poolAllocator.Create(scoppedBuffer.pBuffer, 8, chunkSize);
 
@@ -1117,7 +1093,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
     {
         const size_t chunkSize = 32;
         const size_t heapSize = chunkSize * 3 + chunkSize;
-        ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
 
         poolAllocator.Create(scoppedBuffer.pBuffer, 3, chunkSize);
 
@@ -1197,7 +1173,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
     {
         const size_t chunkSize = 16;
         const size_t heapSize = 16 * 4 + chunkSize;
-        ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
 
         poolAllocator.Create(scoppedBuffer.pBuffer, 4, chunkSize);
 
@@ -1314,7 +1290,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
         const size_t sizeForArraySizeHeader = sizeof(size_t) * 2;
 
         const size_t heapSize = (chunkSize * arrayLength + sizeForArraySizeHeader + 32) * 4 + chunkSize;
-        ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize, chunkSize);
 
         const size_t numChunks = heapSize / chunkSize;
 

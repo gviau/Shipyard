@@ -148,7 +148,7 @@ namespace Shipyard
     };
 
     // This array can hold a maximum of 16383 elements.
-    template <typename T>
+    template <typename T, size_t alignment = 1>
     class Array : public ArrayIterator<T>
     {
     protected:
@@ -158,17 +158,29 @@ namespace Shipyard
         };
 
     public:
-        Array()
-            : m_Array(nullptr)
+        Array(BaseAllocator* pAllocator = nullptr)
+            : m_pAllocator(pAllocator)
+            , m_Array(nullptr)
             , m_ArraySizeAndCapacity(0)
         {
+            if (pAllocator == nullptr)
+            {
+                m_pAllocator = &GlobalAllocator::GetInstance();
+            }
+
             Reserve(4);
         }
 
-        Array(uint32_t initialCapacity)
-            : m_Array(nullptr)
+        Array(uint32_t initialCapacity, BaseAllocator* pAllocator = nullptr)
+            : m_pAllocator(pAllocator)
+            , m_Array(nullptr)
             , m_ArraySizeAndCapacity(0)
         {
+            if (pAllocator == nullptr)
+            {
+                m_pAllocator = &GlobalAllocator::GetInstance();
+            }
+
             if (initialCapacity > 0)
             {
                 Reserve(initialCapacity);
@@ -181,7 +193,8 @@ namespace Shipyard
         }
 
         Array(const Array& src)
-            : m_Array(nullptr)
+            : m_pAllocator(src.m_pAllocator)
+            , m_Array(nullptr)
             , m_ArraySizeAndCapacity(0)
         {
             Reserve(src.Capacity());
@@ -201,6 +214,8 @@ namespace Shipyard
             if (this != &rhs)
             {
                 Clear();
+
+                m_pAllocator = rhs.m_pAllocator;
 
                 Reserve(rhs.Capacity());
 
@@ -350,7 +365,7 @@ namespace Shipyard
         {
             if ((m_ArraySizeAndCapacity & BORROWED_MEMORY_FLAG) == 0)
             {
-                MemArrayFree(m_Array);
+                SHIP_FREE_EX(m_pAllocator, m_Array);
             }
 
             m_Array = nullptr;
@@ -400,7 +415,9 @@ namespace Shipyard
                 return;
             }
 
-            T* newArray = MemArrayAlloc(T, newCapacity);
+            size_t requiredSize = sizeof(T) * newCapacity;
+
+            T* newArray = reinterpret_cast<T*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, alignment));
 
             uint32_t currentSize = Size();
 
@@ -411,7 +428,7 @@ namespace Shipyard
 
             if ((m_ArraySizeAndCapacity & BORROWED_MEMORY_FLAG) == 0)
             {
-                MemArrayFree(m_Array);
+                SHIP_FREE_EX(m_pAllocator, m_Array);
             }
 
             m_Array = newArray;
@@ -494,7 +511,18 @@ namespace Shipyard
             m_ArraySizeAndCapacity |= BORROWED_MEMORY_FLAG;
         }
 
+        void SetAllocator(BaseAllocator* pAllocator)
+        {
+            if (pAllocator == m_pAllocator)
+            {
+                return;
+            }
+
+
+        }
+
     protected:
+        BaseAllocator* m_pAllocator;
         T* m_Array;
         uint32_t m_ArraySizeAndCapacity;
 
@@ -529,12 +557,12 @@ namespace Shipyard
     // Instead:
     //
     // InplaceArray<ArrayType, 100> myArray;
-    template <typename T, uint32_t inplaceSize>
-    class InplaceArray : public Array<T>
+    template <typename T, uint32_t inplaceSize, size_t alignment = 1>
+    class InplaceArray : public Array<T, alignment>
     {
     public:
-        InplaceArray()
-            : Array(0)
+        InplaceArray(BaseAllocator* pAllocator = nullptr)
+            : Array(0, pAllocator)
         {
             this->SetUserPointer(m_StaticArray, inplaceSize, 0);
         }
@@ -544,23 +572,35 @@ namespace Shipyard
     };
 
     // Array of number of elements larger than 16383, up to 4294967295 elements (2 ** 32 - 1)
-    template <typename T>
+    template <typename T, size_t alignment = 1>
     class BigArray : public ArrayIterator<T>
     {
     public:
-        BigArray()
-            : m_Array(nullptr)
+        BigArray(BaseAllocator* pAllocator = nullptr)
+            : m_pAllocator(pAllocator)
+            , m_Array(nullptr)
             , m_Size(0)
             , m_Capacity(0)
         {
+            if (pAllocator == nullptr)
+            {
+                m_pAllocator = &GlobalAllocator::GetInstance();
+            }
+
             Reserve(4);
         }
 
-        BigArray(uint32_t initialCapacity)
-            : m_Array(nullptr)
+        BigArray(uint32_t initialCapacity, BaseAllocator* pAllocator = nullptr)
+            : m_pAllocator(pAllocator)
+            , m_Array(nullptr)
             , m_Size(0)
             , m_Capacity(0)
         {
+            if (pAllocator == nullptr)
+            {
+                m_pAllocator = &GlobalAllocator::GetInstance();
+            }
+
             if (initialCapacity > 0)
             {
                 Reserve(initialCapacity);
@@ -573,7 +613,8 @@ namespace Shipyard
         }
 
         BigArray(const BigArray& src)
-            : m_Array(nullptr)
+            : m_pAllocator(src.m_pAllocator)
+            , m_Array(nullptr)
             , m_Size(0)
             , m_Capacity(0)
         {
@@ -592,6 +633,8 @@ namespace Shipyard
             if (this != &rhs)
             {
                 Clear();
+
+                m_pAllocator = rhs.m_pAllocator;
 
                 Reserve(rhs.m_Capacity);
 
@@ -726,7 +769,7 @@ namespace Shipyard
 
         void Clear()
         {
-            MemArrayFree(m_Array);
+            SHIP_FREE_EX(m_pAllocator, m_Array);
 
             m_Array = nullptr;
             m_Size = 0;
@@ -773,14 +816,16 @@ namespace Shipyard
                 return;
             }
 
-            T* newArray = MemArrayAlloc(T, newCapacity);
+            size_t requiredSize = sizeof(T) * newCapacity;
+
+            T* newArray = reinterpret_cast<T*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, alignment));
 
             for (uint32_t i = 0; i < m_Size; i++)
             {
                 newArray[i] = m_Array[i];
             }
 
-            MemArrayFree(m_Array);
+            SHIP_FREE_EX(m_pAllocator, m_Array);
 
             m_Array = newArray;
 
@@ -839,6 +884,7 @@ namespace Shipyard
         }
 
     protected:
+        BaseAllocator* m_pAllocator;
         T* m_Array;
         uint32_t m_Size;
         uint32_t m_Capacity;

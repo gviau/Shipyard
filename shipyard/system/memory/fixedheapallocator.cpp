@@ -96,6 +96,8 @@ void* FixedHeapAllocator::Allocate(size_t size, size_t alignment
     SHIP_ASSERT_MSG(alignment > 0, "FixedHeapAllocator::Allocate --> alignment cannot be 0");
     SHIP_ASSERT_MSG( ( ((alignment - 1) & alignment) == 0 ), "FixedHeapAllocator::Allocate --> alignment %zu is not a power-of-2", alignment);
 
+    std::lock_guard<std::mutex> lock(m_Lock);
+
     if (m_pFirstFreeMemoryBlock == nullptr)
     {
         return nullptr;
@@ -257,6 +259,8 @@ void FixedHeapAllocator::Deallocate(void* memory)
     {
         return;
     }
+
+    std::lock_guard<std::mutex> lock(m_Lock);
 
     SHIP_ASSERT_MSG(size_t(m_pHeap) <= size_t(memory) && (size_t(m_pHeap) + size_t(m_HeapSize)) >= size_t(memory), "FixedHeapAllocator::Deallocate --> Memory address %p was not allocated from allocator %p", memory, this);
 

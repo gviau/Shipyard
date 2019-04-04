@@ -2,6 +2,8 @@
 
 #include <system/memory/baseallocator.h>
 
+#include <mutex>
+
 namespace Shipyard
 {
     // Use this class to allocate fixed sized chunk of memory.
@@ -50,6 +52,8 @@ namespace Shipyard
         FreeChunkHeader* m_pFirstFreeChunk;
         size_t m_ChunkSize;
         size_t m_NumChunks;
+
+        std::mutex m_Lock;
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         struct MemoryInfo

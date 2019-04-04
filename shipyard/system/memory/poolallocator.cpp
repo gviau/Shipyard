@@ -103,6 +103,8 @@ void* PoolAllocator::Allocate(size_t size, size_t alignment
     SHIP_ASSERT_MSG(alignment > 0, "PoolAllocator::Allocate --> alignment cannot be 0");
     SHIP_ASSERT_MSG((((alignment - 1) & alignment) == 0), "PoolAllocator::Allocate --> alignment %zu is not a power-of-2", alignment);
 
+    std::lock_guard<std::mutex> lock(m_Lock);
+
     if (m_pFirstFreeChunk == nullptr)
     {
         return nullptr;
@@ -155,6 +157,8 @@ void* PoolAllocator::Allocate(size_t size, size_t alignment
 
 void PoolAllocator::Deallocate(void* memory)
 {
+    std::lock_guard<std::mutex> lock(m_Lock);
+
     FreeChunkHeader* pNewFreeChunk = reinterpret_cast<FreeChunkHeader*>(memory);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_MEMORY_FILL

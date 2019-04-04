@@ -2,6 +2,8 @@
 
 #include <system/memory/baseallocator.h>
 
+#include <mutex>
+
 namespace Shipyard
 {
     // Use this class to allocate variably sized chunk of memory from a fixed heap.
@@ -83,6 +85,8 @@ namespace Shipyard
 
     private:
         FreeMemoryBlock* m_pFirstFreeMemoryBlock;
+
+        std::mutex m_Lock;
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         MemoryAllocationHeader* m_pAllocatedBlockHead;

@@ -17,7 +17,7 @@ GlobalAllocator::GlobalAllocator()
 
 GlobalAllocator::~GlobalAllocator()
 {
-
+    Destroy();
 }
 
 bool GlobalAllocator::Create(AllocatorInitEntry* pInitEntries, uint32_t numAllocators)
@@ -33,16 +33,18 @@ bool GlobalAllocator::Create(AllocatorInitEntry* pInitEntries, uint32_t numAlloc
 
         SHIP_ASSERT(allocatorInitEntry.pAllocator != nullptr);
 
-        SHIP_ASSERT_MSG(lastSize < allocatorInitEntry.maxAllocationSize, "GlobalAllocator::Create --> Allocators are assumed to be in increasing order");
+        bool lastAllocator = (i == (numAllocators - 1));
 
-        lastSize = allocatorInitEntry.maxAllocationSize;
-
-        if (i == (numAllocators - 1))
+        if (lastAllocator)
         {
             m_MaxAllocationSizes[i] = size_t(-1);
         }
         else
         {
+            SHIP_ASSERT_MSG(lastSize < allocatorInitEntry.maxAllocationSize, "GlobalAllocator::Create --> Allocators are assumed to be in increasing order");
+
+            lastSize = allocatorInitEntry.maxAllocationSize;
+
             m_MaxAllocationSizes[i] = allocatorInitEntry.maxAllocationSize;
         }
 
@@ -85,6 +87,8 @@ void* GlobalAllocator::Allocate(size_t size, size_t alignment
     SHIP_ASSERT_MSG(m_Initialized, "The GlobalAllocator needs to be initialized before using it for allocations!");
 #endif // #ifdef SHIP_DEBUG
 
+    std::lock_guard<std::mutex> lock(m_Lock);
+
     uint32_t allocatorIndexToUse = 0;
 
     for (; allocatorIndexToUse < m_NumAllocators; allocatorIndexToUse++)
@@ -116,9 +120,16 @@ void* GlobalAllocator::Allocate(size_t size, size_t alignment
 
 void GlobalAllocator::Deallocate(void* memory)
 {
+    if (memory == nullptr)
+    {
+        return;
+    }
+
 #ifdef SHIP_DEBUG
     SHIP_ASSERT_MSG(m_Initialized, "The GlobalAllocator needs to be initialized before using it for freeing memory!");
 #endif // #ifdef SHIP_DEBUG
+
+    std::lock_guard<std::mutex> lock(m_Lock);
 
     size_t memoryAddress = size_t(memory);
 

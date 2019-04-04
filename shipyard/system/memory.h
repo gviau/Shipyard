@@ -2,6 +2,8 @@
 
 #include <system/memory/baseallocator.h>
 
+#include <mutex>
+
 namespace Shipyard
 {
     class SHIPYARD_API GlobalAllocator : public BaseAllocator
@@ -64,6 +66,8 @@ namespace Shipyard
         size_t m_MaxAllocationSizes[ms_MaxNumAllocators];
         AllocatorAddressRange m_pAllocators[ms_MaxNumAllocators];
         uint32_t m_NumAllocators;
+
+        std::mutex m_Lock;
 
 #ifdef SHIP_DEBUG
         // Used to assert when we forget to initialize this guy before usage.

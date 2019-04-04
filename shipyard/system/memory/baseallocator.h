@@ -8,7 +8,7 @@
 
 #ifndef SHIP_OPTIMIZED
 
-// This define allows loogging of some information about allocation and deallocation.
+// This define allows logging of some information about allocation and deallocation.
 #define SHIP_ALLOCATOR_DEBUG_INFO
 
 // This define enables memsetting regions of memory with pre-defined values for debugging.
@@ -62,7 +62,7 @@ namespace Shipyard
 namespace
 {
     template <typename T>
-    T* NewArray(Shipyard::BaseAllocator& allocator, size_t length, size_t alignment
+    T* NewArray(Shipyard::BaseAllocator* pAllocator, size_t length, size_t alignment
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         , const char* pAllocationFilename
@@ -82,7 +82,7 @@ namespace
         // Alignment is guaranteed to be respected since we allocated 'alignment' extra bytes, so we'll be able
         // to forward align the user pointer.
         constexpr size_t noAlignment = 1;
-        void* pMem = allocator.Allocate(requiredSize, noAlignment
+        void* pMem = pAllocator->Allocate(requiredSize, noAlignment
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             , pAllocationFilename
             , allocationLineNumber
@@ -136,7 +136,7 @@ namespace
     }
 
     template <typename T>
-    void DeleteArray(Shipyard::BaseAllocator& allocator, T* pArray)
+    void DeleteArray(Shipyard::BaseAllocator* pAllocator, T* pArray)
     {
         // The small header before the user pointer contains the number of items that were created and the address of the user pointer
         // that we need to deallocate
@@ -151,7 +151,7 @@ namespace
             pArray[i].~T();
         }
 
-        allocator.Deallocate(reinterpret_cast<void*>(addressOfUserPointer));
+        pAllocator->Deallocate(reinterpret_cast<void*>(addressOfUserPointer));
     }
 }
 
@@ -159,26 +159,26 @@ namespace Shipyard
 {
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-#define SHIP_ALLOC(allocator, size, alignment) allocator.Allocate(size, alignment, __FILE__, __LINE__)
+#define SHIP_ALLOC_EX(pAllocator, size, alignment) (pAllocator)->Allocate(size, alignment, __FILE__, __LINE__)
 
-#define SHIP_NEW(allocator, classX, alignment) new(allocator.Allocate(sizeof(classX), alignment, __FILE__, __LINE__))classX
+#define SHIP_NEW_EX(pAllocator, classX, alignment) new((pAllocator)->Allocate(sizeof(classX), alignment, __FILE__, __LINE__))classX
 
-#define SHIP_NEW_ARRAY(allocator, classX, length, alignment) NewArray<classX>(allocator, length, alignment, __FILE__, __LINE__)
+#define SHIP_NEW_ARRAY_EX(pAllocator, classX, length, alignment) NewArray<classX>(pAllocator, length, alignment, __FILE__, __LINE__)
 
 #else
 
-#define SHIP_ALLOC(allocator, size, alignment) allocator.Allocate(size, alignment)
+#define SHIP_ALLOC_EX(pAllocator, size, alignment) (pAllocator)->Allocate(size, alignment)
 
-#define SHIP_NEW(allocator, classX, alignment) new(allocator.Allocate(sizeof(classX), alignment))classX
+#define SHIP_NEW_EX(pAllocator, classX, alignment) new((pAllocator)->Allocate(sizeof(classX), alignment))classX
 
-#define SHIP_NEW_ARRAY(allocator, classX, length, alignment) NewArray<classX>(allocator, length, alignment)
+#define SHIP_NEW_ARRAY_EX(pAllocator, classX, length, alignment) NewArray<classX>(pAllocator, length, alignment)
 
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-#define SHIP_FREE(allocator, memory) if (memory != nullptr) allocator.Deallocate(memory)
+#define SHIP_FREE_EX(pAllocator, memory) if (memory != nullptr) (pAllocator)->Deallocate(memory)
 
-#define SHIP_DELETE(allocator, memory) if (memory != nullptr) { DestructorCall(memory); allocator.Deallocate(memory); }
+#define SHIP_DELETE_EX(pAllocator, memory) if (memory != nullptr) { DestructorCall(memory); (pAllocator)->Deallocate(memory); }
 
-#define SHIP_DELETE_ARRAY(allocator, memory) if (memory != nullptr) DeleteArray(allocator, memory)
+#define SHIP_DELETE_ARRAY_EX(pAllocator, memory) if (memory != nullptr) DeleteArray(pAllocator, memory)
 
 }

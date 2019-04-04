@@ -165,6 +165,8 @@ void ShaderCompiler::ShaderCompilerThreadFunction()
 {
     while (m_RunShaderCompilerThread)
     {
+        Sleep(100);
+
         uint32_t shaderFamilyToCompileIndex = 0;
 
         if (m_ShaderKeysToCompile.Size() > 0 && m_CurrentShaderKeyBeingCompiled.GetShaderFamily() == ShaderFamily::Count)

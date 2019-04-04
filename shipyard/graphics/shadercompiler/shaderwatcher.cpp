@@ -302,6 +302,8 @@ void ShaderWatcher::ShaderWatcherThreadFunction()
 {
     while (m_RunShaderWatcherThread)
     {
+        Sleep(100);
+
         GetModifiedFilesInDirectory(m_ShaderDirectoryName, m_WatchedShaderFiles, m_ShaderWatcherLock);
     }
 }

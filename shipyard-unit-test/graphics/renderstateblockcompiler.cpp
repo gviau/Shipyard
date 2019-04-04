@@ -1,4 +1,4 @@
-#include <catch.hpp>
+#include <extern/catch/catch.hpp>
 
 #include <graphics/shadercompiler/renderstateblockcompiler.h>
 

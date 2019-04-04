@@ -30,6 +30,8 @@ namespace Shipyard
         ShaderCompiler();
         virtual ~ShaderCompiler();
 
+        void StopThread();
+
         void AddCompilationRequestForShaderKey(ShaderKey shaderKey);
 
         // Returns false if the ShaderKey isn't compiled yet, in which case the blob returned are from the error ShaderKey that corresponds to the

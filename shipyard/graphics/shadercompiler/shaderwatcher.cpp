@@ -23,8 +23,17 @@ ShaderWatcher::ShaderWatcher()
 
 ShaderWatcher::~ShaderWatcher()
 {
+    StopThread();
+}
+
+void ShaderWatcher::StopThread()
+{
     m_RunShaderWatcherThread = false;
-    m_ShaderWatcherThread.join();
+
+    if (m_ShaderWatcherThread.native_handle() != nullptr)
+    {
+        m_ShaderWatcherThread.join();
+    }
 }
 
 uint64_t ShaderWatcher::GetTimestampForShaderKey(const ShaderKey& shaderKey) const
@@ -69,7 +78,8 @@ void GetIncludeDirectives(const StringA& fileContent, Array<StringA>& includeDir
     size_t findPosition = 0;
 
     // For now, it is assumed that all #include directives are one per line, never in a comment, and with a single whitespace between the #include and the file name
-    static const StringA searchString = "#include ";
+    static const char* searchString = "#include ";
+    size_t searchStringLength = strlen(searchString);
 
     while (true)
     {
@@ -82,7 +92,7 @@ void GetIncludeDirectives(const StringA& fileContent, Array<StringA>& includeDir
         StringA includeFilename = "";
         char currentChar = '\0';
 
-        currentOffset = findPosition + searchString.Size();
+        currentOffset = findPosition + searchStringLength;
 
         bool startCollectingFilename = false;
 

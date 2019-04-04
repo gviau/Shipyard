@@ -67,8 +67,17 @@ ShaderCompiler::ShaderCompiler()
 
 ShaderCompiler::~ShaderCompiler()
 {
+    StopThread();
+}
+
+void ShaderCompiler::StopThread()
+{
     m_RunShaderCompilerThread = false;
-    m_ShaderCompilerThread.join();
+
+    if (m_ShaderCompilerThread.native_handle() != nullptr)
+    {
+        m_ShaderCompilerThread.join();
+    }
 
     for (CompiledShaderKeyEntry& compiledShaderKeyEntry : m_CompiledShaderKeyEntries)
     {
@@ -428,7 +437,7 @@ void ShaderCompiler::CompileShaderKey(
 
 ID3D10Blob* ShaderCompiler::CompileVertexShaderForShaderKey(const StringT& sourceFilename, const StringA& source, D3D_SHADER_MACRO* shaderOptionDefines)
 {
-    static const StringA vertexShaderEntryPoint = "VS_Main";
+    static const char* vertexShaderEntryPoint = "VS_Main";
 
     if (source.FindIndexOfFirst(vertexShaderEntryPoint, 0) == StringA::InvalidIndex)
     {
@@ -440,7 +449,7 @@ ID3D10Blob* ShaderCompiler::CompileVertexShaderForShaderKey(const StringT& sourc
 
 ID3D10Blob* ShaderCompiler::CompilePixelShaderForShaderKey(const StringT& sourceFilename, const StringA& source, D3D_SHADER_MACRO* shaderOptionDefines)
 {
-    static const StringA pixelShaderEntryPoint = "PS_Main";
+    static const char* pixelShaderEntryPoint = "PS_Main";
 
     if (source.FindIndexOfFirst(pixelShaderEntryPoint, 0) == StringA::InvalidIndex)
     {
@@ -452,7 +461,7 @@ ID3D10Blob* ShaderCompiler::CompilePixelShaderForShaderKey(const StringT& source
 
 ID3D10Blob* ShaderCompiler::CompileComputeShaderForShaderKey(const StringT& sourceFilename, const StringA& source, D3D_SHADER_MACRO* shaderOptionDefines)
 {
-    static const StringA computeShaderEntryPoint = "CS_Main";
+    static const char* computeShaderEntryPoint = "CS_Main";
 
     if (source.FindIndexOfFirst(computeShaderEntryPoint, 0) == StringA::InvalidIndex)
     {

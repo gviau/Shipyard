@@ -20,6 +20,8 @@ namespace Shipyard
         ShaderWatcher();
         ~ShaderWatcher();
 
+        void StopThread();
+
         uint64_t GetTimestampForShaderKey(const ShaderKey& shaderKey) const;
 
         void SetShaderDirectoryName(const StringT& shaderDirectoryName);

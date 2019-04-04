@@ -76,9 +76,11 @@ bool ShaderDatabase::Load(const StringT& filename)
 
 void ShaderDatabase::Close()
 {
+    m_Filename.Clear();
+
     m_FileHandler.Close();
 
-    m_ShaderEntryKeys.Resize(0);
+    m_ShaderEntryKeys.Clear();
 
     for (ShaderEntrySet& shaderEntrySet : m_ShaderEntrySets)
     {
@@ -89,7 +91,7 @@ void ShaderDatabase::Close()
         SHIP_DELETE(shaderEntrySet.rawGeometryShader);
         SHIP_DELETE(shaderEntrySet.rawComputeShader);
     }
-    m_ShaderEntrySets.Resize(0);
+    m_ShaderEntrySets.Clear();
 }
 
 bool ShaderDatabase::Invalidate()

@@ -1,11 +1,13 @@
 #include <graphics/shaderdatabase.h>
 
+#include <system/memory.h>
+
 namespace Shipyard
 {;
 
 ShaderDatabase::ShaderDatabase()
-    : m_ShaderEntrySets(0)
-    , m_ShaderEntryKeys(0)
+    : m_ShaderEntrySets(uint32_t(0))
+    , m_ShaderEntryKeys(uint32_t(0))
 {
 
 }
@@ -80,12 +82,12 @@ void ShaderDatabase::Close()
 
     for (ShaderEntrySet& shaderEntrySet : m_ShaderEntrySets)
     {
-        MemArrayFree(shaderEntrySet.rawVertexShader);
-        MemArrayFree(shaderEntrySet.rawPixelShader);
-        MemArrayFree(shaderEntrySet.rawHullShader);
-        MemArrayFree(shaderEntrySet.rawDomainShader);
-        MemArrayFree(shaderEntrySet.rawGeometryShader);
-        MemArrayFree(shaderEntrySet.rawComputeShader);
+        SHIP_DELETE(shaderEntrySet.rawVertexShader);
+        SHIP_DELETE(shaderEntrySet.rawPixelShader);
+        SHIP_DELETE(shaderEntrySet.rawHullShader);
+        SHIP_DELETE(shaderEntrySet.rawDomainShader);
+        SHIP_DELETE(shaderEntrySet.rawGeometryShader);
+        SHIP_DELETE(shaderEntrySet.rawComputeShader);
     }
     m_ShaderEntrySets.Resize(0);
 }
@@ -185,12 +187,12 @@ void ShaderDatabase::RemoveShadersForShaderKey(const ShaderKey& shaderKey)
 
     numCharsToRemove += sizeof(ShaderEntryHeader);
 
-    MemArrayFree(shaderEntrySet.rawVertexShader);
-    MemArrayFree(shaderEntrySet.rawPixelShader);
-    MemArrayFree(shaderEntrySet.rawHullShader);
-    MemArrayFree(shaderEntrySet.rawDomainShader);
-    MemArrayFree(shaderEntrySet.rawGeometryShader);
-    MemArrayFree(shaderEntrySet.rawComputeShader);
+    SHIP_DELETE(shaderEntrySet.rawVertexShader);
+    SHIP_DELETE(shaderEntrySet.rawPixelShader);
+    SHIP_DELETE(shaderEntrySet.rawHullShader);
+    SHIP_DELETE(shaderEntrySet.rawDomainShader);
+    SHIP_DELETE(shaderEntrySet.rawGeometryShader);
+    SHIP_DELETE(shaderEntrySet.rawComputeShader);
 
     m_FileHandler.RemoveChars(positionToRemoveInFile, numCharsToRemove);
 
@@ -218,7 +220,7 @@ void StealShaderMemory(uint8_t* sourceRawShader, size_t sourceShaderSize, uint8_
     if (sourceShaderSize > 0)
     {
         destShaderSize = sourceShaderSize;
-        destRawShader = MemArrayAlloc(uint8_t, sourceShaderSize);
+        destRawShader = reinterpret_cast<uint8_t*>(SHIP_ALLOC(sourceShaderSize, 1));
 
         memcpy(destRawShader, sourceRawShader, sourceShaderSize);
     }
@@ -228,7 +230,7 @@ void LoadShaderFromBuffer(uint8_t*& buffer, uint8_t*& rawShader, size_t shaderSi
 {
     if (shaderSize > 0)
     {
-        rawShader = MemArrayAlloc(uint8_t, shaderSize);
+        rawShader = reinterpret_cast<uint8_t*>(SHIP_ALLOC(shaderSize, 1));
 
         memcpy(rawShader, buffer, shaderSize);
 

@@ -90,7 +90,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
-        void* pAlloc = SHIP_ALLOC(fixedHeapAllocator, allocSize, 1);
+        void* pAlloc = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize, 1);
 
         REQUIRE(pAlloc != nullptr);
 
@@ -100,7 +100,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(fixedHeapAllocator, pAlloc);
+        SHIP_FREE_EX(&fixedHeapAllocator, pAlloc);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -118,7 +118,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
-        void* pAlloc = SHIP_ALLOC(fixedHeapAllocator, allocSize, alignment);
+        void* pAlloc = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize, alignment);
 
         REQUIRE(pAlloc != nullptr);
         REQUIRE(Shipyard::IsAddressAligned(size_t(pAlloc), alignment));
@@ -128,7 +128,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated >= allocSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(fixedHeapAllocator, pAlloc);
+        SHIP_FREE_EX(&fixedHeapAllocator, pAlloc);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -144,7 +144,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
-        void* pAlloc1 = SHIP_ALLOC(fixedHeapAllocator, allocSize, 1);
+        void* pAlloc1 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize, 1);
 
         REQUIRE(pAlloc1 != nullptr);
 
@@ -153,7 +153,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        void* pAlloc2 = SHIP_ALLOC(fixedHeapAllocator, allocSize, 1);
+        void* pAlloc2 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize, 1);
 
         REQUIRE(pAlloc2 != nullptr);
 
@@ -164,14 +164,14 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == (allocSize * 2));
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(fixedHeapAllocator, pAlloc1);
+        SHIP_FREE_EX(&fixedHeapAllocator, pAlloc1);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 1);
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(fixedHeapAllocator, pAlloc2);
+        SHIP_FREE_EX(&fixedHeapAllocator, pAlloc2);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -188,7 +188,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
-        void* pAlloc1 = SHIP_ALLOC(fixedHeapAllocator, allocSize, alignment);
+        void* pAlloc1 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize, alignment);
 
         REQUIRE(pAlloc1 != nullptr);
 
@@ -197,7 +197,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated >= allocSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        void* pAlloc2 = SHIP_ALLOC(fixedHeapAllocator, allocSize, alignment);
+        void* pAlloc2 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize, alignment);
 
         REQUIRE(pAlloc2 != nullptr);
 
@@ -208,14 +208,14 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated >= (allocSize * 2));
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(fixedHeapAllocator, pAlloc1);
+        SHIP_FREE_EX(&fixedHeapAllocator, pAlloc1);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 1);
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated >= allocSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(fixedHeapAllocator, pAlloc2);
+        SHIP_FREE_EX(&fixedHeapAllocator, pAlloc2);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -233,7 +233,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
 
         for (uint32_t i = 0; i < 2; i++)
         {
-            void* pAlloc1 = SHIP_ALLOC(fixedHeapAllocator, allocSize, 1);
+            void* pAlloc1 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize, 1);
 
             REQUIRE(pAlloc1 != nullptr);
 
@@ -242,7 +242,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            void* pAlloc2 = SHIP_ALLOC(fixedHeapAllocator, allocSize, 1);
+            void* pAlloc2 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize, 1);
 
             REQUIRE(pAlloc2 != nullptr);
 
@@ -253,14 +253,14 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == (allocSize * 2));
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(fixedHeapAllocator, pAlloc1);
+            SHIP_FREE_EX(&fixedHeapAllocator, pAlloc1);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 1);
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(fixedHeapAllocator, pAlloc2);
+            SHIP_FREE_EX(&fixedHeapAllocator, pAlloc2);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -277,7 +277,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
-        void* pAlloc1 = SHIP_ALLOC(fixedHeapAllocator, allocSize, 1);
+        void* pAlloc1 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize, 1);
 
         REQUIRE(pAlloc1 != nullptr);
 
@@ -286,7 +286,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        void* pAlloc2 = SHIP_ALLOC(fixedHeapAllocator, allocSize, 1);
+        void* pAlloc2 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize, 1);
 
         REQUIRE(pAlloc2 != nullptr);
 
@@ -297,14 +297,14 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == (allocSize * 2));
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(fixedHeapAllocator, pAlloc2);
+        SHIP_FREE_EX(&fixedHeapAllocator, pAlloc2);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 1);
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(fixedHeapAllocator, pAlloc1);
+        SHIP_FREE_EX(&fixedHeapAllocator, pAlloc1);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -322,7 +322,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
 
         for (uint32_t i = 0; i < 2; i++)
         {
-            void* pAlloc1 = SHIP_ALLOC(fixedHeapAllocator, allocSize, 1);
+            void* pAlloc1 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize, 1);
 
             REQUIRE(pAlloc1 != nullptr);
 
@@ -331,7 +331,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            void* pAlloc2 = SHIP_ALLOC(fixedHeapAllocator, allocSize, 1);
+            void* pAlloc2 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize, 1);
 
             REQUIRE(pAlloc2 != nullptr);
 
@@ -342,14 +342,14 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == (allocSize * 2));
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(fixedHeapAllocator, pAlloc2);
+            SHIP_FREE_EX(&fixedHeapAllocator, pAlloc2);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 1);
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(fixedHeapAllocator, pAlloc1);
+            SHIP_FREE_EX(&fixedHeapAllocator, pAlloc1);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -367,7 +367,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
-        void* pAlloc1 = SHIP_ALLOC(fixedHeapAllocator, allocSize1, 1);
+        void* pAlloc1 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize1, 1);
 
         REQUIRE(pAlloc1 != nullptr);
 
@@ -376,7 +376,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize1);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        void* pAlloc2 = SHIP_ALLOC(fixedHeapAllocator, allocSize2, 1);
+        void* pAlloc2 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize2, 1);
 
         REQUIRE(pAlloc2 != nullptr);
 
@@ -387,14 +387,14 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == (allocSize1 + allocSize2));
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(fixedHeapAllocator, pAlloc1);
+        SHIP_FREE_EX(&fixedHeapAllocator, pAlloc1);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 1);
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize2);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(fixedHeapAllocator, pAlloc2);
+        SHIP_FREE_EX(&fixedHeapAllocator, pAlloc2);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -413,7 +413,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
 
         for (uint32_t i = 0; i < 2; i++)
         {
-            void* pAlloc1 = SHIP_ALLOC(fixedHeapAllocator, allocSize1, 1);
+            void* pAlloc1 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize1, 1);
 
             REQUIRE(pAlloc1 != nullptr);
 
@@ -422,7 +422,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize1);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            void* pAlloc2 = SHIP_ALLOC(fixedHeapAllocator, allocSize2, 1);
+            void* pAlloc2 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize2, 1);
 
             REQUIRE(pAlloc2 != nullptr);
 
@@ -433,14 +433,14 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == (allocSize1 + allocSize2));
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(fixedHeapAllocator, pAlloc1);
+            SHIP_FREE_EX(&fixedHeapAllocator, pAlloc1);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 1);
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize2);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(fixedHeapAllocator, pAlloc2);
+            SHIP_FREE_EX(&fixedHeapAllocator, pAlloc2);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -458,7 +458,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
-        void* pAlloc1 = SHIP_ALLOC(fixedHeapAllocator, allocSize1, 1);
+        void* pAlloc1 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize1, 1);
 
         REQUIRE(pAlloc1 != nullptr);
 
@@ -467,7 +467,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize1);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        void* pAlloc2 = SHIP_ALLOC(fixedHeapAllocator, allocSize2, 1);
+        void* pAlloc2 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize2, 1);
 
         REQUIRE(pAlloc2 != nullptr);
 
@@ -478,14 +478,14 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == (allocSize1 + allocSize2));
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(fixedHeapAllocator, pAlloc2);
+        SHIP_FREE_EX(&fixedHeapAllocator, pAlloc2);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 1);
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize1);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(fixedHeapAllocator, pAlloc1);
+        SHIP_FREE_EX(&fixedHeapAllocator, pAlloc1);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -504,7 +504,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
 
         for (uint32_t i = 0; i < 2; i++)
         {
-            void* pAlloc1 = SHIP_ALLOC(fixedHeapAllocator, allocSize1, 1);
+            void* pAlloc1 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize1, 1);
 
             REQUIRE(pAlloc1 != nullptr);
 
@@ -513,7 +513,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize1);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            void* pAlloc2 = SHIP_ALLOC(fixedHeapAllocator, allocSize2, 1);
+            void* pAlloc2 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize2, 1);
 
             REQUIRE(pAlloc2 != nullptr);
 
@@ -524,14 +524,14 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == (allocSize1 + allocSize2));
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(fixedHeapAllocator, pAlloc2);
+            SHIP_FREE_EX(&fixedHeapAllocator, pAlloc2);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 1);
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize1);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(fixedHeapAllocator, pAlloc1);
+            SHIP_FREE_EX(&fixedHeapAllocator, pAlloc1);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -550,7 +550,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
 
         fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
 
-        void* pAlloc1 = SHIP_ALLOC(fixedHeapAllocator, allocSize1, alignment);
+        void* pAlloc1 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize1, alignment);
 
         REQUIRE(pAlloc1 != nullptr);
         REQUIRE(Shipyard::IsAddressAligned(size_t(pAlloc1), alignment));
@@ -560,7 +560,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated >= allocSize1);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        void* pAlloc2 = SHIP_ALLOC(fixedHeapAllocator, allocSize2, alignment);
+        void* pAlloc2 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize2, alignment);
 
         REQUIRE(pAlloc2 != nullptr);
         REQUIRE(Shipyard::IsAddressAligned(size_t(pAlloc2), alignment));
@@ -572,14 +572,14 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated >= (allocSize1 + allocSize2));
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(fixedHeapAllocator, pAlloc1);
+        SHIP_FREE_EX(&fixedHeapAllocator, pAlloc1);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 1);
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated >= allocSize2);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(fixedHeapAllocator, pAlloc2);
+        SHIP_FREE_EX(&fixedHeapAllocator, pAlloc2);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -599,7 +599,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
 
         for (uint32_t i = 0; i < 2; i++)
         {
-            void* pAlloc1 = SHIP_ALLOC(fixedHeapAllocator, allocSize1, alignment);
+            void* pAlloc1 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize1, alignment);
 
             REQUIRE(pAlloc1 != nullptr);
             REQUIRE(Shipyard::IsAddressAligned(size_t(pAlloc1), alignment));
@@ -609,7 +609,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated >= allocSize1);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            void* pAlloc2 = SHIP_ALLOC(fixedHeapAllocator, allocSize2, alignment);
+            void* pAlloc2 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize2, alignment);
 
             REQUIRE(pAlloc2 != nullptr);
             REQUIRE(Shipyard::IsAddressAligned(size_t(pAlloc2), alignment));
@@ -621,14 +621,14 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated >= (allocSize1 + allocSize2));
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(fixedHeapAllocator, pAlloc1);
+            SHIP_FREE_EX(&fixedHeapAllocator, pAlloc1);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 1);
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated >= allocSize2);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(fixedHeapAllocator, pAlloc2);
+            SHIP_FREE_EX(&fixedHeapAllocator, pAlloc2);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -647,7 +647,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
                 uint32_t first, uint32_t second, uint32_t third,
                 uint32_t allocSize1, uint32_t allocSize2, uint32_t allocSize3)
         {
-            void* pAlloc1 = SHIP_ALLOC(fixedHeapAllocator, allocSize1, 1);
+            void* pAlloc1 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize1, 1);
 
             REQUIRE(pAlloc1 != nullptr);
 
@@ -656,7 +656,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize1);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            void* pAlloc2 = SHIP_ALLOC(fixedHeapAllocator, allocSize2, 1);
+            void* pAlloc2 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize2, 1);
 
             REQUIRE(pAlloc2 != nullptr);
 
@@ -667,7 +667,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize1 + allocSize2);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            void* pAlloc3 = SHIP_ALLOC(fixedHeapAllocator, allocSize3, 1);
+            void* pAlloc3 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize3, 1);
 
             REQUIRE(pAlloc3 != nullptr);
 
@@ -682,21 +682,21 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             void* pAllocs[] = { pAlloc1, pAlloc2, pAlloc3 };
             size_t allocSizes[] = { allocSize1, allocSize2, allocSize3 };
 
-            SHIP_FREE(fixedHeapAllocator, pAllocs[first]);
+            SHIP_FREE_EX(&fixedHeapAllocator, pAllocs[first]);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 2);
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSizes[second] + allocSizes[third]);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(fixedHeapAllocator, pAllocs[second]);
+            SHIP_FREE_EX(&fixedHeapAllocator, pAllocs[second]);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 1);
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSizes[third]);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(fixedHeapAllocator, pAllocs[third]);
+            SHIP_FREE_EX(&fixedHeapAllocator, pAllocs[third]);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -736,7 +736,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
                 uint32_t first, uint32_t second, uint32_t third, uint32_t fourth,
                 uint32_t allocSize1, uint32_t allocSize2, uint32_t allocSize3, uint32_t allocSize4)
         {
-            void* pAlloc1 = SHIP_ALLOC(fixedHeapAllocator, allocSize1, 1);
+            void* pAlloc1 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize1, 1);
 
             REQUIRE(pAlloc1 != nullptr);
 
@@ -745,7 +745,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize1);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            void* pAlloc2 = SHIP_ALLOC(fixedHeapAllocator, allocSize2, 1);
+            void* pAlloc2 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize2, 1);
 
             REQUIRE(pAlloc2 != nullptr);
 
@@ -756,7 +756,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize1 + allocSize2);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            void* pAlloc3 = SHIP_ALLOC(fixedHeapAllocator, allocSize3, 1);
+            void* pAlloc3 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize3, 1);
 
             REQUIRE(pAlloc3 != nullptr);
 
@@ -768,7 +768,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSize1 + allocSize2 + allocSize3);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            void* pAlloc4 = SHIP_ALLOC(fixedHeapAllocator, allocSize4, 1);
+            void* pAlloc4 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize4, 1);
 
             REQUIRE(pAlloc4 != nullptr);
 
@@ -784,28 +784,28 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             void* pAllocs[] = { pAlloc1, pAlloc2, pAlloc3, pAlloc4 };
             uint32_t allocSizes[] = { allocSize1, allocSize2, allocSize3, allocSize4 };
 
-            SHIP_FREE(fixedHeapAllocator, pAllocs[first]);
+            SHIP_FREE_EX(&fixedHeapAllocator, pAllocs[first]);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 3);
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSizes[second] + allocSizes[third] + allocSizes[fourth]);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(fixedHeapAllocator, pAllocs[second]);
+            SHIP_FREE_EX(&fixedHeapAllocator, pAllocs[second]);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 2);
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSizes[third] + allocSizes[fourth]);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(fixedHeapAllocator, pAllocs[third]);
+            SHIP_FREE_EX(&fixedHeapAllocator, pAllocs[third]);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 1);
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numUserBytesAllocated == allocSizes[fourth]);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(fixedHeapAllocator, pAllocs[fourth]);
+            SHIP_FREE_EX(&fixedHeapAllocator, pAllocs[fourth]);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -874,32 +874,32 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             uint32_t first, uint32_t second, uint32_t third, uint32_t fourth,
             uint32_t alignment1, uint32_t alignment2, uint32_t alignment3, uint32_t alignment4)
         {
-            TestObject* pAlloc1 = SHIP_NEW_ARRAY(fixedHeapAllocator, TestObject, arrayLength, alignment1);
+            TestObject* pAlloc1 = SHIP_NEW_ARRAY_EX(&fixedHeapAllocator, TestObject, arrayLength, alignment1);
 
             REQUIRE(pAlloc1 != nullptr);
             REQUIRE(g_TestObjectCount == arrayLength);
 
-            TestObject* pAlloc2 = SHIP_NEW_ARRAY(fixedHeapAllocator, TestObject, arrayLength, alignment2);
+            TestObject* pAlloc2 = SHIP_NEW_ARRAY_EX(&fixedHeapAllocator, TestObject, arrayLength, alignment2);
 
             REQUIRE(pAlloc2 != nullptr);
             REQUIRE(g_TestObjectCount == arrayLength * 2);
 
-            TestObject* pAlloc3 = SHIP_NEW_ARRAY(fixedHeapAllocator, TestObject, arrayLength, alignment3);
+            TestObject* pAlloc3 = SHIP_NEW_ARRAY_EX(&fixedHeapAllocator, TestObject, arrayLength, alignment3);
 
             REQUIRE(pAlloc3 != nullptr);
             REQUIRE(g_TestObjectCount == arrayLength * 3);
 
-            TestObject* pAlloc4 = SHIP_NEW_ARRAY(fixedHeapAllocator, TestObject, arrayLength, alignment4);
+            TestObject* pAlloc4 = SHIP_NEW_ARRAY_EX(&fixedHeapAllocator, TestObject, arrayLength, alignment4);
 
             REQUIRE(pAlloc4 != nullptr);
             REQUIRE(g_TestObjectCount == arrayLength * 4);
 
             TestObject* pAllocs[] = { pAlloc1, pAlloc2, pAlloc3, pAlloc4 };
 
-            SHIP_DELETE_ARRAY(fixedHeapAllocator, pAllocs[first]);
-            SHIP_DELETE_ARRAY(fixedHeapAllocator, pAllocs[second]);
-            SHIP_DELETE_ARRAY(fixedHeapAllocator, pAllocs[third]);
-            SHIP_DELETE_ARRAY(fixedHeapAllocator, pAllocs[fourth]);
+            SHIP_DELETE_ARRAY_EX(&fixedHeapAllocator, pAllocs[first]);
+            SHIP_DELETE_ARRAY_EX(&fixedHeapAllocator, pAllocs[second]);
+            SHIP_DELETE_ARRAY_EX(&fixedHeapAllocator, pAllocs[third]);
+            SHIP_DELETE_ARRAY_EX(&fixedHeapAllocator, pAllocs[fourth]);
 
             REQUIRE(g_TestObjectCount == 0);
         };
@@ -980,7 +980,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
 
         poolAllocator.Create(scoppedBuffer.pBuffer, 1, chunkSize);
 
-        void* pAlloc = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+        void* pAlloc = SHIP_ALLOC_EX(&poolAllocator, chunkSize, 1);
 
         REQUIRE(pAlloc != nullptr);
 
@@ -990,7 +990,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
         REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(poolAllocator, pAlloc);
+        SHIP_FREE_EX(&poolAllocator, pAlloc);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -1008,7 +1008,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
 
         poolAllocator.Create(scoppedBuffer.pBuffer, 4, chunkSize);
 
-        void* pAlloc = SHIP_ALLOC(poolAllocator, chunkSize, alignment);
+        void* pAlloc = SHIP_ALLOC_EX(&poolAllocator, chunkSize, alignment);
 
         REQUIRE(pAlloc != nullptr);
         REQUIRE(Shipyard::IsAddressAligned(size_t(pAlloc), alignment));
@@ -1018,7 +1018,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
         REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(poolAllocator, pAlloc);
+        SHIP_FREE_EX(&poolAllocator, pAlloc);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -1034,7 +1034,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
 
         poolAllocator.Create(scoppedBuffer.pBuffer, 2, chunkSize);
 
-        void* pAlloc1 = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+        void* pAlloc1 = SHIP_ALLOC_EX(&poolAllocator, chunkSize, 1);
 
         REQUIRE(pAlloc1 != nullptr);
 
@@ -1043,7 +1043,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
         REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        void* pAlloc2 = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+        void* pAlloc2 = SHIP_ALLOC_EX(&poolAllocator, chunkSize, 1);
 
         REQUIRE(pAlloc2 != nullptr);
 
@@ -1054,14 +1054,14 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
         REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize * 2);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(poolAllocator, pAlloc1);
+        SHIP_FREE_EX(&poolAllocator, pAlloc1);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 1);
         REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(poolAllocator, pAlloc2);
+        SHIP_FREE_EX(&poolAllocator, pAlloc2);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -1078,7 +1078,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
 
         poolAllocator.Create(scoppedBuffer.pBuffer, 8, chunkSize);
 
-        void* pAlloc1 = SHIP_ALLOC(poolAllocator, chunkSize, alignment);
+        void* pAlloc1 = SHIP_ALLOC_EX(&poolAllocator, chunkSize, alignment);
 
         REQUIRE(pAlloc1 != nullptr);
 
@@ -1087,7 +1087,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
         REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        void* pAlloc2 = SHIP_ALLOC(poolAllocator, chunkSize, alignment);
+        void* pAlloc2 = SHIP_ALLOC_EX(&poolAllocator, chunkSize, alignment);
 
         REQUIRE(pAlloc2 != nullptr);
 
@@ -1098,14 +1098,14 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
         REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize * 2);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(poolAllocator, pAlloc1);
+        SHIP_FREE_EX(&poolAllocator, pAlloc1);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 1);
         REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-        SHIP_FREE(poolAllocator, pAlloc2);
+        SHIP_FREE_EX(&poolAllocator, pAlloc2);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -1125,7 +1125,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
             uint32_t first, uint32_t second, uint32_t third,
             size_t chunkSize)
         {
-            void* pAlloc1 = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+            void* pAlloc1 = SHIP_ALLOC_EX(&poolAllocator, chunkSize, 1);
 
             REQUIRE(pAlloc1 != nullptr);
 
@@ -1134,7 +1134,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
             REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            void* pAlloc2 = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+            void* pAlloc2 = SHIP_ALLOC_EX(&poolAllocator, chunkSize, 1);
 
             REQUIRE(pAlloc2 != nullptr);
 
@@ -1145,7 +1145,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
             REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize + chunkSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            void* pAlloc3 = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+            void* pAlloc3 = SHIP_ALLOC_EX(&poolAllocator, chunkSize, 1);
 
             REQUIRE(pAlloc3 != nullptr);
 
@@ -1160,21 +1160,21 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
             void* pAllocs[] = { pAlloc1, pAlloc2, pAlloc3 };
             size_t allocSizes[] = { chunkSize, chunkSize, chunkSize };
 
-            SHIP_FREE(poolAllocator, pAllocs[first]);
+            SHIP_FREE_EX(&poolAllocator, pAllocs[first]);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 2);
             REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == allocSizes[second] + allocSizes[third]);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(poolAllocator, pAllocs[second]);
+            SHIP_FREE_EX(&poolAllocator, pAllocs[second]);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 1);
             REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == allocSizes[third]);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(poolAllocator, pAllocs[third]);
+            SHIP_FREE_EX(&poolAllocator, pAllocs[third]);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -1205,7 +1205,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
             uint32_t first, uint32_t second, uint32_t third, uint32_t fourth,
             size_t chunkSize)
         {
-            void* pAlloc1 = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+            void* pAlloc1 = SHIP_ALLOC_EX(&poolAllocator, chunkSize, 1);
 
             REQUIRE(pAlloc1 != nullptr);
 
@@ -1214,7 +1214,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
             REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            void* pAlloc2 = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+            void* pAlloc2 = SHIP_ALLOC_EX(&poolAllocator, chunkSize, 1);
 
             REQUIRE(pAlloc2 != nullptr);
 
@@ -1225,7 +1225,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
             REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize + chunkSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            void* pAlloc3 = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+            void* pAlloc3 = SHIP_ALLOC_EX(&poolAllocator, chunkSize, 1);
 
             REQUIRE(pAlloc3 != nullptr);
 
@@ -1237,7 +1237,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
             REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == chunkSize + chunkSize + chunkSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            void* pAlloc4 = SHIP_ALLOC(poolAllocator, chunkSize, 1);
+            void* pAlloc4 = SHIP_ALLOC_EX(&poolAllocator, chunkSize, 1);
 
             REQUIRE(pAlloc4 != nullptr);
 
@@ -1253,28 +1253,28 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
             void* pAllocs[] = { pAlloc1, pAlloc2, pAlloc3, pAlloc4 };
             size_t allocSizes[] = { chunkSize, chunkSize, chunkSize, chunkSize };
 
-            SHIP_FREE(poolAllocator, pAllocs[first]);
+            SHIP_FREE_EX(&poolAllocator, pAllocs[first]);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 3);
             REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == allocSizes[second] + allocSizes[third] + allocSizes[fourth]);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(poolAllocator, pAllocs[second]);
+            SHIP_FREE_EX(&poolAllocator, pAllocs[second]);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 2);
             REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == allocSizes[third] + allocSizes[fourth]);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(poolAllocator, pAllocs[third]);
+            SHIP_FREE_EX(&poolAllocator, pAllocs[third]);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 1);
             REQUIRE(poolAllocator.GetMemoryInfo().numUserBytesAllocated == allocSizes[fourth]);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-            SHIP_FREE(poolAllocator, pAllocs[fourth]);
+            SHIP_FREE_EX(&poolAllocator, pAllocs[fourth]);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 0);
@@ -1324,32 +1324,32 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
             uint32_t first, uint32_t second, uint32_t third, uint32_t fourth,
             uint32_t alignment1, uint32_t alignment2, uint32_t alignment3, uint32_t alignment4)
         {
-            TestObject* pAlloc1 = SHIP_NEW_ARRAY(poolAllocator, TestObject, arrayLength, alignment1);
+            TestObject* pAlloc1 = SHIP_NEW_ARRAY_EX(&poolAllocator, TestObject, arrayLength, alignment1);
 
             REQUIRE(pAlloc1 != nullptr);
             REQUIRE(g_TestObjectCount == arrayLength);
 
-            TestObject* pAlloc2 = SHIP_NEW_ARRAY(poolAllocator, TestObject, arrayLength, alignment2);
+            TestObject* pAlloc2 = SHIP_NEW_ARRAY_EX(&poolAllocator, TestObject, arrayLength, alignment2);
 
             REQUIRE(pAlloc2 != nullptr);
             REQUIRE(g_TestObjectCount == arrayLength * 2);
 
-            TestObject* pAlloc3 = SHIP_NEW_ARRAY(poolAllocator, TestObject, arrayLength, alignment3);
+            TestObject* pAlloc3 = SHIP_NEW_ARRAY_EX(&poolAllocator, TestObject, arrayLength, alignment3);
 
             REQUIRE(pAlloc3 != nullptr);
             REQUIRE(g_TestObjectCount == arrayLength * 3);
 
-            TestObject* pAlloc4 = SHIP_NEW_ARRAY(poolAllocator, TestObject, arrayLength, alignment4);
+            TestObject* pAlloc4 = SHIP_NEW_ARRAY_EX(&poolAllocator, TestObject, arrayLength, alignment4);
 
             REQUIRE(pAlloc4 != nullptr);
             REQUIRE(g_TestObjectCount == arrayLength * 4);
 
             TestObject* pAllocs[] = { pAlloc1, pAlloc2, pAlloc3, pAlloc4 };
 
-            SHIP_DELETE_ARRAY(poolAllocator, pAllocs[first]);
-            SHIP_DELETE_ARRAY(poolAllocator, pAllocs[second]);
-            SHIP_DELETE_ARRAY(poolAllocator, pAllocs[third]);
-            SHIP_DELETE_ARRAY(poolAllocator, pAllocs[fourth]);
+            SHIP_DELETE_ARRAY_EX(&poolAllocator, pAllocs[first]);
+            SHIP_DELETE_ARRAY_EX(&poolAllocator, pAllocs[second]);
+            SHIP_DELETE_ARRAY_EX(&poolAllocator, pAllocs[third]);
+            SHIP_DELETE_ARRAY_EX(&poolAllocator, pAllocs[fourth]);
 
             REQUIRE(g_TestObjectCount == 0);
         };

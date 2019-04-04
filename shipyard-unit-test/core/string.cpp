@@ -2,8 +2,12 @@
 
 #include <system/string.h>
 
+#include <utils/unittestutils.h>
+
 TEST_CASE("Test StringA", "[String]")
 {
+    Shipyard::ScoppedGlobalAllocator scoppedGlobalAllocator;
+
     Shipyard::StringA string;
 
     SECTION("Default Constructor")
@@ -291,7 +295,7 @@ TEST_CASE("Test StringA", "[String]")
         REQUIRE(string[1] == 'b');
         REQUIRE(string[2] == 'c');
         REQUIRE(string.GetBuffer()[6] == '\0');
-        REQUIRE(string.GetBuffer() != buffer);
+        REQUIRE(string.GetBuffer() == buffer);
     }
 
     SECTION("String Reserve")
@@ -337,7 +341,7 @@ TEST_CASE("Test StringA", "[String]")
         string.Clear();
 
         REQUIRE(string.Size() == 0);
-        REQUIRE(string.Capacity() == 1);
+        REQUIRE(string.Capacity() == string.DefaultStringCapacity);
         REQUIRE(string == "");
     }
 

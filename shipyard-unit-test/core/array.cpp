@@ -2,10 +2,14 @@
 
 #include <system/array.h>
 
+#include <utils/unittestutils.h>
+
 #include <algorithm>
 
 TEST_CASE("Test array", "[Array]")
 {
+    Shipyard::ScoppedGlobalAllocator scoppedGlobalAllocator;
+
     Shipyard::Array<int> arr;
 
     SECTION("push_back")

@@ -6,8 +6,12 @@
 #include <graphics/shaderfamilies.h>
 #include <graphics/shaderkey.h>
 
+#include <utils/unittestutils.h>
+
 TEST_CASE("Test RenderStateBlockCompiler", "[ShaderCompiler]")
 {
+    Shipyard::ScoppedGlobalAllocator scoppedGlobalAllocator;
+
     Shipyard::ShaderKey::InitializeShaderKeyGroups();
 
     Shipyard::ShaderKey testShaderKey;

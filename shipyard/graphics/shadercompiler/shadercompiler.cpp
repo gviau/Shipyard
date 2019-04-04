@@ -19,9 +19,9 @@ const char* ShaderCompiler::RenderStateBlockName = "RenderState";
 
 volatile bool ShaderCompiler::m_RunShaderCompilerThread = true;
 
-extern StringA g_ShaderFamilyFilenames[uint8_t(ShaderFamily::Count)];
+extern const char* g_ShaderFamilyFilenames[uint8_t(ShaderFamily::Count)];
 extern uint8_t g_NumBitsForShaderOption[uint32_t(ShaderOption::Count)];
-extern StringA g_ShaderOptionString[uint32_t(ShaderOption::Count)];
+extern const char* g_ShaderOptionString[uint32_t(ShaderOption::Count)];
 
 class ShaderCompilerIncludeHandler : public ID3DInclude
 {
@@ -379,7 +379,7 @@ void ShaderCompiler::CompileShaderKey(
         uint32_t valueForShaderOption = shaderKeyToCompile.GetShaderOptionValue(shaderOption);
 
         D3D_SHADER_MACRO shaderDefine;
-        shaderDefine.Name = g_ShaderOptionString[uint32_t(shaderOption)].GetBuffer();
+        shaderDefine.Name = g_ShaderOptionString[uint32_t(shaderOption)];
 
         char* buf = new char[8];
         sprintf_s(buf, 8, "%u", valueForShaderOption);

@@ -64,11 +64,19 @@ namespace Shipyard
     class VertexFormat
     {
     public:
-        const Array<InputLayout>& GetInputLayouts() const { return m_InputLayouts; }
+        VertexFormat()
+            : m_NumInputLayouts(0)
+        {
+        }
+
+        const InputLayout* GetInputLayouts() const { return m_InputLayouts; }
+        uint32_t GetNumInputLayouts() const { return m_NumInputLayouts; }
+
         virtual uint32_t GetSize() const = 0;
 
     protected:
-        Array<InputLayout> m_InputLayouts;
+        InputLayout m_InputLayouts[GfxConstants::GfxConstants_MaxInputLayouts];
+        uint32_t m_NumInputLayouts;
     };
 
     class VertexFormat_Pos : public VertexFormat

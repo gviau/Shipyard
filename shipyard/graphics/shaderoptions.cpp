@@ -16,7 +16,7 @@ uint8_t g_NumBitsForShaderOption[uint32_t(ShaderOption::Count)] =
 #define CREATE_OPTION(option, numBits) \
     #option,
 
-StringA g_ShaderOptionString[uint32_t(ShaderOption::Count)] =
+const char* g_ShaderOptionString[uint32_t(ShaderOption::Count)] =
 {
 #include <graphics/shaderoptiondefinitions.h>
 };

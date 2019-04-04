@@ -14,7 +14,7 @@ namespace Shipyard
 {;
 
 volatile bool ShaderWatcher::m_RunShaderWatcherThread = true;
-extern StringA g_ShaderFamilyFilenames[uint8_t(ShaderFamily::Count)];
+extern const char* g_ShaderFamilyFilenames[uint8_t(ShaderFamily::Count)];
 
 ShaderWatcher::ShaderWatcher()
 {

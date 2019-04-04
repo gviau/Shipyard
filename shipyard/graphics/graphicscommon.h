@@ -34,6 +34,8 @@ namespace Shipyard
         GfxConstants_MaxRenderTargetsBound = 8,
 
         GfxConstants_MaxVertexBuffers = 16,
+
+        GfxConstants_MaxInputLayouts = 16,
     };
 
     struct BytesArray

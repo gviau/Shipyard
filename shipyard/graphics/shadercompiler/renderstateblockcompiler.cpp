@@ -630,7 +630,7 @@ RenderStateBlockCompilationError InterpretRenderPipelineStateOption(
     return renderStateBlockCompilationError;
 }
 
-extern StringA g_ShaderOptionString[uint32_t(ShaderOption::Count)];
+extern const char* g_ShaderOptionString[uint32_t(ShaderOption::Count)];
 
 void GetEffectiveRenderPipelineBlockForShaderKey(
         const ShaderKey& shaderKey,
@@ -646,7 +646,7 @@ void GetEffectiveRenderPipelineBlockForShaderKey(
         uint32_t valueForShaderOption = shaderKey.GetShaderOptionValue(shaderOption);
 
         D3D_SHADER_MACRO shaderDefine;
-        shaderDefine.Name = g_ShaderOptionString[uint32_t(shaderOption)].GetBuffer();
+        shaderDefine.Name = g_ShaderOptionString[uint32_t(shaderOption)];
 
         char* buf = new char[8];
         sprintf_s(buf, 8, "%u", valueForShaderOption);

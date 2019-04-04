@@ -333,11 +333,14 @@ ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatTy
     VertexFormat* vertexFormat = nullptr;
     GetVertexFormat(vertexFormatType, vertexFormat);
 
-    const Array<InputLayout>& inputLayouts = vertexFormat->GetInputLayouts();
+    const InputLayout* inputLayouts = vertexFormat->GetInputLayouts();
+    uint32_t numInputLayouts = vertexFormat->GetNumInputLayouts();
 
     Array<D3D11_INPUT_ELEMENT_DESC> inputElements;
-    for (InputLayout inputLayout : inputLayouts)
+    for (uint32_t i = 0; i < numInputLayouts; i++)
     {
+        const InputLayout& inputLayout = inputLayouts[i];
+
         D3D11_INPUT_ELEMENT_DESC inputElement;
         inputElement.SemanticName = ConvertShipyardSemanticNameToDX11(inputLayout.m_SemanticName);
         inputElement.SemanticIndex = inputLayout.m_SemanticIndex;

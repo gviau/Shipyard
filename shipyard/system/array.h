@@ -9,6 +9,8 @@
 #include <cinttypes>
 #include <stdlib.h>
 
+#include <new>
+
 namespace Shipyard
 {
     template <typename T>
@@ -419,6 +421,11 @@ namespace Shipyard
 
             T* newArray = reinterpret_cast<T*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, alignment));
 
+            for (uint32_t i = 0; i < newCapacity; i++)
+            {
+                new(newArray + i)T();
+            }
+
             uint32_t currentSize = Size();
 
             for (uint32_t i = 0; i < currentSize; i++)
@@ -518,8 +525,15 @@ namespace Shipyard
                 return;
             }
 
-            size_t requiredSize = sizeof(T) * Capacity();
+            size_t capacity = Capacity();
+
+            size_t requiredSize = sizeof(T) * capacity;
             T* pNewArray = reinterpret_cast<T*>(SHIP_ALLOC_EX(pAllocator, requiredSize, alignment));
+
+            for (uint32_t i = 0; i < capacity; i++)
+            {
+                new(newArray + i)T();
+            }
 
             uint32_t numElements = Size();
 
@@ -836,6 +850,11 @@ namespace Shipyard
 
             T* newArray = reinterpret_cast<T*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, alignment));
 
+            for (uint32_t i = 0; i < newCapacity; i++)
+            {
+                new(newArray + i)T();
+            }
+
             for (uint32_t i = 0; i < m_Size; i++)
             {
                 newArray[i] = m_Array[i];
@@ -908,6 +927,11 @@ namespace Shipyard
 
             size_t requiredSize = sizeof(T) * m_Capacity;
             T* pNewArray = reinterpret_cast<T*>(SHIP_ALLOC_EX(pAllocator, requiredSize, alignment));
+
+            for (uint32_t i = 0; i < m_Capacity; i++)
+            {
+                new(pNewArray + i)T();
+            }
 
             for (uint32_t i = 0; i < m_Size; i++)
             {

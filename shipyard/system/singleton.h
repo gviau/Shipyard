@@ -3,6 +3,7 @@
 #include <system/platform.h>
 
 #include <system/systemcommon.h>
+#include <system/systemdebug.h>
 
 namespace Shipyard
 {
@@ -34,6 +35,10 @@ namespace Shipyard
     protected:
         Singleton() {}
         virtual ~Singleton() {}
+
+        Singleton(const Singleton& src) = delete;
+        Singleton& operator= (const Singleton& rhs) = delete;
+        Singleton& operator= (const Singleton&& rhs) = delete;
     };
 
     template <class T> T* Singleton<T>::ms_Instance = nullptr;

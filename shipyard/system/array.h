@@ -518,7 +518,23 @@ namespace Shipyard
                 return;
             }
 
+            size_t requiredSize = sizeof(T) * Capacity();
+            T* pNewArray = reinterpret_cast<T*>(SHIP_ALLOC_EX(pAllocator, requiredSize, alignment));
 
+            uint32_t numElements = Size();
+
+            for (uint32_t i = 0; i < numElements; i++)
+            {
+                pNewArray[i] = m_Array[i];
+            }
+
+            if ((m_ArraySizeAndCapacity & BORROWED_MEMORY_FLAG) == 0)
+            {
+                SHIP_FREE_EX(m_pAllocator, m_Array);
+            }
+
+            m_Array = pNewArray;
+            m_pAllocator = pAllocator;
         }
 
     protected:
@@ -881,6 +897,27 @@ namespace Shipyard
         bool Exists(const T& elementToFind) const
         {
             return (FindIndex(elementToFind) != uint32_t(-1));
+        }
+
+        void SetAllocator(BaseAllocator* pAllocator)
+        {
+            if (pAllocator == m_pAllocator)
+            {
+                return;
+            }
+
+            size_t requiredSize = sizeof(T) * m_Capacity;
+            T* pNewArray = reinterpret_cast<T*>(SHIP_ALLOC_EX(pAllocator, requiredSize, alignment));
+
+            for (uint32_t i = 0; i < m_Size; i++)
+            {
+                pNewArray[i] = m_Array[i];
+            }
+
+            SHIP_FREE_EX(m_pAllocator, m_Array);
+
+            m_Array = pNewArray;
+            m_pAllocator = pAllocator;
         }
 
     protected:

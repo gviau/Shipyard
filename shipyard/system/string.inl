@@ -696,13 +696,9 @@ void String<CharType>::Clear()
 {
     SHIP_FREE_EX(m_pAllocator, m_Buffer);
     
+    m_Buffer = nullptr;
     m_NumChars = 0;
-    m_Capacity = DefaultStringCapacity;
-    
-    size_t requiredSize = sizeof(CharType) * m_Capacity;
-    m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
-
-    m_Buffer[m_NumChars] = '\0';
+    m_Capacity = 0;
 }
 
 template <typename CharType>
@@ -1376,4 +1372,26 @@ bool String<CharType>::operator!= (const CharType* rhs) const
 
     return false;
 }
+
+template <typename CharType>
+void String<CharType>::SetAllocator(BaseAllocator* pAllocator)
+{
+    if (pAllocator == m_pAllocator)
+    {
+        return;
+    }
+
+    size_t requiredSize = sizeof(CharType) * m_Capacity;
+    CharType* pNewArray = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(pAllocator, requiredSize, 1));
+
+    memcpy(pNewArray, m_Buffer, m_NumChars);
+
+    SHIP_FREE_EX(m_pAllocator, m_Buffer);
+
+    m_Buffer = pNewArray;
+    m_Buffer[m_NumChars] = '\0';
+
+    m_pAllocator = pAllocator;
+}
+
 }

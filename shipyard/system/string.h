@@ -113,6 +113,8 @@ namespace Shipyard
         bool operator!= (const String& rhs) const;
         bool operator!= (const CharType* rhs) const;
 
+        void SetAllocator(BaseAllocator* pAllocator);
+
     protected:
         BaseAllocator* m_pAllocator;
         CharType* m_Buffer;

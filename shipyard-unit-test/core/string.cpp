@@ -13,7 +13,7 @@ TEST_CASE("Test StringA", "[String]")
     SECTION("Default Constructor")
     {
         REQUIRE(string.Size() == 0);
-        REQUIRE(string.Capacity() >= 1);
+        REQUIRE(string.Capacity() == string.DefaultStringCapacity);
         REQUIRE(string.GetBuffer()[0] == '\0');
     }
 
@@ -341,7 +341,7 @@ TEST_CASE("Test StringA", "[String]")
         string.Clear();
 
         REQUIRE(string.Size() == 0);
-        REQUIRE(string.Capacity() == string.DefaultStringCapacity);
+        REQUIRE(string.Capacity() == 0);
         REQUIRE(string == "");
     }
 
@@ -467,5 +467,31 @@ TEST_CASE("Test StringA", "[String]")
         string.Format("%s%s=%d", "This", "test", 5);
 
         REQUIRE(string == "Thistest=5");
+    }
+
+    SECTION("Change allocator")
+    {
+        Shipyard::StringA constructedString("Test");
+
+        const size_t heapSize = 1024;
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
+
+        Shipyard::FixedHeapAllocator fixedHeapAllocator;
+        fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
+
+        constructedString.SetAllocator(&fixedHeapAllocator);
+
+        REQUIRE(constructedString.Size() == 4);
+        REQUIRE(constructedString.Capacity() >= 5);
+        REQUIRE(constructedString[0] == 'T');
+        REQUIRE(constructedString[1] == 'e');
+        REQUIRE(constructedString[2] == 's');
+        REQUIRE(constructedString[3] == 't');
+        REQUIRE(constructedString.GetBuffer()[4] == '\0');
+
+        // Required since we destroy the allocator before the destructor.
+        constructedString.Clear();
+
+        fixedHeapAllocator.Destroy();
     }
 }

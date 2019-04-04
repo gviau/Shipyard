@@ -209,4 +209,35 @@ TEST_CASE("Test array", "[Array]")
         REQUIRE(inplaceArray.Capacity() == numElements);
         REQUIRE(inplaceArray.Size() == numElements);
     }
+
+    SECTION("Change allocator")
+    {
+        constexpr int numElements = 3;
+
+        for (int i = 0; i < numElements; i++)
+        {
+            arr.Add(i);
+        }
+
+        const size_t heapSize = 1024;
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
+
+        Shipyard::FixedHeapAllocator fixedHeapAllocator;
+        fixedHeapAllocator.Create(scoppedBuffer.pBuffer, heapSize);
+
+        arr.SetAllocator(&fixedHeapAllocator);
+
+        REQUIRE(arr.Size() == numElements);
+        REQUIRE(arr.Capacity() >= numElements);
+
+        for (int i = 0; i < numElements; i++)
+        {
+            REQUIRE(arr[i] == i);
+        }
+
+        // Required since we destroy the allocator before the destructor.
+        arr.Clear();
+
+        fixedHeapAllocator.Destroy();
+    }
 }

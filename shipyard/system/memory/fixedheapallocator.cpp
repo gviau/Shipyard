@@ -14,9 +14,7 @@ const size_t FixedHeapAllocator::MemoryAllocationHeaderSize = sizeof(MemoryAlloc
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 FixedHeapAllocator::FixedHeapAllocator()
-    : m_pHeap(nullptr)
-    , m_HeapSize(0)
-    , m_pFirstFreeMemoryBlock(nullptr)
+    : m_pFirstFreeMemoryBlock(nullptr)
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
     , m_pAllocatedBlockHead(nullptr)

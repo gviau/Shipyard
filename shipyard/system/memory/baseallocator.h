@@ -31,6 +31,12 @@ namespace Shipyard
     class SHIPYARD_API BaseAllocator
     {
     public:
+        BaseAllocator()
+            : m_pHeap(nullptr)
+            , m_HeapSize(0)
+        {
+        }
+
         // Alignment must be a power of 2 and non-zero.
         virtual void* Allocate(size_t size, size_t alignment
         
@@ -43,6 +49,13 @@ namespace Shipyard
 
         // Memory must come from the allocator that allocated it.
         virtual void Deallocate(void* memory) = 0;
+
+        const void* GetHeap() const { return m_pHeap; }
+        size_t GetHeapSize() const { return m_HeapSize; }
+
+    protected:
+        void* m_pHeap;
+        size_t m_HeapSize;
     };
 }
 

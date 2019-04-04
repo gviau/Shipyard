@@ -82,9 +82,6 @@ namespace Shipyard
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
     private:
-        void* m_pHeap;
-        size_t m_HeapSize;
-
         FreeMemoryBlock* m_pFirstFreeMemoryBlock;
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO

@@ -7,8 +7,7 @@ namespace Shipyard
 {;
 
 PoolAllocator::PoolAllocator()
-    : m_pHeap(nullptr)
-    , m_pFirstFreeChunk(nullptr)
+    : m_pFirstFreeChunk(nullptr)
     , m_ChunkSize(0)
     , m_NumChunks(0)
 {
@@ -55,6 +54,8 @@ bool PoolAllocator::Create(void* pHeap, size_t numChunks, size_t chunkSize)
 
     m_ChunkSize = chunkSize;
     m_NumChunks = numChunks;
+
+    m_HeapSize = chunkSize * numChunks;
 
     m_pFirstFreeChunk = reinterpret_cast<FreeChunkHeader*>(m_pHeap);
     FreeChunkHeader* pCurrentFreeChunk = m_pFirstFreeChunk;

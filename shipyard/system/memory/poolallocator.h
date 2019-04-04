@@ -47,7 +47,6 @@ namespace Shipyard
         };
 
     private:
-        void* m_pHeap;
         FreeChunkHeader* m_pFirstFreeChunk;
         size_t m_ChunkSize;
         size_t m_NumChunks;

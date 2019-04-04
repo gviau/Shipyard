@@ -89,20 +89,29 @@ void* GlobalAllocator::Allocate(size_t size, size_t alignment
 
     for (; allocatorIndexToUse < m_NumAllocators; allocatorIndexToUse++)
     {
-        if (size <= m_MaxAllocationSizes[allocatorIndexToUse])
+        if (size > m_MaxAllocationSizes[allocatorIndexToUse])
         {
-            break;
+            continue;
+        }
+
+        void* pAllocatedPtr = m_pAllocators[allocatorIndexToUse].pAllocator->Allocate(size, alignment
+
+                #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+                    , pAllocationFilename
+                    , allocationLineNumber
+                #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
+                );
+
+        // If the allocator is out of memory then we need to continue trying with the next one.
+        if (pAllocatedPtr != nullptr)
+        {
+            return pAllocatedPtr;
         }
     }
 
-    return m_pAllocators[allocatorIndexToUse].pAllocator->Allocate(size, alignment
-
-        #ifdef SHIP_ALLOCATOR_DEBUG_INFO
-            , pAllocationFilename
-            , allocationLineNumber
-        #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
-
-        );
+    // If we're here, then we we're out of memory in this allocator.
+    return nullptr;
 }
 
 void GlobalAllocator::Deallocate(void* memory)

@@ -525,29 +525,30 @@ namespace Shipyard
                 return;
             }
 
-            size_t capacity = Capacity();
-
-            size_t requiredSize = sizeof(T) * capacity;
-            T* pNewArray = reinterpret_cast<T*>(SHIP_ALLOC_EX(pAllocator, requiredSize, alignment));
-
-            for (uint32_t i = 0; i < capacity; i++)
-            {
-                new(newArray + i)T();
-            }
-
-            uint32_t numElements = Size();
-
-            for (uint32_t i = 0; i < numElements; i++)
-            {
-                pNewArray[i] = m_Array[i];
-            }
-
             if ((m_ArraySizeAndCapacity & BORROWED_MEMORY_FLAG) == 0)
             {
+                size_t capacity = Capacity();
+
+                size_t requiredSize = sizeof(T) * capacity;
+                T* pNewArray = reinterpret_cast<T*>(SHIP_ALLOC_EX(pAllocator, requiredSize, alignment));
+
+                for (uint32_t i = 0; i < capacity; i++)
+                {
+                    new(pNewArray + i)T();
+                }
+
+                uint32_t numElements = Size();
+
+                for (uint32_t i = 0; i < numElements; i++)
+                {
+                    pNewArray[i] = m_Array[i];
+                }
+
                 SHIP_FREE_EX(m_pAllocator, m_Array);
+
+                m_Array = pNewArray;
             }
 
-            m_Array = pNewArray;
             m_pAllocator = pAllocator;
         }
 

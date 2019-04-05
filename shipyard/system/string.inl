@@ -15,6 +15,7 @@ namespace Shipyard
 template <typename CharType>
 String<CharType>::String(BaseAllocator* pAllocator)
     : m_pAllocator(pAllocator)
+    , m_Buffer(nullptr)
 {
     if (pAllocator == nullptr)
     {
@@ -32,6 +33,7 @@ String<CharType>::String(BaseAllocator* pAllocator)
 
 template <typename CharType>
 String<CharType>::String(const CharType* sz, BaseAllocator* pAllocator)
+    : m_pAllocator(pAllocator)
 {
     if (pAllocator == nullptr)
     {
@@ -62,6 +64,7 @@ String<CharType>::String(const CharType* sz, BaseAllocator* pAllocator)
 
 template <typename CharType>
 String<CharType>::String(const CharType* sz, size_t numChars, BaseAllocator* pAllocator)
+    : m_pAllocator(pAllocator)
 {
     if (pAllocator == nullptr)
     {

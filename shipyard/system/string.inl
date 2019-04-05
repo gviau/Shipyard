@@ -265,7 +265,7 @@ String<CharType> String<CharType>::operator+ (const String<CharType>& rhs) const
 {
     size_t sizeOfNewString = m_NumChars + rhs.m_NumChars;
 
-    String<CharType> result;
+    String<CharType> result(m_pAllocator);
 
     if (sizeOfNewString == 0)
     {
@@ -289,7 +289,7 @@ String<CharType> String<CharType>::operator+ (const CharType* rhs) const
 
     size_t sizeOfNewString = m_NumChars + sizeOfRhsString;
 
-    String<CharType> result;
+    String<CharType> result(m_pAllocator);
 
     if (sizeOfNewString == 0)
     {
@@ -311,7 +311,7 @@ String<CharType> String<CharType>::operator+ (CharType c) const
 {
     size_t sizeOfNewString = m_NumChars + 1;
 
-    String<CharType> result;
+    String<CharType> result(m_pAllocator);
 
     if (sizeOfNewString == 0)
     {
@@ -335,7 +335,7 @@ String<CharType> operator+ (const CharType* lhs, const String<CharType>& rhs)
 
     size_t sizeOfNewString = sizeOfLhsString + rhs.Size();
 
-    String<CharType> result;
+    String<CharType> result(rhs.m_pAllocator);
 
     if (sizeOfNewString == 0)
     {
@@ -355,7 +355,7 @@ String<CharType> operator+ (CharType c, const String<CharType>& rhs)
 {
     size_t sizeOfNewString = 1 + rhs.Size();
 
-    String<CharType> result;
+    String<CharType> result(rhs.m_pAllocator);
 
     if (sizeOfNewString == 0)
     {
@@ -1098,7 +1098,7 @@ size_t String<CharType>::FindIndexOfFirstCaseInsensitiveReverse(const CharType* 
 template <typename CharType>
 String<CharType> String<CharType>::Substring(size_t pos, size_t lengthOfSubstring) const
 {
-    String<CharType> substring;
+    String<CharType> substring(m_pAllocator);
 
     if (pos >= m_NumChars)
     {

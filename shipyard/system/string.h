@@ -40,10 +40,10 @@ namespace Shipyard
         String operator+ (CharType c) const;
 
         template <typename CharType>
-        friend String operator+ (const CharType* lhs, const String& rhs);
+        friend String<CharType> operator+ (const CharType* lhs, const String<CharType>& rhs);
 
         template <typename CharType>
-        friend String operator+ (CharType c, const String& rhs);
+        friend String<CharType> operator+ (CharType c, const String<CharType>& rhs);
 
         void Assign(const CharType* sz, size_t numChars);
         void Assign(const CharType* sz);

@@ -41,6 +41,72 @@ bool DX11RenderDevice::Create()
         return false;
     }
 
+    if (!m_VertexBufferPool.Create())
+    {
+        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create VertexBuffer pool.");
+        return false;
+    }
+
+    if (!m_IndexBufferPool.Create())
+    {
+        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create IndexBuffer pool.");
+        return false;
+    }
+
+    if (!m_ConstantBufferPool.Create())
+    {
+        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create ConstantBuffer pool.");
+        return false;
+    }
+
+    if (!m_Texture2dPool.Create())
+    {
+        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create Texture2D pool.");
+        return false;
+    }
+
+    if (!m_RenderTargetPool.Create())
+    {
+        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create RenderTarget pool.");
+        return false;
+    }
+
+    if (!m_DepthStencilRenderTargetPool.Create())
+    {
+        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create DepthStencilRenderTarget pool.");
+        return false;
+    }
+
+    if (!m_VertexShaderPool.Create())
+    {
+        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create VertexShader pool.");
+        return false;
+    }
+
+    if (!m_PixelShaderPool.Create())
+    {
+        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create PixelShader pool.");
+        return false;
+    }
+
+    if (!m_RootSignaturePool.Create())
+    {
+        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create RootSignature pool.");
+        return false;
+    }
+
+    if (!m_PipelineStateObjectPool.Create())
+    {
+        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create PipelineStateObject pool.");
+        return false;
+    }
+
+    if (!m_DescriptorSetPool.Create())
+    {
+        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create DescriptorSet pool.");
+        return false;
+    }
+
     return true;
 }
 

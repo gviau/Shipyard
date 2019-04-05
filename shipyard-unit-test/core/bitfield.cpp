@@ -2,9 +2,15 @@
 
 #include <system/bitfield.h>
 
+#include <utils/unittestutils.h>
+
 TEST_CASE("Test bitfield 1 element", "[Bitfield]")
 {
+    Shipyard::ScoppedGlobalAllocator scoppedGlobalAllocator;
+
     Shipyard::Bitfield<NUM_BITS_PER_BITFIELD_ELEMENT> bitfield;
+
+    bitfield.Create();
 
     SECTION("Set bit")
     {
@@ -116,8 +122,12 @@ TEST_CASE("Test bitfield 1 element", "[Bitfield]")
 
 TEST_CASE("Test bitfield 2 elements", "[Bitfield]")
 {
+    Shipyard::ScoppedGlobalAllocator scoppedGlobalAllocator;
+
     constexpr uint32_t bitfieldSize = NUM_BITS_PER_BITFIELD_ELEMENT * 2;
     Shipyard::Bitfield<bitfieldSize> bitfield;
+
+    bitfield.Create();
 
     SECTION("Set bit")
     {
@@ -255,8 +265,12 @@ TEST_CASE("Test bitfield 2 elements", "[Bitfield]")
 
 TEST_CASE("Test bitfield 3 elements", "[Bitfield]")
 {
+    Shipyard::ScoppedGlobalAllocator scoppedGlobalAllocator;
+
     constexpr uint32_t bitfieldSize = NUM_BITS_PER_BITFIELD_ELEMENT * 3;
     Shipyard::Bitfield<bitfieldSize> bitfield;
+
+    bitfield.Create();
 
     SECTION("Set bit")
     {
@@ -404,8 +418,12 @@ TEST_CASE("Test bitfield 3 elements", "[Bitfield]")
 
 TEST_CASE("Test bitfield less than an element", "[Bitfield]")
 {
+    Shipyard::ScoppedGlobalAllocator scoppedGlobalAllocator;
+
     constexpr uint32_t bitfieldSize = 16;
     Shipyard::Bitfield<bitfieldSize> bitfield;
+
+    bitfield.Create();
 
     SECTION("Set bit")
     {

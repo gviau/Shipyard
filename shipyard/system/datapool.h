@@ -13,28 +13,56 @@ namespace Shipyard
     // With the use of a bitfield, the container will prioritize empty locations that are closest
     // to the beginning of the internal array.
     //
-    // Minimal size is floor(MaxElementsInPool / 64) bytes due to the bitfield
-    // The internal pool's array is dynamic and allocated on the heap.
+    // Allocated size is floor(MaxElementsInPool / 64) * sizeof(Bitfield::BitfieldType) bytes due to the bitfield + MaxElementsInPool * sizeof(T) bytes.
     //
     // The rationale behind returning indices in the pool instead of pointers is that
     // uint32_t can access the full range of the array without wasting another 4 bytes
     // from a 8 bytes pointer (on 64 bits platform).
-    template<typename T, uint32_t MaxElementsInPool>
+    template<typename T, uint32_t MaxElementsInPool, size_t alignment = 1>
     class DataPool
     {
     public:
         static const uint32_t InvalidDataPoolIndex = uint32_t(-1);
 
     public:
-        DataPool()
-            : m_FreePoolIndices(true)
+        DataPool(BaseAllocator* pAllocator = nullptr)
+            : m_pAllocator(pAllocator)
+            , m_Datas(nullptr)
             , m_LastFreeIndex(0)
         {
+            if (pAllocator == nullptr)
+            {
+                m_pAllocator = &GlobalAllocator::GetInstance();
+            }
+
         }
 
         ~DataPool()
         {
             SHIP_ASSERT_MSG(m_FreePoolIndices.GetLongestRangeWithBitsSet(0) == MaxElementsInPool, "DataPool 0x%p elements were not all freed.", this);
+
+            SHIP_FREE_EX(m_pAllocator, m_Datas);
+        }
+
+        bool Create()
+        {
+            m_FreePoolIndices.SetAllocator(m_pAllocator);
+
+            constexpr bool setAllBits = true;
+            if (!m_FreePoolIndices.Create(setAllBits))
+            {
+                return false;
+            }
+
+            size_t requiredSizeForPool = MaxElementsInPool * sizeof(T);
+
+            m_Datas = reinterpret_cast<T*>(SHIP_ALLOC_EX(m_pAllocator, requiredSizeForPool, alignment));
+            if (m_Datas == nullptr)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         uint32_t GetNewItemIndex()
@@ -47,6 +75,8 @@ namespace Shipyard
                 m_FreePoolIndices.UnsetBit(newItemIndex);
 
                 m_LastFreeIndex = newItemIndex;
+
+                new (m_Datas + newItemIndex)T();
 
                 return newItemIndex;
             }
@@ -129,8 +159,9 @@ namespace Shipyard
         }
 
     private:
+        BaseAllocator* m_pAllocator;
         Bitfield<MaxElementsInPool> m_FreePoolIndices;
-        T m_Datas[MaxElementsInPool];
+        T* m_Datas;
         uint32_t m_LastFreeIndex;
     };
 }

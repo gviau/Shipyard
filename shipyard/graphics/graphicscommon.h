@@ -632,7 +632,7 @@ namespace Shipyard
         void OverrideRenderTargetWriteMask(RenderTargetWriteMask overrideValue, uint32_t renderTargetIndex);
 
     private:
-        Bitfield<128> m_OverridenState;
+        InplaceBitfield<128> m_OverridenState;
         RenderStateBlock m_RenderStateBlockOverride;
     };
 

@@ -48,7 +48,7 @@ namespace Shipyard
         void BindDescriptorFromDescriptorSet(GfxResource* descriptorResource, const RootSignatureParameterEntry& rootSignatureParameter);
 
         template <uint32_t NumBits>
-        void MarkBindingSlotAsDirty(Bitfield<NumBits>* dirtyBindingSlots, ShaderVisibility shaderVisibility, uint32_t bindingSlot)
+        void MarkBindingSlotAsDirty(InplaceBitfield<NumBits>* dirtyBindingSlots, ShaderVisibility shaderVisibility, uint32_t bindingSlot)
         {
             if ((shaderVisibility & ShaderVisibility::ShaderVisibility_Vertex) > 0)
             {
@@ -122,7 +122,7 @@ namespace Shipyard
         ID3D11DeviceContext* m_DeviceContext;
 
         // Redundant render state cache
-        Bitfield<RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Count> m_RenderStateCacheDirtyFlags;
+        InplaceBitfield<RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Count> m_RenderStateCacheDirtyFlags;
 
         GFXVertexShaderHandle m_VertexShaderHandle;
         GFXPixelShaderHandle m_PixelShaderHandle;
@@ -154,10 +154,10 @@ namespace Shipyard
         ShaderVisibility m_UnorderedAccessViewsShaderVisibility[GfxConstants::GfxConstants_MaxUnorderedAccessViewsBoundPerShaderStage];
         ShaderVisibility m_SamplersShaderVisibility[GfxConstants::GfxConstants_MaxSamplersBoundPerShaderStage];
 
-        Bitfield<GfxConstants::GfxConstants_MaxShaderResourceViewsBoundPerShaderStage> m_DirtySlotShaderResourceViewsPerShaderStage[ShaderStage::ShaderStage_Count];
-        Bitfield<GfxConstants::GfxConstants_MaxConstantBufferViewsBoundPerShaderStage> m_DirtySlotConstantBufferViewsPerShaderStage[ShaderStage::ShaderStage_Count];
-        Bitfield<GfxConstants::GfxConstants_MaxUnorderedAccessViewsBoundPerShaderStage> m_DirtySlotUnorderedAccessViewsPerShaderStage[ShaderStage::ShaderStage_Count];
-        Bitfield<GfxConstants::GfxConstants_MaxSamplersBoundPerShaderStage> m_DirtySlotSamplersPerShaderStage[ShaderStage::ShaderStage_Count];
+        InplaceBitfield<GfxConstants::GfxConstants_MaxShaderResourceViewsBoundPerShaderStage> m_DirtySlotShaderResourceViewsPerShaderStage[ShaderStage::ShaderStage_Count];
+        InplaceBitfield<GfxConstants::GfxConstants_MaxConstantBufferViewsBoundPerShaderStage> m_DirtySlotConstantBufferViewsPerShaderStage[ShaderStage::ShaderStage_Count];
+        InplaceBitfield<GfxConstants::GfxConstants_MaxUnorderedAccessViewsBoundPerShaderStage> m_DirtySlotUnorderedAccessViewsPerShaderStage[ShaderStage::ShaderStage_Count];
+        InplaceBitfield<GfxConstants::GfxConstants_MaxSamplersBoundPerShaderStage> m_DirtySlotSamplersPerShaderStage[ShaderStage::ShaderStage_Count];
 
         // Native interface for actual binding
         ID3D11RasterizerState* m_NativeRasterizerState;

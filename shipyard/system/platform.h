@@ -80,6 +80,9 @@ namespace Shipyard
 #   pragma error "Unreconized compiler"
 #endif // #if COMPILER == COMPILER_MSVC
 
+    // Cache line
+#define SHIP_CHACHE_LINE_SIZE 64
+
 #if defined(SHIPYARD_NONCLIENT_BUILD)
 #   define SHIPYARD_API SHIPYARD_API_EXPORT
 #elif defined(SHIPYARD_STATIC_LINK)

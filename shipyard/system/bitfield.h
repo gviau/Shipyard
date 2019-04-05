@@ -3,6 +3,8 @@
 #include <system/systemcommon.h>
 #include <system/systemdebug.h>
 
+#include <system/memory.h>
+
 namespace Shipyard
 {
 #if CPU_BITS == CPU_BITS_64
@@ -11,10 +13,10 @@ namespace Shipyard
 #   define NUM_BITS_PER_BITFIELD_ELEMENT 32
 #endif // #if CPU_BITS == CPU_BITS_64
 
-    template <uint32_t NumBits>
+    template <uint32_t NumBits, size_t alignment = SHIP_CHACHE_LINE_SIZE>
     class Bitfield
     {
-    private:
+    public:
 
 #if CPU_BITS == CPU_BITS_64
         using BitfieldType = uint64_t;
@@ -25,8 +27,37 @@ namespace Shipyard
         static constexpr uint32_t ms_NumElements = ((NumBits + NUM_BITS_PER_BITFIELD_ELEMENT - 1) / NUM_BITS_PER_BITFIELD_ELEMENT);
 
     public:
-        Bitfield(bool setAllBits = false)
+        Bitfield(BaseAllocator* pAllocator = nullptr)
+            : m_pAllocator(pAllocator)
+            , m_BitField(nullptr)
+            , m_MemoryOwned(false)
         {
+            if (pAllocator == nullptr)
+            {
+                m_pAllocator = &GlobalAllocator::GetInstance();
+            }
+        }
+
+        ~Bitfield()
+        {
+            if (m_MemoryOwned)
+            {
+                SHIP_FREE_EX(m_pAllocator, m_BitField);
+            }
+        }
+
+        bool Create(bool setAllBits = false)
+        {
+            size_t requiredSize = sizeof(BitfieldType) * ms_NumElements;
+
+            m_BitField = reinterpret_cast<BitfieldType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, alignment));
+            if (m_BitField == nullptr)
+            {
+                return false;
+            }
+
+            m_MemoryOwned = true;
+
             if (setAllBits)
             {
                 SetAllBits();
@@ -35,6 +66,8 @@ namespace Shipyard
             {
                 Clear();
             }
+
+            return true;
         }
 
         void Clear()
@@ -295,7 +328,69 @@ namespace Shipyard
             }
         }
 
+        // Assumed to be at least sizeof(BitfieldType) * ms_NumElements bytes.
+        void SetUserPointer(BitfieldType* pUserPtr)
+        {
+            if (m_MemoryOwned)
+            {
+                SHIP_FREE_EX(m_pAllocator, m_BitField);
+            }
+
+            m_BitField = pUserPtr;
+
+            m_MemoryOwned = false;
+        }
+
+        void SetAllocator(BaseAllocator* pAllocator)
+        {
+            if (pAllocator == m_pAllocator)
+            {
+                return;
+            }
+
+            if (m_MemoryOwned)
+            {
+                size_t requiredSize = sizeof(BitfieldType) * ms_NumElements;
+                BitfieldType* pNewBitfield = reinterpret_cast<BitfieldType*>(SHIP_ALLOC_EX(pAllocator, requiredSize, alignment));
+
+                for (uint32_t i = 0; i < ms_NumElements; i++)
+                {
+                    pNewBitfield[i] = m_BitField[i];
+                }
+
+                SHIP_FREE_EX(m_pAllocator, m_BitField);
+
+                m_BitField = pNewBitfield;
+            }
+
+            m_pAllocator = pAllocator;
+        }
+
     private:
-        BitfieldType m_BitField[ms_NumElements];
+        BaseAllocator* m_pAllocator;
+        BitfieldType* m_BitField;
+        bool m_MemoryOwned;
+    };
+
+    template <uint32_t NumBits, size_t alignment = SHIP_CHACHE_LINE_SIZE>
+    class InplaceBitfield : public Bitfield<NumBits, alignment>
+    {
+    public:
+        InplaceBitfield(bool setAllBits = false)
+        {
+            this->SetUserPointer(m_StackBitfield);
+
+            if (setAllBits)
+            {
+                SetAllBits();
+            }
+            else
+            {
+                Clear();
+            }
+        }
+
+    private:
+        BitfieldType m_StackBitfield[ms_NumElements];
     };
 }

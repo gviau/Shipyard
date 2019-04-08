@@ -690,15 +690,15 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         // One last time, to make sure we can properly realloc after last case
         deallocationPatternTestCase(0, 1, 2, 4, 4, 4);
 
-        deallocationPatternTestCase(0, 1, 2, 4, 5, 13);
-        deallocationPatternTestCase(1, 2, 0, 4, 5, 13);
-        deallocationPatternTestCase(2, 1, 0, 4, 5, 13);
-        deallocationPatternTestCase(2, 0, 1, 4, 5, 13);
-        deallocationPatternTestCase(0, 2, 1, 4, 5, 13);
-        deallocationPatternTestCase(1, 0, 2, 4, 5, 13);
+        deallocationPatternTestCase(0, 1, 2, 4, 8, 16);
+        deallocationPatternTestCase(1, 2, 0, 4, 8, 16);
+        deallocationPatternTestCase(2, 1, 0, 4, 8, 16);
+        deallocationPatternTestCase(2, 0, 1, 4, 8, 16);
+        deallocationPatternTestCase(0, 2, 1, 4, 8, 16);
+        deallocationPatternTestCase(1, 0, 2, 4, 8, 16);
 
         // One last time, to make sure we can properly realloc after last case
-        deallocationPatternTestCase(0, 1, 2, 4, 5, 13);
+        deallocationPatternTestCase(0, 1, 2, 4, 8, 16);
     }
 
     SECTION("four allocations")
@@ -813,29 +813,29 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         // One last time, to make sure we can properly realloc after last case
         deallocationPatternTestCase(0, 1, 2, 3, 4, 4, 4, 4);
 
-        deallocationPatternTestCase(0, 1, 2, 3, 4, 5, 13, 31);
-        deallocationPatternTestCase(1, 2, 3, 0, 4, 5, 13, 31);
-        deallocationPatternTestCase(2, 3, 0, 1, 4, 5, 13, 31);
-        deallocationPatternTestCase(3, 0, 1, 2, 4, 5, 13, 31);
-        deallocationPatternTestCase(0, 2, 1, 3, 4, 5, 13, 31);
-        deallocationPatternTestCase(2, 1, 3, 0, 4, 5, 13, 31);
-        deallocationPatternTestCase(1, 3, 0, 2, 4, 5, 13, 31);
-        deallocationPatternTestCase(3, 0, 2, 1, 4, 5, 13, 31);
-        deallocationPatternTestCase(0, 1, 3, 2, 4, 5, 13, 31);
-        deallocationPatternTestCase(1, 3, 2, 0, 4, 5, 13, 31);
-        deallocationPatternTestCase(3, 2, 0, 1, 4, 5, 13, 31);
-        deallocationPatternTestCase(2, 0, 1, 3, 4, 5, 13, 31);
-        deallocationPatternTestCase(3, 1, 2, 0, 4, 5, 13, 31);
-        deallocationPatternTestCase(1, 2, 0, 3, 4, 5, 13, 31);
-        deallocationPatternTestCase(2, 0, 3, 1, 4, 5, 13, 31);
-        deallocationPatternTestCase(0, 3, 1, 2, 4, 5, 13, 31);
-        deallocationPatternTestCase(3, 2, 1, 0, 4, 5, 13, 31);
-        deallocationPatternTestCase(2, 1, 0, 3, 4, 5, 13, 31);
-        deallocationPatternTestCase(1, 0, 3, 2, 4, 5, 13, 31);
-        deallocationPatternTestCase(0, 3, 2, 1, 4, 5, 13, 31);
+        deallocationPatternTestCase(0, 1, 2, 3, 4, 8, 16, 32);
+        deallocationPatternTestCase(1, 2, 3, 0, 4, 8, 16, 32);
+        deallocationPatternTestCase(2, 3, 0, 1, 4, 8, 16, 32);
+        deallocationPatternTestCase(3, 0, 1, 2, 4, 8, 16, 32);
+        deallocationPatternTestCase(0, 2, 1, 3, 4, 8, 16, 32);
+        deallocationPatternTestCase(2, 1, 3, 0, 4, 8, 16, 32);
+        deallocationPatternTestCase(1, 3, 0, 2, 4, 8, 16, 32);
+        deallocationPatternTestCase(3, 0, 2, 1, 4, 8, 16, 32);
+        deallocationPatternTestCase(0, 1, 3, 2, 4, 8, 16, 32);
+        deallocationPatternTestCase(1, 3, 2, 0, 4, 8, 16, 32);
+        deallocationPatternTestCase(3, 2, 0, 1, 4, 8, 16, 32);
+        deallocationPatternTestCase(2, 0, 1, 3, 4, 8, 16, 32);
+        deallocationPatternTestCase(3, 1, 2, 0, 4, 8, 16, 32);
+        deallocationPatternTestCase(1, 2, 0, 3, 4, 8, 16, 32);
+        deallocationPatternTestCase(2, 0, 3, 1, 4, 8, 16, 32);
+        deallocationPatternTestCase(0, 3, 1, 2, 4, 8, 16, 32);
+        deallocationPatternTestCase(3, 2, 1, 0, 4, 8, 16, 32);
+        deallocationPatternTestCase(2, 1, 0, 3, 4, 8, 16, 32);
+        deallocationPatternTestCase(1, 0, 3, 2, 4, 8, 16, 32);
+        deallocationPatternTestCase(0, 3, 2, 1, 4, 8, 16, 32);
 
         // One last time, to make sure we can properly realloc after last case
-        deallocationPatternTestCase(0, 1, 2, 3, 4, 5, 13, 31);
+        deallocationPatternTestCase(0, 1, 2, 3, 4, 8, 16, 32);
     }
 
     SECTION("Array allocations")
@@ -904,29 +904,29 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         // One last time, to make sure we can properly realloc after last case
         deallocationPatternTestCase(0, 1, 2, 3, 4, 4, 4, 4);
 
-        deallocationPatternTestCase(0, 1, 2, 3, 4, 5, 13, 31);
-        deallocationPatternTestCase(1, 2, 3, 0, 4, 5, 13, 31);
-        deallocationPatternTestCase(2, 3, 0, 1, 4, 5, 13, 31);
-        deallocationPatternTestCase(3, 0, 1, 2, 4, 5, 13, 31);
-        deallocationPatternTestCase(0, 2, 1, 3, 4, 5, 13, 31);
-        deallocationPatternTestCase(2, 1, 3, 0, 4, 5, 13, 31);
-        deallocationPatternTestCase(1, 3, 0, 2, 4, 5, 13, 31);
-        deallocationPatternTestCase(3, 0, 2, 1, 4, 5, 13, 31);
-        deallocationPatternTestCase(0, 1, 3, 2, 4, 5, 13, 31);
-        deallocationPatternTestCase(1, 3, 2, 0, 4, 5, 13, 31);
-        deallocationPatternTestCase(3, 2, 0, 1, 4, 5, 13, 31);
-        deallocationPatternTestCase(2, 0, 1, 3, 4, 5, 13, 31);
-        deallocationPatternTestCase(3, 1, 2, 0, 4, 5, 13, 31);
-        deallocationPatternTestCase(1, 2, 0, 3, 4, 5, 13, 31);
-        deallocationPatternTestCase(2, 0, 3, 1, 4, 5, 13, 31);
-        deallocationPatternTestCase(0, 3, 1, 2, 4, 5, 13, 31);
-        deallocationPatternTestCase(3, 2, 1, 0, 4, 5, 13, 31);
-        deallocationPatternTestCase(2, 1, 0, 3, 4, 5, 13, 31);
-        deallocationPatternTestCase(1, 0, 3, 2, 4, 5, 13, 31);
-        deallocationPatternTestCase(0, 3, 2, 1, 4, 5, 13, 31);
+        deallocationPatternTestCase(0, 1, 2, 3, 4, 8, 16, 32);
+        deallocationPatternTestCase(1, 2, 3, 0, 4, 8, 16, 32);
+        deallocationPatternTestCase(2, 3, 0, 1, 4, 8, 16, 32);
+        deallocationPatternTestCase(3, 0, 1, 2, 4, 8, 16, 32);
+        deallocationPatternTestCase(0, 2, 1, 3, 4, 8, 16, 32);
+        deallocationPatternTestCase(2, 1, 3, 0, 4, 8, 16, 32);
+        deallocationPatternTestCase(1, 3, 0, 2, 4, 8, 16, 32);
+        deallocationPatternTestCase(3, 0, 2, 1, 4, 8, 16, 32);
+        deallocationPatternTestCase(0, 1, 3, 2, 4, 8, 16, 32);
+        deallocationPatternTestCase(1, 3, 2, 0, 4, 8, 16, 32);
+        deallocationPatternTestCase(3, 2, 0, 1, 4, 8, 16, 32);
+        deallocationPatternTestCase(2, 0, 1, 3, 4, 8, 16, 32);
+        deallocationPatternTestCase(3, 1, 2, 0, 4, 8, 16, 32);
+        deallocationPatternTestCase(1, 2, 0, 3, 4, 8, 16, 32);
+        deallocationPatternTestCase(2, 0, 3, 1, 4, 8, 16, 32);
+        deallocationPatternTestCase(0, 3, 1, 2, 4, 8, 16, 32);
+        deallocationPatternTestCase(3, 2, 1, 0, 4, 8, 16, 32);
+        deallocationPatternTestCase(2, 1, 0, 3, 4, 8, 16, 32);
+        deallocationPatternTestCase(1, 0, 3, 2, 4, 8, 16, 32);
+        deallocationPatternTestCase(0, 3, 2, 1, 4, 8, 16, 32);
 
         // One last time, to make sure we can properly realloc after last case
-        deallocationPatternTestCase(0, 1, 2, 3, 4, 5, 13, 31);
+        deallocationPatternTestCase(0, 1, 2, 3, 4, 8, 16, 32);
 
     }
 

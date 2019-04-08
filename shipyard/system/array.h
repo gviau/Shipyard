@@ -439,7 +439,16 @@ namespace Shipyard
                 newArray[i] = m_Array[i];
             }
 
-            Clear();
+            if ((m_ArraySizeAndCapacity & BORROWED_MEMORY_FLAG) == 0)
+            {
+                uint32_t currentCapacity = Capacity();
+                for (uint32_t i = 0; i < currentCapacity; i++)
+                {
+                    m_Array[i].~T();
+                }
+
+                SHIP_FREE_EX(m_pAllocator, m_Array);
+            }
 
             m_Array = newArray;
 
@@ -547,7 +556,16 @@ namespace Shipyard
                     pNewArray[i] = m_Array[i];
                 }
 
-                Clear();
+                if ((m_ArraySizeAndCapacity & BORROWED_MEMORY_FLAG) == 0)
+                {
+                    uint32_t currentCapacity = Capacity();
+                    for (uint32_t i = 0; i < currentCapacity; i++)
+                    {
+                        m_Array[i].~T();
+                    }
+
+                    SHIP_FREE_EX(m_pAllocator, m_Array);
+                }
 
                 m_Array = pNewArray;
             }
@@ -869,7 +887,12 @@ namespace Shipyard
                 newArray[i] = m_Array[i];
             }
 
-            Clear();
+            for (uint32_t i = 0; i < m_Capacity; i++)
+            {
+                m_Array[i].~T();
+            }
+
+            SHIP_FREE_EX(m_pAllocator, m_Array);
 
             m_Array = newArray;
 
@@ -947,7 +970,12 @@ namespace Shipyard
                 pNewArray[i] = m_Array[i];
             }
 
-            Clear();
+            for (uint32_t i = 0; i < m_Capacity; i++)
+            {
+                m_Array[i].~T();
+            }
+
+            SHIP_FREE_EX(m_pAllocator, m_Array);
 
             m_Array = pNewArray;
             m_pAllocator = pAllocator;

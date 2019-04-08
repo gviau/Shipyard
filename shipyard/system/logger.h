@@ -6,8 +6,6 @@
 
 #ifdef SHIP_ENABLE_LOGGING
 
-#include <system/singleton.h>
-
 #include <system/string.h>
 
 #include <fstream>
@@ -28,15 +26,16 @@ namespace Shipyard
         LogLevel_FullLog = (LogLevel_Debug | LogLevel_Info | LogLevel_Warning | LogLevel_Error)
     };
 
-    class SHIPYARD_API Logger : public Singleton<Logger>
+    class SHIPYARD_API Logger
     {
-        friend class Singleton<Logger>;
-
     public:
-        Logger();
-        virtual ~Logger();
+        static Logger& GetInstance()
+        {
+            static Logger s_Logger;
+            return s_Logger;
+        }
 
-        bool OpenLog(const StringA& logFilename);
+        bool OpenLog(const char* pLogFilename);
         void CloseLog();
 
         void SetLogLevel(LogLevel logLevel);
@@ -47,6 +46,13 @@ namespace Shipyard
         void LogError(const char* pMessage, ...);
 
     private:
+        Logger();
+        ~Logger();
+
+        Logger(const Logger& src) = delete;
+        Logger(const Logger&& src) = delete;
+        Logger& operator= (const Logger& rhs) = delete;
+
         std::ofstream m_LogFile;
         LogLevel m_LogLevel;
 

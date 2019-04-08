@@ -18,11 +18,11 @@ Logger::~Logger()
     CloseLog();
 }
 
-bool Logger::OpenLog(const StringA& logFilename)
+bool Logger::OpenLog(const char* pLogFilename)
 {
     CloseLog();
 
-    m_LogFile.open(logFilename.GetBuffer(), std::ios_base::ate | std::ios_base::out);
+    m_LogFile.open(pLogFilename, std::ios_base::ate | std::ios_base::out);
     if (!m_LogFile.is_open())
     {
         return false;
@@ -61,6 +61,11 @@ void Log(std::ofstream& file, const char* pHeader, const char* pMessage, va_list
     vsnprintf_s(pBuffer, maxCount, maxCount - 1, pMessage, argPtr);
 
     file << currentTime.GetBuffer() << pHeader << pBuffer << std::endl;
+
+    char outputBuffer[8192];
+    sprintf_s(outputBuffer, "%s%s\n", pHeader, pBuffer);
+
+    OutputDebugString(outputBuffer);
 }
 
 void Logger::LogDebug(const char* pMessage, ...)

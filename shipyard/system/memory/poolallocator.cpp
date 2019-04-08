@@ -3,6 +3,10 @@
 #include <system/logger.h>
 #include <system/systemdebug.h>
 
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+#include <system/memory/debugallocator.h>
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
 namespace Shipyard
 {;
 
@@ -150,6 +154,8 @@ void* PoolAllocator::Allocate(size_t size, size_t alignment
     m_MemoryInfo.numBytesUsed += m_ChunkSize;
     m_MemoryInfo.numUserBytesAllocated += m_ChunkSize;
     m_MemoryInfo.peakUserBytesAllocated = MAX(m_MemoryInfo.peakUserBytesAllocated, m_MemoryInfo.numUserBytesAllocated);
+
+    DebugAllocator::GetInstance().Allocate(this, pChunkCandidate, m_ChunkSize, pAllocationFilename, allocationLineNumber);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
     return pChunkCandidate;
@@ -170,9 +176,13 @@ void PoolAllocator::Deallocate(void* memory)
     m_pFirstFreeChunk = pNewFreeChunk;
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+    SHIP_ASSERT(m_MemoryInfo.numBlocksAllocated > 0);
+
     m_MemoryInfo.numBlocksAllocated -= 1;
     m_MemoryInfo.numBytesUsed -= m_ChunkSize;
     m_MemoryInfo.numUserBytesAllocated -= m_ChunkSize;
+
+    DebugAllocator::GetInstance().Deallocate(memory);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
 }

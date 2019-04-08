@@ -34,6 +34,10 @@ namespace Shipyard
         BaseAllocator()
             : m_pHeap(nullptr)
             , m_HeapSize(0)
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+            , m_pAllocatorDebugName("Unammed allocator")
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         {
         }
 
@@ -53,9 +57,18 @@ namespace Shipyard
         const void* GetHeap() const { return m_pHeap; }
         size_t GetHeapSize() const { return m_HeapSize; }
 
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+        void SetAllocatorDebugName(const char* pAllocatorDebugName) { m_pAllocatorDebugName = pAllocatorDebugName; }
+        const char* GetAllocatorDebugName() const { return m_pAllocatorDebugName; }
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
     protected:
         void* m_pHeap;
         size_t m_HeapSize;
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+        const char* m_pAllocatorDebugName;
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
     };
 }
 

@@ -53,16 +53,6 @@ namespace Shipyard
         {
             void* pStartOfMemoryAllocationHeaderIncludingAlignmentPadding = nullptr;
             size_t userAllocationRegionSizeInBytes = 0;
-
-#ifdef SHIP_ALLOCATOR_DEBUG_INFO
-            MemoryAllocationHeader* pNextHeader = nullptr;
-            MemoryAllocationHeader* pPreviousHeader = nullptr;
-
-            const char* pAllocationFilename = nullptr;
-            int allocationLineNumber = 0;
-
-            char pad[4];
-#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         };
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
@@ -89,8 +79,6 @@ namespace Shipyard
         std::mutex m_Lock;
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
-        MemoryAllocationHeader* m_pAllocatedBlockHead;
-
         MemoryInfo m_MemoryInfo;
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
     };

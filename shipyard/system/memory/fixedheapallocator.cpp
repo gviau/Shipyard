@@ -15,10 +15,6 @@ const size_t FixedHeapAllocator::MemoryAllocationHeaderSize = sizeof(MemoryAlloc
 
 FixedHeapAllocator::FixedHeapAllocator()
     : m_pFirstFreeMemoryBlock(nullptr)
-
-#ifdef SHIP_ALLOCATOR_DEBUG_INFO
-    , m_pAllocatedBlockHead(nullptr)
-#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 {
 }
 
@@ -66,20 +62,6 @@ bool FixedHeapAllocator::Create(void* pHeap, size_t heapSize)
 
 void FixedHeapAllocator::Destroy()
 {
-#ifdef SHIP_ALLOCATOR_DEBUG_INFO
-    if (m_MemoryInfo.numBlocksAllocated != 0)
-    {
-        SHIP_ASSERT(m_pAllocatedBlockHead != nullptr);
-
-        SHIP_LOG_ERROR("***** Memory leaks detected! *****");
-
-        for (MemoryAllocationHeader* pCurrentMemoryLeak = m_pAllocatedBlockHead; pCurrentMemoryLeak != nullptr; pCurrentMemoryLeak = pCurrentMemoryLeak->pNextHeader)
-        {
-            SHIP_LOG_ERROR("    Memory leak of %llu bytes --> \t%s (line %d)", pCurrentMemoryLeak->userAllocationRegionSizeInBytes, pCurrentMemoryLeak->pAllocationFilename, pCurrentMemoryLeak->allocationLineNumber);
-        }
-    }
-#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
-
     m_pHeap = nullptr;
     m_HeapSize = 0;
 }
@@ -217,19 +199,6 @@ void* FixedHeapAllocator::Allocate(size_t size, size_t alignment
         pNewMemoryAllocationHeader->userAllocationRegionSizeInBytes = size;
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
-        pNewMemoryAllocationHeader->pAllocationFilename = pAllocationFilename;
-        pNewMemoryAllocationHeader->allocationLineNumber = allocationLineNumber;
-
-        pNewMemoryAllocationHeader->pPreviousHeader = nullptr;
-        pNewMemoryAllocationHeader->pNextHeader = m_pAllocatedBlockHead;
-
-        if (m_pAllocatedBlockHead != nullptr)
-        {
-            m_pAllocatedBlockHead->pPreviousHeader = pNewMemoryAllocationHeader;
-        }
-
-        m_pAllocatedBlockHead = pNewMemoryAllocationHeader;
-
         m_MemoryInfo.numBlocksAllocated += 1;
         m_MemoryInfo.numBytesUsed += requiredSize + ((canCreateNewFreeBlock) ? 0 : remainingSizeForFreeBlock);
         m_MemoryInfo.numUserBytesAllocated += size;
@@ -264,10 +233,6 @@ void FixedHeapAllocator::Deallocate(void* memory)
 
     SHIP_ASSERT_MSG(size_t(m_pHeap) <= size_t(memory) && (size_t(m_pHeap) + size_t(m_HeapSize)) >= size_t(memory), "FixedHeapAllocator::Deallocate --> Memory address %p was not allocated from allocator %p", memory, this);
 
-#ifdef SHIP_ALLOCATOR_DEBUG_INFO
-    SHIP_ASSERT_MSG(m_pAllocatedBlockHead != nullptr, "FixedHeapAllocator::Deallocator --> Absolutely no blocks are allocated in allocator %p", this);
-#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
-
     size_t addressOfMemoryAllocationHeader = size_t(memory) - sizeof(MemoryAllocationHeader);
     MemoryAllocationHeader* pMemoryAllocationHeader = reinterpret_cast<MemoryAllocationHeader*>(addressOfMemoryAllocationHeader);
 
@@ -280,21 +245,6 @@ void FixedHeapAllocator::Deallocate(void* memory)
     m_MemoryInfo.numBlocksAllocated -= 1;
     m_MemoryInfo.numBytesUsed -= sizeOfNewFreeBlockInBytesIncludingThisHeader;
     m_MemoryInfo.numUserBytesAllocated -= pMemoryAllocationHeader->userAllocationRegionSizeInBytes;
-
-    if (m_pAllocatedBlockHead == pMemoryAllocationHeader)
-    {
-        m_pAllocatedBlockHead = pMemoryAllocationHeader->pNextHeader;
-    }
-
-    if (pMemoryAllocationHeader->pNextHeader != nullptr)
-    {
-        pMemoryAllocationHeader->pNextHeader->pPreviousHeader = pMemoryAllocationHeader->pPreviousHeader;
-    }
-
-    if (pMemoryAllocationHeader->pPreviousHeader != nullptr)
-    {
-        pMemoryAllocationHeader->pPreviousHeader->pNextHeader = pMemoryAllocationHeader->pNextHeader;
-    }
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
     pNewFreeMemoryBlock->sizeOfBlockInBytesIncludingThisHeader = sizeOfNewFreeBlockInBytesIncludingThisHeader;

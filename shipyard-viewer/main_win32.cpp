@@ -14,6 +14,10 @@
 #include <system/memory/fixedheapallocator.h>
 #include <system/memory/poolallocator.h>
 
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+#include <system/memory/debugallocator.h>
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+
 #include <system/singletonstorer.h>
 
 #include <windows.h>
@@ -49,8 +53,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
+#include <signal.h>
+
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
+    signal(SIGABRT, [](int)
+    {
+        __debugbreak();
+    });
+
     WNDCLASSEX wndClass;
     ZeroMemory(&wndClass, sizeof(wndClass));
     wndClass.cbSize = sizeof(WNDCLASSEX);
@@ -100,6 +111,18 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     poolAllocator32.Create(pHeap32, numChunks, 32);
     poolAllocator64.Create(pHeap64, numChunks, 64);
     fixedHeapAllocator.Create(pFixedHeap, fixedHeapSize);
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+    size_t debugHeapSize = 32 * 1024 * 1024;
+    void* pDebugHeap = malloc(debugHeapSize);
+
+    Shipyard::DebugAllocator::GetInstance().Create(pDebugHeap, debugHeapSize);
+
+    poolAllocator16.SetAllocatorDebugName("PoolAllocator 16 bytes");
+    poolAllocator32.SetAllocatorDebugName("PoolAllocator 32 bytes");
+    poolAllocator64.SetAllocatorDebugName("PoolAllocator 64 bytes");
+    fixedHeapAllocator.SetAllocatorDebugName("FixedHeapAllocator");
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
     Shipyard::GlobalAllocator::AllocatorInitEntry allocatorInitEntries[4];
     allocatorInitEntries[0].pAllocator = &poolAllocator16;
@@ -304,7 +327,13 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
         delete pGfxRenderDevice;
 
-        }
+    }
+
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+    Shipyard::DebugAllocator::GetInstance().Destroy();
+
+    free(pDebugHeap);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
     fixedHeapAllocator.Destroy();
     poolAllocator64.Destroy();
@@ -312,6 +341,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     poolAllocator16.Destroy();
 
     Shipyard::GlobalAllocator::GetInstance().Destroy();
+
+    free(pHeap);
 
     return 0;
 }

@@ -137,12 +137,14 @@ void GlobalAllocator::Deallocate(void* memory)
     {
         AllocatorAddressRange& allocatorAddressRange = m_pAllocators[i];
 
-        if (memoryAddress >= allocatorAddressRange.startingAddressBytes && memoryAddress <= allocatorAddressRange.endingAddressBytes)
+        if (memoryAddress >= allocatorAddressRange.startingAddressBytes && memoryAddress < allocatorAddressRange.endingAddressBytes)
         {
             allocatorAddressRange.pAllocator->Deallocate(memory);
-            break;
+            return;
         }
     }
+
+    SHIP_ASSERT(false);
 }
 
 }

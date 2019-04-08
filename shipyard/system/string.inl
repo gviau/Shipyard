@@ -111,7 +111,7 @@ String<CharType>::String(const String<CharType>& src)
 template <typename CharType>
 String<CharType>::~String()
 {
-    SHIP_FREE_EX(m_pAllocator, m_Buffer);
+    Clear();
 }
 
 template <typename CharType>

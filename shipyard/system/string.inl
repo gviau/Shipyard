@@ -96,17 +96,25 @@ String<CharType>::String(const CharType* sz, size_t numChars, BaseAllocator* pAl
 template <typename CharType>
 String<CharType>::String(const String<CharType>& src)
     : m_pAllocator(src.m_pAllocator)
+    , m_Buffer(nullptr)
     , m_OwnMemory(true)
 {
-    m_NumChars = src.m_NumChars;
-    m_Capacity = src.m_Capacity;
+    if (src.m_OwnMemory)
+    {
+        m_NumChars = src.m_NumChars;
+        m_Capacity = src.m_Capacity;
 
-    size_t requiredSize = sizeof(CharType) * m_Capacity;
-    m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
 
-    memcpy(m_Buffer, src.m_Buffer, m_NumChars);
+        memcpy(m_Buffer, src.m_Buffer, m_NumChars);
 
-    m_Buffer[m_NumChars] = '\0';
+        m_Buffer[m_NumChars] = '\0';
+    }
+    else
+    {
+        SetUserPointer(src.m_Buffer, uint32_t(src.m_Capacity));
+    }
 }
 
 template <typename CharType>
@@ -1036,8 +1044,9 @@ size_t String<CharType>::FindIndexOfFirstCaseInsensitive(const String<CharType>&
     }
 
     size_t numCharsToSearch = (m_NumChars - numCharsToIgnoreInSearch);
+    size_t endPos = (startingPos + numCharsToSearch);
 
-    for (size_t i = startingPos; i < numCharsToSearch; i++)
+    for (size_t i = startingPos; i < endPos; i++)
     {
         bool foundString = true;
 
@@ -1075,8 +1084,9 @@ size_t String<CharType>::FindIndexOfFirstCaseInsensitive(const CharType* strToFi
     }
 
     size_t numCharsToSearch = (m_NumChars - numCharsToIgnoreInSearch);
+    size_t endPos = (startingPos + numCharsToSearch);
 
-    for (size_t i = startingPos; i < numCharsToSearch; i++)
+    for (size_t i = startingPos; i < endPos; i++)
     {
         bool foundString = true;
 
@@ -1544,6 +1554,7 @@ template <typename CharType, size_t numChars>
 InplaceString<CharType, numChars>::InplaceString(const CharType* sz, BaseAllocator* pAllocator)
     : String<CharType>(nullptr, pAllocator)
 {
+    m_StackBuffer[0] = '\0';
     this->SetUserPointer(m_StackBuffer, numChars);
 
     m_NumChars = strlen(sz);
@@ -1573,6 +1584,7 @@ InplaceString<CharType, numChars>::InplaceString(const String<CharType>& src)
 {
     SetAllocator(src.GetAllocator());
 
+    m_StackBuffer[0] = '\0';
     this->SetUserPointer(m_StackBuffer, numChars);
 
     Resize(src.Size());

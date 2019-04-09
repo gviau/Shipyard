@@ -1513,6 +1513,12 @@ void String<CharType>::SetAllocator(BaseAllocator* pAllocator)
 }
 
 template <typename CharType>
+BaseAllocator* String<CharType>::GetAllocator() const
+{
+    return m_pAllocator;
+}
+
+template <typename CharType>
 void String<CharType>::SetUserPointer(CharType* userArray, uint32_t stringSize)
 {
     Clear();
@@ -1562,32 +1568,28 @@ InplaceString<CharType, numChars>::InplaceString(const CharType* sz, BaseAllocat
 }
 
 template <typename CharType, size_t numChars>
+InplaceString<CharType, numChars>::InplaceString(const String<CharType>& src)
+    : StringA(nullptr, nullptr)
+{
+    SetAllocator(src.GetAllocator());
+
+    this->SetUserPointer(m_StackBuffer, numChars);
+
+    Resize(src.Size());
+
+    Assign(src.GetBuffer());
+}
+
+template <typename CharType, size_t numChars>
 InplaceString<CharType, numChars>& InplaceString<CharType, numChars>::operator= (const String <CharType>& rhs)
 {
     if (&rhs != this)
     {
-        m_NumChars = rhs.m_NumChars;
+        Clear();
 
-        if (m_NumChars >= m_Capacity || m_pAllocator != rhs.m_pAllocator)
-        {
-            if (m_OwnMemory)
-            {
-                SHIP_FREE_EX(m_pAllocator, m_Buffer);
-            }
+        m_pAllocator = rhs.GetAllocator();
 
-            m_pAllocator = rhs.m_pAllocator;
-
-            m_Capacity = rhs.m_Capacity;
-
-            size_t requiredSize = sizeof(CharType) * m_Capacity;
-            m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
-
-            m_OwnMemory = true;
-        }
-
-        memcpy(m_Buffer, rhs.m_Buffer, m_NumChars);
-
-        m_Buffer[m_NumChars] = '\0';
+        Assign(rhs.GetBuffer());
     }
 
     return *this;

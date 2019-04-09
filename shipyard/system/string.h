@@ -114,6 +114,7 @@ namespace Shipyard
         bool operator!= (const CharType* rhs) const;
 
         void SetAllocator(BaseAllocator* pAllocator);
+        BaseAllocator* GetAllocator() const;
 
         void SetUserPointer(CharType* userArray, uint32_t stringSize);
 
@@ -131,6 +132,7 @@ namespace Shipyard
     public:
         explicit InplaceString(BaseAllocator* pAllocator = nullptr);
         InplaceString(const CharType* sz, BaseAllocator* pAllocator = nullptr);
+        InplaceString(const String<CharType>& src);
 
         InplaceString& operator= (const String& rhs);
         InplaceString& operator= (const CharType* rhs);
@@ -155,6 +157,11 @@ namespace Shipyard
     using SmallInplaceStringA = InplaceStringA<gs_SmallStringSize>;
     using MediumInplaceStringA = InplaceStringA<gs_MediumStringSize>;
     using LargeInplaceStringA = InplaceStringA<gs_LargeStringSize>;
+
+    using TinyInplaceStringT = InplaceStringT<gs_TinyStringSize>;
+    using SmallInplaceStringT = InplaceStringT<gs_SmallStringSize>;
+    using MediumInplaceStringT = InplaceStringT<gs_MediumStringSize>;
+    using LargeInplaceStringT = InplaceStringT<gs_LargeStringSize>;
 }
 
 #include <system/string.inl>

@@ -115,15 +115,46 @@ namespace Shipyard
 
         void SetAllocator(BaseAllocator* pAllocator);
 
+        void SetUserPointer(CharType* userArray, uint32_t stringSize);
+
     protected:
         BaseAllocator* m_pAllocator;
         CharType* m_Buffer;
         size_t m_NumChars;
         size_t m_Capacity;
+        bool m_OwnMemory;
+    };
+
+    template <typename CharType, size_t numChars>
+    class InplaceString : public String<CharType>
+    {
+    public:
+        explicit InplaceString(BaseAllocator* pAllocator = nullptr);
+        InplaceString(const CharType* sz, BaseAllocator* pAllocator = nullptr);
+
+        InplaceString& operator= (const String& rhs);
+        InplaceString& operator= (const CharType* rhs);
+        InplaceString& operator= (CharType c);
+
+    private:
+        CharType m_StackBuffer[numChars];
     };
 
     using StringA = String<char>;
     using StringT = StringA;
+
+    template<size_t numChars> using InplaceStringA = InplaceString<char, numChars>;
+    template<size_t numChars> using InplaceStringT = InplaceStringA<numChars>;
+
+    static const size_t gs_TinyStringSize = 64;
+    static const size_t gs_SmallStringSize = 128;
+    static const size_t gs_MediumStringSize = 512;
+    static const size_t gs_LargeStringSize = 1024;
+
+    using TinyInplaceStringA = InplaceStringA<gs_TinyStringSize>;
+    using SmallInplaceStringA = InplaceStringA<gs_SmallStringSize>;
+    using MediumInplaceStringA = InplaceStringA<gs_MediumStringSize>;
+    using LargeInplaceStringA = InplaceStringA<gs_LargeStringSize>;
 }
 
 #include <system/string.inl>

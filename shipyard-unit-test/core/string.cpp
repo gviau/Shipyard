@@ -494,4 +494,48 @@ TEST_CASE("Test StringA", "[String]")
 
         fixedHeapAllocator.Destroy();
     }
+
+    SECTION("Inplace string")
+    {
+        Shipyard::InplaceStringA<32> inplaceString;
+
+        REQUIRE(inplaceString.Size() == 0);
+        REQUIRE(inplaceString.Capacity() == 32);
+
+        const char* pBuffer = inplaceString.GetBuffer();
+
+        inplaceString = "This is a test";
+
+        REQUIRE(inplaceString.Size() == 14);
+        REQUIRE(inplaceString.Capacity() == 32);
+        REQUIRE(inplaceString.GetBuffer() == pBuffer);
+        REQUIRE(inplaceString == "This is a test");
+
+        inplaceString += "123";
+
+        REQUIRE(inplaceString.Size() == 17);
+        REQUIRE(inplaceString.Capacity() == 32);
+        REQUIRE(inplaceString.GetBuffer() == pBuffer);
+        REQUIRE(inplaceString == "This is a test123");
+
+        inplaceString.Assign("This is another test");
+
+        REQUIRE(inplaceString.Size() == 20);
+        REQUIRE(inplaceString.Capacity() == 32);
+        REQUIRE(inplaceString.GetBuffer() == pBuffer);
+        REQUIRE(inplaceString == "This is another test");
+
+        inplaceString += " and this string makes go over our allocated inplace string.";
+
+        REQUIRE(inplaceString.Size() == 80);
+        REQUIRE(inplaceString.Capacity() == 81);
+        REQUIRE(inplaceString.GetBuffer() != pBuffer);
+        REQUIRE(inplaceString == "This is another test and this string makes go over our allocated inplace string.");
+
+        Shipyard::InplaceStringA<32> constructedInplaceString = "This is a test";
+
+        REQUIRE(constructedInplaceString.Size() == 14);
+        REQUIRE(constructedInplaceString.Capacity() == 32);
+        REQUIRE(constructedInplaceString == "This is a test");
+    }
 }

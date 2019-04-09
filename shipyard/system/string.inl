@@ -16,6 +16,7 @@ template <typename CharType>
 String<CharType>::String(BaseAllocator* pAllocator)
     : m_pAllocator(pAllocator)
     , m_Buffer(nullptr)
+    , m_OwnMemory(true)
 {
     if (pAllocator == nullptr)
     {
@@ -34,6 +35,7 @@ String<CharType>::String(BaseAllocator* pAllocator)
 template <typename CharType>
 String<CharType>::String(const CharType* sz, BaseAllocator* pAllocator)
     : m_pAllocator(pAllocator)
+    , m_OwnMemory(true)
 {
     if (pAllocator == nullptr)
     {
@@ -43,10 +45,8 @@ String<CharType>::String(const CharType* sz, BaseAllocator* pAllocator)
     if (sz == nullptr)
     {
         m_NumChars = 0;
-        m_Capacity = DefaultStringCapacity;
-
-        size_t requiredSize = sizeof(CharType) * m_Capacity;
-        m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+        m_Capacity = 0;
+        m_Buffer = nullptr;
     }
     else
     {
@@ -57,14 +57,15 @@ String<CharType>::String(const CharType* sz, BaseAllocator* pAllocator)
         m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
 
         memcpy(m_Buffer, sz, m_NumChars);
-    }
 
-    m_Buffer[m_NumChars] = '\0';
+        m_Buffer[m_NumChars] = '\0';
+    }
 }
 
 template <typename CharType>
 String<CharType>::String(const CharType* sz, size_t numChars, BaseAllocator* pAllocator)
     : m_pAllocator(pAllocator)
+    , m_OwnMemory(true)
 {
     if (pAllocator == nullptr)
     {
@@ -74,10 +75,9 @@ String<CharType>::String(const CharType* sz, size_t numChars, BaseAllocator* pAl
     if (sz == nullptr || numChars == 0)
     {
         m_NumChars = 0;
-        m_Capacity = 1;
+        m_Capacity = 0;
 
-        size_t requiredSize = sizeof(CharType) * m_Capacity;
-        m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+        m_Buffer = nullptr;
     }
     else
     {
@@ -88,14 +88,15 @@ String<CharType>::String(const CharType* sz, size_t numChars, BaseAllocator* pAl
         m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
 
         memcpy(m_Buffer, sz, m_NumChars);
-    }
 
-    m_Buffer[m_NumChars] = '\0';
+        m_Buffer[m_NumChars] = '\0';
+    }
 }
 
 template <typename CharType>
 String<CharType>::String(const String<CharType>& src)
     : m_pAllocator(src.m_pAllocator)
+    , m_OwnMemory(true)
 {
     m_NumChars = src.m_NumChars;
     m_Capacity = src.m_Capacity;
@@ -119,15 +120,24 @@ String<CharType>& String<CharType>::operator= (const String <CharType>& rhs)
 {
     if (&rhs != this)
     {
-        SHIP_FREE_EX(m_pAllocator, m_Buffer);
-
-        m_pAllocator = rhs.m_pAllocator;
-
         m_NumChars = rhs.m_NumChars;
-        m_Capacity = rhs.m_Capacity;
 
-        size_t requiredSize = sizeof(CharType) * m_Capacity;
-        m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+        if (m_NumChars >= m_Capacity || m_pAllocator != rhs.m_pAllocator)
+        {
+            if (m_OwnMemory)
+            {
+                SHIP_FREE_EX(m_pAllocator, m_Buffer);
+            }
+
+            m_pAllocator = rhs.m_pAllocator;
+
+            m_Capacity = rhs.m_Capacity;
+
+            size_t requiredSize = sizeof(CharType) * m_Capacity;
+            m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+
+            m_OwnMemory = true;
+        }
 
         memcpy(m_Buffer, rhs.m_Buffer, m_NumChars);
 
@@ -140,13 +150,22 @@ String<CharType>& String<CharType>::operator= (const String <CharType>& rhs)
 template <typename CharType>
 String<CharType>& String<CharType>::operator= (const CharType* rhs)
 {
-    SHIP_FREE_EX(m_pAllocator, m_Buffer);
-
     m_NumChars = strlen(rhs);
-    m_Capacity = m_NumChars + 1;
+    
+    if (m_NumChars >= m_Capacity)
+    {
+        if (m_OwnMemory)
+        {
+            SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        }
 
-    size_t requiredSize = sizeof(CharType) * m_Capacity;
-    m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+        m_Capacity = m_NumChars + 1;
+
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+
+        m_OwnMemory = true;
+    }
 
     memcpy(m_Buffer, rhs, m_NumChars);
 
@@ -158,13 +177,22 @@ String<CharType>& String<CharType>::operator= (const CharType* rhs)
 template <typename CharType>
 String<CharType>& String<CharType>::operator= (CharType c)
 {
-    SHIP_FREE_EX(m_pAllocator, m_Buffer);
-
     m_NumChars = 1;
-    m_Capacity = 2;
 
-    size_t requiredSize = sizeof(CharType) * m_Capacity;
-    m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+    if (m_NumChars >= m_Capacity)
+    {
+        if (m_OwnMemory)
+        {
+            SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        }
+
+        m_Capacity = 2;
+
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+
+        m_OwnMemory = true;
+    }
 
     m_Buffer[0] = c;
     m_Buffer[1] = '\0';
@@ -200,8 +228,13 @@ void String<CharType>::operator+= (const String<CharType>& rhs)
 
         memcpy(newBuffer, m_Buffer, m_NumChars);
 
-        SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        if (m_OwnMemory)
+        {
+            SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        }
+        
         m_Buffer = newBuffer;
+        m_OwnMemory = true;
     }
 
     memcpy(&m_Buffer[m_NumChars], rhs.m_Buffer, rhs.m_NumChars);
@@ -227,8 +260,13 @@ void String<CharType>::operator+= (const CharType* rhs)
 
         memcpy(newBuffer, m_Buffer, m_NumChars);
 
-        SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        if (m_OwnMemory)
+        {
+            SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        }
+
         m_Buffer = newBuffer;
+        m_OwnMemory = true;
     }
 
     memcpy(&m_Buffer[m_NumChars], rhs, numCharsToAdd);
@@ -252,8 +290,13 @@ void String<CharType>::operator+= (CharType c)
 
         memcpy(newBuffer, m_Buffer, m_NumChars);
 
-        SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        if (m_OwnMemory)
+        {
+            SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        }
+
         m_Buffer = newBuffer;
+        m_OwnMemory = true;
     }
 
     m_Buffer[m_NumChars] = c;
@@ -376,13 +419,22 @@ String<CharType> operator+ (CharType c, const String<CharType>& rhs)
 template <typename CharType>
 void String<CharType>::Assign(const CharType* sz, size_t numChars)
 {
-    SHIP_FREE_EX(m_pAllocator, m_Buffer);
-
     m_NumChars = numChars;
-    m_Capacity = m_NumChars + 1;
 
-    size_t requiredSize = sizeof(CharType) * m_Capacity;
-    m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+    if (m_NumChars >= m_Capacity)
+    {
+        if (m_OwnMemory)
+        {
+            SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        }
+
+        m_Capacity = m_NumChars + 1;
+
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+
+        m_OwnMemory = true;
+    }
 
     memcpy(m_Buffer, sz, m_NumChars);
 
@@ -409,8 +461,13 @@ void String<CharType>::Append(const CharType* sz, size_t numChars)
 
         memcpy(newBuffer, m_Buffer, m_NumChars);
 
-        SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        if (m_OwnMemory)
+        {
+            SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        }
+
         m_Buffer = newBuffer;
+        m_OwnMemory = true;
     }
 
     memcpy(&m_Buffer[m_NumChars], sz, numChars);
@@ -467,8 +524,13 @@ void String<CharType>::Insert(size_t pos, const String<CharType>& str)
             memcpy(&newBuffer[endInsertIdx], &m_Buffer[pos], numCharsToMove);
         }
 
-        SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        if (m_OwnMemory)
+        {
+            SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        }
+
         m_Buffer = newBuffer;
+        m_OwnMemory = true;
     }
 
     m_NumChars = newSize;
@@ -500,7 +562,20 @@ void String<CharType>::InsertSubstring(size_t pos, const String<CharType>& str, 
     {
         if (numCharsToMove > 0)
         {
-            memcpy(&m_Buffer[endInsertIdx], &m_Buffer[pos], numCharsToMove);
+            if (pos < endInsertIdx)
+            {
+                size_t endSrcPos = pos + numCharsToMove;
+                size_t endDestPos = endInsertIdx + numCharsToMove - 1;
+                for (size_t i = endSrcPos; i > 0; i--)
+                {
+                    size_t idx = i - 1;
+                    m_Buffer[endDestPos--] = m_Buffer[idx];
+                }
+            }
+            else
+            {
+                memcpy(&m_Buffer[endInsertIdx], &m_Buffer[pos], numCharsToMove);
+            }
         }
 
         memcpy(&m_Buffer[pos], &str.m_Buffer[substringPos], substringLength);
@@ -524,8 +599,13 @@ void String<CharType>::InsertSubstring(size_t pos, const String<CharType>& str, 
             memcpy(&newBuffer[endInsertIdx], &m_Buffer[pos], numCharsToMove);
         }
 
-        SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        if (m_OwnMemory)
+        {
+            SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        }
+        
         m_Buffer = newBuffer;
+        m_OwnMemory = true;
     }
 
     m_NumChars = newSize;
@@ -549,7 +629,20 @@ void String<CharType>::Insert(size_t pos, const CharType* str, size_t numChars)
     {
         if (numCharsToMove > 0)
         {
-            memcpy(&m_Buffer[endInsertIdx], &m_Buffer[pos], numCharsToMove);
+            if (pos < endInsertIdx)
+            {
+                size_t endSrcPos = pos + numCharsToMove;
+                size_t endDestPos = endInsertIdx + numCharsToMove - 1;
+                for (size_t i = endSrcPos; i > 0; i--)
+                {
+                    size_t idx = i - 1;
+                    m_Buffer[endDestPos--] = m_Buffer[idx];
+                }
+            }
+            else
+            {
+                memcpy(&m_Buffer[endInsertIdx], &m_Buffer[pos], numCharsToMove);
+            }
         }
 
         memcpy(&m_Buffer[pos], str, numChars);
@@ -573,8 +666,13 @@ void String<CharType>::Insert(size_t pos, const CharType* str, size_t numChars)
             memcpy(&newBuffer[endInsertIdx], &m_Buffer[pos], numCharsToMove);
         }
 
-        SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        if (m_OwnMemory)
+        {
+            SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        }
+        
         m_Buffer = newBuffer;
+        m_OwnMemory = true;
     }
 
     m_NumChars = newSize;
@@ -661,8 +759,13 @@ void String<CharType>::Resize(size_t newSize)
 
             memcpy(newBuffer, m_Buffer, m_NumChars);
 
-            SHIP_FREE_EX(m_pAllocator, m_Buffer);
+            if (m_OwnMemory)
+            {
+                SHIP_FREE_EX(m_pAllocator, m_Buffer);
+            }
+            
             m_Buffer = newBuffer;
+            m_OwnMemory = true;
         }
     }
 
@@ -686,22 +789,31 @@ void String<CharType>::Reserve(size_t newCapacity)
     size_t numCharsToCopy = MIN(newCapacity - 1, m_NumChars);
     memcpy(newBuffer, m_Buffer, numCharsToCopy);
 
-    SHIP_FREE_EX(m_pAllocator, m_Buffer);
+    if (m_OwnMemory)
+    {
+        SHIP_FREE_EX(m_pAllocator, m_Buffer);
+    }
+
     m_Buffer = newBuffer;
 
     m_NumChars = MIN(m_NumChars, newCapacity - 1);
 
     m_Buffer[m_NumChars] = '\0';
+    m_OwnMemory = true;
 }
 
 template <typename CharType>
 void String<CharType>::Clear()
 {
-    SHIP_FREE_EX(m_pAllocator, m_Buffer);
+    if (m_OwnMemory)
+    {
+        SHIP_FREE_EX(m_pAllocator, m_Buffer);
+    }
     
     m_Buffer = nullptr;
     m_NumChars = 0;
     m_Capacity = 0;
+    m_OwnMemory = false;
 }
 
 template <typename CharType>
@@ -1384,17 +1496,154 @@ void String<CharType>::SetAllocator(BaseAllocator* pAllocator)
         return;
     }
 
-    size_t requiredSize = sizeof(CharType) * m_Capacity;
-    CharType* pNewArray = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(pAllocator, requiredSize, 1));
+    if (m_OwnMemory)
+    {
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        CharType* pNewArray = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(pAllocator, requiredSize, 1));
 
-    memcpy(pNewArray, m_Buffer, m_NumChars);
+        memcpy(pNewArray, m_Buffer, m_NumChars);
 
-    SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        SHIP_FREE_EX(m_pAllocator, m_Buffer);
 
-    m_Buffer = pNewArray;
-    m_Buffer[m_NumChars] = '\0';
+        m_Buffer = pNewArray;
+        m_Buffer[m_NumChars] = '\0';
+    }
 
     m_pAllocator = pAllocator;
+}
+
+template <typename CharType>
+void String<CharType>::SetUserPointer(CharType* userArray, uint32_t stringSize)
+{
+    Clear();
+
+    m_Buffer = userArray;
+    m_NumChars = strlen(userArray);
+    m_Capacity = stringSize;
+
+    SHIP_ASSERT(m_NumChars < m_Capacity);
+
+    m_OwnMemory = false;
+}
+
+template <typename CharType, size_t numChars>
+InplaceString<CharType, numChars>::InplaceString(BaseAllocator* pAllocator)
+    : String<CharType>(nullptr, pAllocator)
+{
+    m_StackBuffer[0] = '\0';
+    this->SetUserPointer(m_StackBuffer, numChars);
+}
+
+template <typename CharType, size_t numChars>
+InplaceString<CharType, numChars>::InplaceString(const CharType* sz, BaseAllocator* pAllocator)
+    : String<CharType>(nullptr, pAllocator)
+{
+    this->SetUserPointer(m_StackBuffer, numChars);
+
+    m_NumChars = strlen(sz);
+    if (m_NumChars >= m_Capacity)
+    {
+        if (m_OwnMemory)
+        {
+            SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        }
+
+        m_Capacity = m_NumChars + 1;
+
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+
+        m_OwnMemory = true;
+    }
+
+    memcpy(m_Buffer, sz, m_NumChars);
+
+    m_Buffer[m_NumChars] = '\0';
+}
+
+template <typename CharType, size_t numChars>
+InplaceString<CharType, numChars>& InplaceString<CharType, numChars>::operator= (const String <CharType>& rhs)
+{
+    if (&rhs != this)
+    {
+        m_NumChars = rhs.m_NumChars;
+
+        if (m_NumChars >= m_Capacity || m_pAllocator != rhs.m_pAllocator)
+        {
+            if (m_OwnMemory)
+            {
+                SHIP_FREE_EX(m_pAllocator, m_Buffer);
+            }
+
+            m_pAllocator = rhs.m_pAllocator;
+
+            m_Capacity = rhs.m_Capacity;
+
+            size_t requiredSize = sizeof(CharType) * m_Capacity;
+            m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+
+            m_OwnMemory = true;
+        }
+
+        memcpy(m_Buffer, rhs.m_Buffer, m_NumChars);
+
+        m_Buffer[m_NumChars] = '\0';
+    }
+
+    return *this;
+}
+
+template <typename CharType, size_t numChars>
+InplaceString<CharType, numChars>& InplaceString<CharType, numChars>::operator= (const CharType* rhs)
+{
+    m_NumChars = strlen(rhs);
+
+    if (m_NumChars >= m_Capacity)
+    {
+        if (m_OwnMemory)
+        {
+            SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        }
+
+        m_Capacity = m_NumChars + 1;
+
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+
+        m_OwnMemory = true;
+    }
+
+    memcpy(m_Buffer, rhs, m_NumChars);
+
+    m_Buffer[m_NumChars] = '\0';
+
+    return *this;
+}
+
+template <typename CharType, size_t numChars>
+InplaceString<CharType, numChars>& InplaceString<CharType, numChars>::operator= (CharType c)
+{
+    m_NumChars = 1;
+
+    if (m_NumChars >= m_Capacity)
+    {
+        if (m_OwnMemory)
+        {
+            SHIP_FREE_EX(m_pAllocator, m_Buffer);
+        }
+
+        m_Capacity = 2;
+
+        size_t requiredSize = sizeof(CharType) * m_Capacity;
+        m_Buffer = reinterpret_cast<CharType*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, 1));
+
+        m_OwnMemory = true;
+    }
+
+    m_Buffer[0] = c;
+    m_Buffer[1] = '\0';
+
+    return *this;
 }
 
 }

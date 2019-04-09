@@ -17,8 +17,11 @@ volatile bool ShaderWatcher::m_RunShaderWatcherThread = true;
 extern const char* g_ShaderFamilyFilenames[uint8_t(ShaderFamily::Count)];
 
 ShaderWatcher::ShaderWatcher()
+    : m_FileToCheckContent(nullptr, nullptr)
 {
     m_ShaderWatcherThread = std::thread(&ShaderWatcher::ShaderWatcherThreadFunction, this);
+
+    m_FileToCheckContent.Reserve(4096);
 }
 
 ShaderWatcher::~ShaderWatcher()
@@ -39,7 +42,7 @@ void ShaderWatcher::StopThread()
 uint64_t ShaderWatcher::GetTimestampForShaderKey(const ShaderKey& shaderKey) const
 {
     ShaderFamily shaderFamily = shaderKey.GetShaderFamily();
-    const StringA& shaderFamilyShaderFile = g_ShaderFamilyFilenames[uint8_t(shaderFamily)];
+    const TinyInplaceStringA& shaderFamilyShaderFile = g_ShaderFamilyFilenames[uint8_t(shaderFamily)];
 
     size_t shaderFileSize = shaderFamilyShaderFile.Size();
 
@@ -72,7 +75,7 @@ void ShaderWatcher::SetShaderDirectoryName(const StringT& shaderDirectoryName)
     m_ShaderDirectoryName = shaderDirectoryName;
 }
 
-void GetIncludeDirectives(const StringA& fileContent, Array<StringA>& includeDirectives)
+void GetIncludeDirectives(const StringA& fileContent, Array<TinyInplaceStringA>& includeDirectives)
 {
     size_t currentOffset = 0;
     size_t findPosition = 0;
@@ -89,7 +92,7 @@ void GetIncludeDirectives(const StringA& fileContent, Array<StringA>& includeDir
             break;
         }
 
-        StringA includeFilename = "";
+        SmallInplaceStringT includeFilename = "";
         char currentChar = '\0';
 
         currentOffset = findPosition + searchStringLength;
@@ -125,7 +128,7 @@ void GetIncludeDirectives(const StringA& fileContent, Array<StringA>& includeDir
     }
 }
 
-bool CheckFileForHlslReference(const StringT& shaderDirectory, const StringT& filenameToCheck, const StringA& touchedHlslFilename)
+bool CheckFileForHlslReference(const StringT& shaderDirectory, const StringT& filenameToCheck, const StringA& touchedHlslFilename, StringT& fileToCheckContent)
 {
     FileHandler file(filenameToCheck, FileHandlerOpenFlag::FileHandlerOpenFlag_Read);
     if (!file.IsOpen())
@@ -133,11 +136,16 @@ bool CheckFileForHlslReference(const StringT& shaderDirectory, const StringT& fi
         return false;
     }
 
-    StringA filenameToCheckContent;
-    file.ReadWholeFile(filenameToCheckContent);
+    size_t fileSize = file.Size();
+    if (fileSize > fileToCheckContent.Capacity())
+    {
+        fileToCheckContent.Resize(0);
+        fileToCheckContent.Reserve(fileSize * 2);
+    }
+    file.ReadWholeFile(fileToCheckContent);
 
-    Array<StringA> includeDirectives;
-    GetIncludeDirectives(filenameToCheckContent, includeDirectives);
+    InplaceArray<TinyInplaceStringA, 32> includeDirectives;
+    GetIncludeDirectives(fileToCheckContent, includeDirectives);
 
     bool immediateReference = includeDirectives.Exists(touchedHlslFilename);
 
@@ -146,9 +154,12 @@ bool CheckFileForHlslReference(const StringT& shaderDirectory, const StringT& fi
         return true;
     }
 
-    for (const StringA& includeDirective : includeDirectives)
+    for (const TinyInplaceStringA& includeDirective : includeDirectives)
     {
-        if (CheckFileForHlslReference(shaderDirectory, shaderDirectory + includeDirective, touchedHlslFilename))
+        SmallInplaceStringT includePath = shaderDirectory;
+        includePath += includeDirective;
+
+        if (CheckFileForHlslReference(shaderDirectory, includePath, touchedHlslFilename, fileToCheckContent))
         {
             return true;
         }
@@ -157,7 +168,7 @@ bool CheckFileForHlslReference(const StringT& shaderDirectory, const StringT& fi
     return false;
 }
 
-void AddShaderFamilyFilesIncludingThisHlslFile(const StringT& shaderDirectory, const StringA& hlslFilename, Array<StringA>& shaderFilesToUpdate)
+void AddShaderFamilyFilesIncludingThisHlslFile(const StringT& shaderDirectory, const StringA& hlslFilename, Array<TinyInplaceStringA>& shaderFilesToUpdate, StringT& fileToCheckContent)
 {
     // For Hlsl files, we need to inspect every FX file and check whether they reference that Hlsl file. Moreoever, we also have to inspect
     // every Hlsl files to see if they reference the touched Hlsl file.
@@ -172,7 +183,10 @@ void AddShaderFamilyFilesIncludingThisHlslFile(const StringT& shaderDirectory, c
             continue;
         }
 
-        if (CheckFileForHlslReference(shaderDirectory, shaderDirectory + g_ShaderFamilyFilenames[i], hlslFilename))
+        SmallInplaceStringT shaderFilePath = shaderDirectory;
+        shaderFilePath += g_ShaderFamilyFilenames[i];
+
+        if (CheckFileForHlslReference(shaderDirectory, shaderFilePath, hlslFilename, fileToCheckContent))
         {
             shaderFilesToUpdate.Add(g_ShaderFamilyFilenames[i]);
         }
@@ -184,17 +198,18 @@ void UpdateFileIfModified(
         const StringA& filename,
         uint64_t lastWriteTimestamp,
         Array<ShaderWatcher::ShaderFile>& watchedShaderFiles,
+        StringT& fileToCheckContent,
         std::mutex& shaderWatcherLock)
 {
     // Filter out filenames with unsupported extensions
     bool isFxFile = false;
     bool isHlslFile = false;
 
-    if (filename.Substring(filename.Size() - 3, 3) == ".fx")
+    if (filename.FindIndexOfFirstCaseInsensitive(".fx", 3, filename.Size() - 3) != StringT::InvalidIndex)
     {
         isFxFile = true;
     }
-    else if (filename.Substring(filename.Size() - 5, 5) == ".hlsl")
+    else if (filename.FindIndexOfFirstCaseInsensitive(".hlsl", 5, filename.Size() - 5) != StringT::InvalidIndex)
     {
         isHlslFile = true;
     }
@@ -205,12 +220,12 @@ void UpdateFileIfModified(
         return;
     }
 
-    InplaceArray<StringA, 256> shaderFilesToUpdate;
+    InplaceArray<TinyInplaceStringA, 128> shaderFilesToUpdate;
 
     // For Hlsl file, we want to go through every shader family's file and update their timestamp if they include this Hlsl file.
     if (isHlslFile)
     {
-        AddShaderFamilyFilesIncludingThisHlslFile(shaderDirectory, filename, shaderFilesToUpdate);
+        AddShaderFamilyFilesIncludingThisHlslFile(shaderDirectory, filename, shaderFilesToUpdate, fileToCheckContent);
     }
     else
     {
@@ -262,14 +277,18 @@ void UpdateFileIfModified(
 }
 
 void GetModifiedFilesInDirectory(
-        const StringT& directoryName,
+        const SmallInplaceStringT& directoryName,
         Array<ShaderWatcher::ShaderFile>& watchedShaderFiles,
+        StringT& fileToCheckContent,
         std::mutex& shaderWatcherLock)
 {
     WIN32_FIND_DATAA findData;
     HANDLE findHandle = INVALID_HANDLE_VALUE;
 
-    findHandle = FindFirstFileA((directoryName + '*').GetBuffer(), &findData);
+    TinyInplaceStringA fileRegex = directoryName;
+    fileRegex += '*';
+
+    findHandle = FindFirstFileA(fileRegex.GetBuffer(), &findData);
 
     if (findHandle == INVALID_HANDLE_VALUE)
     {
@@ -288,10 +307,10 @@ void GetModifiedFilesInDirectory(
             continue;
         }
 
-        StringA filename = findData.cFileName;
+        TinyInplaceStringA filename = findData.cFileName;
         uint64_t lastWriteTimestamp = (uint64_t(findData.ftLastWriteTime.dwHighDateTime) << 32) | uint64_t(findData.ftLastWriteTime.dwLowDateTime);
 
-        UpdateFileIfModified(directoryName, filename, lastWriteTimestamp, watchedShaderFiles, shaderWatcherLock);
+        UpdateFileIfModified(directoryName, filename, lastWriteTimestamp, watchedShaderFiles, fileToCheckContent, shaderWatcherLock);
 
     } while (FindNextFileA(findHandle, &findData));
 
@@ -304,7 +323,7 @@ void ShaderWatcher::ShaderWatcherThreadFunction()
     {
         Sleep(100);
 
-        GetModifiedFilesInDirectory(m_ShaderDirectoryName, m_WatchedShaderFiles, m_ShaderWatcherLock);
+        GetModifiedFilesInDirectory(m_ShaderDirectoryName, m_WatchedShaderFiles, m_FileToCheckContent, m_ShaderWatcherLock);
     }
 }
 

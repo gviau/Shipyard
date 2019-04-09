@@ -34,7 +34,7 @@ namespace Shipyard
         int GetFileMode(FileHandlerOpenFlag openFlag) const;
 
         std::fstream m_File;
-        StringT m_Filename;
+        SmallInplaceStringT m_Filename;
         FileHandlerOpenFlag m_OpenFlag;
     };
 }

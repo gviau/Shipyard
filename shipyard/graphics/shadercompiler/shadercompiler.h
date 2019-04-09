@@ -91,7 +91,7 @@ namespace Shipyard
 
         static volatile bool m_RunShaderCompilerThread;
 
-        StringT m_ShaderDirectoryName;
+        SmallInplaceStringT m_ShaderDirectoryName;
 
         Array<ShaderKey> m_ShaderKeysToCompile;
         ShaderKey m_CurrentShaderKeyBeingCompiled;

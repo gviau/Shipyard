@@ -306,11 +306,11 @@ bool ReadShaderFile(const StringT& sourceFilename, StringA& shaderSource, String
 
 void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
 {
-    const StringA& shaderFamilyFilename = g_ShaderFamilyFilenames[uint32_t(shaderFamily)];
+    SmallInplaceStringT sourceFilename = m_ShaderDirectoryName;
+    sourceFilename += g_ShaderFamilyFilenames[uint32_t(shaderFamily)];
 
-    StringA sourceFilename = m_ShaderDirectoryName + shaderFamilyFilename;
     StringA shaderSource;
-    StringA renderStateBlockSource;
+    LargeInplaceStringA renderStateBlockSource;
 
     bool couldReadShaderFile = ReadShaderFile(sourceFilename, shaderSource, renderStateBlockSource);
     if (!couldReadShaderFile)
@@ -352,11 +352,11 @@ void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
 
 void ShaderCompiler::CompileShaderKey(const ShaderKey& shaderKeyToCompile)
 {
-    const StringA& shaderFamilyFilename = g_ShaderFamilyFilenames[uint32_t(shaderKeyToCompile.GetShaderFamily())];
+    SmallInplaceStringT sourceFilename = m_ShaderDirectoryName;
+    sourceFilename += g_ShaderFamilyFilenames[uint32_t(shaderKeyToCompile.GetShaderFamily())];
 
-    StringA sourceFilename = m_ShaderDirectoryName + shaderFamilyFilename;
     StringA shaderSource;
-    StringA renderStateBlockSource;
+    LargeInplaceStringA renderStateBlockSource;
 
     bool couldReadShaderFile = ReadShaderFile(sourceFilename, shaderSource, renderStateBlockSource);
     if (!couldReadShaderFile)

@@ -46,8 +46,10 @@ namespace Shipyard
 
         mutable std::mutex m_ShaderWatcherLock;
 
-        StringT m_ShaderDirectoryName;
+        SmallInplaceStringT m_ShaderDirectoryName;
 
         Array<ShaderFile> m_WatchedShaderFiles;
+
+        StringA m_FileToCheckContent;
     };
 }

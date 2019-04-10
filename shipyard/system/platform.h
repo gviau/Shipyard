@@ -81,7 +81,7 @@ namespace Shipyard
 #endif // #if COMPILER == COMPILER_MSVC
 
     // Cache line
-#define SHIP_CHACHE_LINE_SIZE 64
+#define SHIP_CACHE_LINE_SIZE 64
 
 #if defined(SHIPYARD_NONCLIENT_BUILD)
 #   define SHIPYARD_API SHIPYARD_API_EXPORT

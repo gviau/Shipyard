@@ -13,7 +13,7 @@ namespace Shipyard
 #   define NUM_BITS_PER_BITFIELD_ELEMENT 32
 #endif // #if CPU_BITS == CPU_BITS_64
 
-    template <uint32_t NumBits, size_t alignment = SHIP_CHACHE_LINE_SIZE>
+    template <uint32_t NumBits, size_t alignment = SHIP_CACHE_LINE_SIZE>
     class Bitfield
     {
     public:
@@ -372,7 +372,7 @@ namespace Shipyard
         bool m_MemoryOwned;
     };
 
-    template <uint32_t NumBits, size_t alignment = SHIP_CHACHE_LINE_SIZE>
+    template <uint32_t NumBits, size_t alignment = SHIP_CACHE_LINE_SIZE>
     class InplaceBitfield : public Bitfield<NumBits, alignment>
     {
     public:

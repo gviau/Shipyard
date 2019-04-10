@@ -161,11 +161,11 @@ void* PoolAllocator::Allocate(size_t size, size_t alignment
     return pChunkCandidate;
 }
 
-void PoolAllocator::Deallocate(void* memory)
+void PoolAllocator::Deallocate(const void* memory)
 {
     std::lock_guard<std::mutex> lock(m_Lock);
 
-    FreeChunkHeader* pNewFreeChunk = reinterpret_cast<FreeChunkHeader*>(memory);
+    FreeChunkHeader* pNewFreeChunk = reinterpret_cast<FreeChunkHeader*>(const_cast<void*>(memory));
 
 #ifdef SHIP_ALLOCATOR_DEBUG_MEMORY_FILL
     memset(pNewFreeChunk, FixedHeapAllocatorDebugConstants_FreedMemory, m_ChunkSize);

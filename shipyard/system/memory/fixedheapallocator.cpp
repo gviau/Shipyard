@@ -222,7 +222,7 @@ void* FixedHeapAllocator::Allocate(size_t size, size_t alignment
     return nullptr;
 }
 
-void FixedHeapAllocator::Deallocate(void* memory)
+void FixedHeapAllocator::Deallocate(const void* memory)
 {
     if (memory == nullptr)
     {

@@ -52,7 +52,7 @@ namespace Shipyard
             ) = 0;
 
         // Memory must come from the allocator that allocated it.
-        virtual void Deallocate(void* memory) = 0;
+        virtual void Deallocate(const void* memory) = 0;
 
         const void* GetHeap() const { return m_pHeap; }
         size_t GetHeapSize() const { return m_HeapSize; }
@@ -143,13 +143,13 @@ namespace
     }
 
     template <typename T>
-    void DestructorCall(T* memory)
+    void DestructorCall(const T* memory)
     {
         memory->~T();
     }
 
     template <typename T>
-    void DeleteArray(Shipyard::BaseAllocator* pAllocator, T* pArray)
+    void DeleteArray(Shipyard::BaseAllocator* pAllocator, const T* pArray)
     {
         // The small header before the user pointer contains the number of items that were created and the address of the user pointer
         // that we need to deallocate

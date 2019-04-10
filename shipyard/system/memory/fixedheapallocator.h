@@ -33,7 +33,7 @@ namespace Shipyard
                 ) override;
 
         // Memory must come from the allocator that allocated it.
-        virtual void Deallocate(void* memory) override;
+        virtual void Deallocate(const void* memory) override;
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         const MemoryInfo& GetMemoryInfo() const { return m_MemoryInfo; }

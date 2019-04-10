@@ -173,7 +173,7 @@ void DebugAllocator::Allocate(BaseAllocator* pAllocator, void* pAllocatedMemory,
     m_MemoryInfo.numAllocations += 1;
 }
 
-void DebugAllocator::Deallocate(void* memory)
+void DebugAllocator::Deallocate(const void* memory)
 {
     if (m_pHeap == nullptr)
     {

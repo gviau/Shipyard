@@ -118,7 +118,7 @@ void* GlobalAllocator::Allocate(size_t size, size_t alignment
     return nullptr;
 }
 
-void GlobalAllocator::Deallocate(void* memory)
+void GlobalAllocator::Deallocate(const void* memory)
 {
     if (memory == nullptr)
     {

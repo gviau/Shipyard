@@ -42,7 +42,7 @@ namespace Shipyard
 
         void Allocate(BaseAllocator* pAllocator, void* pAllocatedMemory, size_t size, const char* pAllocationFilename, int allocationLineNumber);
 
-        void Deallocate(void* pAllocatedMemory);
+        void Deallocate(const void* pAllocatedMemory);
 
         const MemoryInfo& GetMemoryInfo() const { return m_MemoryInfo; }
 

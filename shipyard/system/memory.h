@@ -45,7 +45,7 @@ namespace Shipyard
             ) override;
 
         // Memory must come from the allocator that allocated it.
-        virtual void Deallocate(void* memory) override;
+        virtual void Deallocate(const void* memory) override;
 
     private:
         struct AllocatorAddressRange

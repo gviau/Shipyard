@@ -70,7 +70,7 @@ void ShaderHandlerManager::Destroy()
             m_RenderDevice->DestroyPixelShader(shaderHandler->m_PixelShaderHandle);
         }
 
-        delete shaderHandler;
+        SHIP_DELETE(shaderHandler);
     }
 
     m_ShaderHandlers.clear();
@@ -133,7 +133,7 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
     auto it = m_ShaderHandlers.find(shaderKey);
     if (it == m_ShaderHandlers.end())
     {
-        shaderHandler = new ShaderHandler(shaderKey);
+        shaderHandler = SHIP_NEW(ShaderHandler, 1)(shaderKey);
 
         m_ShaderHandlers[shaderKey] = shaderHandler;
 

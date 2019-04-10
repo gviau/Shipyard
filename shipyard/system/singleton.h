@@ -2,6 +2,7 @@
 
 #include <system/platform.h>
 
+#include <system/memory.h>
 #include <system/systemcommon.h>
 #include <system/systemdebug.h>
 
@@ -20,12 +21,12 @@ namespace Shipyard
         static void CreateInstance()
         {
             SHIP_ASSERT(ms_Instance == nullptr);
-            ms_Instance = new T();
+            ms_Instance = SHIP_NEW(T, 1);
         }
 
         static void DestroyInstance()
         {
-            delete ms_Instance;
+            SHIP_DELETE(ms_Instance);
             ms_Instance = nullptr;
         }
 

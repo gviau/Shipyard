@@ -648,7 +648,7 @@ void GetEffectiveRenderPipelineBlockForShaderKey(
         D3D_SHADER_MACRO shaderDefine;
         shaderDefine.Name = g_ShaderOptionString[uint32_t(shaderOption)];
 
-        char* buf = new char[8];
+        char* buf = reinterpret_cast<char*>(SHIP_ALLOC(8, 1));
         sprintf_s(buf, 8, "%u", valueForShaderOption);
 
         shaderDefine.Definition = buf;
@@ -670,10 +670,9 @@ void GetEffectiveRenderPipelineBlockForShaderKey(
             &preprocessedOutput,
             nullptr);
 
-    uint32_t idx = 0;
-    while (shaderOptionDefines[idx].Name != nullptr)
+    for (D3D_SHADER_MACRO& shaderMacro : shaderOptionDefines)
     {
-        delete[] shaderOptionDefines[idx++].Definition;
+        SHIP_FREE(shaderMacro.Definition);
     }
 
     if (preprocessedOutput != nullptr)

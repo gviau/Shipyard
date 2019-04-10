@@ -392,7 +392,7 @@ void ShaderCompiler::CompileShaderKey(
         D3D_SHADER_MACRO shaderDefine;
         shaderDefine.Name = g_ShaderOptionString[uint32_t(shaderOption)];
 
-        char* buf = new char[8];
+        char* buf = reinterpret_cast<char*>(SHIP_ALLOC(8, 1));
         sprintf_s(buf, 8, "%u", valueForShaderOption);
 
         shaderDefine.Definition = buf;
@@ -409,7 +409,7 @@ void ShaderCompiler::CompileShaderKey(
 
     for (D3D_SHADER_MACRO& shaderMacro : shaderOptionDefines)
     {
-        delete[] shaderMacro.Definition;
+        SHIP_FREE(shaderMacro.Definition);
     }
 
     compiledShaderKeyEntry.m_GotCompilationError = ((vertexShaderBlob != nullptr && pixelShaderBlob == nullptr) || (pixelShaderBlob != nullptr && vertexShaderBlob == nullptr) || (vertexShaderBlob == nullptr && pixelShaderBlob == nullptr && computeShaderBlob == nullptr));

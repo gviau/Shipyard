@@ -138,9 +138,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     {
         Shipyard::SingletonStorer singletonStorer;
 
-        Shipyard::GFXRenderDevice* pGfxRenderDevice = new Shipyard::GFXRenderDevice();
-
-        Shipyard::GFXRenderDevice& gfxRenderDevice = *pGfxRenderDevice;
+        Shipyard::GFXRenderDevice gfxRenderDevice;
         gfxRenderDevice.Create();
 
         Shipyard::GFXRenderDeviceContext gfxRenderDeviceContext(gfxRenderDevice);
@@ -324,9 +322,6 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         Shipyard::ShaderWatcher::GetInstance().StopThread();
 
         shaderDatabase.Close();
-
-        delete pGfxRenderDevice;
-
     }
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO

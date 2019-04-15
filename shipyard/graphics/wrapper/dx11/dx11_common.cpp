@@ -229,6 +229,24 @@ uint8_t ConvertShipyardRenderTargetWriteMaskToDX11(RenderTargetWriteMask renderT
     return mask;
 }
 
+D3D11_MAP ConvertShipyardMapFlagToDX11(MapFlag mapFlag)
+{
+    switch (mapFlag)
+    {
+    case MapFlag::Read:                 return D3D11_MAP_READ;
+    case MapFlag::Write:                return D3D11_MAP_WRITE;
+    case MapFlag::Read_Write:           return D3D11_MAP_READ_WRITE;
+    case MapFlag::Write_Discard:        return D3D11_MAP_WRITE_DISCARD;
+    case MapFlag::Write_No_Overwrite:   return D3D11_MAP_WRITE_NO_OVERWRITE;
+    default:
+        // Should never happen
+        SHIP_ASSERT(false);
+        break;
+    }
+
+    return D3D11_MAP_READ;
+}
+
 const char* GetD3DShaderVersion(D3D_FEATURE_LEVEL featureLevel)
 {
     switch (featureLevel)

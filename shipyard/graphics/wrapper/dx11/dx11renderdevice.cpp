@@ -14,11 +14,17 @@
 #pragma warning( disable : 4005 )
 
 #include <d3d11.h>
+#include <d3dcompiler.h>
 
 #pragma warning( default : 4005 )
 
 namespace Shipyard
 {;
+
+// Used to not have to constantly create new input layouts
+ID3D11InputLayout* g_RegisteredInputLayouts[uint32_t(VertexFormatType::VertexFormatType_Count)];
+
+ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatType vertexFormatType);
 
 DX11RenderDevice::DX11RenderDevice()
     : m_Device(nullptr)
@@ -39,6 +45,11 @@ bool DX11RenderDevice::Create()
     {
         SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create D3D11 device.");
         return false;
+    }
+
+    for (uint32_t i = 0; i < uint32_t(VertexFormatType::VertexFormatType_Count); i++)
+    {
+        g_RegisteredInputLayouts[i] = RegisterVertexFormatType(m_Device, VertexFormatType(i));
     }
 
     if (!m_VertexBufferPool.Create())
@@ -112,6 +123,14 @@ bool DX11RenderDevice::Create()
 
 void DX11RenderDevice::Destroy()
 {
+    for (uint32_t i = 0; i < uint32_t(VertexFormatType::VertexFormatType_Count); i++)
+    {
+        if (g_RegisteredInputLayouts[i] != nullptr)
+        {
+            g_RegisteredInputLayouts[i]->Release();
+        }
+    }
+
     uint32_t indexToFree = 0;
     if (m_VertexBufferPool.GetFirstAllocatedIndex(&indexToFree))
     {
@@ -642,6 +661,130 @@ IDXGISwapChain* DX11RenderDevice::CreateSwapchain(uint32_t width, uint32_t heigh
     backBufferTexture->Release();
 
     return swapChain;
+}
+
+ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatType vertexFormatType)
+{
+    static_assert(uint32_t(VertexFormatType::VertexFormatType_Count) == 5, "Update the RegisterVertexFormatType function if you add or remove vertex formats");
+
+    uint32_t idx = uint32_t(vertexFormatType);
+    SHIP_ASSERT(g_RegisteredInputLayouts[idx] == nullptr);
+
+    // Create a dummy shader just to validate the input layout
+    StringA dummyShaderSource = "struct VS_INPUT {\nfloat3 position : POSITION;\n";
+
+    if (VertexFormatTypeContainsUV(vertexFormatType))
+    {
+        dummyShaderSource += "float2 uv : TEXCOORD0;\n";
+    }
+
+    if (VertexFormatTypeContainsNormals(vertexFormatType))
+    {
+        dummyShaderSource += "float3 normal : NORMAL;\n";
+    }
+
+    if (VertexFormatTypeContainsColor(vertexFormatType))
+    {
+        dummyShaderSource += "float3 color : COLOR;\n";
+    }
+
+    dummyShaderSource += "};\n"
+
+        "struct VS_OUTPUT {\n"
+        "float4 position : SV_POSITION;\n"
+        "};\n"
+
+        "VS_OUTPUT main(VS_INPUT input) {\n"
+        "VS_OUTPUT output = (VS_OUTPUT)0;\n"
+        "output.position = float4(input.position, 1.0);\n"
+        "return output;\n"
+        "}\n";
+
+    ID3D10Blob* shaderBlob = nullptr;
+    ID3D10Blob* error = nullptr;
+
+    D3D_FEATURE_LEVEL featureLevel = device->GetFeatureLevel();
+    StringA shaderVersion = GetD3DShaderVersion(featureLevel);
+
+    StringA version = ("vs_" + shaderVersion);
+    uint32_t flags = 0;
+
+#ifdef _DEBUG
+    flags = D3DCOMPILE_DEBUG;
+#endif
+
+    HRESULT hr = D3DCompile(dummyShaderSource.GetBuffer(), dummyShaderSource.Size(), nullptr, nullptr, nullptr, "main", version.GetBuffer(), flags, 0, &shaderBlob, &error);
+    if (FAILED(hr))
+    {
+        if (error != nullptr)
+        {
+            char* errorMsg = (char*)error->GetBufferPointer();
+            OutputDebugString(errorMsg);
+
+            error->Release();
+        }
+
+        SHIP_LOG_ERROR("RegisterVertexFormatType() --> Couldn't compile dummy shader for registering vertex layout.");
+
+        return nullptr;
+    }
+
+    ID3D11VertexShader* shader = nullptr;
+    bool success = true;
+    hr = device->CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &shader);
+    if (FAILED(hr))
+    {
+        success = false;
+
+        SHIP_LOG_ERROR("RegisterVertexFormatType() --> Couldn't create dummy vertex shader for registering vertex layout.");
+    }
+
+    if (error != nullptr)
+    {
+        error->Release();
+    }
+
+    if (!success)
+    {
+        shader->Release();
+        return nullptr;
+    }
+
+    VertexFormat* vertexFormat = nullptr;
+    GetVertexFormat(vertexFormatType, vertexFormat);
+
+    const InputLayout* inputLayouts = vertexFormat->GetInputLayouts();
+    uint32_t numInputLayouts = vertexFormat->GetNumInputLayouts();
+
+    Array<D3D11_INPUT_ELEMENT_DESC> inputElements;
+    for (uint32_t i = 0; i < numInputLayouts; i++)
+    {
+        const InputLayout& inputLayout = inputLayouts[i];
+
+        D3D11_INPUT_ELEMENT_DESC inputElement;
+        inputElement.SemanticName = ConvertShipyardSemanticNameToDX11(inputLayout.m_SemanticName);
+        inputElement.SemanticIndex = inputLayout.m_SemanticIndex;
+        inputElement.Format = ConvertShipyardFormatToDX11(inputLayout.m_Format);
+        inputElement.InputSlot = inputLayout.m_InputSlot;
+        inputElement.AlignedByteOffset = inputLayout.m_ByteOffset;
+        inputElement.InputSlotClass = (inputLayout.m_IsDataPerInstance) ? D3D11_INPUT_PER_INSTANCE_DATA : D3D11_INPUT_PER_VERTEX_DATA;
+        inputElement.InstanceDataStepRate = inputLayout.m_InstanceDataStepRate;
+
+        inputElements.Add(inputElement);
+    }
+
+    ID3D11InputLayout* inputLayout = nullptr;
+    hr = device->CreateInputLayout(&inputElements[0], inputElements.Size(), shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), &inputLayout);
+    if (FAILED(hr))
+    {
+        SHIP_LOG_ERROR("RegisterVertexFormatType() --> Couldn't create input layout.");
+
+        shader->Release();
+        return nullptr;
+    }
+
+    shader->Release();
+    return inputLayout;
 }
 
 }

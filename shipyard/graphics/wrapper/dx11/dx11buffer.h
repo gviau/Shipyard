@@ -15,14 +15,15 @@ namespace Shipyard
 
         void Destroy();
 
-        void* Map(MapFlag mapFlag);
-        void Unmap();
-
         ID3D11Buffer* GetBuffer() const { return m_Buffer; }
+
+        size_t GetSize() const { return m_SizeInBytes; }
 
     protected:
         ID3D11DeviceContext* m_DeviceContext;
         ID3D11Buffer* m_Buffer;
+
+        size_t m_SizeInBytes;
     };
 
     class SHIPYARD_API DX11VertexBuffer : public VertexBuffer, public DX11BaseBuffer

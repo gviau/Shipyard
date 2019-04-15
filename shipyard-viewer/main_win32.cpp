@@ -141,10 +141,17 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         Shipyard::GFXRenderDevice gfxRenderDevice;
         gfxRenderDevice.Create();
 
-        Shipyard::GFXRenderDeviceContext gfxRenderDeviceContext(gfxRenderDevice);
+        Shipyard::GFXDirectRenderCommandList gfxDirectCommandList(gfxRenderDevice);
+        gfxDirectCommandList.Create();
+
+        Shipyard::GFXCommandListAllocator gfxCommandListAllocator(gfxRenderDevice);
+        gfxCommandListAllocator.Create();
+
+        Shipyard::GFXCommandQueue gfxDirectCommandQueue(gfxRenderDevice, Shipyard::CommandQueueType::Direct);
+        gfxDirectCommandQueue.Create();
 
         Shipyard::GFXViewSurface gfxViewSurface;
-        bool isValid = gfxViewSurface.Create(gfxRenderDevice, gfxRenderDeviceContext, windowWidth, windowHeight, Shipyard::GfxFormat::R8G8B8A8_UNORM, windowHandle);
+        bool isValid = gfxViewSurface.Create(gfxRenderDevice, windowWidth, windowHeight, Shipyard::GfxFormat::R8G8B8A8_UNORM, windowHandle);
 
         SHIP_ASSERT(isValid);
 
@@ -276,41 +283,68 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
             }
             else
             {
-                void* mappedData = constantBuffer.Map(Shipyard::MapFlag::Write_Discard);
+                gfxDirectCommandList.Reset(gfxCommandListAllocator, nullptr);
 
+                void* mappedData = gfxDirectCommandList.MapConstantBuffer(constantBufferHandle, Shipyard::MapFlag::Write_Discard);
+                
                 glm::mat4 matrix(1.0f, 0.0f, 0.0f, 0.0f,
                                  0.0f, 1.0f, 0.0f, 0.0f,
                                  0.0f, 0.0f, 1.0f, 0.25f,
                                  0.0f, 0.0f, 0.0f, 1.0f);
                 ((SimpleConstantBuffer*)mappedData)->m_Matrix = glm::rotate(matrix, theta, glm::vec3(0.0f, 1.0f, 0.0f));
 
-                constantBuffer.Unmap();
-
                 theta += 0.001f;
 
                 Shipyard::GFXRenderTargetHandle gfxRenderTargetHandle = gfxViewSurface.GetBackBufferRenderTargetHandle();
 
-                gfxRenderDeviceContext.ClearFullRenderTarget(gfxRenderTargetHandle, 0.0f, 0.0f, 0.125f, 1.0f);
-                gfxRenderDeviceContext.ClearDepthStencilRenderTarget(gfxDepthStencilRenderTargetHandle, Shipyard::DepthStencilClearFlag::Depth, 1.0f, 0);
+                Shipyard::ClearFullRenderTargetCommand* pClearFullRenderTargetCommand = gfxDirectCommandList.ClearFullRenderTarget();
+                pClearFullRenderTargetCommand->gfxRenderTargetHandle = gfxRenderTargetHandle;
+                pClearFullRenderTargetCommand->red = 0.0f;
+                pClearFullRenderTargetCommand->green = 0.0f;
+                pClearFullRenderTargetCommand->blue = 0.125f;
+                pClearFullRenderTargetCommand->alpha = 0.0f;
+
+                Shipyard::ClearDepthStencilRenderTargetCommand* pClearDepthStencilRenderTargetCommand = gfxDirectCommandList.ClearDepthStencilRenderTarget();
+                pClearDepthStencilRenderTargetCommand->gfxDepthStencilRenderTargetHandle = gfxDepthStencilRenderTargetHandle;
+                pClearDepthStencilRenderTargetCommand->depthStencilClearFlag = Shipyard::DepthStencilClearFlag::Depth;
+                pClearDepthStencilRenderTargetCommand->depthValue = 1.0f;
+                pClearDepthStencilRenderTargetCommand->stencilValue = 0;
 
                 static volatile uint32_t value = 0;
 
                 SET_SHADER_OPTION(shaderKey, Test2Bits, value);
 
-                Shipyard::ShaderHandler* shaderHandler = Shipyard::ShaderHandlerManager::GetInstance().GetShaderHandlerForShaderKey(shaderKey);
+                Shipyard::ShaderHandler* pShaderHandler = Shipyard::ShaderHandlerManager::GetInstance().GetShaderHandlerForShaderKey(shaderKey);
 
-                Shipyard::DrawItem drawItem(
-                        gfxRenderTargetHandle,
-                        gfxDepthStencilRenderTargetHandle,
-                        gfxViewport,
-                        gfxRootSignatureHandle,
-                        gfxDescriptorSetHandle,
-                        *shaderHandler,
-                        Shipyard::PrimitiveTopology::TriangleList);
-
-                Shipyard::GFXVertexBufferHandle* gfxVertexBufferHandle = &vertexBufferHandle;
                 uint32_t vertexBufferOffsets = 0;
-                gfxRenderDeviceContext.DrawIndexed(drawItem, gfxVertexBufferHandle, 0, 1, &vertexBufferOffsets, indexBufferHandle, 0, 0, 0);
+
+                Shipyard::DrawIndexedCommand* pDrawIndexedCommand = gfxDirectCommandList.DrawIndexed();
+                pDrawIndexedCommand->gfxViewport = gfxViewport;
+                pDrawIndexedCommand->pShaderHandler = pShaderHandler;
+                pDrawIndexedCommand->gfxRenderTargetHandle = gfxRenderTargetHandle;
+                pDrawIndexedCommand->gfxDepthStencilRenderTargetHandle = gfxDepthStencilRenderTargetHandle;
+                pDrawIndexedCommand->gfxRootSignatureHandle = gfxRootSignatureHandle;
+                pDrawIndexedCommand->gfxDescriptorSetHandle = gfxDescriptorSetHandle;
+                pDrawIndexedCommand->primitiveTopologyToUse = Shipyard::PrimitiveTopology::TriangleList;
+                pDrawIndexedCommand->pRenderStateBlockStateOverride = nullptr;
+                pDrawIndexedCommand->pGfxVertexBufferHandles = &vertexBufferHandle;
+                pDrawIndexedCommand->gfxIndexBufferHandle = indexBufferHandle;
+                pDrawIndexedCommand->startSlot = 0;
+                pDrawIndexedCommand->numVertexBuffers = 1;
+                pDrawIndexedCommand->startVertexLocation = 0;
+                pDrawIndexedCommand->pVertexBufferOffsets = &vertexBufferOffsets;
+                pDrawIndexedCommand->startVertexLocation = 0;
+                pDrawIndexedCommand->startIndexLocation = 0;
+                pDrawIndexedCommand->indexBufferOffset = 0;
+
+                gfxDirectCommandList.Close();
+
+                Shipyard::GFXRenderCommandList* ppRenderCommandLists[] =
+                {
+                    &gfxDirectCommandList
+                };
+
+                gfxDirectCommandQueue.ExecuteCommandLists(ppRenderCommandLists, 1);
 
                 gfxViewSurface.Flip();
             }

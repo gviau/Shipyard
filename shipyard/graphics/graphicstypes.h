@@ -6,56 +6,188 @@ namespace Shipyard
 
     struct GFXVertexBufferHandle
     {
-        uint32_t handle = InvalidGfxHandle;
+        GFXVertexBufferHandle()
+            : handle(InvalidGfxHandle)
+        {
+
+        }
+
+        GFXVertexBufferHandle(uint32_t _handle)
+            : handle(_handle)
+        {
+
+        }
+
+        uint32_t handle;
     };
 
     struct GFXIndexBufferHandle
     {
-        uint32_t handle = InvalidGfxHandle;
+        GFXIndexBufferHandle()
+            : handle(InvalidGfxHandle)
+        {
+
+        }
+
+        GFXIndexBufferHandle(uint32_t _handle)
+            : handle(_handle)
+        {
+
+        }
+
+        uint32_t handle;
     };
 
     struct GFXConstantBufferHandle
     {
-        uint32_t handle = InvalidGfxHandle;
+        GFXConstantBufferHandle()
+            : handle(InvalidGfxHandle)
+        {
+
+        }
+
+        GFXConstantBufferHandle(uint32_t _handle)
+            : handle(_handle)
+        {
+
+        }
+
+        uint32_t handle;
     };
 
     struct GFXDescriptorSetHandle
     {
-        uint32_t handle = InvalidGfxHandle;
+        GFXDescriptorSetHandle()
+            : handle(InvalidGfxHandle)
+        {
+
+        }
+
+        GFXDescriptorSetHandle(uint32_t _handle)
+            : handle(_handle)
+        {
+
+        }
+
+        uint32_t handle;
     };
 
     struct GFXPipelineStateObjectHandle
     {
-        uint32_t handle = InvalidGfxHandle;
+        GFXPipelineStateObjectHandle()
+            : handle(InvalidGfxHandle)
+        {
+
+        }
+
+        GFXPipelineStateObjectHandle(uint32_t _handle)
+            : handle(_handle)
+        {
+
+        }
+
+        uint32_t handle;
     };
 
     struct GFXRenderTargetHandle
     {
-        uint32_t handle = InvalidGfxHandle;
+        GFXRenderTargetHandle()
+            : handle(InvalidGfxHandle)
+        {
+
+        }
+
+        GFXRenderTargetHandle(uint32_t _handle)
+            : handle(_handle)
+        {
+
+        }
+
+        uint32_t handle;
     };
 
     struct GFXDepthStencilRenderTargetHandle
     {
-        uint32_t handle = InvalidGfxHandle;
+        GFXDepthStencilRenderTargetHandle()
+            : handle(InvalidGfxHandle)
+        {
+
+        }
+
+        GFXDepthStencilRenderTargetHandle(uint32_t _handle)
+            : handle(_handle)
+        {
+
+        }
+
+        uint32_t handle;
     };
 
     struct GFXRootSignatureHandle
     {
-        uint32_t handle = InvalidGfxHandle;
+        GFXRootSignatureHandle()
+            : handle(InvalidGfxHandle)
+        {
+
+        }
+
+        GFXRootSignatureHandle(uint32_t _handle)
+            : handle(_handle)
+        {
+
+        }
+
+        uint32_t handle;
     };
 
     struct GFXVertexShaderHandle
     {
-        uint32_t handle = InvalidGfxHandle;
+        GFXVertexShaderHandle()
+            : handle(InvalidGfxHandle)
+        {
+
+        }
+
+        GFXVertexShaderHandle(uint32_t _handle)
+            : handle(_handle)
+        {
+
+        }
+
+        uint32_t handle;
     };
 
     struct GFXPixelShaderHandle
     {
-        uint32_t handle = InvalidGfxHandle;
+        GFXPixelShaderHandle()
+            : handle(InvalidGfxHandle)
+        {
+
+        }
+
+        GFXPixelShaderHandle(uint32_t _handle)
+            : handle(_handle)
+        {
+
+        }
+
+        uint32_t handle;
     };
 
     struct GFXTexture2DHandle
     {
-        uint32_t handle = InvalidGfxHandle;
+        GFXTexture2DHandle()
+            : handle(InvalidGfxHandle)
+        {
+
+        }
+
+        GFXTexture2DHandle(uint32_t _handle)
+            : handle(_handle)
+        {
+
+        }
+
+        uint32_t handle;
     };
 }

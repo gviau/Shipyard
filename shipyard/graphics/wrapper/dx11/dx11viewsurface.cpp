@@ -3,7 +3,6 @@
 #include <graphics/wrapper/dx11/dx11_common.h>
 
 #include <graphics/wrapper/dx11/dx11renderdevice.h>
-#include <graphics/wrapper/dx11/dx11renderdevicecontext.h>
 #include <graphics/wrapper/dx11/dx11rendertarget.h>
 #include <graphics/wrapper/dx11/dx11texture.h>
 
@@ -21,22 +20,19 @@ namespace Shipyard
 {;
 
 DX11ViewSurface::DX11ViewSurface()
-    : m_ImmediateRenderContext(nullptr)
-    , m_WindowHandle(nullptr)
+    : m_WindowHandle(nullptr)
     , m_SwapChain(nullptr)
 {
 }
 
 bool DX11ViewSurface::Create(
         DX11RenderDevice& renderDevice,
-        DX11RenderDeviceContext& immediateRenderContext,
         uint32_t width,
         uint32_t height,
         GfxFormat viewSurfaceFormat,
         HWND windowHandle)
 {
     m_RenderDevice = &renderDevice;
-    m_ImmediateRenderContext = &immediateRenderContext;
     m_Width = width;
     m_Height = height;
     m_ViewSurfaceFormat = viewSurfaceFormat;

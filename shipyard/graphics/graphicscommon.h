@@ -681,38 +681,10 @@ namespace Shipyard
         }
     };
 
-    struct DrawItem
+    enum class CommandQueueType : uint8_t
     {
-        DrawItem(
-                GFXRenderTargetHandle gfxRenderTargetHandle,
-                GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle,
-                const GfxViewport& gfxViewport,
-                GFXRootSignatureHandle gfxRootSignatureHandle,
-                GFXDescriptorSetHandle gfxDescriptorSetHandle,
-                const ShaderHandler& shaderHandlerToUse,
-                PrimitiveTopology primitiveTopologyToUse)
-            : renderTargetHandle(gfxRenderTargetHandle)
-            , depthStencilRenderTargetHandle(gfxDepthStencilRenderTargetHandle)
-            , viewport(gfxViewport)
-            , rootSignatureHandle(gfxRootSignatureHandle)
-            , descriptorSetHandle(gfxDescriptorSetHandle)
-            , shaderHandler(shaderHandlerToUse)
-            , primitiveTopology(primitiveTopologyToUse)
-            , pRenderStateBlockStateOverride(nullptr)
-        {}
-
-        GFXRenderTargetHandle renderTargetHandle;
-        GFXDepthStencilRenderTargetHandle depthStencilRenderTargetHandle;
-
-        const GfxViewport& viewport;
-
-        GFXRootSignatureHandle rootSignatureHandle;
-        GFXDescriptorSetHandle descriptorSetHandle;
-
-        const ShaderHandler& shaderHandler;
-
-        PrimitiveTopology primitiveTopology;
-
-        const RenderStateBlockStateOverride* pRenderStateBlockStateOverride = nullptr;
+        Direct,
+        Compute,
+        Copy
     };
 }

@@ -10,11 +10,6 @@ namespace Shipyard
     {
     public:
         BaseBuffer();
-
-#ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
-        virtual void* Map(MapFlag mapFlag) = 0;
-        virtual void Unmap() = 0;
-#endif // #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
     };
 
     class SHIPYARD_API VertexBuffer

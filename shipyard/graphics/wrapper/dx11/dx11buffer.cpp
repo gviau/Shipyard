@@ -13,11 +13,10 @@
 namespace Shipyard
 {;
 
-D3D11_MAP GetD3D11MapFlag(MapFlag mapFlag);
-
 DX11BaseBuffer::DX11BaseBuffer()
     : m_DeviceContext(nullptr)
     , m_Buffer(nullptr)
+    , m_SizeInBytes(0)
 {
 
 }
@@ -32,35 +31,6 @@ void DX11BaseBuffer::Destroy()
     m_DeviceContext = nullptr;
 }
 
-void* DX11BaseBuffer::Map(MapFlag mapFlag)
-{
-    if (m_Buffer == nullptr)
-    {
-        SHIP_LOG_WARNING("DX11BaseBuffer::Map() --> Calling map with a nullptr buffer.");
-        return nullptr;
-    }
-
-    D3D11_MAP d3d11MapFlag = GetD3D11MapFlag(mapFlag);
-
-    D3D11_MAPPED_SUBRESOURCE mappedResource;
-    HRESULT hr = m_DeviceContext->Map(m_Buffer, 0, d3d11MapFlag, 0, &mappedResource);
-    if (FAILED(hr))
-    {
-        SHIP_LOG_ERROR("DX11BaseBuffer::Map() --> Couldn't map buffer.");
-        return nullptr;
-    }
-
-    return mappedResource.pData;
-}
-
-void DX11BaseBuffer::Unmap()
-{
-    if (m_Buffer != nullptr)
-    {
-        m_DeviceContext->Unmap(m_Buffer, 0);
-    }
-}
-
 bool DX11VertexBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t numVertices, VertexFormatType vertexFormatType, bool dynamic, void* initialData)
 {
     m_NumVertices = numVertices;
@@ -71,6 +41,8 @@ bool DX11VertexBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& deviceC
 
     VertexFormat* vertexFormat = nullptr;
     GetVertexFormat(vertexFormatType, vertexFormat);
+
+    m_SizeInBytes = vertexFormat->GetSize() * numVertices;
 
     D3D11_BUFFER_DESC desc;
     desc.Usage = usage;
@@ -104,6 +76,8 @@ bool DX11IndexBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& deviceCo
 
     uint32_t indexSizeInBytes = (uses2BytesPerIndex ? 2 : 4);
 
+    m_SizeInBytes = numIndices * indexSizeInBytes;
+
     D3D11_BUFFER_DESC desc;
     desc.Usage = usage;
     desc.ByteWidth = numIndices * indexSizeInBytes;
@@ -129,6 +103,7 @@ bool DX11IndexBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& deviceCo
 bool DX11ConstantBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t dataSizeInBytes, bool dynamic, void* initialData)
 {
     m_DeviceContext = &deviceContext;
+    m_SizeInBytes = dataSizeInBytes;
 
     D3D11_USAGE usage = (dynamic) ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
 
@@ -163,24 +138,6 @@ bool DX11ConstantBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& devic
     m_ResourceType = GfxResourceType::ConstantBuffer;
 
     return true;
-}
-
-D3D11_MAP GetD3D11MapFlag(MapFlag mapFlag)
-{
-    switch (mapFlag)
-    {
-    case MapFlag::Read:                 return D3D11_MAP_READ;
-    case MapFlag::Write:                return D3D11_MAP_WRITE;
-    case MapFlag::Read_Write:           return D3D11_MAP_READ_WRITE;
-    case MapFlag::Write_Discard:        return D3D11_MAP_WRITE_DISCARD;
-    case MapFlag::Write_No_Overwrite:   return D3D11_MAP_WRITE_NO_OVERWRITE;
-    default:
-        // Should never happen
-        SHIP_ASSERT(false);
-        break;
-    }
-
-    return D3D11_MAP_READ;
 }
 
 }

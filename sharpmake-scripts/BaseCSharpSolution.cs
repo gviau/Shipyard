@@ -2,10 +2,10 @@
 
 namespace ShipyardSharpmake
 {
-    class BaseShipyardSolution : Solution
+    public abstract class BaseCSharpSolution : Solution
     {
-        public BaseShipyardSolution(string solutionName, ShipyardTarget target)
-            : base(typeof(ShipyardTarget))
+        public BaseCSharpSolution(string solutionName, Target target)
+            : base(typeof(Target))
         {
             IsFileNameToLower = false;
 
@@ -14,7 +14,8 @@ namespace ShipyardSharpmake
             AddTargets(target);
         }
 
-        public virtual void ConfigureAll(Configuration configuration, ShipyardTarget target)
+        [Configure]
+        public virtual void ConfigureAll(Configuration configuration, Target target)
         {
             configuration.SolutionFileName = "[solution.Name].[target.DevEnv]";
             configuration.SolutionPath = @"[solution.SharpmakeCsPath]\..\generated-projects\";

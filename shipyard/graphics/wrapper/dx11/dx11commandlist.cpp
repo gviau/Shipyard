@@ -29,6 +29,10 @@ namespace Shipyard
 DX11BaseRenderCommandList::DX11BaseRenderCommandList()
     : m_pCommandListHeap(nullptr)
     , m_CommandListHeapCurrentPointer(0)
+
+#ifdef SHIP_COMMAND_LIST_GROWABLE_HEAP
+    , m_CommandListHeapSize(SHIP_COMMAND_LIST_HEAP_SIZE)
+#endif // #ifdef SHIP_COMMAND_LIST_GROWABLE_HEAP
 {
 
 }
@@ -95,10 +99,22 @@ BaseRenderCommand* DX11BaseRenderCommandList::GetNewRenderCommand(RenderCommandT
         SHIP_ASSERT(!"DX11BaseRenderCommandList::GetNewRenderCommand --> unsupported render command type");
     }
 
+#ifdef SHIP_COMMAND_LIST_GROWABLE_HEAP
+
+    bool notEnoughSpaceToStoreThisRenderCommand = ((m_CommandListHeapCurrentPointer + renderCommandSize) > m_CommandListHeapSize);
+    if (notEnoughSpaceToStoreThisRenderCommand)
+    {
+        m_pCommandListHeap = GrowCommandListHeap(m_CommandListHeapSize * 2);
+    }
+
+#else
+
     if (m_CommandListHeapCurrentPointer + renderCommandSize > SHIP_COMMAND_LIST_HEAP_SIZE)
     {
         SHIP_ASSERT(!"No more space for command list heap! You need to increase the internal command list heap size");
     }
+
+#endif // #ifdef SHIP_COMMAND_LIST_GROWABLE_HEAP
 
     BaseRenderCommand* pNewCommand = reinterpret_cast<BaseRenderCommand*>(size_t(m_pCommandListHeap) + m_CommandListHeapCurrentPointer);
     pNewCommand->renderCommandType = renderCommandType;
@@ -117,6 +133,25 @@ void* DX11BaseRenderCommandList::GetCommandListEnd() const
 {
     return reinterpret_cast<void*>(size_t(m_pCommandListHeap) + m_CommandListHeapCurrentPointer);
 }
+
+#ifdef SHIP_COMMAND_LIST_GROWABLE_HEAP
+void* DX11BaseRenderCommandList::GrowCommandListHeap(size_t newCommandListHeapSize)
+{
+    SHIP_LOG_WARNING(
+            "DX11BaseRenderCommandList::GrowCommandListHeap --> Growing command list 0x%p from size %llu to new size %llu",
+            this, m_CommandListHeapSize, newCommandListHeapSize);
+
+    m_CommandListHeapSize = newCommandListHeapSize;
+
+    void* pNewCommandListHeap = SHIP_ALLOC(newCommandListHeapSize, SHIP_CACHE_LINE_SIZE);
+
+    memcpy(pNewCommandListHeap, m_pCommandListHeap, m_CommandListHeapCurrentPointer);
+
+    SHIP_FREE(m_pCommandListHeap);
+
+    return pNewCommandListHeap;
+}
+#endif // #ifdef SHIP_COMMAND_LIST_GROWABLE_HEAP
 
 DX11DirectRenderCommandList::DX11DirectRenderCommandList(GFXRenderDevice& gfxRenderDevice)
     : DirectRenderCommandList(gfxRenderDevice)

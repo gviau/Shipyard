@@ -17,7 +17,8 @@ volatile bool ShaderWatcher::m_RunShaderWatcherThread = true;
 extern const char* g_ShaderFamilyFilenames[uint8_t(ShaderFamily::Count)];
 
 ShaderWatcher::ShaderWatcher()
-    : m_FileToCheckContent(nullptr, nullptr)
+    : m_ShaderDirectoryName(".\\shaders\\")
+    , m_FileToCheckContent(nullptr, nullptr)
 {
     m_ShaderWatcherThread = std::thread(&ShaderWatcher::ShaderWatcherThreadFunction, this);
 

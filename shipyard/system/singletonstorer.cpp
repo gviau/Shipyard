@@ -11,16 +11,16 @@ namespace Shipyard
 
 SingletonStorer::SingletonStorer()
 {
+    ShaderHandlerManager::CreateInstance();
     ShaderCompiler::CreateInstance();
     ShaderWatcher::CreateInstance();
-    ShaderHandlerManager::CreateInstance();
 }
 
 SingletonStorer::~SingletonStorer()
 {
-    ShaderHandlerManager::DestroyInstance();
     ShaderWatcher::DestroyInstance();
     ShaderCompiler::DestroyInstance();
+    ShaderHandlerManager::DestroyInstance();
 }
 
 }

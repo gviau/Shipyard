@@ -1580,7 +1580,21 @@ InplaceString<CharType, numChars>::InplaceString(const CharType* sz, BaseAllocat
 
 template <typename CharType, size_t numChars>
 InplaceString<CharType, numChars>::InplaceString(const String<CharType>& src)
-    : StringA(nullptr, nullptr)
+    : String<CharType>(nullptr, nullptr)
+{
+    SetAllocator(src.GetAllocator());
+
+    m_StackBuffer[0] = '\0';
+    this->SetUserPointer(m_StackBuffer, numChars);
+
+    Resize(src.Size());
+
+    Assign(src.GetBuffer());
+}
+
+template <typename CharType, size_t numChars>
+InplaceString<CharType, numChars>::InplaceString(const InplaceString<CharType, numChars>& src)
+    : String<CharType>(nullptr, nullptr)
 {
     SetAllocator(src.GetAllocator());
 

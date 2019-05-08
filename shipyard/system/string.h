@@ -133,6 +133,27 @@ namespace Shipyard
         explicit InplaceString(BaseAllocator* pAllocator = nullptr);
         InplaceString(const CharType* sz, BaseAllocator* pAllocator = nullptr);
         InplaceString(const String<CharType>& src);
+        InplaceString(const InplaceString<CharType, numChars>& src);
+
+        template <size_t otherNumChars>
+        InplaceString(const InplaceString<CharType, otherNumChars>& src)
+            : String<CharType>(nullptr, nullptr)
+        {
+            SetAllocator(src.GetAllocator());
+
+            m_StackBuffer[0] = '\0';
+            this->SetUserPointer(m_StackBuffer, numChars);
+
+            bool notEnoughSpaceToFitInStackBuffer = (otherNumChars < numChars);
+            if (notEnoughSpaceToFitInStackBuffer)
+            {
+                m_OwnMemory = true;
+            }
+
+            Resize(src.Size());
+
+            Assign(src.GetBuffer());
+        }
 
         InplaceString& operator= (const String& rhs);
         InplaceString& operator= (const CharType* rhs);

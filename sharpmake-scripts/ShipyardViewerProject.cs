@@ -17,6 +17,12 @@ namespace ShipyardSharpmake
             base.ConfigureAll(configuration, target);
 
             configuration.Options.Add(Sharpmake.Options.Vc.Linker.SubSystem.Application);
+            
+            Configuration.VcxprojUserFileSettings projectUserFileSettings = new Configuration.VcxprojUserFileSettings();
+            projectUserFileSettings.LocalDebuggerWorkingDirectory = @"[project.SharpmakeCsPath]\..\shipyard-viewer\approot";
+            projectUserFileSettings.OverwriteExistingFile = true;
+
+            configuration.VcxprojUserFile = projectUserFileSettings;
         }
 
         protected override void ConfigureProjectDependencies(Configuration configuration, ShipyardTarget target)

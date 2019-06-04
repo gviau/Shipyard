@@ -261,12 +261,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
         float theta = 0.0f;
 
-        const char* shaderDirectory = "c:\\Sandbox\\shipyard\\shipyard-viewer\\shaders\\";
-        Shipyard::ShaderCompiler::GetInstance().SetShaderDirectoryName(shaderDirectory);
-        Shipyard::ShaderWatcher::GetInstance().SetShaderDirectoryName(shaderDirectory);
-
         Shipyard::ShaderDatabase shaderDatabase;
-        shaderDatabase.Load("C:\\Sandbox\\shipyard\\generated-projects\\ShipyardShaderDatabase.bin");
+        shaderDatabase.Load("ShipyardShaderDatabase.bin");
 
         Shipyard::ShaderHandlerManager::GetInstance().Initialize(gfxRenderDevice, shaderDatabase);
 

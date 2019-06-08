@@ -25,6 +25,7 @@ namespace ShipyardSharpmake
         public static void SharpmakeMain(Sharpmake.Arguments arguments)
         {
             arguments.Generate<ShipyardSolution>();
+            arguments.Generate<ShipyardDllProject>();
             arguments.Generate<ShipyardViewerSolution>();
 
             arguments.Generate<ShipyardUnitTestSolution>();

@@ -3,10 +3,10 @@
 namespace ShipyardSharpmake
 {
     [Generate]
-    class ShipyardUnitTestProject : BaseShipyardExecutableProject
+    class ShipyardUnitTestProject : BaseExecutableProject
     {
         public ShipyardUnitTestProject()
-            : base("ShipyardUnitTest", "../shipyard-unit-test")
+            : base("ShipyardUnitTest", "../shipyard-unit-test", ShipyardUtils.DefaultShipyardTargetLib)
         {
         }
         

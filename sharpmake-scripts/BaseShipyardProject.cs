@@ -2,9 +2,9 @@
 
 namespace ShipyardSharpmake
 {
-    abstract class BaseShipyardProject : Project
+    abstract class BaseProject : Project
     {
-        public BaseShipyardProject(string projectName, string baseSourcePath, ShipyardTarget target)
+        public BaseProject(string projectName, string baseSourcePath, ShipyardTarget target)
             : base(typeof(ShipyardTarget))
         {
             IsFileNameToLower = false;
@@ -31,7 +31,7 @@ namespace ShipyardSharpmake
                 platformString = @"Mswin\";
             }
 
-            configuration.ProjectFileName   = platformString + @"[project.Name]";
+            configuration.ProjectFileName   = platformString + @"[project.Name]" + ((target.OutputType == OutputType.Dll) ? ".dll" : "");
             configuration.ProjectPath       = @"[project.SharpmakeCsPath]\..\generated-projects\[target.DevEnv]\";
             configuration.IntermediatePath  = configuration.ProjectPath + @"intermediate\[target.DevEnv]\[project.Name]\";
             configuration.Name              = @"[target.Optimization]";
@@ -122,6 +122,11 @@ namespace ShipyardSharpmake
                     configuration.Defines.Add("SHIP_OPTIMIZED");
                     configuration.Defines.Add("SHIP_MASTER");
                     break;
+            }
+
+            if (target.OutputType == OutputType.Lib)
+            {
+                configuration.Defines.Add("SHIPYARD_BUILD_STATIC");
             }
         }
 

@@ -2,10 +2,16 @@
 
 namespace ShipyardSharpmake
 {
-    class BaseShipyardLibProject : BaseShipyardProject
+    class BaseLibProject : BaseProject
     {
-        public BaseShipyardLibProject(string projectName, string relativeProjectPath)
-            : base(projectName, relativeProjectPath, ShipyardUtils.DefaultShipyardTargetLib)
+        public BaseLibProject(string projectName, string relativeProjectPath, ShipyardTarget shipyardTarget)
+            : base(projectName, relativeProjectPath, shipyardTarget)
+        {
+
+        }
+
+        public BaseLibProject(string projectName, string relativeProjectPath)
+            : base(projectName, relativeProjectPath, ShipyardUtils.DefaultShipyardTargetDll)
         {
 
         }

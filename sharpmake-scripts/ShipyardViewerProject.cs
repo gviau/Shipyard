@@ -3,10 +3,10 @@
 namespace ShipyardSharpmake
 {
     [Generate]
-    class ShipyardViewerProject : BaseShipyardExecutableProject
+    class ShipyardViewerProject : BaseExecutableProject
     {
         public ShipyardViewerProject()
-            : base("ShipyardViewer", "../shipyard-viewer")
+            : base("ShipyardViewer", "../shipyard-viewer", ShipyardUtils.DefaultShipyardTargetDll)
         {
 
         }
@@ -29,7 +29,7 @@ namespace ShipyardSharpmake
         {
             base.ConfigureProjectDependencies(configuration, target);
 
-            configuration.AddPublicDependency<ShipyardProject>(target, ShipyardUtils.DefaultDependencySettings);
+            configuration.AddPublicDependency<ShipyardDllProject>(target, ShipyardUtils.DefaultDependencySettings);
         }
     }
 }

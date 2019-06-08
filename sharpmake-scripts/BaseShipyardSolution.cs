@@ -2,9 +2,9 @@
 
 namespace ShipyardSharpmake
 {
-    class BaseShipyardSolution : Solution
+    class BaseSolution : Solution
     {
-        public BaseShipyardSolution(string solutionName, ShipyardTarget target)
+        public BaseSolution(string solutionName, ShipyardTarget target)
             : base(typeof(ShipyardTarget))
         {
             IsFileNameToLower = false;

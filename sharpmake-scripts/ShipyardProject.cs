@@ -2,11 +2,10 @@
 
 namespace ShipyardSharpmake
 {
-    [Generate]
-    class ShipyardProject : BaseShipyardLibProject
+    class BaseShipyardProject : BaseLibProject
     {
-        public ShipyardProject()
-            : base("Shipyard", "../shipyard")
+        public BaseShipyardProject(ShipyardTarget shipyardTarget)
+            : base("Shipyard", "../shipyard", shipyardTarget)
         {
 
         }
@@ -27,7 +26,7 @@ namespace ShipyardSharpmake
         protected override void ConfigurePlatform(Configuration configuration, Platform platform)
         {
             base.ConfigurePlatform(configuration, platform);
-            
+
             switch (platform)
             {
                 case Platform.win32:
@@ -56,6 +55,26 @@ namespace ShipyardSharpmake
             configuration.LibraryFiles.Add("DxErr.lib");
             configuration.LibraryFiles.Add("dxguid.lib");
             configuration.LibraryFiles.Add("d3dcompiler.lib");
+        }
+    }
+
+    [Generate]
+    class ShipyardDllProject : BaseShipyardProject
+    {
+        public ShipyardDllProject()
+            : base(ShipyardUtils.DefaultShipyardTargetDll)
+        {
+
+        }
+    }
+
+    [Generate]
+    class ShipyardProject : BaseShipyardProject
+    {
+        public ShipyardProject()
+            : base(ShipyardUtils.DefaultShipyardTargetLib)
+        {
+
         }
     }
 }

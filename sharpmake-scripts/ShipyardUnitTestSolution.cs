@@ -3,7 +3,7 @@
 namespace ShipyardSharpmake
 {
     [Generate]
-    class ShipyardUnitTestSolution : BaseShipyardSolution
+    class ShipyardUnitTestSolution : BaseSolution
     {
         public ShipyardUnitTestSolution()
             : base("Shipyard-Unit-Test", ShipyardUtils.DefaultShipyardTargetLib)

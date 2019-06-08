@@ -42,6 +42,20 @@ namespace ShipyardSharpmake
             }
         }
 
+        private static ShipyardTarget ms_DefaultShipyardTargetDll;
+        public static ShipyardTarget DefaultShipyardTargetDll
+        {
+            get
+            {
+                if (ms_DefaultShipyardTargetDll == null)
+                {
+                    ms_DefaultShipyardTargetDll = new ShipyardTarget(DefaultShipyardPlatforms, DefaultShipyardDevEnv, DefaultShipyardOptimization, OutputType.Dll);
+                }
+
+                return ms_DefaultShipyardTargetDll;
+            }
+        }
+
         private static ShipyardTarget ms_DefaultShipyardTargetLib;
         public static ShipyardTarget DefaultShipyardTargetLib
         {
@@ -49,7 +63,7 @@ namespace ShipyardSharpmake
             {
                 if (ms_DefaultShipyardTargetLib == null)
                 {
-                    ms_DefaultShipyardTargetLib = new ShipyardTarget(DefaultShipyardPlatforms, DefaultShipyardDevEnv, DefaultShipyardOptimization, OutputType.Dll);
+                    ms_DefaultShipyardTargetLib = new ShipyardTarget(DefaultShipyardPlatforms, DefaultShipyardDevEnv, DefaultShipyardOptimization, OutputType.Lib);
                 }
 
                 return ms_DefaultShipyardTargetLib;

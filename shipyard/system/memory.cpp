@@ -54,6 +54,8 @@ bool GlobalAllocator::Create(AllocatorInitEntry* pInitEntries, uint32_t numAlloc
         allocatorAddressRange.endingAddressBytes = allocatorAddressRange.startingAddressBytes + allocatorInitEntry.pAllocator->GetHeapSize();
 
         SHIP_ASSERT(allocatorAddressRange.startingAddressBytes < allocatorAddressRange.endingAddressBytes);
+
+        m_HeapSize += allocatorInitEntry.pAllocator->GetHeapSize();
     }
 
     m_NumAllocators = numAllocators;

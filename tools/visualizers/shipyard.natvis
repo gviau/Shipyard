@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+	<Type Name="Shipyard::PoolAllocator">
+		<DisplayString Condition="m_HeapSize&lt;=1024">PoolAllocator {m_ChunkSize} B * {m_NumChunks} chunks = {m_HeapSize} B</DisplayString>
+		<DisplayString Condition="m_HeapSize&lt;=1048576">PoolAllocator {m_ChunkSize} B * {m_NumChunks} chunks = {m_HeapSize/1024} Kb</DisplayString>
+		<DisplayString>PoolAllocator {m_ChunkSize} B * {m_NumChunks} chunks = {m_HeapSize/1048576} Mb</DisplayString>
+	</Type>
+	
+	<Type Name="Shipyard::FixedHeapAllocator">
+		<DisplayString Condition="m_HeapSize&lt;=1024">FixedHeapAllocator {m_HeapSize} B</DisplayString>
+		<DisplayString Condition="m_HeapSize&lt;=1048576">FixedHeapAllocator {m_HeapSize/1024} Kb</DisplayString>
+		<DisplayString>FixedHeapAllocator {m_HeapSize/1048576} Mb</DisplayString>
+	</Type>
+	
+	<Type Name="Shipyard::GlobalAllocator">
+		<DisplayString Condition="m_HeapSize&lt;=1024">GlobalAllocator {m_HeapSize} B</DisplayString>
+		<DisplayString Condition="m_HeapSize&lt;=1048576">GlobalAllocator {m_HeapSize/1024} Kb</DisplayString>
+		<DisplayString>GlobalAllocator {m_HeapSize/1048576} Mb</DisplayString>
+	</Type>
+	
+    <Type Name="Shipyard::Array&lt;*,*&gt;">
+        <DisplayString>Array&lt;T&gt; size={m_ArraySizeAndCapacity&amp;0x3FFF}</DisplayString>
+		<Expand>
+			<Item Name="[size]">m_ArraySizeAndCapacity&amp;0x3FFF</Item>
+			<Item Name="[capacity]">(m_ArraySizeAndCapacity>>14)&amp;0x3FFF</Item>
+			<Item Name="[own memory]">((m_ArraySizeAndCapacity&amp;0x80000000) == 0)</Item>
+			<Item Name="[pAllocator]">m_pAllocator</Item>
+			<ArrayItems>
+				<Size>m_ArraySizeAndCapacity&amp;0x3FFF</Size>
+				<ValuePointer>m_Array</ValuePointer>
+			</ArrayItems>
+		</Expand>
+    </Type>
+	
+    <Type Name="Shipyard::InplaceArray&lt;*,*&gt;">
+        <DisplayString>InplaceArray&lt;T, {$T2}&gt; size={m_ArraySizeAndCapacity&amp;0x3FFF}</DisplayString>
+		<Expand>
+			<Item Name="[fixed size]">$T2</Item>
+			<Item Name="[size]">m_ArraySizeAndCapacity&amp;0x3FFF</Item>
+			<Item Name="[capacity]">(m_ArraySizeAndCapacity>>14)&amp;0x3FFF</Item>
+			<Item Name="[own memory]">((m_ArraySizeAndCapacity&amp;0x80000000) == 0)</Item>
+			<Item Name="[pAllocator]">m_pAllocator</Item>
+			<ArrayItems>
+				<Size>m_ArraySizeAndCapacity&amp;0x3FFF</Size>
+				<ValuePointer>m_Array</ValuePointer>
+			</ArrayItems>
+		</Expand>
+    </Type>
+	
+    <Type Name="Shipyard::BigArray&lt;*,*&gt;">
+        <DisplayString>BigArray&lt;T&gt; size={m_Size}</DisplayString>
+		<Expand>
+			<Item Name="[size]">m_Size</Item>
+			<Item Name="[capacity]">m_Capacity</Item>
+			<Item Name="[pAllocator]">m_pAllocator</Item>
+			<ArrayItems>
+				<Size>m_Size</Size>
+				<ValuePointer>m_Array</ValuePointer>
+			</ArrayItems>
+		</Expand>
+    </Type>
+	
+	<Type Name="Shipyard::String&lt;*&gt;">
+		<DisplayString Condition="m_Buffer == nullptr"></DisplayString>
+		<DisplayString>{m_Buffer,s}</DisplayString>
+		<Expand>
+			<Item Name="[size]">m_NumChars</Item>
+			<Item Name="[capacity]">m_Capacity</Item>
+			<Item Name="[own memory]">m_OwnMemory</Item>
+			<Item Name="[pAllocator]">m_pAllocator</Item>
+			<Item Name="[buffer]">m_Buffer</Item>
+		</Expand>
+	</Type>
+	
+	<Type Name="Shipyard::InplaceString&lt;*,*&gt;">
+		<DisplayString Condition="m_Buffer == nullptr"></DisplayString>
+		<DisplayString>{m_Buffer,s}</DisplayString>
+		<Expand>
+			<Item Name="[fixed size]">$T2</Item>
+			<Item Name="[size]">m_NumChars</Item>
+			<Item Name="[capacity]">m_Capacity</Item>
+			<Item Name="[own memory]">m_OwnMemory</Item>
+			<Item Name="[pAllocator]">m_pAllocator</Item>
+			<Item Name="[buffer]">m_Buffer</Item>
+		</Expand>
+	</Type>
+	
+	<Type Name="Shipyard::Bitfield&lt;*,*&gt;">
+		<DisplayString>Bitfield of {$T1} bits</DisplayString>
+		<Expand>
+			<Item Name="[pAllocator]">m_pAllocator</Item>
+			<Item Name="[own memory]">m_MemoryOwned</Item>
+			<IndexListItems>
+				<Size>$T1</Size>
+				<ValueNode>(m_BitField[$i / (sizeof(BitfieldType) * 8)] &gt;&gt; ($i % (sizeof(BitfieldType) * 8))) &amp; 1,d</ValueNode>
+			</IndexListItems>
+		</Expand>
+	</Type>
+	
+	<Type Name="Shipyard::InplaceBitfield&lt;*,*&gt;">
+		<DisplayString>Inplace Bitfield of {$T1} bits</DisplayString>
+		<Expand>
+			<Item Name="[pAllocator]">m_pAllocator</Item>
+			<Item Name="[own memory]">m_MemoryOwned</Item>
+			<IndexListItems>
+				<Size>$T1</Size>
+				<ValueNode>(m_StackBitfield[$i / (sizeof(BitfieldType) * 8)] &gt;&gt; ($i % (sizeof(BitfieldType) * 8))) &amp; 1,d</ValueNode>
+			</IndexListItems>
+		</Expand>
+	</Type>
+</AutoVisualizer>

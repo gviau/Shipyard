@@ -17,6 +17,8 @@ namespace ShipyardSharpmake
 
             ResourceFilesExtensions.Add(".fx");
             ResourceFilesExtensions.Add(".hlsl");
+
+            NatvisFiles.Add(@"[project.SharpmakeCsPath]\..\tools\visualizers\shipyard.natvis");
         }
 
         public virtual void ConfigureAll(Configuration configuration, ShipyardTarget target)

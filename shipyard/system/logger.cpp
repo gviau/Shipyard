@@ -9,8 +9,8 @@ namespace Shipyard
 
 Logger::Logger()
     : m_LogLevel(LogLevel(LogLevel_Error | LogLevel_Warning))
+    , m_IsLogOpen(false)
 {
-    OpenLog("shipyard_log.txt");
 }
 
 Logger::~Logger()
@@ -28,12 +28,16 @@ bool Logger::OpenLog(const char* pLogFilename)
         return false;
     }
 
+    m_IsLogOpen = true;
+
     return true;
 }
 
 void Logger::CloseLog()
 {
     m_LogFile.close();
+
+    m_IsLogOpen = false;
 }
 
 void Logger::SetLogLevel(LogLevel logLevel)
@@ -70,7 +74,7 @@ void Log(std::ofstream& file, const char* pHeader, const char* pMessage, va_list
 
 void Logger::LogDebug(const char* pMessage, ...)
 {
-    if ((m_LogLevel & LogLevel::LogLevel_Debug) == 0)
+    if ((m_LogLevel & LogLevel::LogLevel_Debug) == 0 || !m_IsLogOpen)
     {
         return;
     }
@@ -89,7 +93,7 @@ void Logger::LogDebug(const char* pMessage, ...)
 
 void Logger::LogInfo(const char* pMessage, ...)
 {
-    if ((m_LogLevel & LogLevel::LogLevel_Info) == 0)
+    if ((m_LogLevel & LogLevel::LogLevel_Info) == 0 || !m_IsLogOpen)
     {
         return;
     }
@@ -108,7 +112,7 @@ void Logger::LogInfo(const char* pMessage, ...)
 
 void Logger::LogWarning(const char* pMessage, ...)
 {
-    if ((m_LogLevel & LogLevel::LogLevel_Warning) == 0)
+    if ((m_LogLevel & LogLevel::LogLevel_Warning) == 0 || !m_IsLogOpen)
     {
         return;
     }
@@ -127,7 +131,7 @@ void Logger::LogWarning(const char* pMessage, ...)
 
 void Logger::LogError(const char* pMessage, ...)
 {
-    if ((m_LogLevel & LogLevel::LogLevel_Error) == 0)
+    if ((m_LogLevel & LogLevel::LogLevel_Error) == 0 || !m_IsLogOpen)
     {
         return;
     }
@@ -142,6 +146,11 @@ void Logger::LogError(const char* pMessage, ...)
     va_end(argsPtr);
 
     m_LoggerLock.unlock();
+}
+
+SHIPYARD_API Logger& GetLogger()
+{
+    return Logger::GetInstance();
 }
 
 }

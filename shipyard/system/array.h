@@ -167,7 +167,7 @@ namespace Shipyard
         {
             if (pAllocator == nullptr)
             {
-                m_pAllocator = &GlobalAllocator::GetInstance();
+                m_pAllocator = &GetGlobalAllocator();
             }
 
             Reserve(4);
@@ -180,7 +180,7 @@ namespace Shipyard
         {
             if (pAllocator == nullptr)
             {
-                m_pAllocator = &GlobalAllocator::GetInstance();
+                m_pAllocator = &GetGlobalAllocator();
             }
 
             if (initialCapacity > 0)
@@ -636,7 +636,7 @@ namespace Shipyard
         {
             if (pAllocator == nullptr)
             {
-                m_pAllocator = &GlobalAllocator::GetInstance();
+                m_pAllocator = &GetGlobalAllocator();
             }
 
             Reserve(4);
@@ -650,7 +650,7 @@ namespace Shipyard
         {
             if (pAllocator == nullptr)
             {
-                m_pAllocator = &GlobalAllocator::GetInstance();
+                m_pAllocator = &GetGlobalAllocator();
             }
 
             if (initialCapacity > 0)

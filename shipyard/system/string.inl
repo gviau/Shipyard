@@ -20,7 +20,7 @@ String<CharType>::String(BaseAllocator* pAllocator)
 {
     if (pAllocator == nullptr)
     {
-        m_pAllocator = &GlobalAllocator::GetInstance();
+        m_pAllocator = &GetGlobalAllocator();
     }
 
     m_NumChars = 0;
@@ -39,7 +39,7 @@ String<CharType>::String(const CharType* sz, BaseAllocator* pAllocator)
 {
     if (pAllocator == nullptr)
     {
-        m_pAllocator = &GlobalAllocator::GetInstance();
+        m_pAllocator = &GetGlobalAllocator();
     }
 
     if (sz == nullptr)
@@ -69,7 +69,7 @@ String<CharType>::String(const CharType* sz, size_t numChars, BaseAllocator* pAl
 {
     if (pAllocator == nullptr)
     {
-        m_pAllocator = &GlobalAllocator::GetInstance();
+        m_pAllocator = &GetGlobalAllocator();
     }
 
     if (sz == nullptr || numChars == 0)

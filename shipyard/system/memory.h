@@ -75,28 +75,30 @@ namespace Shipyard
 #endif // #ifdef SHIP_DEBUG
     };
 
+    SHIPYARD_API GlobalAllocator& GetGlobalAllocator();
+
     // Those macros use the GlobalAllocator instead of specifying one. Be sure not to mismatch allocators!
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-#define SHIP_ALLOC(size, alignment) GlobalAllocator::GetInstance().Allocate(size, alignment, __FILE__, __LINE__)
+#define SHIP_ALLOC(size, alignment) GetGlobalAllocator().Allocate(size, alignment, __FILE__, __LINE__)
 
-#define SHIP_NEW(classX, alignment) new(GlobalAllocator::GetInstance().Allocate(sizeof(classX), alignment, __FILE__, __LINE__))classX
+#define SHIP_NEW(classX, alignment) new(GetGlobalAllocator().Allocate(sizeof(classX), alignment, __FILE__, __LINE__))classX
 
-#define SHIP_NEW_ARRAY(classX, length, alignment) NewArray<classX>(&GlobalAllocator::GetInstance(), length, alignment, __FILE__, __LINE__)
+#define SHIP_NEW_ARRAY(classX, length, alignment) NewArray<classX>(&GetGlobalAllocator(), length, alignment, __FILE__, __LINE__)
 
 #else
 
-#define SHIP_ALLOC(size, alignment) GlobalAllocator::GetInstance().Allocate(size, alignment)
+#define SHIP_ALLOC(size, alignment) GetGlobalAllocator().Allocate(size, alignment)
 
-#define SHIP_NEW(classX, alignment) new(GlobalAllocator::GetInstance().Allocate(sizeof(classX), alignment))classX
+#define SHIP_NEW(classX, alignment) new(GetGlobalAllocator().Allocate(sizeof(classX), alignment))classX
 
-#define SHIP_NEW_ARRAY(classX, length, alignment) NewArray<classX>(&GlobalAllocator::GetInstance(), length, alignment)
+#define SHIP_NEW_ARRAY(classX, length, alignment) NewArray<classX>(&GetGlobalAllocator(), length, alignment)
 
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-#define SHIP_FREE(memory) if (memory != nullptr) GlobalAllocator::GetInstance().Deallocate(memory)
+#define SHIP_FREE(memory) if (memory != nullptr) GetGlobalAllocator().Deallocate(memory)
 
-#define SHIP_DELETE(memory) if (memory != nullptr) { DestructorCall(memory); GlobalAllocator::GetInstance().Deallocate(memory); }
+#define SHIP_DELETE(memory) if (memory != nullptr) { DestructorCall(memory); GetGlobalAllocator().Deallocate(memory); }
 
-#define SHIP_DELETE_ARRAY(memory) if (memory != nullptr) DeleteArray(&GlobalAllocator::GetInstance(), memory)
+#define SHIP_DELETE_ARRAY(memory) if (memory != nullptr) DeleteArray(&GetGlobalAllocator(), memory)
 }

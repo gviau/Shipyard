@@ -149,4 +149,9 @@ void GlobalAllocator::Deallocate(const void* memory)
     SHIP_ASSERT(false);
 }
 
+GlobalAllocator& GetGlobalAllocator()
+{
+    return GlobalAllocator::GetInstance();
+}
+
 }

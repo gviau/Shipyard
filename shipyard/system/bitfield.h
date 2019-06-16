@@ -34,7 +34,7 @@ namespace Shipyard
         {
             if (pAllocator == nullptr)
             {
-                m_pAllocator = &GlobalAllocator::GetInstance();
+                m_pAllocator = &GetGlobalAllocator();
             }
         }
 

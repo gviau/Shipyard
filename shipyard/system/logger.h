@@ -57,7 +57,11 @@ namespace Shipyard
         LogLevel m_LogLevel;
 
         std::mutex m_LoggerLock;
+
+        bool m_IsLogOpen;
     };
+
+    SHIPYARD_API Logger& GetLogger();
 }
 
 #define SHIP_LOG_DEBUG(msg, ...) Shipyard::Logger::GetInstance().LogDebug(msg, __VA_ARGS__)

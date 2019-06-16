@@ -18,7 +18,7 @@ namespace ShipyardSharpmake
         public virtual void ConfigureAll(Configuration configuration, Target target)
         {
             configuration.SolutionFileName = "[solution.Name].[target.DevEnv]";
-            configuration.SolutionPath = @"[solution.SharpmakeCsPath]\..\generated-projects\";
+            configuration.SolutionPath = @"[solution.SharpmakeCsPath]\..\tmp\generated-projects\";
             configuration.Name = @"[target.Optimization]";
         }
     }

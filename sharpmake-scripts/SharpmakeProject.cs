@@ -23,7 +23,7 @@ namespace ShipyardSharpmake
 
         protected override string GetTargetOutputPath()
         {
-            return @"lib\";
+            return @"\tmp\lib\";
         }
     }
 }

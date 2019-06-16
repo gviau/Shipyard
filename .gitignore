@@ -19,3 +19,4 @@ Debug/
 Release/
 *.dir
 generated-projects/
+tmp/

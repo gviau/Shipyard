@@ -35,7 +35,7 @@ namespace ShipyardSharpmake
             string outputTypeString = (target.OutputType == OutputType.Lib) ? "lib" : "dll";
 
             configuration.ProjectFileName   = @"[project.Name]";
-            configuration.ProjectPath       = @"[project.SharpmakeCsPath]\..\generated-projects\[target.DevEnv]\" + platformString;
+            configuration.ProjectPath       = @"[project.SharpmakeCsPath]\..\tmp\generated-projects\[target.DevEnv]\" + platformString;
             configuration.IntermediatePath  = configuration.ProjectPath + @"intermediate\[target.DevEnv]\" + outputTypeString + @"\[project.Name]\";
             configuration.Name              = @"[target.Optimization]";
 

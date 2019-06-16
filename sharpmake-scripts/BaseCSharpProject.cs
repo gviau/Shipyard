@@ -22,7 +22,7 @@ namespace ShipyardSharpmake
         public virtual void ConfigureAll(Configuration configuration, Target target)
         {
             configuration.ProjectFileName =  @"[project.Name]";
-            configuration.ProjectPath = @"[project.SharpmakeCsPath]\..\generated-projects\[target.DevEnv]\csprojs\";
+            configuration.ProjectPath = @"[project.SharpmakeCsPath]\..\tmp\generated-projects\[target.DevEnv]\csprojs\";
             configuration.IntermediatePath = configuration.ProjectPath + @"intermediate\[target.DevEnv]\csprojs\[project.Name]\";
             configuration.Name = @"[target.Optimization]";
 

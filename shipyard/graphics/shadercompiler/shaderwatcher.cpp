@@ -2,7 +2,7 @@
 
 #include <graphics/shadercompiler/shadercompiler.h>
 
-#include <graphics/shaderfamilies.h>
+#include <graphics/shader/shaderfamilies.h>
 
 #include <system/systemcommon.h>
 

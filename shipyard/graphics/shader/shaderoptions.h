@@ -9,7 +9,7 @@ namespace Shipyard
 
     enum class ShaderOption : uint32_t
     {
-#include <graphics/shaderoptiondefinitions.h>
+#include <graphics/shader/shaderoptiondefinitions.h>
         Count
     };
 }

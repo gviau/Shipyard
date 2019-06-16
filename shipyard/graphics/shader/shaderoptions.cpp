@@ -1,4 +1,4 @@
-#include <graphics/shaderoptions.h>
+#include <graphics/shader/shaderoptions.h>
 
 #include <system/string.h>
 
@@ -10,7 +10,7 @@ namespace Shipyard
 
 uint8_t g_NumBitsForShaderOption[uint32_t(ShaderOption::Count)] =
 {
-#include <graphics/shaderoptiondefinitions.h>
+#include <graphics/shader/shaderoptiondefinitions.h>
 };
 
 #define CREATE_OPTION(option, numBits) \
@@ -18,7 +18,7 @@ uint8_t g_NumBitsForShaderOption[uint32_t(ShaderOption::Count)] =
 
 const char* g_ShaderOptionString[uint32_t(ShaderOption::Count)] =
 {
-#include <graphics/shaderoptiondefinitions.h>
+#include <graphics/shader/shaderoptiondefinitions.h>
 };
 
 }

@@ -7,7 +7,7 @@
 #include <system/array.h>
 #include <system/wrapper/wrapper.h>
 
-#include <graphics/shaderhandler.h>
+#include <graphics/shader/shaderhandler.h>
 
 namespace Shipyard
 {

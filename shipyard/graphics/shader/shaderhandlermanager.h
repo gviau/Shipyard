@@ -1,6 +1,6 @@
 #pragma once
 
-#include <graphics/shaderkey.h>
+#include <graphics/shader/shaderkey.h>
 
 #include <graphics/wrapper/wrapper_common.h>
 

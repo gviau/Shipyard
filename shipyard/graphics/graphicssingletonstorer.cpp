@@ -1,6 +1,6 @@
 #include <graphics/graphicssingletonstorer.h>
 
-#include <graphics/shaderhandlermanager.h>
+#include <graphics/shader/shaderhandlermanager.h>
 #include <graphics/shadercompiler/shadercompiler.h>
 #include <graphics/shadercompiler/shaderwatcher.h>
 

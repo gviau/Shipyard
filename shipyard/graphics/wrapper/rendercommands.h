@@ -2,7 +2,7 @@
 
 #include <graphics/wrapper/wrapper_common.h>
 
-#include <graphics/shaderhandler.h>
+#include <graphics/shader/shaderhandler.h>
 
 namespace Shipyard
 {

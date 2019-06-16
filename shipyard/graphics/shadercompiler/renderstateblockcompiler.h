@@ -1,6 +1,6 @@
 #pragma once
 
-#include <graphics/shaderoptions.h>
+#include <graphics/shader/shaderoptions.h>
 
 #include <system/array.h>
 #include <system/string.h>

@@ -1,4 +1,4 @@
-#include <graphics/shaderdatabase.h>
+#include <graphics/shader/shaderdatabase.h>
 
 #include <system/memory.h>
 

@@ -1,4 +1,4 @@
-#include <graphics/shaderfamilies.h>
+#include <graphics/shader/shaderfamilies.h>
 
 #include <system/string.h>
 
@@ -9,7 +9,7 @@ namespace Shipyard
 
 const char* g_ShaderFamilyFilenames[uint8_t(ShaderFamily::Count)] =
 {
-#include <graphics/shaderkeydefinitions.h>
+#include <graphics/shader/shaderkeydefinitions.h>
 };
 
 }

@@ -1,8 +1,8 @@
-#include <graphics/shaderhandlermanager.h>
+#include <graphics/shader/shaderhandlermanager.h>
 
-#include <graphics/shaderdatabase.h>
-#include <graphics/shaderfamilies.h>
-#include <graphics/shaderhandler.h>
+#include <graphics/shader/shaderdatabase.h>
+#include <graphics/shader/shaderfamilies.h>
+#include <graphics/shader/shaderhandler.h>
 
 #include <graphics/shadercompiler/shadercompiler.h>
 #include <graphics/shadercompiler/shaderwatcher.h>

@@ -1,7 +1,7 @@
 #include <graphics/shadercompiler/shadercompiler.h>
 
-#include <graphics/shaderfamilies.h>
-#include <graphics/shaderoptions.h>
+#include <graphics/shader/shaderfamilies.h>
+#include <graphics/shader/shaderoptions.h>
 
 #include <graphics/shadercompiler/renderstateblockcompiler.h>
 

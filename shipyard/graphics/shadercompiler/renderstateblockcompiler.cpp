@@ -1,7 +1,7 @@
 #include <graphics/shadercompiler/renderstateblockcompiler.h>
 
 #include <graphics/graphicscommon.h>
-#include <graphics/shaderkey.h>
+#include <graphics/shader/shaderkey.h>
 
 #include <system/string.h>
 #include <system/systemcommon.h>

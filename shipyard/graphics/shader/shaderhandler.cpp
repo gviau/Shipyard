@@ -1,4 +1,4 @@
-#include <graphics/shaderhandler.h>
+#include <graphics/shader/shaderhandler.h>
 
 #include <graphics/wrapper/wrapper.h>
 

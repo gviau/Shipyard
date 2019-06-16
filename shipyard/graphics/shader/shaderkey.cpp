@@ -1,7 +1,7 @@
-#include <graphics/shaderkey.h>
+#include <graphics/shader/shaderkey.h>
 
-#include <graphics/shaderfamilies.h>
-#include <graphics/shaderoptions.h>
+#include <graphics/shader/shaderfamilies.h>
+#include <graphics/shader/shaderoptions.h>
 
 #include <system/systemcommon.h>
 
@@ -57,7 +57,7 @@ struct ShaderKeyGroupBase
     }; \
     ShaderKeyGroup_##shaderFamily g_ShaderKeyGroup_##shaderFamily;
 
-#include <graphics/shaderkeydefinitions.h>
+#include <graphics/shader/shaderkeydefinitions.h>
 
 // 256 is the maximum amount of shader family we can have, since we allocate only 8 bits for it in a ShaderKey
 ShaderKeyGroupBase* g_ShaderKeyGroups[256];
@@ -78,7 +78,7 @@ void ShaderKey::InitializeShaderKeyGroups()
 #define START_SHADER_KEY(shaderFamily) \
     g_ShaderKeyGroups[uint32_t(ShaderFamily:: ##shaderFamily)] = &g_ShaderKeyGroup_##shaderFamily;
 
-#include <graphics/shaderkeydefinitions.h>
+#include <graphics/shader/shaderkeydefinitions.h>
 }
 
 void ShaderKey::GetShaderKeyOptionsForShaderFamily(ShaderFamily shaderFamily, Array<ShaderOption>& shaderOptions)

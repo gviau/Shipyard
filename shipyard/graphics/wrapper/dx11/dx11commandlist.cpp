@@ -1,5 +1,7 @@
 #include <graphics/wrapper/dx11/dx11commandlist.h>
 
+#include <graphics/shader/shaderhandler.h>
+
 #include <graphics/wrapper/dx11/dx11_common.h>
 #include <graphics/wrapper/dx11/dx11buffer.h>
 #include <graphics/wrapper/dx11/dx11descriptorset.h>
@@ -10,7 +12,6 @@
 #include <graphics/wrapper/dx11/dx11shader.h>
 #include <graphics/wrapper/dx11/dx11texture.h>
 
-#include <graphics/shaderhandler.h>
 #include <graphics/vertexformat.h>
 
 #include <system/array.h>

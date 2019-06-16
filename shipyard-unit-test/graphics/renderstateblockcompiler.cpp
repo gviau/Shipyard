@@ -3,8 +3,8 @@
 #include <graphics/shadercompiler/renderstateblockcompiler.h>
 
 #include <graphics/graphicscommon.h>
-#include <graphics/shaderfamilies.h>
-#include <graphics/shaderkey.h>
+#include <graphics/shader/shaderfamilies.h>
+#include <graphics/shader/shaderkey.h>
 
 #include <utils/unittestutils.h>
 

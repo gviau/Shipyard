@@ -1,7 +1,7 @@
 #pragma once
 
-#include <graphics/shaderdatabase.h>
-#include <graphics/shaderkey.h>
+#include <graphics/shader/shaderdatabase.h>
+#include <graphics/shader/shaderkey.h>
 
 #include <system/array.h>
 #include <system/platform.h>

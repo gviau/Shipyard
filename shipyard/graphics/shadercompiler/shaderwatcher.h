@@ -5,7 +5,7 @@
 #include <system/string.h>
 #include <system/singleton.h>
 
-#include <graphics/shaderkey.h>
+#include <graphics/shader/shaderkey.h>
 
 #include <mutex>
 #include <thread>

@@ -5,12 +5,12 @@
 #include <graphics/shadercompiler/shadercompiler.h>
 #include <graphics/shadercompiler/shaderwatcher.h>
 
-#include <graphics/shaderdatabase.h>
-#include <graphics/shaderfamilies.h>
-#include <graphics/shaderhandler.h>
-#include <graphics/shaderhandlermanager.h>
-#include <graphics/shaderkey.h>
-#include <graphics/shaderoptions.h>
+#include <graphics/shader/shaderdatabase.h>
+#include <graphics/shader/shaderfamilies.h>
+#include <graphics/shader/shaderhandler.h>
+#include <graphics/shader/shaderhandlermanager.h>
+#include <graphics/shader/shaderkey.h>
+#include <graphics/shader/shaderoptions.h>
 
 #include <graphics/graphicssingletonstorer.h>
 

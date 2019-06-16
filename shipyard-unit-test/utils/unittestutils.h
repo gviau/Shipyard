@@ -24,7 +24,7 @@ namespace Shipyard
 
                 firstPoolAllocatorSize = numChunks * chunkSize;
 
-                void* pHeap = reinterpret_cast<void*>(Shipyard::AlignAddress(size_t(m_pHeap), chunkSize));
+                void* pHeap = reinterpret_cast<void*>(Shipyard::MemoryUtils::AlignAddress(size_t(m_pHeap), chunkSize));
 
                 m_FirstPoolAllocator.Create(pHeap, numChunks, chunkSize);
             }
@@ -37,7 +37,7 @@ namespace Shipyard
 
                 secondPoolAllocatorSize = numChunks * chunkSize;
 
-                void* pHeap = reinterpret_cast<void*>(Shipyard::AlignAddress(size_t(m_pHeap) + firstPoolAllocatorSize, chunkSize));
+                void* pHeap = reinterpret_cast<void*>(Shipyard::MemoryUtils::AlignAddress(size_t(m_pHeap) + firstPoolAllocatorSize, chunkSize));
 
                 m_SecondPoolAllocator.Create(pHeap, numChunks, chunkSize);
             }
@@ -94,7 +94,7 @@ namespace Shipyard
         ScoppedBuffer(size_t size, size_t alignment)
         {
             pInternalBuffer = malloc(size);
-            pBuffer = reinterpret_cast<void*>(Shipyard::AlignAddress(size_t(pInternalBuffer), alignment));
+            pBuffer = reinterpret_cast<void*>(Shipyard::MemoryUtils::AlignAddress(size_t(pInternalBuffer), alignment));
         }
 
         ~ScoppedBuffer()

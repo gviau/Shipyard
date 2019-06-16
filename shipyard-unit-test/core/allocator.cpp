@@ -2,6 +2,10 @@
 
 #include <utils/unittestutils.h>
 
+#include <system/memory/linearallocator.h>
+
+#include <thread>
+
 namespace
 {
     bool AllocsAreDontOverlap(void* pAlloc1, size_t allocSize1, void* pAlloc2, size_t allocSize2)
@@ -97,7 +101,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         void* pAlloc = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize, alignment);
 
         REQUIRE(pAlloc != nullptr);
-        REQUIRE(Shipyard::IsAddressAligned(size_t(pAlloc), alignment));
+        REQUIRE(Shipyard::MemoryUtils::IsAddressAligned(size_t(pAlloc), alignment));
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 1);
@@ -529,7 +533,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         void* pAlloc1 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize1, alignment);
 
         REQUIRE(pAlloc1 != nullptr);
-        REQUIRE(Shipyard::IsAddressAligned(size_t(pAlloc1), alignment));
+        REQUIRE(Shipyard::MemoryUtils::IsAddressAligned(size_t(pAlloc1), alignment));
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 1);
@@ -539,7 +543,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
         void* pAlloc2 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize2, alignment);
 
         REQUIRE(pAlloc2 != nullptr);
-        REQUIRE(Shipyard::IsAddressAligned(size_t(pAlloc2), alignment));
+        REQUIRE(Shipyard::MemoryUtils::IsAddressAligned(size_t(pAlloc2), alignment));
 
         REQUIRE(AllocsAreDontOverlap(pAlloc1, allocSize1, pAlloc2, allocSize2));
 
@@ -578,7 +582,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             void* pAlloc1 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize1, alignment);
 
             REQUIRE(pAlloc1 != nullptr);
-            REQUIRE(Shipyard::IsAddressAligned(size_t(pAlloc1), alignment));
+            REQUIRE(Shipyard::MemoryUtils::IsAddressAligned(size_t(pAlloc1), alignment));
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
             REQUIRE(fixedHeapAllocator.GetMemoryInfo().numBlocksAllocated == 1);
@@ -588,7 +592,7 @@ TEST_CASE("Test FixedHeapAllocator", "[Allocator]")
             void* pAlloc2 = SHIP_ALLOC_EX(&fixedHeapAllocator, allocSize2, alignment);
 
             REQUIRE(pAlloc2 != nullptr);
-            REQUIRE(Shipyard::IsAddressAligned(size_t(pAlloc2), alignment));
+            REQUIRE(Shipyard::MemoryUtils::IsAddressAligned(size_t(pAlloc2), alignment));
 
             REQUIRE(AllocsAreDontOverlap(pAlloc1, allocSize1, pAlloc2, allocSize2));
 
@@ -987,7 +991,7 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
         void* pAlloc = SHIP_ALLOC_EX(&poolAllocator, chunkSize, alignment);
 
         REQUIRE(pAlloc != nullptr);
-        REQUIRE(Shipyard::IsAddressAligned(size_t(pAlloc), alignment));
+        REQUIRE(Shipyard::MemoryUtils::IsAddressAligned(size_t(pAlloc), alignment));
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         REQUIRE(poolAllocator.GetMemoryInfo().numBlocksAllocated == 1);
@@ -1381,4 +1385,150 @@ TEST_CASE("Test PoolAllocator", "[Allocator]")
     }
 
     poolAllocator.Destroy();
+}
+
+class LinearAllocatorTestThread
+{
+public:
+    LinearAllocatorTestThread(Shipyard::LinearAllocator* pLinearAllocator, size_t numAllocationsToDo, size_t allocSize, size_t allocAlignment)
+        : m_pLinearAllocator(pLinearAllocator)
+        , m_NumAllocationsDoneAndValid(0)
+        , m_NumAllocationsToDo(numAllocationsToDo)
+        , m_AllocSize(allocSize)
+        , m_AllocAlignment(allocAlignment)
+    {
+        m_LinearAllocatorTestThread = std::thread(&LinearAllocatorTestThread::LinearAllocatorTestThreadFunction, this);
+    }
+
+    bool ValidateAllocations()
+    {
+        return (m_NumAllocationsDoneAndValid == m_NumAllocationsToDo);
+    }
+
+    void WaitForThreadToFinish()
+    {
+        m_LinearAllocatorTestThread.join();
+    }
+
+private:
+    Shipyard::LinearAllocator* m_pLinearAllocator;
+    size_t m_NumAllocationsDoneAndValid;
+    size_t m_NumAllocationsToDo;
+    size_t m_AllocSize;
+    size_t m_AllocAlignment;
+
+    void LinearAllocatorTestThreadFunction()
+    {
+        for (size_t i = 0; i < m_NumAllocationsToDo; i++)
+        {
+            void* pAlloc = SHIP_ALLOC_EX(m_pLinearAllocator, m_AllocSize, m_AllocAlignment);
+
+            if (pAlloc != nullptr && Shipyard::MemoryUtils::IsAddressAligned(size_t(pAlloc), m_AllocAlignment))
+            {
+                m_NumAllocationsDoneAndValid += 1;
+            }
+        }
+    }
+
+    std::thread m_LinearAllocatorTestThread;
+};
+
+TEST_CASE("Test LinearAllocator", "[Allocator]")
+{
+    Shipyard::LinearAllocator linearAllocator;
+
+    SECTION("creating allocator")
+    {
+        const size_t heapSize = 64;
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
+
+        linearAllocator.Create(scoppedBuffer.pBuffer, heapSize);
+    }
+
+    SECTION("simple allocation")
+    {
+        const size_t allocSize = 4;
+        const size_t heapSize = allocSize;
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
+
+        linearAllocator.Create(scoppedBuffer.pBuffer, heapSize);
+
+        void* pAlloc = SHIP_ALLOC_EX(&linearAllocator, allocSize, 1);
+
+        REQUIRE(pAlloc != nullptr);
+    }
+
+    SECTION("simple aligned allocation")
+    {
+        const size_t allocSize = 4;
+        const size_t alignment = 16;
+        const size_t heapSize = allocSize + alignment;
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
+
+        linearAllocator.Create(scoppedBuffer.pBuffer, heapSize);
+
+        void* pAlloc = SHIP_ALLOC_EX(&linearAllocator, allocSize, alignment);
+
+        REQUIRE(pAlloc != nullptr);
+        REQUIRE(Shipyard::MemoryUtils::IsAddressAligned(size_t(pAlloc), alignment));
+    }
+
+    SECTION("Allocations from multiple threads")
+    {
+        const size_t numThreads = 8;
+
+        const size_t allocSizes[] =
+        {
+            1,
+            2,
+            3,
+            4,
+            8,
+            13,
+            16,
+            32
+        };
+
+        const size_t alignments[] =
+        {
+            1,
+            2,
+            1,
+            4,
+            8,
+            16,
+            16,
+            16
+        };
+
+        const size_t numAllocationsForEachThread = 10000;
+
+        // Enough space for biggest allocation & biggest alignment
+        const size_t heapSize = numThreads * numAllocationsForEachThread * 32 * 16;
+
+        Shipyard::ScoppedBuffer scoppedBuffer(heapSize);
+
+        linearAllocator.Create(scoppedBuffer.pBuffer, heapSize);
+
+        LinearAllocatorTestThread* linearAllocatorTestThreads[numThreads];
+
+        for (size_t i = 0; i < numThreads; i++)
+        {
+            linearAllocatorTestThreads[i] = new LinearAllocatorTestThread(&linearAllocator, numAllocationsForEachThread, allocSizes[i], alignments[i]);
+        }
+
+        for (size_t i = 0; i < numThreads; i++)
+        {
+            linearAllocatorTestThreads[i]->WaitForThreadToFinish();
+        }
+
+        for (size_t i = 0; i < numThreads; i++)
+        {
+            REQUIRE(linearAllocatorTestThreads[i]->ValidateAllocations());
+
+            delete linearAllocatorTestThreads[i];
+        }
+    }
+
+    linearAllocator.Destroy();
 }

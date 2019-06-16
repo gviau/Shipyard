@@ -76,6 +76,7 @@ namespace Shipyard
     // Inline
 #if COMPILER == COMPILER_MSVC
 #   define SHIP_INLINE inline
+#   define SHIP_ALIGN(alignment) __declspec(align(alignment))
 #else
 #   pragma error "Unreconized compiler"
 #endif // #if COMPILER == COMPILER_MSVC

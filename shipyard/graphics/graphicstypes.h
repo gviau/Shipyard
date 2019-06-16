@@ -1,5 +1,7 @@
 #pragma once
 
+#include <inttypes.h>
+
 namespace Shipyard
 {
     const uint32_t InvalidGfxHandle = 0xffffffff;

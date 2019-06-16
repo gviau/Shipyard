@@ -181,4 +181,9 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
     return shaderHandler;
 }
 
+SHIPYARD_API ShaderHandlerManager& GetShaderHandlerManager()
+{
+    return ShaderHandlerManager::GetInstance();
+}
+
 }

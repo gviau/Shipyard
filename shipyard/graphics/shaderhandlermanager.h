@@ -31,4 +31,6 @@ namespace Shipyard
         std::map<ShaderKey, ShaderHandler*> m_ShaderHandlers;
         ShaderDatabase* m_ShaderDatabase;
     };
+
+    SHIPYARD_API ShaderHandlerManager& GetShaderHandlerManager();
 }

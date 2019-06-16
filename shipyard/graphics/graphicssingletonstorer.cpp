@@ -1,4 +1,4 @@
-#include <system/singletonstorer.h>
+#include <graphics/graphicssingletonstorer.h>
 
 #include <graphics/shaderhandlermanager.h>
 #include <graphics/shadercompiler/shadercompiler.h>
@@ -9,14 +9,14 @@
 namespace Shipyard
 {;
 
-SingletonStorer::SingletonStorer()
+GraphicsSingletonStorer::GraphicsSingletonStorer()
 {
     ShaderHandlerManager::CreateInstance();
     ShaderCompiler::CreateInstance();
     ShaderWatcher::CreateInstance();
 }
 
-SingletonStorer::~SingletonStorer()
+GraphicsSingletonStorer::~GraphicsSingletonStorer()
 {
     ShaderWatcher::DestroyInstance();
     ShaderCompiler::DestroyInstance();

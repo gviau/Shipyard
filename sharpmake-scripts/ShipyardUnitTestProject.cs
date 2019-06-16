@@ -6,7 +6,7 @@ namespace ShipyardSharpmake
     class ShipyardUnitTestProject : BaseExecutableProject
     {
         public ShipyardUnitTestProject()
-            : base("ShipyardUnitTest", "../shipyard-unit-test", ShipyardUtils.DefaultShipyardTargetLib)
+            : base("shipyard.unittests", @"..\shipyard-unit-test\", ShipyardUtils.DefaultShipyardTargetLib)
         {
         }
         
@@ -20,7 +20,16 @@ namespace ShipyardSharpmake
         {
             base.ConfigureProjectDependencies(configuration, target);
 
-            configuration.AddPublicDependency<ShipyardProject>(target, ShipyardUtils.DefaultDependencySettings);
+            configuration.AddPublicDependency<ShipyardSystemProject>(target, ShipyardUtils.DefaultDependencySettings);
+            configuration.AddPublicDependency<ShipyardMathProject>(target, ShipyardUtils.DefaultDependencySettings);
+            configuration.AddPublicDependency<ShipyardGraphicsProject>(target, ShipyardUtils.DefaultDependencySettings);
+        }
+
+        protected override void ConfigureIncludePaths(Configuration configuration)
+        {
+            base.ConfigureIncludePaths(configuration);
+
+            configuration.IncludePrivatePaths.Add(SourceRootPath);
         }
     }
 }

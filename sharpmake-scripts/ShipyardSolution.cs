@@ -4,8 +4,8 @@ namespace ShipyardSharpmake
 {
     class BaseShipyardSolution : BaseSolution
     {
-        public BaseShipyardSolution(ShipyardTarget shipyardTarget)
-            : base("Shipyard", shipyardTarget)
+        public BaseShipyardSolution(string solutionName, ShipyardTarget shipyardTarget)
+            : base(solutionName, shipyardTarget)
         {
         }
     }
@@ -14,7 +14,7 @@ namespace ShipyardSharpmake
     class ShipyardDllSolution : BaseShipyardSolution
     {
         public ShipyardDllSolution()
-            : base(ShipyardUtils.DefaultShipyardTargetDll)
+            : base("shipyard.dll", ShipyardUtils.DefaultShipyardTargetDll)
         {
         }
 
@@ -23,7 +23,9 @@ namespace ShipyardSharpmake
         {
             base.ConfigureAll(configuration, target);
 
-            configuration.AddProject<ShipyardDllProject>(target);
+            configuration.AddProject<ShipyardSystemDllProject>(target);
+            configuration.AddProject<ShipyardMathDllProject>(target);
+            configuration.AddProject<ShipyardGraphicsDllProject>(target);
         }
     }
 
@@ -31,7 +33,7 @@ namespace ShipyardSharpmake
     class ShipyardSolution : BaseShipyardSolution
     {
         public ShipyardSolution()
-            : base(ShipyardUtils.DefaultShipyardTargetLib)
+            : base("shipyard", ShipyardUtils.DefaultShipyardTargetLib)
         {
         }
 
@@ -40,7 +42,9 @@ namespace ShipyardSharpmake
         {
             base.ConfigureAll(configuration, target);
 
-            configuration.AddProject<ShipyardProject>(target);
+            configuration.AddProject<ShipyardSystemProject>(target);
+            configuration.AddProject<ShipyardMathProject>(target);
+            configuration.AddProject<ShipyardGraphicsProject>(target);
         }
     }
 }

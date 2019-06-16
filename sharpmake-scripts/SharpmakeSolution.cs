@@ -6,7 +6,7 @@ namespace ShipyardSharpmake
     public class SharpmakeSolution : BaseCSharpSolution
     {
         public SharpmakeSolution()
-            : base("SharpmakeScripts", new Target(Platform.anycpu, ShipyardUtils.DefaultShipyardDevEnv, Optimization.Debug))
+            : base("shipyard.sharpmakescripts", new Target(Platform.anycpu, ShipyardUtils.DefaultShipyardDevEnv, Optimization.Debug))
         {
 
         }

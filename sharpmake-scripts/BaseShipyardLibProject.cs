@@ -20,7 +20,15 @@ namespace ShipyardSharpmake
         {
             base.ConfigureAll(configuration, target);
 
-            configuration.Output = (target.OutputType == OutputType.Lib) ? Configuration.OutputType.Lib : Configuration.OutputType.Dll;
+            if (target.OutputType == OutputType.Dll)
+            {
+                configuration.ProjectFileName += ".dll";
+                configuration.Output = Configuration.OutputType.Dll;
+            }
+            else
+            {
+                configuration.Output = Configuration.OutputType.Lib;
+            }
         }
 
         protected override string GetTargetOutputPath()

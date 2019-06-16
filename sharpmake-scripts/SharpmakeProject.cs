@@ -7,7 +7,7 @@ namespace ShipyardSharpmake
     public class SharpmakeProject : BaseCSharpProject
     {
         public SharpmakeProject()
-            : base("SharpmakeScripts", "", new Target(Platform.anycpu, ShipyardUtils.DefaultShipyardDevEnv, Optimization.Debug))
+            : base("shipyard.sharpmakescripts", "", new Target(Platform.anycpu, ShipyardUtils.DefaultShipyardDevEnv, Optimization.Debug))
         {
             AssemblyName = "ShipyardSharpmake";
         }

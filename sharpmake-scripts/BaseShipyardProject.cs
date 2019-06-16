@@ -21,6 +21,7 @@ namespace ShipyardSharpmake
             NatvisFiles.Add(@"[project.SharpmakeCsPath]\..\tools\visualizers\shipyard.natvis");
         }
 
+        [Configure]
         public virtual void ConfigureAll(Configuration configuration, ShipyardTarget target)
         {
             bool isMswinPlatform = (target.Platform == Platform.win32 || target.Platform == Platform.win64);
@@ -31,9 +32,9 @@ namespace ShipyardSharpmake
                 platformString = @"Mswin\";
             }
 
-            configuration.ProjectFileName   = platformString + @"[project.Name]" + ((target.OutputType == OutputType.Dll) ? ".dll" : "");
-            configuration.ProjectPath       = @"[project.SharpmakeCsPath]\..\generated-projects\[target.DevEnv]\";
-            configuration.IntermediatePath  = configuration.ProjectPath + @"intermediate\[target.DevEnv]\[project.Name]\";
+            configuration.ProjectFileName   = @"[project.Name]";
+            configuration.ProjectPath       = @"[project.SharpmakeCsPath]\..\generated-projects\[target.DevEnv]\" + platformString;
+            configuration.IntermediatePath  = configuration.ProjectPath + @"intermediate\[project.Name]\";
             configuration.Name              = @"[target.Optimization]";
 
             string targetOutputPath = GetTargetOutputPath();
@@ -94,7 +95,7 @@ namespace ShipyardSharpmake
 
         protected virtual void ConfigureIncludePaths(Configuration configuration)
         {
-            configuration.IncludePaths.Add(SourceRootPath);
+            
         }
 
         protected virtual void ConfigurePlatform(Configuration configuration, Platform platform)
@@ -128,6 +129,8 @@ namespace ShipyardSharpmake
             {
                 configuration.Defines.Add("SHIPYARD_BUILD_STATIC");
             }
+
+            configuration.Defines.Add("SHIPYARD_NONCLIENT_BUILD");
         }
 
         protected virtual void ConfigureProjectDependencies(Configuration configuration, ShipyardTarget target)

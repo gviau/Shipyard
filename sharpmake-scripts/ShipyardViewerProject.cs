@@ -3,10 +3,29 @@
 namespace ShipyardSharpmake
 {
     [Generate]
+    class ShipyardViewerLibProject : BaseLibProject
+    {
+        public ShipyardViewerLibProject()
+            : base("shipyard.viewer", @"..\shipyard-viewer\src\framework\", ShipyardUtils.DefaultShipyardTargetDll)
+        {
+
+        }
+
+        protected override void ConfigureProjectDependencies(Configuration configuration, ShipyardTarget target)
+        {
+            base.ConfigureProjectDependencies(configuration, target);
+
+            configuration.AddPublicDependency<ShipyardSystemDllProject>(target, ShipyardUtils.DefaultDependencySettings);
+            configuration.AddPublicDependency<ShipyardMathDllProject>(target, ShipyardUtils.DefaultDependencySettings);
+            configuration.AddPublicDependency<ShipyardGraphicsDllProject>(target, ShipyardUtils.DefaultDependencySettings);
+        }
+    }
+
+    [Generate]
     class ShipyardViewerProject : BaseExecutableProject
     {
         public ShipyardViewerProject()
-            : base("ShipyardViewer", "../shipyard-viewer", ShipyardUtils.DefaultShipyardTargetDll)
+            : base("shipyard.viewer.app", @"..\shipyard-viewer\src\", ShipyardUtils.DefaultShipyardTargetDll)
         {
 
         }
@@ -17,9 +36,9 @@ namespace ShipyardSharpmake
             base.ConfigureAll(configuration, target);
 
             configuration.Options.Add(Sharpmake.Options.Vc.Linker.SubSystem.Application);
-            
+
             Configuration.VcxprojUserFileSettings projectUserFileSettings = new Configuration.VcxprojUserFileSettings();
-            projectUserFileSettings.LocalDebuggerWorkingDirectory = @"[project.SharpmakeCsPath]\..\shipyard-viewer\approot";
+            projectUserFileSettings.LocalDebuggerWorkingDirectory = @"[project.SharpmakeCsPath]\..\shipyard-viewer\approot\";
             projectUserFileSettings.OverwriteExistingFile = true;
 
             configuration.VcxprojUserFile = projectUserFileSettings;
@@ -29,7 +48,7 @@ namespace ShipyardSharpmake
         {
             base.ConfigureProjectDependencies(configuration, target);
 
-            configuration.AddPublicDependency<ShipyardDllProject>(target, ShipyardUtils.DefaultDependencySettings);
+            configuration.AddPublicDependency<ShipyardViewerLibProject>(target, ShipyardUtils.DefaultDependencySettings);
         }
     }
 }

@@ -6,7 +6,7 @@ namespace ShipyardSharpmake
     class ShipyardUnitTestSolution : BaseSolution
     {
         public ShipyardUnitTestSolution()
-            : base("Shipyard-Unit-Test", ShipyardUtils.DefaultShipyardTargetLib)
+            : base("shipyard.unittests", ShipyardUtils.DefaultShipyardTargetLib)
         {
         }
 
@@ -15,7 +15,7 @@ namespace ShipyardSharpmake
         {
             base.ConfigureAll(configuration, target);
 
-            configuration.AddProject<ShipyardProject>(target);
+            configuration.AddProject<ShipyardSystemProject>(target);
             configuration.AddProject<ShipyardUnitTestProject>(target);
         }
     }

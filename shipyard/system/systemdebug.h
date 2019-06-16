@@ -57,4 +57,7 @@ namespace Shipyard
 #else
 #error Unsupported platform
 #endif // #if PLATFORM == PLATFORM_WINDOWS
+
+#define SHIP_STATIC_ASSERT(cond) static_assert(cond, #cond)
+#define SHIP_STATIC_ASSERT_MSG(cond, msg) static_assert(cond, msg)
 }

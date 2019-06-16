@@ -665,7 +665,7 @@ IDXGISwapChain* DX11RenderDevice::CreateSwapchain(uint32_t width, uint32_t heigh
 
 ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatType vertexFormatType)
 {
-    static_assert(uint32_t(VertexFormatType::VertexFormatType_Count) == 5, "Update the RegisterVertexFormatType function if you add or remove vertex formats");
+    SHIP_STATIC_ASSERT_MSG(uint32_t(VertexFormatType::VertexFormatType_Count) == 5, "Update the RegisterVertexFormatType function if you add or remove vertex formats");
 
     uint32_t idx = uint32_t(vertexFormatType);
     SHIP_ASSERT(g_RegisteredInputLayouts[idx] == nullptr);

@@ -3,6 +3,8 @@
 #include <system/logger.h>
 #include <system/systemdebug.h>
 
+#include <system/memory/memoryutils.h>
+
 namespace Shipyard
 {;
 
@@ -107,12 +109,12 @@ void* FixedHeapAllocator::Allocate(size_t size, size_t alignment
 
         size_t startingAddressOfUserBuffer = startingAddressOfBlock + minimalSpaceRequiredForHeader;
 
-        bool isBlockBigEnough = IsAddressAligned(startingAddressOfUserBuffer, alignment);
+        bool isBlockBigEnough = MemoryUtils::IsAddressAligned(startingAddressOfUserBuffer, alignment);
         bool requiresAlignmentPadding = !isBlockBigEnough;
 
         if (requiresAlignmentPadding)
         {
-            size_t alignedStartingAddressOfUserBuffer = AlignAddress(startingAddressOfUserBuffer, alignment);
+            size_t alignedStartingAddressOfUserBuffer = MemoryUtils::AlignAddress(startingAddressOfUserBuffer, alignment);
             requiredSize = size + (alignedStartingAddressOfUserBuffer - startingAddressOfBlock);
 
             startingAddressOfUserBuffer = alignedStartingAddressOfUserBuffer;

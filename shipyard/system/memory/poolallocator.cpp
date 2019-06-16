@@ -3,6 +3,8 @@
 #include <system/logger.h>
 #include <system/systemdebug.h>
 
+#include <system/memory/memoryutils.h>
+
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 #include <system/memory/debugallocator.h>
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
@@ -46,7 +48,7 @@ bool PoolAllocator::Create(void* pHeap, size_t numChunks, size_t chunkSize)
             this, chunkSize, sizeof(FreeChunkHeader));
 
     SHIP_ASSERT_MSG(
-            IsAddressAligned(size_t(pHeap), chunkSize),
+            MemoryUtils::IsAddressAligned(size_t(pHeap), chunkSize),
             "PoolAllocator::Create --> pHeap %p for pool allocator %p is assumed to be aligned to %zu bytes",
             pHeap, this, chunkSize);
 
@@ -116,7 +118,7 @@ void* PoolAllocator::Allocate(size_t size, size_t alignment
 
     FreeChunkHeader* pChunkCandidate = m_pFirstFreeChunk;
 
-    if (IsAddressAligned(size_t(pChunkCandidate), alignment))
+    if (MemoryUtils::IsAddressAligned(size_t(pChunkCandidate), alignment))
     {
         m_pFirstFreeChunk = m_pFirstFreeChunk->pNextFreeChunk;
     }
@@ -130,7 +132,7 @@ void* PoolAllocator::Allocate(size_t size, size_t alignment
 
         while (pCurrentFreeChunk != nullptr)
         {
-            if (IsAddressAligned(size_t(pCurrentFreeChunk), alignment))
+            if (MemoryUtils::IsAddressAligned(size_t(pCurrentFreeChunk), alignment))
             {
                 pPreviousFreeChunk->pNextFreeChunk = pCurrentFreeChunk->pNextFreeChunk;
 

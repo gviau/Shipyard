@@ -4,6 +4,8 @@
 
 #include <math/mathutilities.h>
 
+#include <system/memory/memoryutils.h>
+
 #include <stdint.h>
 
 #ifndef SHIP_OPTIMIZED
@@ -18,16 +20,6 @@
 
 namespace Shipyard
 {
-    SHIP_INLINE size_t AlignAddress(size_t address, size_t alignment)
-    {
-        return (address + (alignment - 1)) & (~(alignment - 1));
-    }
-
-    SHIP_INLINE bool IsAddressAligned(size_t address, size_t alignment)
-    {
-        return ((address & (alignment - 1)) == 0);
-    }
-
     class SHIPYARD_API BaseAllocator
     {
     public:
@@ -113,7 +105,7 @@ namespace
         // location that has an extra sizeof(size_t) bytes behind it so that we can place the header, even if the user pointer is already
         // aligned.
         size_t userPointerAddress = size_t(pMem);
-        size_t forwardAlignedAddress = Shipyard::AlignAddress(userPointerAddress, alignment);
+        size_t forwardAlignedAddress = Shipyard::MemoryUtils::AlignAddress(userPointerAddress, alignment);
 
         size_t diffAddress = (forwardAlignedAddress - userPointerAddress);
 
@@ -123,7 +115,7 @@ namespace
         if (needToAlignToNextBoundary)
         {
             forwardAlignedAddress += (sizeForArraySizeHeader - MAX(diffAddress, 1));
-            forwardAlignedAddress = Shipyard::AlignAddress(forwardAlignedAddress, alignment);
+            forwardAlignedAddress = Shipyard::MemoryUtils::AlignAddress(forwardAlignedAddress, alignment);
         }
 
         // Required header so that we know how many objects to destroy when deleting the array.

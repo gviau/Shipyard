@@ -41,26 +41,35 @@ void* LinearAllocator::Allocate(size_t size, size_t alignment
 
         )
 {
-    size_t allocationOffsetToUse = 0;
+    size_t allocationOffset = 0;
+    size_t newAllocationOffset = 0;
+    size_t allocatedAddress = 0;
 
     do
     {
-        allocationOffsetToUse = m_AllocationOffset;
+        allocationOffset = m_AllocationOffset;
+        size_t allocationOffsetToUse = m_AllocationOffset;
 
-        if (!MemoryUtils::IsAddressAligned(allocationOffsetToUse, alignment))
+        allocatedAddress = size_t(m_pHeap) + allocationOffsetToUse;
+
+        if (!MemoryUtils::IsAddressAligned(allocatedAddress, alignment))
         {
-            allocationOffsetToUse = MemoryUtils::AlignAddress(allocationOffsetToUse, alignment);
+            allocatedAddress = MemoryUtils::AlignAddress(allocatedAddress, alignment);
+
+            allocationOffsetToUse = allocatedAddress - size_t(m_pHeap);
         }
 
-        bool validAllocation = (allocationOffsetToUse + size <= m_HeapSize);
+        newAllocationOffset = allocationOffsetToUse + size;
+
+        bool validAllocation = (newAllocationOffset <= m_HeapSize);
         if (!validAllocation)
         {
             return nullptr;
         }
 
-    } while (AtomicOperations<size_t>::CompareExchange(m_AllocationOffset, allocationOffsetToUse, m_AllocationOffset) != m_AllocationOffset);
+    } while (AtomicOperations<size_t>::CompareExchange(m_AllocationOffset, newAllocationOffset, allocationOffset) != allocationOffset);
 
-    void* allocatedPtr = reinterpret_cast<void*>(reinterpret_cast<size_t>(m_pHeap) + allocationOffsetToUse);
+    void* allocatedPtr = reinterpret_cast<void*>(allocatedAddress);
 
     return allocatedPtr;
 }

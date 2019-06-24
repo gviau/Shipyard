@@ -16,6 +16,7 @@ namespace Shipyard
 DX11BaseBuffer::DX11BaseBuffer()
     : m_DeviceContext(nullptr)
     , m_Buffer(nullptr)
+    , m_ShaderResourceView(nullptr)
     , m_SizeInBytes(0)
 {
 
@@ -27,6 +28,12 @@ void DX11BaseBuffer::Destroy()
 
     m_Buffer->Release();
     m_Buffer = nullptr;
+
+    if (m_ShaderResourceView != nullptr)
+    {
+        m_ShaderResourceView->Release();
+        m_ShaderResourceView = nullptr;
+    }
 
     m_DeviceContext = nullptr;
 }
@@ -59,7 +66,7 @@ bool DX11VertexBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& deviceC
     HRESULT hr = device.CreateBuffer(&desc, &data, &m_Buffer);
     if (FAILED(hr))
     {
-        SHIP_LOG_ERROR("DX11VertexBuffer::DX11VertexBuffer() --> Couldn't create vertex buffer.");
+        SHIP_LOG_ERROR("DX11VertexBuffer::Create() --> Couldn't create vertex buffer.");
         return false;
     }
 
@@ -93,7 +100,7 @@ bool DX11IndexBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& deviceCo
     HRESULT hr = device.CreateBuffer(&desc, &data, &m_Buffer);
     if (FAILED(hr))
     {
-        SHIP_LOG_ERROR("DX11IndexBuffer::DX11IndexBuffer() --> Couldn't create index buffer.");
+        SHIP_LOG_ERROR("DX11IndexBuffer::Create() --> Couldn't create index buffer.");
         return false;
     }
 
@@ -131,11 +138,76 @@ bool DX11ConstantBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& devic
     HRESULT hr = device.CreateBuffer(&desc, pData, &m_Buffer);
     if (FAILED(hr))
     {
-        SHIP_LOG_ERROR("DX11ConstantBuffer::DX11ConstantBuffer() --> Couldn't create constant buffer.");
+        SHIP_LOG_ERROR("DX11ConstantBuffer::Create() --> Couldn't create constant buffer.");
         return false;
     }
 
     m_ResourceType = GfxResourceType::ConstantBuffer;
+
+    return true;
+}
+
+bool DX11ByteBuffer::Create(
+        ID3D11Device& device,
+        ID3D11DeviceContext& deviceContext,
+        ByteBufferCreationFlags byteBufferCreationFlags,
+        uint32_t dataSizeInBytes,
+        bool dynamic,
+        void* initialData)
+{
+    m_DeviceContext = &deviceContext;
+    m_SizeInBytes = dataSizeInBytes;
+
+    D3D11_USAGE usage = (dynamic) ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
+
+    D3D11_BIND_FLAG bindFlag = D3D11_BIND_SHADER_RESOURCE;
+
+    D3D11_BUFFER_DESC desc;
+    desc.Usage = usage;
+    desc.ByteWidth = dataSizeInBytes;
+    desc.BindFlags = bindFlag;
+    desc.CPUAccessFlags = (dynamic) ? D3D11_CPU_ACCESS_WRITE : 0;
+    desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS;
+
+    D3D11_SUBRESOURCE_DATA data;
+    D3D11_SUBRESOURCE_DATA* pData = &data;
+
+    if (initialData != nullptr)
+    {
+        data.pSysMem = initialData;
+        data.SysMemPitch = 0;
+        data.SysMemSlicePitch = 0;
+    }
+    else
+    {
+        pData = nullptr;
+    }
+
+    HRESULT hr = device.CreateBuffer(&desc, pData, &m_Buffer);
+    if (FAILED(hr))
+    {
+        SHIP_LOG_ERROR("DX11ByteBuffer::Create() --> Couldn't create byte buffer.");
+        return false;
+    }
+
+    if ((byteBufferCreationFlags & ByteBufferCreationFlags::ByteBufferCreationFlags_ShaderResourceView) != 0)
+    {
+        D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
+        shaderResourceViewDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32_TYPELESS;
+        shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
+        shaderResourceViewDesc.BufferEx.Flags = D3D11_BUFFEREX_SRV_FLAG_RAW;
+        shaderResourceViewDesc.BufferEx.FirstElement = 0;
+        shaderResourceViewDesc.BufferEx.NumElements = dataSizeInBytes / 4;
+
+        hr = device.CreateShaderResourceView(m_Buffer, &shaderResourceViewDesc, &m_ShaderResourceView);
+        if (FAILED(hr))
+        {
+            SHIP_LOG_ERROR("DX11ByteBuffer::Create() --> Couldn't create shader resource view.");
+            return false;
+        }
+    }
+
+    m_ResourceType = GfxResourceType::ByteBuffer;
 
     return true;
 }

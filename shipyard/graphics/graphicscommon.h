@@ -646,6 +646,7 @@ namespace Shipyard
     enum class GfxResourceType
     {
         ConstantBuffer,
+        ByteBuffer,
         Texture,
 
         Unknown

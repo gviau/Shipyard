@@ -13,6 +13,7 @@ namespace Shipyard
 #ifdef DX11_RENDERER
 
 class DX11BaseRenderCommandList;
+class DX11ByteBuffer;
 class DX11CommandListAllocator;
 class DX11CommandQueue;
 class DX11ComputeRenderCommandList;
@@ -33,6 +34,7 @@ class DX11VertexShader;
 class DX11ViewSurface;
 
 typedef DX11BaseRenderCommandList GFXRenderCommandList;
+typedef DX11ByteBuffer GFXByteBuffer;
 typedef DX11CommandListAllocator GFXCommandListAllocator;
 typedef DX11CommandQueue GFXCommandQueue;
 typedef DX11ComputeRenderCommandList GFXComputeRenderCommandList;

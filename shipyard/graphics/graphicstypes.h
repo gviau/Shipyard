@@ -57,6 +57,23 @@ namespace Shipyard
         uint32_t handle;
     };
 
+    struct GFXByteBufferHandle
+    {
+        GFXByteBufferHandle()
+            : handle(InvalidGfxHandle)
+        {
+
+        }
+
+        GFXByteBufferHandle(uint32_t _handle)
+            : handle(_handle)
+        {
+
+        }
+
+        uint32_t handle;
+    };
+
     struct GFXDescriptorSetHandle
     {
         GFXDescriptorSetHandle()

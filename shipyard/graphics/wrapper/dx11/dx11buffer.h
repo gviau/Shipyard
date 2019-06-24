@@ -2,9 +2,10 @@
 
 #include <graphics/wrapper/buffer.h>
 
+struct ID3D11Buffer;
 struct ID3D11Device;
 struct ID3D11DeviceContext;
-struct ID3D11Buffer;
+struct ID3D11ShaderResourceView;
 
 namespace Shipyard
 {
@@ -16,12 +17,14 @@ namespace Shipyard
         void Destroy();
 
         ID3D11Buffer* GetBuffer() const { return m_Buffer; }
+        ID3D11ShaderResourceView* GetShaderResourceView() { return m_ShaderResourceView; }
 
         size_t GetSize() const { return m_SizeInBytes; }
 
     protected:
         ID3D11DeviceContext* m_DeviceContext;
         ID3D11Buffer* m_Buffer;
+        ID3D11ShaderResourceView* m_ShaderResourceView;
 
         size_t m_SizeInBytes;
     };
@@ -42,5 +45,17 @@ namespace Shipyard
     {
     public:
         bool Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t dataSizeInBytes, bool dynamic, void* initialData);
+    };
+
+    class SHIPYARD_API DX11ByteBuffer : public ByteBuffer, public DX11BaseBuffer
+    {
+    public:
+        bool Create(
+                ID3D11Device& device,
+                ID3D11DeviceContext& deviceContext,
+                ByteBufferCreationFlags byteBufferCreationFlags,
+                uint32_t dataSizeInBytes,
+                bool dynamic,
+                void* initialData);
     };
 }

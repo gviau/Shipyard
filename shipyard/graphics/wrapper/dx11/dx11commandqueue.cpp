@@ -247,6 +247,10 @@ size_t DX11CommandQueue::MapBuffer(BaseRenderCommand* pCmd)
         pBaseBuffer = &m_RenderDevice.GetConstantBuffer(pMapBufferCommand->bufferHandle.gfxConstantBufferHandle);
         break;
 
+    case MapBufferType::Data:
+        pBaseBuffer = &m_RenderDevice.GetByteBuffer(pMapBufferCommand->bufferHandle.gfxByteBufferHandle);
+        break;
+
     default:
         SHIP_ASSERT_MSG(false, "DX11CommandQueue::MapBuffer --> Unsupported buffer type");
     }
@@ -269,7 +273,9 @@ size_t DX11CommandQueue::MapBuffer(BaseRenderCommand* pCmd)
             return sizeof(MapBufferCommand);
         }
 
-        memcpy(mappedSubresource.pData, pMapBufferCommand->pBuffer, pBaseBuffer->GetSize());
+        void* offsetedWritedBuffer = reinterpret_cast<void*>(size_t(mappedSubresource.pData) + pMapBufferCommand->bufferOffset);
+
+        memcpy(offsetedWritedBuffer, pMapBufferCommand->pBuffer, pBaseBuffer->GetSize());
 
         m_DeviceContext->Unmap(pDx11Buffer, 0);
 

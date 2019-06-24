@@ -425,8 +425,8 @@ void DX11RenderStateCache::BindDescriptorFromDescriptorSet(GfxResource* descript
                 }
                 else
                 {
-                    // Not yet implemented
-                    SHIP_ASSERT(false);
+                    DX11BaseBuffer* buffer = static_cast<DX11BaseBuffer*>(descriptorResource);
+                    nativeShaderResourceView = buffer->GetShaderResourceView();
                 }
 
                 if (m_NativeShaderResourceViews[bindingSlot] != nativeShaderResourceView)

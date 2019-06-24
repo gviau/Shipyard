@@ -63,9 +63,10 @@ namespace Shipyard
         virtual DrawCommand* Draw() = 0;
         virtual DrawIndexedCommand* DrawIndexed() = 0;
 
-        virtual void* MapVertexBuffer(GFXVertexBufferHandle gfxVertexBufferhandle, MapFlag mapFlag) = 0;
-        virtual void* MapIndexBuffer(GFXIndexBufferHandle gfxIndexBufferHandle, MapFlag mapFlag) = 0;
-        virtual void* MapConstantBuffer(GFXConstantBufferHandle gfxConstantBufferHandle, MapFlag mapFlag) = 0;
+        virtual void* MapVertexBuffer(GFXVertexBufferHandle gfxVertexBufferhandle, MapFlag mapFlag, size_t bufferOffset) = 0;
+        virtual void* MapIndexBuffer(GFXIndexBufferHandle gfxIndexBufferHandle, MapFlag mapFlag, size_t bufferOffset) = 0;
+        virtual void* MapConstantBuffer(GFXConstantBufferHandle gfxConstantBufferHandle, MapFlag mapFlag, size_t bufferOffset) = 0;
+        virtual void* MapByteBuffer(GFXByteBufferHandle gfxByteBufferHandle, MapFlag mapFlag, size_t bufferOffset) = 0;
 #endif // #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
     };
 }

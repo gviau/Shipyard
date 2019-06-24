@@ -46,6 +46,11 @@ namespace Shipyard
         GFXConstantBuffer& GetConstantBuffer(GFXConstantBufferHandle gfxConstantBufferHandle);
         const GFXConstantBuffer& GetConstantBuffer(GFXConstantBufferHandle gfxConstantBufferHandle) const;
 
+        GFXByteBufferHandle CreateByteBuffer(ByteBuffer::ByteBufferCreationFlags byteBufferCreationFlags, uint32_t dataSizeInBytes, bool dynamic, void* initialData);
+        void DestroyByteBuffer(GFXByteBufferHandle gfxByteBufferHandle);
+        GFXByteBuffer& GetByteBuffer(GFXByteBufferHandle gfxByteBufferHandle);
+        const GFXByteBuffer& GetByteBuffer(GFXByteBufferHandle gfxByteBufferHandle) const;
+
         GFXTexture2DHandle CreateTexture2D(
                 uint32_t width,
                 uint32_t height,
@@ -106,6 +111,7 @@ namespace Shipyard
         DataPool<GFXVertexBuffer, SHIP_MAX_VERTEX_BUFFERS> m_VertexBufferPool;
         DataPool<GFXIndexBuffer, SHIP_MAX_INDEX_BUFFERS> m_IndexBufferPool;
         DataPool<GFXConstantBuffer, SHIP_MAX_CONSTANT_BUFFERS> m_ConstantBufferPool;
+        DataPool<GFXByteBuffer, SHIP_MAX_BYTE_BUFFERS> m_ByteBufferPool;
         DataPool<GFXTexture2D, SHIP_MAX_2D_TEXTURES> m_Texture2dPool;
         DataPool<GFXRenderTarget, SHIP_MAX_RENDER_TARGETS> m_RenderTargetPool;
         DataPool<GFXDepthStencilRenderTarget, SHIP_MAX_DEPTH_STENCIL_RENDER_TARGETS> m_DepthStencilRenderTargetPool;

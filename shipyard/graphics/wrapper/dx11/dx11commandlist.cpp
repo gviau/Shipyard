@@ -224,51 +224,107 @@ void* GetMappedBuffer(DX11BaseBuffer& dx11BaseBuffer, MapFlag mapFlag, ID3D11Dev
     return  SHIP_ALLOC(dx11BaseBuffer.GetSize(), 16);
 }
 
-void* DX11DirectRenderCommandList::MapVertexBuffer(GFXVertexBufferHandle gfxVertexBufferhandle, MapFlag mapFlag)
+void* DX11DirectRenderCommandList::MapVertexBuffer(GFXVertexBufferHandle gfxVertexBufferhandle, MapFlag mapFlag, size_t bufferOffset)
 {
+    SHIP_ASSERT_MSG(bufferOffset == 0 || mapFlag != MapFlag::Write_Discard, "Cannot Map a buffer with Write_Discard with a non-zero offset. Using an offset indicates a partial update of the buffer, but Write_Discard will throw away the whole buffer.");
+
     BaseRenderCommand* pCmd = GetNewRenderCommand(RenderCommandType::MapBuffer);
 
     MapBufferCommand* pMapBufferCommand = static_cast<MapBufferCommand*>(pCmd);
     pMapBufferCommand->mapFlag = mapFlag;
     pMapBufferCommand->mapBufferType = MapBufferType::Vertex;
     pMapBufferCommand->bufferHandle.gfxVertexBufferHandle = gfxVertexBufferhandle;
+    pMapBufferCommand->bufferOffset = bufferOffset;
 
     GFXVertexBuffer& gfxVertexBuffer = m_RenderDevice.GetVertexBuffer(gfxVertexBufferhandle);
 
     pMapBufferCommand->pBuffer = GetMappedBuffer(gfxVertexBuffer, mapFlag, m_pDeviceContext);
 
+    // If we're reading, then we want to offset the buffer.
+    if (mapFlag == MapFlag::Read || mapFlag == MapFlag::Read_Write)
+    {
+        return reinterpret_cast<void*>(size_t(pMapBufferCommand->pBuffer) + bufferOffset);
+    }
+
+    // If we're writing, since we allocated a fresh temporary buffer, we don't offset here.
     return pMapBufferCommand->pBuffer;
 }
 
-void* DX11DirectRenderCommandList::MapIndexBuffer(GFXIndexBufferHandle gfxIndexBufferHandle, MapFlag mapFlag)
+void* DX11DirectRenderCommandList::MapIndexBuffer(GFXIndexBufferHandle gfxIndexBufferHandle, MapFlag mapFlag, size_t bufferOffset)
 {
+    SHIP_ASSERT_MSG(bufferOffset == 0 || mapFlag != MapFlag::Write_Discard, "Cannot Map a buffer with Write_Discard with a non-zero offset. Using an offset indicates a partial update of the buffer, but Write_Discard will throw away the whole buffer.");
+
     BaseRenderCommand* pCmd = GetNewRenderCommand(RenderCommandType::MapBuffer);
 
     MapBufferCommand* pMapBufferCommand = static_cast<MapBufferCommand*>(pCmd);
     pMapBufferCommand->mapFlag = mapFlag;
     pMapBufferCommand->mapBufferType = MapBufferType::Index;
     pMapBufferCommand->bufferHandle.gfxIndexBufferHandle = gfxIndexBufferHandle;
+    pMapBufferCommand->bufferOffset = bufferOffset;
 
     GFXIndexBuffer& gfxIndexBuffer = m_RenderDevice.GetIndexBuffer(gfxIndexBufferHandle);
 
     pMapBufferCommand->pBuffer = GetMappedBuffer(gfxIndexBuffer, mapFlag, m_pDeviceContext);
 
+    // If we're reading, then we want to offset the buffer.
+    if (mapFlag == MapFlag::Read || mapFlag == MapFlag::Read_Write)
+    {
+        return reinterpret_cast<void*>(size_t(pMapBufferCommand->pBuffer) + bufferOffset);
+    }
+
+    // If we're writing, since we allocated a fresh temporary buffer, we don't offset here.
     return pMapBufferCommand->pBuffer;
 }
 
-void* DX11DirectRenderCommandList::MapConstantBuffer(GFXConstantBufferHandle gfxConstantBufferHandle, MapFlag mapFlag)
+void* DX11DirectRenderCommandList::MapConstantBuffer(GFXConstantBufferHandle gfxConstantBufferHandle, MapFlag mapFlag, size_t bufferOffset)
 {
+    SHIP_ASSERT_MSG(bufferOffset == 0 || mapFlag != MapFlag::Write_Discard, "Cannot Map a buffer with Write_Discard with a non-zero offset. Using an offset indicates a partial update of the buffer, but Write_Discard will throw away the whole buffer.");
+
     BaseRenderCommand* pCmd = GetNewRenderCommand(RenderCommandType::MapBuffer);
 
     MapBufferCommand* pMapBufferCommand = static_cast<MapBufferCommand*>(pCmd);
     pMapBufferCommand->mapFlag = mapFlag;
     pMapBufferCommand->mapBufferType = MapBufferType::Constant;
     pMapBufferCommand->bufferHandle.gfxConstantBufferHandle = gfxConstantBufferHandle;
+    pMapBufferCommand->bufferOffset = bufferOffset;
 
     GFXConstantBuffer& gfxConstantBuffer = m_RenderDevice.GetConstantBuffer(gfxConstantBufferHandle);
 
     pMapBufferCommand->pBuffer = GetMappedBuffer(gfxConstantBuffer, mapFlag, m_pDeviceContext);
 
+    // If we're reading, then we want to offset the buffer.
+    if (mapFlag == MapFlag::Read || mapFlag == MapFlag::Read_Write)
+    {
+        return reinterpret_cast<void*>(size_t(pMapBufferCommand->pBuffer) + bufferOffset);
+    }
+
+    // If we're writing, since we allocated a fresh temporary buffer, we don't offset here.
+    return pMapBufferCommand->pBuffer;
+}
+
+void* DX11DirectRenderCommandList::MapByteBuffer(GFXByteBufferHandle gfxByteBufferHandle, MapFlag mapFlag, size_t bufferOffset)
+{
+    SHIP_ASSERT_MSG(bufferOffset == 0 || mapFlag != MapFlag::Write_Discard, "Cannot Map a buffer with Write_Discard with a non-zero offset. Using an offset indicates a partial update of the buffer, but Write_Discard will throw away the whole buffer.");
+
+    BaseRenderCommand* pCmd = GetNewRenderCommand(RenderCommandType::MapBuffer);
+
+    MapBufferCommand* pMapBufferCommand = static_cast<MapBufferCommand*>(pCmd);
+    pMapBufferCommand->mapFlag = mapFlag;
+    pMapBufferCommand->mapBufferType = MapBufferType::Data;
+    pMapBufferCommand->bufferHandle.gfxByteBufferHandle = gfxByteBufferHandle;
+    pMapBufferCommand->bufferOffset = bufferOffset;
+
+    GFXByteBuffer& gfxByteBuffer = m_RenderDevice.GetByteBuffer(gfxByteBufferHandle);
+
+    pMapBufferCommand->pBuffer = GetMappedBuffer(gfxByteBuffer, mapFlag, m_pDeviceContext);
+
+    // If we're reading, then we want to offset the buffer.
+    if (mapFlag == MapFlag::Read || mapFlag == MapFlag::Read_Write)
+    {
+        return reinterpret_cast<void*>(size_t(pMapBufferCommand->pBuffer) + bufferOffset);
+    }
+
+    // If we're writing, since we allocated a fresh temporary buffer, we don't offset here.
     return pMapBufferCommand->pBuffer;
 }
 

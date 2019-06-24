@@ -48,8 +48,12 @@ namespace Shipyard
 
     };
 
-    class DataBuffer
+    class SHIPYARD_API ByteBuffer
     {
-
+    public:
+        enum ByteBufferCreationFlags
+        {
+            ByteBufferCreationFlags_ShaderResourceView = 0x01
+        };
     };
 }

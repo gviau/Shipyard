@@ -103,10 +103,12 @@ namespace Shipyard
             GFXVertexBufferHandle gfxVertexBufferHandle;
             GFXIndexBufferHandle gfxIndexBufferHandle;
             GFXConstantBufferHandle gfxConstantBufferHandle;
+            GFXByteBufferHandle gfxByteBufferHandle;
         } bufferHandle;
 
-        MapBufferType mapBufferType;
-        MapFlag mapFlag;
+        MapBufferType mapBufferType = MapBufferType::Constant;
+        MapFlag mapFlag = MapFlag::Write_Discard;
+        size_t bufferOffset = 0;
 
         // Depending on MapFlag, this pointer will either be for writing at the next ExecuteCommandLists or for immediate reading.
         // This pointer is not owned by the user, but by the command list.

@@ -10,8 +10,13 @@
 
 namespace Shipyard
 {
+
+#ifndef SHIP_OPTIMIZED
+#define SHIP_ENABLE_ASSERTS
+#endif // #ifndef SHIP_OPTIMIZED
+
 #if PLATFORM == PLATFORM_WINDOWS
-#ifdef _DEBUG
+#ifdef SHIP_ENABLE_ASSERTS
 #define SHIP_ASSERT(cond) \
     if (!(cond)) \
     { \
@@ -52,7 +57,7 @@ namespace Shipyard
 #else
 #    define SHIP_ASSERT(cond) (void)(cond)
 #    define SHIP_ASSERT_MSG(cond, fmt, ...) (void)(cond)
-#endif // #ifdef _DEBUG
+#endif // #ifdef SHIP_ENABLE_ASSERTS
 
 #else
 #error Unsupported platform

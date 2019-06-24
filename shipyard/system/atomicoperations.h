@@ -67,7 +67,7 @@ namespace Shipyard
         {
             SHIP_ASSERT_MSG(MemoryUtils::IsAddressAligned(reinterpret_cast<size_t>(&target), 4), "Address of value must be aligned to 4 bytes boundary in AtomicOperations::Add!");
 
-            return InterlockedExchangeAdd(reinterpret_cast<volatile long*>(&dest), static_cast<const __int64>(value));
+            return InterlockedExchangeAdd(reinterpret_cast<volatile long*>(&target), static_cast<const __int64>(value));
         }
 
         // Returns the initial value of target
@@ -75,7 +75,7 @@ namespace Shipyard
         {
             SHIP_ASSERT_MSG(MemoryUtils::IsAddressAligned(reinterpret_cast<size_t>(&target), 4), "Address of value must be aligned to 4 bytes boundary in AtomicOperations::Subtract!");
 
-            return InterlockedExchangeAdd(reinterpret_cast<volatile long*>(&dest), -static_cast<const __int64>(value));
+            return InterlockedExchangeAdd(reinterpret_cast<volatile long*>(&target), -static_cast<const __int64>(value));
         }
     };
 
@@ -125,7 +125,7 @@ namespace Shipyard
         {
             SHIP_ASSERT_MSG(MemoryUtils::IsAddressAligned(reinterpret_cast<size_t>(&target), 8), "Address of value must be aligned to 8 bytes boundary in AtomicOperations::Add!");
 
-            return InterlockedExchangeAdd64(reinterpret_cast<volatile __int64*>(&dest), static_cast<const __int64>(value));
+            return InterlockedExchangeAdd64(reinterpret_cast<volatile __int64*>(&target), static_cast<const __int64>(value));
         }
 
         // Returns the initial value of target
@@ -133,7 +133,7 @@ namespace Shipyard
         {
             SHIP_ASSERT_MSG(MemoryUtils::IsAddressAligned(reinterpret_cast<size_t>(&target), 8), "Address of value must be aligned to 8 bytes boundary in AtomicOperations::Subtract!");
 
-            return InterlockedExchangeAdd64(reinterpret_cast<volatile __int64*>(&dest), - static_cast<const __int64>(value));
+            return InterlockedExchangeAdd64(reinterpret_cast<volatile __int64*>(&target), - static_cast<const __int64>(value));
         }
     };
 

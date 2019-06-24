@@ -12,6 +12,8 @@ namespace Shipyard
 {
     class ShaderDatabase;
     class ShaderHandlerManager;
+    class ShaderInputProvider;
+    class ShaderResourceBinder;
 
     struct RenderStateBlock;
 
@@ -27,6 +29,12 @@ namespace Shipyard
         ~ShaderHandler();
 
         void ApplyShader(PipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters) const;
+
+        void ApplyShaderInputProviders(
+                GFXRenderDevice& gfxRenderDevice,
+                GFXDirectRenderCommandList& gfxDirectRenderCommandList,
+                const ShaderResourceBinder& shaderResourceBinder,
+                const Array<ShaderInputProvider*>& shaderInputProviders);
 
         const ShaderKey& GetShaderKey() const { return m_ShaderKey; }
 

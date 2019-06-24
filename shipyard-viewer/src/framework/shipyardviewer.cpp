@@ -2,6 +2,8 @@
 
 #include <graphics/wrapper/wrapper.h>
 
+#include <graphics/material/materialunifiedconstantbuffer.h>
+
 #include <graphics/shadercompiler/shadercompiler.h>
 #include <graphics/shadercompiler/shaderwatcher.h>
 
@@ -9,6 +11,8 @@
 #include <graphics/shader/shaderfamilies.h>
 #include <graphics/shader/shaderhandler.h>
 #include <graphics/shader/shaderhandlermanager.h>
+#include <graphics/shader/shaderinputprovider.h>
+#include <graphics/shader/shaderresourcebinder.h>
 #include <graphics/shader/shaderkey.h>
 #include <graphics/shader/shaderoptions.h>
 
@@ -20,16 +24,24 @@
 #include <extern/glm/gtc/matrix_transform.hpp>
 #include <extern/glm/gtc/type_ptr.hpp>
 
-struct SimpleConstantBuffer
-{
-    glm::mat4x4 m_Matrix;
-};
-
 namespace Shipyard
 {;
 
+struct SimpleConstantBufferProvider : public BaseShaderInputProvider<SimpleConstantBufferProvider>
+{
+    glm::mat4x4 Matrix;
+};
+
+SHIP_DECLARE_SHADER_INPUT_PROVIDER_BEGIN(SimpleConstantBufferProvider, Default)
+{
+    SHIP_SCALAR_SHADER_INPUT(ShaderInputType::Float4x4, "Test", Matrix);
+}
+SHIP_DECLARE_SHADER_INPUT_PROVIDER_END(SimpleConstantBufferProvider)
+
 ShipyardViewer::~ShipyardViewer()
 {
+    SHIP_DELETE(m_pDataProvider);
+
     SHIP_DELETE(m_pGraphicsSingletonStorer);
 
     SHIP_DELETE(m_pShaderDatabase);
@@ -70,9 +82,9 @@ bool ShipyardViewer::CreateApp(HWND windowHandle, uint32_t windowWidth, uint32_t
 
     size_t numChunks = 256 * 1024;
 
-    void* pHeap16 = reinterpret_cast<void*>(AlignAddress(size_t(m_pHeap), 16));
-    void* pHeap32 = reinterpret_cast<void*>(AlignAddress(size_t(pHeap16) + numChunks * 16, 32));
-    void* pHeap64 = reinterpret_cast<void*>(AlignAddress(size_t(pHeap32) + numChunks * 32, 64));
+    void* pHeap16 = reinterpret_cast<void*>(MemoryUtils::AlignAddress(size_t(m_pHeap), 16));
+    void* pHeap32 = reinterpret_cast<void*>(MemoryUtils::AlignAddress(size_t(pHeap16) + numChunks * 16, 32));
+    void* pHeap64 = reinterpret_cast<void*>(MemoryUtils::AlignAddress(size_t(pHeap32) + numChunks * 32, 64));
 
     void* pFixedHeap = reinterpret_cast<void*>(size_t(pHeap64) + numChunks * 64);
     size_t fixedHeapSize = heapSize - (size_t(pHeap64) + numChunks * 64 - size_t(m_pHeap));
@@ -184,14 +196,6 @@ bool ShipyardViewer::CreateApp(HWND windowHandle, uint32_t windowWidth, uint32_t
         7, 5, 4
     };
 
-    SimpleConstantBuffer data =
-    {
-        glm::mat4x4(1.0f, 0.0f, 0.0f, 0.0f,
-                    0.0f, 1.0f, 0.0f, 0.0f,
-                    0.0f, 0.0f, 1.0f, 0.0f,
-                    0.0f, 0.0f, 0.0f, 1.0f)
-    };
-
     uint8_t textureData[] =
     {
         255, 255, 255, 255, 255, 0, 0, 255,
@@ -200,24 +204,36 @@ bool ShipyardViewer::CreateApp(HWND windowHandle, uint32_t windowWidth, uint32_t
 
     m_VertexBufferHandle = m_pGfxRenderDevice->CreateVertexBuffer(8, VertexFormatType::Pos_UV, false, vertexBufferData);
     m_IndexBufferHandle = m_pGfxRenderDevice->CreateIndexBuffer(36, true, false, indices);
-    m_ConstantBufferHandle = m_pGfxRenderDevice->CreateConstantBuffer(sizeof(data), true, &data);
     m_TextureHandle = m_pGfxRenderDevice->CreateTexture2D(2, 2, GfxFormat::R8G8B8A8_UNORM, false, textureData, false);
 
-    GFXConstantBuffer& constantBuffer = m_pGfxRenderDevice->GetConstantBuffer(m_ConstantBufferHandle);
     GFXTexture2D& texture = m_pGfxRenderDevice->GetTexture2D(m_TextureHandle);
 
+    InplaceArray<DescriptorSetEntryDeclaration, 2> descriptorSetEntryDeclarations;
+    DescriptorSetEntryDeclaration& constantBufferEntry = descriptorSetEntryDeclarations.Grow();
+    constantBufferEntry.rootIndex = 0;
+    constantBufferEntry.numResources = 1;
+
+    DescriptorSetEntryDeclaration& textureEntry = descriptorSetEntryDeclarations.Grow();
+    textureEntry.rootIndex = 1;
+    textureEntry.numResources = 1;
+
     m_GfxDescriptorSetHandle =
-        m_pGfxRenderDevice->CreateDescriptorSet(DescriptorSetType::ConstantBuffer_ShaderResource_UnorderedAccess_Views, gfxRootSignature);
+        m_pGfxRenderDevice->CreateDescriptorSet(DescriptorSetType::ConstantBuffer_ShaderResource_UnorderedAccess_Views, gfxRootSignature, descriptorSetEntryDeclarations);
 
     GFXDescriptorSet& gfxDescriptorSet = m_pGfxRenderDevice->GetDescriptorSet(m_GfxDescriptorSetHandle);
 
-    gfxDescriptorSet.SetDescriptorForRootIndex(0, constantBuffer);
     gfxDescriptorSet.SetDescriptorForRootIndex(1, texture);
 
     m_TestTextureHandle = m_pGfxRenderDevice->CreateTexture2D(windowWidth, windowHeight, GfxFormat::R8G8B8A8_UNORM, false, nullptr, false, TextureUsage::TextureUsage_RenderTarget);
 
     GFXTexture2DHandle renderTargetTextures[] = { m_TestTextureHandle };
     m_TestRenderTargetHandle = m_pGfxRenderDevice->CreateRenderTarget(&renderTargetTextures[0], 1);
+
+    GetShaderInputProviderManager().Initialize(*m_pGfxRenderDevice);
+
+    m_pDataProvider = SHIP_NEW(SimpleConstantBufferProvider, 1);
+
+    GetGFXMaterialUnifiedConstantBuffer().Create(*m_pGfxRenderDevice, nullptr, 4 * 1024 * 1024);
 
     m_pShaderDatabase = SHIP_NEW(ShaderDatabase, 1);
     m_pShaderDatabase->Load("ShipyardShaderDatabase.bin");
@@ -229,6 +245,9 @@ bool ShipyardViewer::CreateApp(HWND windowHandle, uint32_t windowWidth, uint32_t
 
 void ShipyardViewer::ComputeOneFrame()
 {
+    GFXMaterialUnifiedConstantBuffer& gfxMaterialUnifiedConstantBuffer = GetGFXMaterialUnifiedConstantBuffer();
+    gfxMaterialUnifiedConstantBuffer.PrepareForNextDrawCall();
+
     static float theta = 0.0f;
 
     GfxViewport gfxViewport;
@@ -244,13 +263,20 @@ void ShipyardViewer::ComputeOneFrame()
 
     m_pGfxDirectRenderCommandList->Reset(*m_pGfxCommandListAllocator, nullptr);
 
-    void* mappedData = m_pGfxDirectRenderCommandList->MapConstantBuffer(m_ConstantBufferHandle, MapFlag::Write_Discard);
-
     glm::mat4 matrix(1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.25f,
-        0.0f, 0.0f, 0.0f, 1.0f);
-    ((SimpleConstantBuffer*)mappedData)->m_Matrix = glm::rotate(matrix, theta, glm::vec3(0.0f, 1.0f, 0.0f));
+                     0.0f, 1.0f, 0.0f, 0.0f,
+                     0.0f, 0.0f, 1.0f, 0.25f,
+                     0.0f, 0.0f, 0.0f, 1.0f);
+
+    m_pDataProvider->Matrix = glm::rotate(matrix, theta, glm::vec3(0.0f, 1.0f, 0.0f));
+
+    InplaceArray<ShaderInputProvider*, 1> shaderInputProviders;
+    shaderInputProviders.Add(m_pDataProvider);
+
+    GFXDescriptorSet& gfxDescriptorSet = m_pGfxRenderDevice->GetDescriptorSet(m_GfxDescriptorSetHandle);
+
+    ShaderResourceBinder shaderResourceBinder;
+    shaderResourceBinder.AddShaderResourceBinderEntry<SimpleConstantBufferProvider>(gfxDescriptorSet, 0);
 
     theta += 0.001f;
 
@@ -274,6 +300,8 @@ void ShipyardViewer::ComputeOneFrame()
     SET_SHADER_OPTION(shaderKey, Test2Bits, value);
 
     ShaderHandler* pShaderHandler = GetShaderHandlerManager().GetShaderHandlerForShaderKey(shaderKey);
+
+    pShaderHandler->ApplyShaderInputProviders(*m_pGfxRenderDevice, *m_pGfxDirectRenderCommandList, shaderResourceBinder, shaderInputProviders);
 
     uint32_t vertexBufferOffsets = 0;
 

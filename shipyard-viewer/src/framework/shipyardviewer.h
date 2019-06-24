@@ -21,6 +21,8 @@ namespace Shipyard
     class GraphicsSingletonStorer;
     class ShaderDatabase;
 
+    struct SimpleConstantBufferProvider;
+
     class ShipyardViewer
     {
     public:
@@ -56,12 +58,13 @@ namespace Shipyard
         GFXRootSignatureHandle m_GfxRootSignatureHandle;
         GFXVertexBufferHandle m_VertexBufferHandle;
         GFXIndexBufferHandle m_IndexBufferHandle;
-        GFXConstantBufferHandle m_ConstantBufferHandle;
         GFXTexture2DHandle m_TextureHandle;
         GFXDescriptorSetHandle m_GfxDescriptorSetHandle;
         GFXTexture2DHandle m_TestTextureHandle;
         GFXRenderTargetHandle m_TestRenderTargetHandle;
 
         ShaderDatabase* m_pShaderDatabase = nullptr;
+
+        SimpleConstantBufferProvider* m_pDataProvider = nullptr;
     };
 }

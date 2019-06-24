@@ -628,13 +628,13 @@ const GFXPipelineStateObject& DX11RenderDevice::GetPipelineStateObject(GFXPipeli
     return m_PipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
 }
 
-GFXDescriptorSetHandle DX11RenderDevice::CreateDescriptorSet(DescriptorSetType descriptorSetType, const RootSignature& rootSignature)
+GFXDescriptorSetHandle DX11RenderDevice::CreateDescriptorSet(DescriptorSetType descriptorSetType, const RootSignature& rootSignature, const Array<DescriptorSetEntryDeclaration>& descriptorSetEntryDeclarations)
 {
     GFXDescriptorSetHandle gfxDescriptorSetHandle;
     gfxDescriptorSetHandle.handle = m_DescriptorSetPool.GetNewItemIndex();
 
     GFXDescriptorSet& gfxDescriptorSet = m_DescriptorSetPool.GetItem(gfxDescriptorSetHandle.handle);
-    bool isValid = gfxDescriptorSet.Create(descriptorSetType, rootSignature);
+    bool isValid = gfxDescriptorSet.Create(descriptorSetType, rootSignature, descriptorSetEntryDeclarations);
 
     SHIP_ASSERT(isValid);
 

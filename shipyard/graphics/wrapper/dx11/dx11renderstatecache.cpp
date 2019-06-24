@@ -251,15 +251,18 @@ void DX11RenderStateCache::BindDescriptorSet(const GFXDescriptorSet& descriptorS
     const Array<GFXDescriptorSet::DescriptorSetEntry>& resourcesToBind = descriptorSet.GetDescriptorSetEntries();
     const Array<RootSignatureParameterEntry>& rootSignatureParameters = rootSignature.GetRootSignatureParameters();
 
-    for (const GFXDescriptorSet::DescriptorSetEntry& descriptorSetEntry : resourcesToBind)
+    for (uint32_t rootIndex = 0; rootIndex < resourcesToBind.Size(); rootIndex++)
     {
-        const RootSignatureParameterEntry& rootSignatureParameter = rootSignatureParameters[descriptorSetEntry.rootIndex];
+        const GFXDescriptorSet::DescriptorSetEntry& descriptorSetEntry = resourcesToBind[rootIndex];
 
-        if (descriptorSetEntry.isDescriptorTable)
+        const RootSignatureParameterEntry& rootSignatureParameter = rootSignatureParameters[rootIndex];
+
+        bool isDescriptorTable = (descriptorSetEntry.descriptorResources.Size() > 1);
+        if (isDescriptorTable)
         {
             BindDescriptorTableFromDescriptorSet(descriptorSetEntry.descriptorResources, rootSignatureParameter);
         }
-        else
+        else if (descriptorSetEntry.descriptorResources.Size() > 0)
         {
             BindDescriptorFromDescriptorSet(descriptorSetEntry.descriptorResources[0], rootSignatureParameter);
         }

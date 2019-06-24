@@ -93,7 +93,7 @@ namespace Shipyard
         GFXPipelineStateObject& GetPipelineStateObject(GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle);
         const GFXPipelineStateObject& GetPipelineStateObject(GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle) const;
 
-        GFXDescriptorSetHandle CreateDescriptorSet(DescriptorSetType descriptorSetType, const RootSignature& rootSignature);
+        GFXDescriptorSetHandle CreateDescriptorSet(DescriptorSetType descriptorSetType, const RootSignature& rootSignature, const Array<DescriptorSetEntryDeclaration>& descriptorSetEntryDeclarations);
         void DestroyDescriptorSet(GFXDescriptorSetHandle gfxDescriptorSetHandle);
         GFXDescriptorSet& GetDescriptorSet(GFXDescriptorSetHandle gfxDescriptorSetHandle);
         const GFXDescriptorSet& GetDescriptorSet(GFXDescriptorSetHandle gfxDescriptorSetHandle) const;

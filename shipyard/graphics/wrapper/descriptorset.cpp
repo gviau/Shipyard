@@ -15,9 +15,10 @@ void DescriptorSet::SetDescriptorForRootIndex(uint32_t rootIndex, GfxResource& d
            paramType == RootSignatureParameterType::ShaderResourceView ||
            paramType == RootSignatureParameterType::UnorderedAccessView);
     
-    DescriptorSetEntry& newDescriptorSetEntry = m_Resources.Grow();
-    newDescriptorSetEntry.rootIndex = uint16_t(rootIndex);
-    newDescriptorSetEntry.descriptorResources.Add(&descriptorResource);
+    DescriptorSetEntry& newDescriptorSetEntry = m_Resources[rootIndex];
+    SHIP_ASSERT_MSG(newDescriptorSetEntry.descriptorResources.Size() <= 1, "DescriptorSetEntry for root index %d was created for a descriptor table. Use DescriptorSet::SetDescriptorTableForRootIndex instead!", rootIndex);
+
+    newDescriptorSetEntry.descriptorResources[0] = &descriptorResource;
 }
 
 void DescriptorSet::SetDescriptorTableForRootIndex(uint32_t rootIndex, const Array<GfxResource*>& descriptorTableResources)
@@ -25,15 +26,14 @@ void DescriptorSet::SetDescriptorTableForRootIndex(uint32_t rootIndex, const Arr
     SHIP_ASSERT(descriptorTableResources.Size() > 0);
     SHIP_ASSERT(m_RootSignature->GetRootSignatureParameters()[rootIndex].parameterType == RootSignatureParameterType::DescriptorTable);
 
-    DescriptorSetEntry& newDescriptorSetEntry = m_Resources.Grow();
-    newDescriptorSetEntry.rootIndex = uint16_t(rootIndex);
+    DescriptorSetEntry& newDescriptorSetEntry = m_Resources[rootIndex];
+    SHIP_ASSERT_MSG(newDescriptorSetEntry.descriptorResources.Size() > 1, "DescriptorSetEntry for root index %d was not created for a descriptor table. Use DescriptorSet::SetDescriptorForRootIndex instead!", rootIndex);
 
-    for (GfxResource* descriptorResource : descriptorTableResources)
+    for (uint32_t i = 0; i < descriptorTableResources.Size(); i++)
     {
-        newDescriptorSetEntry.descriptorResources.Add(descriptorResource);
+        GfxResource* descriptorResource = descriptorTableResources[i];
+        newDescriptorSetEntry.descriptorResources[i] = descriptorResource;
     }
-
-    newDescriptorSetEntry.isDescriptorTable = true;
 }
 
 const Array<DescriptorSet::DescriptorSetEntry>& DescriptorSet::GetDescriptorSetEntries() const

@@ -576,6 +576,14 @@ namespace Shipyard
         Unknown
     };
 
+    struct DescriptorSetEntryDeclaration
+    {
+        uint16_t rootIndex = 0;
+
+        // numResources > 1 assumes the entry is for a descriptor table
+        uint16_t numResources = 0;
+    };
+
     // This class gives control to the programmer to override specific RenderStateBlock's state manually.
     // Those overriden states will have priority over every other way to set a state (inside of the shader for example).
     class SHIPYARD_API RenderStateBlockStateOverride

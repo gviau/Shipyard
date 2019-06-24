@@ -12,15 +12,7 @@ namespace Shipyard
     public:
         struct DescriptorSetEntry
         {
-            DescriptorSetEntry()
-                : rootIndex(0)
-                , isDescriptorTable(false)
-            {
-            }
-
             Array<GfxResource*> descriptorResources;
-            uint16_t rootIndex;
-            bool isDescriptorTable;
         };
 
     public:

@@ -304,8 +304,6 @@ bool ShaderInputProviderManager::WriteSingleShaderInputOutsideOfStruct(const Sha
         break;
     }
 
-    content += shaderInputDeclaration.Name;
-
     switch (shaderInputDeclaration.ScalarType)
     {
     case ShaderInputScalarType::Float:

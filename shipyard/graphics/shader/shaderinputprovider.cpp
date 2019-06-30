@@ -388,6 +388,10 @@ void ShaderInputProviderManager::CopyShaderInputsToBuffer(const ShaderInputProvi
     for (uint32_t shaderInputIdx = 0; shaderInputIdx < shaderInputProviderDeclaration->m_NumShaderInputDeclarations; shaderInputIdx++)
     {
         const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration = shaderInputProviderDeclaration->m_ShaderInputDeclarations[shaderInputIdx];
+        if (shaderInputDeclaration.Type != ShaderInputType::Scalar)
+        {
+            continue;
+        }
 
         // Might need to change this to not always use a memcpy, overhead might be too big for small data sizes?
         void* pDest = reinterpret_cast<void*>(int64_t(pBuffer) + int64_t(shaderInputDeclaration.DataOffsetInBuffer));

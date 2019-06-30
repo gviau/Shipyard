@@ -44,8 +44,13 @@ namespace Shipyard
         void CommitStateChangesForGraphics(GFXRenderDevice& gfxRenderDevice);
 
     private:
+        void BindRootSignatureDescriptorTableEntry(const RootSignatureParameterEntry& rootSignatureParameter, ShaderVisibility shaderVisibilityForParameter);
+
         void BindDescriptorTableFromDescriptorSet(const Array<GfxResource*>& descriptorTableResources, const RootSignatureParameterEntry& rootSignatureParameter);
         void BindDescriptorFromDescriptorSet(GfxResource* descriptorResource, const RootSignatureParameterEntry& rootSignatureParameter);
+
+        void BindResourceAsConstantBuffer(GfxResource* descriptorResource, ShaderVisibility shaderVisibility, uint32_t shaderBindingSlot);
+        void BindResourceAsShaderResourceView(GfxResource* descriptorResource, ShaderVisibility shaderVisibility, uint32_t shaderBindingSlot);
 
         template <uint32_t NumBits>
         void MarkBindingSlotAsDirty(InplaceBitfield<NumBits>* dirtyBindingSlots, ShaderVisibility shaderVisibility, uint32_t bindingSlot)

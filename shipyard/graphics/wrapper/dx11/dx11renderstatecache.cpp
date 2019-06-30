@@ -181,6 +181,10 @@ void DX11RenderStateCache::BindRootSignature(const GFXRootSignature& rootSignatu
                 break;
             }
 
+        case RootSignatureParameterType::DescriptorTable:
+            BindRootSignatureDescriptorTableEntry(rootSignatureParameter, shaderVisibilityForParameter);
+            break;
+
         default:
             // Not yet implemented
             SHIP_ASSERT(false);
@@ -257,8 +261,7 @@ void DX11RenderStateCache::BindDescriptorSet(const GFXDescriptorSet& descriptorS
 
         const RootSignatureParameterEntry& rootSignatureParameter = rootSignatureParameters[rootIndex];
 
-        bool isDescriptorTable = (descriptorSetEntry.descriptorResources.Size() > 1);
-        if (isDescriptorTable)
+        if (rootSignatureParameter.parameterType == RootSignatureParameterType::DescriptorTable)
         {
             BindDescriptorTableFromDescriptorSet(descriptorSetEntry.descriptorResources, rootSignatureParameter);
         }
@@ -381,12 +384,96 @@ void DX11RenderStateCache::SetIndexBuffer(const GFXIndexBuffer& indexBuffer, uin
     m_NativeIndexBuffer = indexBuffer.GetBuffer();
 }
 
+void DX11RenderStateCache::BindRootSignatureDescriptorTableEntry(const RootSignatureParameterEntry& rootSignatureParameter, ShaderVisibility shaderVisibilityForParameter)
+{
+    uint32_t numDescriptorRanges = rootSignatureParameter.descriptorTable.numDescriptorRanges;
+
+    for (uint32_t i = 0; i < numDescriptorRanges; i++)
+    {
+        const DescriptorRange& descriptorRange = rootSignatureParameter.descriptorTable.descriptorRanges[i];
+
+        switch (descriptorRange.descriptorRangeType)
+        {
+        case DescriptorRangeType::ConstantBufferView:
+            {
+            uint32_t startingBindingSlot = descriptorRange.baseShaderRegister;
+            uint32_t endingBindingSlot = startingBindingSlot + descriptorRange.numDescriptors;
+
+                for (uint32_t bindingSlot = startingBindingSlot; bindingSlot < endingBindingSlot; bindingSlot++)
+                {
+                    m_ConstantBufferViewsShaderVisibility[bindingSlot] = shaderVisibilityForParameter;
+                }
+
+                break;
+            }
+
+        case DescriptorRangeType::ShaderResourceView:
+            {
+                uint32_t startingBindingSlot = descriptorRange.baseShaderRegister;
+                uint32_t endingBindingSlot = startingBindingSlot + descriptorRange.numDescriptors;
+
+                for (uint32_t bindingSlot = startingBindingSlot; bindingSlot < endingBindingSlot; bindingSlot++)
+                {
+                    m_ShaderResourceViewsShaderVisibility[bindingSlot] = shaderVisibilityForParameter;
+                }
+
+                break;
+            }
+
+        case DescriptorRangeType::UnorderedAccessView:
+            {
+                uint32_t startingBindingSlot = descriptorRange.baseShaderRegister;
+                uint32_t endingBindingSlot = startingBindingSlot + descriptorRange.numDescriptors;
+
+                for (uint32_t bindingSlot = startingBindingSlot; bindingSlot < endingBindingSlot; bindingSlot++)
+                {
+                    m_UnorderedAccessViewsShaderVisibility[bindingSlot] = shaderVisibilityForParameter;
+                }
+
+                break;
+            }
+
+        default:
+            SHIP_ASSERT("!Unsupported descriptor table type");
+            break;
+        }
+    }
+}
+
 void DX11RenderStateCache::BindDescriptorTableFromDescriptorSet(
         const Array<GfxResource*>& descriptorTableResources,
         const RootSignatureParameterEntry& rootSignatureParameter)
 {
-    // Not yet implemented
-    SHIP_ASSERT(false);
+    uint32_t idx = 0;
+
+    for (uint32_t i = 0; i < rootSignatureParameter.descriptorTable.numDescriptorRanges; i++)
+    {
+        const DescriptorRange& descriptorRange = rootSignatureParameter.descriptorTable.descriptorRanges[i];
+
+        for (uint32_t j = 0; j < descriptorRange.numDescriptors; j++)
+        {
+            GfxResource* descriptorResource = descriptorTableResources[idx];
+
+            uint32_t shaderBindingSlot = descriptorRange.baseShaderRegister + j;
+
+            switch (descriptorRange.descriptorRangeType)
+            {
+            case DescriptorRangeType::ConstantBufferView:
+                BindResourceAsConstantBuffer(descriptorResource, rootSignatureParameter.shaderVisibility, shaderBindingSlot);
+                break;
+
+            case DescriptorRangeType::ShaderResourceView:
+                BindResourceAsShaderResourceView(descriptorResource, rootSignatureParameter.shaderVisibility, shaderBindingSlot);
+                break;
+
+            default:
+                SHIP_ASSERT(!"DescriptorTable range type not implemented yet");
+                break;
+            }
+
+            idx += 1;
+        }
+    }
 }
 
 void DX11RenderStateCache::BindDescriptorFromDescriptorSet(GfxResource* descriptorResource, const RootSignatureParameterEntry& rootSignatureParameter)
@@ -399,50 +486,12 @@ void DX11RenderStateCache::BindDescriptorFromDescriptorSet(GfxResource* descript
         switch (rootSignatureParameter.parameterType)
         {
         case RootSignatureParameterType::ConstantBufferView:
-            {
-                GFXConstantBuffer* constantBuffer = static_cast<GFXConstantBuffer*>(descriptorResource);
-                ID3D11Buffer* nativeBuffer = constantBuffer->GetBuffer();
-
-                if (m_NativeConstantBufferViews[bindingSlot] != nativeBuffer)
-                {
-                    m_NativeConstantBufferViews[bindingSlot] = nativeBuffer;
-
-                    MarkBindingSlotAsDirty(m_DirtySlotConstantBufferViewsPerShaderStage, rootSignatureParameter.shaderVisibility, bindingSlot);
-
-                    m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ConstantBufferViews);
-                }
-
-                break;
-            }
+            BindResourceAsConstantBuffer(descriptorResource, rootSignatureParameter.shaderVisibility, bindingSlot);
+            break;
 
         case RootSignatureParameterType::ShaderResourceView:
-            {
-                GfxResourceType resourceType = descriptorResource->GetResourceType();
-                
-                ID3D11ShaderResourceView* nativeShaderResourceView = nullptr;
-
-                if (resourceType == GfxResourceType::Texture)
-                {
-                    DX11BaseTexture* texture = static_cast<DX11BaseTexture*>(descriptorResource);
-                    nativeShaderResourceView = texture->GetShaderResourceView();
-                }
-                else
-                {
-                    DX11BaseBuffer* buffer = static_cast<DX11BaseBuffer*>(descriptorResource);
-                    nativeShaderResourceView = buffer->GetShaderResourceView();
-                }
-
-                if (m_NativeShaderResourceViews[bindingSlot] != nativeShaderResourceView)
-                {
-                    m_NativeShaderResourceViews[bindingSlot] = nativeShaderResourceView;
-
-                    MarkBindingSlotAsDirty(m_DirtySlotShaderResourceViewsPerShaderStage, rootSignatureParameter.shaderVisibility, bindingSlot);
-
-                    m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ShaderResourceViews);
-                }
-
-                break;
-            }
+            BindResourceAsShaderResourceView(descriptorResource, rootSignatureParameter.shaderVisibility, bindingSlot);
+            break;
 
         default:
             // Not yet implemented
@@ -450,6 +499,50 @@ void DX11RenderStateCache::BindDescriptorFromDescriptorSet(GfxResource* descript
             break;
         }
     }
+}
+
+
+void DX11RenderStateCache::BindResourceAsConstantBuffer(GfxResource* descriptorResource, ShaderVisibility shaderVisibility, uint32_t shaderBindingSlot)
+{
+    GFXConstantBuffer* constantBuffer = static_cast<GFXConstantBuffer*>(descriptorResource);
+    ID3D11Buffer* nativeBuffer = constantBuffer->GetBuffer();
+
+    if (m_NativeConstantBufferViews[shaderBindingSlot] != nativeBuffer)
+    {
+        m_NativeConstantBufferViews[shaderBindingSlot] = nativeBuffer;
+
+        MarkBindingSlotAsDirty(m_DirtySlotConstantBufferViewsPerShaderStage, shaderVisibility, shaderBindingSlot);
+
+        m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ConstantBufferViews);
+    }
+}
+
+void DX11RenderStateCache::BindResourceAsShaderResourceView(GfxResource* descriptorResource, ShaderVisibility shaderVisibility, uint32_t shaderBindingSlot)
+{
+    GfxResourceType resourceType = descriptorResource->GetResourceType();
+
+    ID3D11ShaderResourceView* nativeShaderResourceView = nullptr;
+
+    if (resourceType == GfxResourceType::Texture)
+    {
+        DX11BaseTexture* texture = static_cast<DX11BaseTexture*>(descriptorResource);
+        nativeShaderResourceView = texture->GetShaderResourceView();
+    }
+    else
+    {
+        DX11BaseBuffer* buffer = static_cast<DX11BaseBuffer*>(descriptorResource);
+        nativeShaderResourceView = buffer->GetShaderResourceView();
+    }
+
+    if (m_NativeShaderResourceViews[shaderBindingSlot] != nativeShaderResourceView)
+    {
+        m_NativeShaderResourceViews[shaderBindingSlot] = nativeShaderResourceView;
+
+        MarkBindingSlotAsDirty(m_DirtySlotShaderResourceViewsPerShaderStage, shaderVisibility, shaderBindingSlot);
+
+        m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ShaderResourceViews);
+    }
+
 }
 
 namespace

@@ -27,7 +27,7 @@ void DescriptorSet::SetDescriptorTableForRootIndex(uint32_t rootIndex, const Arr
     SHIP_ASSERT(m_RootSignature->GetRootSignatureParameters()[rootIndex].parameterType == RootSignatureParameterType::DescriptorTable);
 
     DescriptorSetEntry& newDescriptorSetEntry = m_Resources[rootIndex];
-    SHIP_ASSERT_MSG(newDescriptorSetEntry.descriptorResources.Size() > 1, "DescriptorSetEntry for root index %d was not created for a descriptor table. Use DescriptorSet::SetDescriptorForRootIndex instead!", rootIndex);
+    SHIP_ASSERT_MSG(newDescriptorSetEntry.descriptorResources.Size() >= 1, "DescriptorSetEntry for root index %d was not created for a descriptor table. Use DescriptorSet::SetDescriptorForRootIndex instead!", rootIndex);
 
     for (uint32_t i = 0; i < descriptorTableResources.Size(); i++)
     {

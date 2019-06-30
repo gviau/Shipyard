@@ -10,8 +10,6 @@ SamplerState testSampler
 	AddressV = Wrap;
 };
 
-Texture2D tex : register(t0);
-
 struct vs_input
 {
 	float3 pos : POSITION;
@@ -41,7 +39,7 @@ vs_output VS_Main(vs_input input)
 ps_output PS_Main(vs_output input)
 {
 	ps_output output;
-	float4 color = tex.Sample(testSampler, input.uv);
+	float4 color = TestTexture.Sample(testSampler, input.uv);
 	
 #if Test2Bits == 3
 	output.color = (color - GetValue()) * GetMultiplier();

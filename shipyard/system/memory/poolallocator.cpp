@@ -53,7 +53,7 @@ bool PoolAllocator::Create(void* pHeap, size_t numChunks, size_t chunkSize)
             pHeap, this, chunkSize);
 
 #ifdef SHIP_ALLOCATOR_DEBUG_MEMORY_FILL
-    memset(pHeap, FixedHeapAllocatorDebugConstants_NeverAllocatedMemory, heapSize);
+    memset(pHeap, FixedHeapAllocatorDebugConstants_NeverAllocatedMemory, m_HeapSize);
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_MEMORY_FILL
 
     m_pHeap = pHeap;

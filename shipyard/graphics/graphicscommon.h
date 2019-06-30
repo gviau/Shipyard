@@ -506,7 +506,7 @@ namespace Shipyard
         }
 
         uint32_t numDescriptorRanges;
-        const DescriptorRange* descriptorRanges;
+        DescriptorRange* descriptorRanges;
     };
 
     struct RootDescriptor

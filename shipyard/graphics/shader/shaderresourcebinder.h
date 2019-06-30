@@ -16,19 +16,13 @@ namespace Shipyard
     class SHIPYARD_API ShaderResourceBinder
     {
     public:
-        // ShaderInputProviderType is assumed to be a BaseShaderInputProvider derived class and setup to be using constant buffers.
-        // See ShaderInputProviderUtils::IsUsingConstantBuffer
         template <typename ShaderInputProviderType>
-        void AddShaderResourceBinderEntry(GFXDescriptorSet& gfxDescriptorSetToBindTo, uint16_t rootIndexToBindTo)
+        void AddShaderResourceBinderEntry(GFXDescriptorSetHandle* gfxDescriptorSetHandleToBindTo, uint16_t rootIndexToBindTo)
         {
-            SHIP_ASSERT_MSG(
-                ShaderInputProviderUtils::IsUsingConstantBuffer(ShaderInputProviderType::ms_ShaderInputProviderDeclaration->GetShaderInputProviderUsage()),
-                "ShaderResourceBinder::AddShaderResourceBinderEntry only deals with ShaderInputProviders that are using constant buffers. See ShaderInputProviderUtils::IsUsingConstantBuffer");
-
             ShaderResourceBinderEntry& shaderResourceBinderEntry = m_ShaderResourceBinderEntries.Grow();
             shaderResourceBinderEntry.Declaration = ShaderInputProviderType::ms_ShaderInputProviderDeclaration;
-            shaderResourceBinderEntry.GfxDescriptorSet = &gfxDescriptorSetToBindTo;
-            shaderResourceBinderEntry.RootIndex = rootIndexToBindTo;
+            shaderResourceBinderEntry.GfxDescriptorSetHandleToBindTo = gfxDescriptorSetHandleToBindTo;
+            shaderResourceBinderEntry.RootIndexToBindTo = rootIndexToBindTo;
         }
 
         void BindShaderInputProvders(GFXRenderDevice& gfxRenderDevice, const Array<ShaderInputProvider*>& shaderInputProviders) const;
@@ -37,8 +31,8 @@ namespace Shipyard
         struct ShaderResourceBinderEntry
         {
             ShaderInputProviderDeclaration* Declaration;
-            GFXDescriptorSet* GfxDescriptorSet;
-            uint16_t RootIndex;
+            GFXDescriptorSetHandle* GfxDescriptorSetHandleToBindTo;
+            uint16_t RootIndexToBindTo;
         };
 
     private:

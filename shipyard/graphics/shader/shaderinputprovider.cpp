@@ -132,16 +132,23 @@ bool ShaderInputProviderManager::WriteSingleShaderInputProviderFile(ShaderInputP
     }
 
     content += pShaderInputProviderDeclaration->m_ShaderInputProviderName;
+
+    // Register is temporary, until ShaderCompiler deduces binding points by reflection
     content += "Data : register(b0)\n{\n";
 
     for (uint32_t i = 0; i < pShaderInputProviderDeclaration->m_NumShaderInputDeclarations; i++)
     {
         ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration = pShaderInputProviderDeclaration->m_ShaderInputDeclarations[i];
 
-        WriteSingleShaderInput(shaderInputDeclaration, content);
+        if (shaderInputDeclaration.Type == ShaderInputType::Scalar)
+        {
+            WriteSingleShaderScalarInput(shaderInputDeclaration, content);
+        }
     }
 
-    content += "};";
+    content += "};\n";
+
+    WriteShaderInputsOutsideOfStruct(pShaderInputProviderDeclaration, content);
 
     shaderInputProviderFile.WriteChars(0, content.GetBuffer(), content.Size());
     shaderInputProviderFile.Close();
@@ -149,118 +156,205 @@ bool ShaderInputProviderManager::WriteSingleShaderInputProviderFile(ShaderInputP
     return true;
 }
 
-bool ShaderInputProviderManager::WriteSingleShaderInput(const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration, StringA& content)
+bool ShaderInputProviderManager::WriteSingleShaderScalarInput(const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration, StringA& content)
 {
     // Indented with respect to struct root, for easier readability.
     content += "    ";
 
-    SHIP_STATIC_ASSERT_MSG(uint32_t(ShaderInputType::Count) == 33, "ShaderInputType size changed, need to update this switch case!");
+    SHIP_STATIC_ASSERT_MSG(uint32_t(ShaderInputScalarType::Count) == 33, "ShaderInputScalarType size changed, need to update this switch case!");
 
-    switch (shaderInputDeclaration.Type)
+    switch (shaderInputDeclaration.ScalarType)
     {
-    case ShaderInputType::Float:
+    case ShaderInputScalarType::Float:
         content += "float ";
         break;
-    case ShaderInputType::Float2:
+    case ShaderInputScalarType::Float2:
         content += "float2 ";
         break;
-    case ShaderInputType::Float3:
+    case ShaderInputScalarType::Float3:
         content += "float3 ";
         break;
-    case ShaderInputType::Float4:
+    case ShaderInputScalarType::Float4:
         content += "float4 ";
         break;
-    case ShaderInputType::Half:
+    case ShaderInputScalarType::Half:
         content += "half ";
         break;
-    case ShaderInputType::Half2:
+    case ShaderInputScalarType::Half2:
         content += "half2 ";
         break;
-    case ShaderInputType::Half3:
+    case ShaderInputScalarType::Half3:
         content += "half3 ";
         break;
-    case ShaderInputType::Half4:
+    case ShaderInputScalarType::Half4:
         content += "half4 ";
         break;
-    case ShaderInputType::Double:
+    case ShaderInputScalarType::Double:
         content += "double ";
         break;
-    case ShaderInputType::Double2:
+    case ShaderInputScalarType::Double2:
         content += "double2";
         break;
-    case ShaderInputType::Double3:
+    case ShaderInputScalarType::Double3:
         content += "double3 ";
         break;
-    case ShaderInputType::Double4:
+    case ShaderInputScalarType::Double4:
         content += "double4 ";
         break;
-    case ShaderInputType::Int:
+    case ShaderInputScalarType::Int:
         content += "int ";
         break;
-    case ShaderInputType::Int2:
+    case ShaderInputScalarType::Int2:
         content += "int2 ";
         break;
-    case ShaderInputType::Int3:
+    case ShaderInputScalarType::Int3:
         content += "int3 ";
         break;
-    case ShaderInputType::Int4:
+    case ShaderInputScalarType::Int4:
         content += "int4 ";
         break;
-    case ShaderInputType::Uint:
+    case ShaderInputScalarType::Uint:
         content += "uint ";
         break;
-    case ShaderInputType::Uint2:
+    case ShaderInputScalarType::Uint2:
         content += "uint2 ";
         break;
-    case ShaderInputType::Uint3:
+    case ShaderInputScalarType::Uint3:
         content += "uint3 ";
         break;
-    case ShaderInputType::Uint4:
+    case ShaderInputScalarType::Uint4:
         content += "uint4 ";
         break;
-    case ShaderInputType::Bool:
+    case ShaderInputScalarType::Bool:
         content += "bool ";
         break;
-    case ShaderInputType::Bool2:
+    case ShaderInputScalarType::Bool2:
         content += "bool2 ";
         break;
-    case ShaderInputType::Bool3:
+    case ShaderInputScalarType::Bool3:
         content += "bool3 ";
         break;
-    case ShaderInputType::Bool4:
+    case ShaderInputScalarType::Bool4:
         content += "bool4 ";
         break;
-    case ShaderInputType::Float2x2:
+    case ShaderInputScalarType::Float2x2:
         content += "float2x2 ";
         break;
-    case ShaderInputType::Float3x3:
+    case ShaderInputScalarType::Float3x3:
         content += "float3x3 ";
         break;
-    case ShaderInputType::Float4x4:
+    case ShaderInputScalarType::Float4x4:
         content += "float4x4 ";
         break;
-    case ShaderInputType::Half2x2:
+    case ShaderInputScalarType::Half2x2:
         content += "half2x2 ";
         break;
-    case ShaderInputType::Half3x3:
+    case ShaderInputScalarType::Half3x3:
         content += "half3x3 ";
         break;
-    case ShaderInputType::Half4x4:
+    case ShaderInputScalarType::Half4x4:
         content += "half4x4 ";
         break;
-    case ShaderInputType::Double2x2:
+    case ShaderInputScalarType::Double2x2:
         content += "double2x2 ";
         break;
-    case ShaderInputType::Double3x3:
+    case ShaderInputScalarType::Double3x3:
         content += "double3x3 ";
         break;
-    case ShaderInputType::Double4x4:
+    case ShaderInputScalarType::Double4x4:
         content += "double4x4 ";
         break;
     }
 
     content += shaderInputDeclaration.Name;
     content += ";\n";
+
+    return true;
+}
+
+bool ShaderInputProviderManager::WriteShaderInputsOutsideOfStruct(ShaderInputProviderDeclaration* pShaderInputProviderDeclaration, StringA& content)
+{
+    for (uint32_t i = 0; i < pShaderInputProviderDeclaration->m_NumShaderInputDeclarations; i++)
+    {
+        ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration = pShaderInputProviderDeclaration->m_ShaderInputDeclarations[i];
+
+        if (shaderInputDeclaration.Type == ShaderInputType::Scalar)
+        {
+            continue;
+        }
+
+        WriteSingleShaderInputOutsideOfStruct(shaderInputDeclaration, content);
+    }
+
+    return true;
+}
+
+bool ShaderInputProviderManager::WriteSingleShaderInputOutsideOfStruct(const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration, StringA& content)
+{
+    SHIP_STATIC_ASSERT_MSG(uint32_t(ShaderInputScalarType::Count) == 33, "ShaderInputScalarType size changed, need to update this switch case!");
+
+    switch (shaderInputDeclaration.Type)
+    {
+    case ShaderInputType::Texture2D:
+        content += "Texture2D<";
+        break;
+
+    default:
+        SHIP_ASSERT(!"Unsupported shader input type!");
+        break;
+    }
+
+    content += shaderInputDeclaration.Name;
+
+    switch (shaderInputDeclaration.ScalarType)
+    {
+    case ShaderInputScalarType::Float:
+        content += "float";
+        break;
+    case ShaderInputScalarType::Float2:
+        content += "float2";
+        break;
+    case ShaderInputScalarType::Float3:
+        content += "float3";
+        break;
+    case ShaderInputScalarType::Float4:
+        content += "float4";
+        break;
+    case ShaderInputScalarType::Int:
+        content += "int";
+        break;
+    case ShaderInputScalarType::Int2:
+        content += "int2";
+        break;
+    case ShaderInputScalarType::Int3:
+        content += "int3";
+        break;
+    case ShaderInputScalarType::Int4:
+        content += "int4";
+        break;
+    case ShaderInputScalarType::Uint:
+        content += "uint";
+        break;
+    case ShaderInputScalarType::Uint2:
+        content += "uint2";
+        break;
+    case ShaderInputScalarType::Uint3:
+        content += "uint3";
+        break;
+    case ShaderInputScalarType::Uint4:
+        content += "uint4";
+        break;
+
+    default:
+        SHIP_ASSERT(!"Unsupported shader input scalar type!");
+        break;
+    }
+
+    content += "> ";
+    content += shaderInputDeclaration.Name;
+
+    // Register is temporary, until ShaderCompiler deduces binding points by reflection
+    content += " : register(t0);\n";
 
     return true;
 }
@@ -323,6 +417,34 @@ void ShaderInputProviderManager::DestroyShaderInputProviderConstantBuffer(Shader
     GFXRenderDevice* gfxRenderDevice = static_cast<GFXRenderDevice*>(m_GfxRenderDevice);
 
     gfxRenderDevice->DestroyConstantBuffer(shaderInputProvider->m_GfxConstantBufferHandle);
+}
+
+uint32_t ShaderInputProviderManager::GetTexture2DHandlesFromProvider(const ShaderInputProvider& shaderInputProvider, GFXTexture2DHandle* pGfxTextureHandles) const
+{
+    uint32_t numTexture2DHandles = 0;
+    size_t providerAddress = reinterpret_cast<size_t>(&shaderInputProvider);
+
+    ShaderInputProviderDeclaration* shaderInputProviderDeclaration = shaderInputProvider.GetShaderInputProviderDeclaration();
+
+    uint32_t numShaderInputDeclarations = 0;
+    const ShaderInputProviderDeclaration::ShaderInputDeclaration* shaderInputDeclarations = shaderInputProviderDeclaration->GetShaderInputDeclarations(numShaderInputDeclarations);
+
+    for (uint32_t i = 0; i < numShaderInputDeclarations; i++)
+    {
+        const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration = shaderInputDeclarations[i];
+
+        if (shaderInputDeclaration.Type != ShaderInputType::Texture2D)
+        {
+            continue;
+        }
+
+        // Valid because we're guaranteeing at compile time that ShaderInputType::Texture2D are GFXTexture2DHandle
+        void* pTexture2DHandleAddress = reinterpret_cast<void*>(providerAddress + size_t(shaderInputDeclaration.DataOffsetInProvider));
+        pGfxTextureHandles[numTexture2DHandles] = *reinterpret_cast<GFXTexture2DHandle*>(pTexture2DHandleAddress);
+        numTexture2DHandles += 1;
+    }
+
+    return numTexture2DHandles;
 }
 
 ShaderInputProviderManager& GetShaderInputProviderManager()

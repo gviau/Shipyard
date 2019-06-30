@@ -386,7 +386,7 @@ void DX11RenderStateCache::SetIndexBuffer(const GFXIndexBuffer& indexBuffer, uin
 
 void DX11RenderStateCache::BindRootSignatureDescriptorTableEntry(const RootSignatureParameterEntry& rootSignatureParameter, ShaderVisibility shaderVisibilityForParameter)
 {
-    uint32_t numDescriptorRanges = rootSignatureParameter.descriptorTable.numDescriptorRanges;
+    uint32_t numDescriptorRanges = rootSignatureParameter.descriptorTable.descriptorRanges.Size();
 
     for (uint32_t i = 0; i < numDescriptorRanges; i++)
     {
@@ -446,7 +446,9 @@ void DX11RenderStateCache::BindDescriptorTableFromDescriptorSet(
 {
     uint32_t idx = 0;
 
-    for (uint32_t i = 0; i < rootSignatureParameter.descriptorTable.numDescriptorRanges; i++)
+    uint32_t numDescriptorRanges = rootSignatureParameter.descriptorTable.descriptorRanges.Size();
+
+    for (uint32_t i = 0; i < numDescriptorRanges; i++)
     {
         const DescriptorRange& descriptorRange = rootSignatureParameter.descriptorTable.descriptorRanges[i];
 

@@ -499,14 +499,7 @@ namespace Shipyard
 
     struct RootDescriptorTable
     {
-        RootDescriptorTable()
-            : numDescriptorRanges(0)
-            , descriptorRanges(nullptr)
-        {
-        }
-
-        uint32_t numDescriptorRanges;
-        DescriptorRange* descriptorRanges;
+        Array<DescriptorRange> descriptorRanges;
     };
 
     struct RootDescriptor

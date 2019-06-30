@@ -62,6 +62,8 @@ namespace Shipyard
         void DestroyTexture2D(GFXTexture2DHandle gfxTexture2dHandle);
         GFXTexture2D& GetTexture2D(GFXTexture2DHandle gfxTexture2dHandle);
         const GFXTexture2D& GetTexture2D(GFXTexture2DHandle gfxTexture2dHandle) const;
+        GFXTexture2D* GetTexture2DPtr(GFXTexture2DHandle gfxTexture2dHandle);
+        const GFXTexture2D* GetTexture2DPtr(GFXTexture2DHandle gfxTexture2dHandle) const;
 
         GFXRenderTargetHandle CreateRenderTarget(GFXTexture2DHandle* texturesToAttach, uint32_t numTexturesToAttach);
         void DestroyRenderTarget(GFXRenderTargetHandle gfxRenderTargetHandle);
@@ -87,13 +89,15 @@ namespace Shipyard
         void DestroyRootSignature(GFXRootSignatureHandle gfxRootSignatureHandle);
         GFXRootSignature& GetRootSignature(GFXRootSignatureHandle gfxRootSignatureHandle);
         const GFXRootSignature& GetRootSignature(GFXRootSignatureHandle gfxRootSignatureHandle) const;
+        GFXRootSignature* GetRootSignaturePtr(GFXRootSignatureHandle gfxRootSignatureHandle);
+        const GFXRootSignature* GetRootSignaturePtr(GFXRootSignatureHandle gfxRootSignatureHandle) const;
 
         GFXPipelineStateObjectHandle CreatePipelineStateObject(const PipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters);
         void DestroyPipelineStateObject(GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle);
         GFXPipelineStateObject& GetPipelineStateObject(GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle);
         const GFXPipelineStateObject& GetPipelineStateObject(GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle) const;
 
-        GFXDescriptorSetHandle CreateDescriptorSet(DescriptorSetType descriptorSetType, const RootSignature& rootSignature, const Array<DescriptorSetEntryDeclaration>& descriptorSetEntryDeclarations);
+        GFXDescriptorSetHandle CreateDescriptorSet(DescriptorSetType descriptorSetType, GFXRootSignatureHandle gfxRootSignatureHandle, const Array<DescriptorSetEntryDeclaration>& descriptorSetEntryDeclarations);
         void DestroyDescriptorSet(GFXDescriptorSetHandle gfxDescriptorSetHandle);
         GFXDescriptorSet& GetDescriptorSet(GFXDescriptorSetHandle gfxDescriptorSetHandle);
         const GFXDescriptorSet& GetDescriptorSet(GFXDescriptorSetHandle gfxDescriptorSetHandle) const;

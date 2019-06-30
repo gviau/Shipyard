@@ -417,6 +417,16 @@ const GFXTexture2D& DX11RenderDevice::GetTexture2D(GFXTexture2DHandle gfxTexture
     return m_Texture2dPool.GetItem(gfxTexture2dHandle.handle);
 }
 
+GFXTexture2D* DX11RenderDevice::GetTexture2DPtr(GFXTexture2DHandle gfxTexture2dHandle)
+{
+    return m_Texture2dPool.GetItemPtr(gfxTexture2dHandle.handle);
+}
+
+const GFXTexture2D* DX11RenderDevice::GetTexture2DPtr(GFXTexture2DHandle gfxTexture2dHandle) const
+{
+    return m_Texture2dPool.GetItemPtr(gfxTexture2dHandle.handle);
+}
+
 GFXRenderTargetHandle DX11RenderDevice::CreateRenderTarget(GFXTexture2DHandle* texturesToAttach, uint32_t numTexturesToAttach)
 {
     GFXRenderTargetHandle gfxRenderTargetHandle;
@@ -596,6 +606,16 @@ const GFXRootSignature& DX11RenderDevice::GetRootSignature(GFXRootSignatureHandl
     return m_RootSignaturePool.GetItem(gfxRootSignatureHandle.handle);
 }
 
+GFXRootSignature* DX11RenderDevice::GetRootSignaturePtr(GFXRootSignatureHandle gfxRootSignatureHandle)
+{
+    return m_RootSignaturePool.GetItemPtr(gfxRootSignatureHandle.handle);
+}
+
+const GFXRootSignature* DX11RenderDevice::GetRootSignaturePtr(GFXRootSignatureHandle gfxRootSignatureHandle) const
+{
+    return m_RootSignaturePool.GetItemPtr(gfxRootSignatureHandle.handle);
+}
+
 GFXPipelineStateObjectHandle DX11RenderDevice::CreatePipelineStateObject(const PipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters)
 {
     GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle;
@@ -628,12 +648,16 @@ const GFXPipelineStateObject& DX11RenderDevice::GetPipelineStateObject(GFXPipeli
     return m_PipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
 }
 
-GFXDescriptorSetHandle DX11RenderDevice::CreateDescriptorSet(DescriptorSetType descriptorSetType, const RootSignature& rootSignature, const Array<DescriptorSetEntryDeclaration>& descriptorSetEntryDeclarations)
+GFXDescriptorSetHandle DX11RenderDevice::CreateDescriptorSet(DescriptorSetType descriptorSetType, GFXRootSignatureHandle gfxRootSignatureHandle, const Array<DescriptorSetEntryDeclaration>& descriptorSetEntryDeclarations)
 {
+    SHIP_ASSERT(gfxRootSignatureHandle.handle != InvalidGfxHandle);
+
     GFXDescriptorSetHandle gfxDescriptorSetHandle;
     gfxDescriptorSetHandle.handle = m_DescriptorSetPool.GetNewItemIndex();
 
     GFXDescriptorSet& gfxDescriptorSet = m_DescriptorSetPool.GetItem(gfxDescriptorSetHandle.handle);
+    GFXRootSignature* rootSignature = m_RootSignaturePool.GetItemPtr(gfxRootSignatureHandle.handle);
+
     bool isValid = gfxDescriptorSet.Create(descriptorSetType, rootSignature, descriptorSetEntryDeclarations);
 
     SHIP_ASSERT(isValid);

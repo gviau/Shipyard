@@ -49,6 +49,8 @@ namespace Shipyard
         virtual void DestroyTexture2D(GFXTexture2DHandle gfxTextureHandle) = 0;
         virtual GFXTexture2D& GetTexture2D(GFXTexture2DHandle gfxTexture2dHandle) = 0;
         virtual const GFXTexture2D& GetTexture2D(GFXTexture2DHandle gfxTexture2dHandle) const = 0;
+        virtual GFXTexture2D* GetTexture2DPtr(GFXTexture2DHandle gfxTexture2dHandle) = 0;
+        virtual const GFXTexture2D* GetTexture2DPtr(GFXTexture2DHandle gfxTexture2dHandle) const = 0;
 
         virtual GFXRenderTargetHandle CreateRenderTarget(GFXTexture2DHandle* texturesToAttach, uint32_t numTexturesToAttach) = 0;
         virtual void DestroyRenderTarget(GFXRenderTargetHandle gfxRenderTargetHandle) = 0;
@@ -74,13 +76,15 @@ namespace Shipyard
         virtual void DestroyRootSignature(GFXRootSignatureHandle gfxRootSignatureHandle) = 0;
         virtual GFXRootSignature& GetRootSignature(GFXRootSignatureHandle gfxRootSignatureHandle) = 0;
         virtual const GFXRootSignature& GetRootSignature(GFXRootSignatureHandle gfxRootSignatureHandle) const = 0;
+        virtual GFXRootSignature* GetRootSignaturePtr(GFXRootSignatureHandle gfxRootSignatureHandle) = 0;
+        virtual const GFXRootSignature* GetRootSignaturePtr(GFXRootSignatureHandle gfxRootSignatureHandle) const = 0;
 
         virtual GFXPipelineStateObjectHandle CreatePipelineStateObject(const PipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters) = 0;
         virtual void DestroyPipelineStateObject(GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle) = 0;
         virtual GFXPipelineStateObject& GetPipelineStateObject(GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle) = 0;
         virtual const GFXPipelineStateObject& GetPipelineStateObject(GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle) const = 0;
 
-        virtual GFXDescriptorSetHandle CreateDescriptorSet(DescriptorSetType descriptorSetType, const RootSignature& rootSignature, const Array<DescriptorSetEntryDeclaration>& descriptorSetEntryDeclarations) = 0;
+        virtual GFXDescriptorSetHandle CreateDescriptorSet(DescriptorSetType descriptorSetType, GFXRootSignatureHandle gfxRootSignatureHandle, const Array<DescriptorSetEntryDeclaration>& descriptorSetEntryDeclarations) = 0;
         virtual void DestroyDescriptorSet(GFXDescriptorSetHandle gfxDescriptorSetHandle) = 0;
         virtual GFXDescriptorSet& GetDescriptorSet(GFXDescriptorSetHandle gfxDescriptorSetHandle) = 0;
         virtual const GFXDescriptorSet& GetDescriptorSet(GFXDescriptorSetHandle gfxDescriptorSetHandle) const = 0;

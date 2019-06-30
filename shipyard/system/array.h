@@ -195,10 +195,11 @@ namespace Shipyard
         }
 
         Array(const Array& src)
-            : m_pAllocator(src.m_pAllocator)
-            , m_Array(nullptr)
+            : m_Array(nullptr)
             , m_ArraySizeAndCapacity(0)
         {
+            m_pAllocator = src.GetAllocator();
+
             Reserve(src.Capacity());
 
             uint32_t srcSize = src.Size();
@@ -207,7 +208,26 @@ namespace Shipyard
 
             for (uint32_t i = 0; i < srcSize; i++)
             {
-                m_Array[i] = src.m_Array[i];
+                m_Array[i] = src[i];
+            }
+        }
+
+        template <typename U, size_t otherAlignment>
+        Array(const Array<U, otherAlignment>& src)
+            : m_Array(nullptr)
+            , m_ArraySizeAndCapacity(0)
+        {
+            m_pAllocator = src.GetAllocator();
+
+            Reserve(src.Capacity());
+
+            uint32_t srcSize = src.Size();
+
+            m_ArraySizeAndCapacity |= srcSize;
+
+            for (uint32_t i = 0; i < srcSize; i++)
+            {
+                m_Array[i] = src[i];
             }
         }
 
@@ -217,7 +237,7 @@ namespace Shipyard
             {
                 Clear();
 
-                m_pAllocator = rhs.m_pAllocator;
+                m_pAllocator = rhs.GetAllocator();
 
                 Reserve(rhs.Capacity());
 
@@ -227,7 +247,31 @@ namespace Shipyard
 
                 for (uint32_t i = 0; i < srcSize; i++)
                 {
-                    m_Array[i] = rhs.m_Array[i];
+                    m_Array[i] = rhs[i];
+                }
+            }
+
+            return *this;
+        }
+
+        template <typename U, size_t otherAlignment>
+        Array& operator= (const Array<U, otherAlignment>& rhs)
+        {
+            if (this != &rhs)
+            {
+                Clear();
+
+                m_pAllocator = rhs.GetAllocator();
+
+                Reserve(rhs.Capacity());
+
+                uint32_t srcSize = rhs.Size();
+
+                m_ArraySizeAndCapacity |= srcSize;
+
+                for (uint32_t i = 0; i < srcSize; i++)
+                {
+                    m_Array[i] = rhs[i];
                 }
             }
 
@@ -571,6 +615,11 @@ namespace Shipyard
             }
 
             m_pAllocator = pAllocator;
+        }
+
+        BaseAllocator* GetAllocator() const
+        {
+            return m_pAllocator;
         }
 
     protected:

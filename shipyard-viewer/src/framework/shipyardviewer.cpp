@@ -30,11 +30,13 @@ namespace Shipyard
 struct SimpleConstantBufferProvider : public BaseShaderInputProvider<SimpleConstantBufferProvider>
 {
     glm::mat4x4 Matrix;
+    GFXTexture2DHandle TestTexture;
 };
 
 SHIP_DECLARE_SHADER_INPUT_PROVIDER_BEGIN(SimpleConstantBufferProvider, Default)
 {
-    SHIP_SCALAR_SHADER_INPUT(ShaderInputType::Float4x4, "Test", Matrix);
+    SHIP_SCALAR_SHADER_INPUT(ShaderInputScalarType::Float4x4, "Test", Matrix);
+    SHIP_TEXTURE2D_SHADER_INPUT(ShaderInputScalarType::Float4, "TestTexture", TestTexture);
 }
 SHIP_DECLARE_SHADER_INPUT_PROVIDER_END(SimpleConstantBufferProvider)
 
@@ -155,12 +157,15 @@ bool ShipyardViewer::CreateApp(HWND windowHandle, uint32_t windowWidth, uint32_t
     rootSignatureParameters[0].shaderVisibility = ShaderVisibility_Vertex;
     rootSignatureParameters[0].descriptor.shaderBindingSlot = 0;
 
-    rootSignatureParameters[1].parameterType = RootSignatureParameterType::ShaderResourceView;
+    rootSignatureParameters[1].parameterType = RootSignatureParameterType::DescriptorTable;
     rootSignatureParameters[1].shaderVisibility = ShaderVisibility_Pixel;
-    rootSignatureParameters[1].descriptor.shaderBindingSlot = 0;
+
+    DescriptorRange& descriptorRange = rootSignatureParameters[1].descriptorTable.descriptorRanges.Grow();
+    descriptorRange.descriptorRangeType = DescriptorRangeType::ShaderResourceView;
+    descriptorRange.baseShaderRegister = 0;
+    descriptorRange.numDescriptors = 1;
 
     m_GfxRootSignatureHandle = m_pGfxRenderDevice->CreateRootSignature(rootSignatureParameters);
-    GFXRootSignature& gfxRootSignature = m_pGfxRenderDevice->GetRootSignature(m_GfxRootSignatureHandle);
 
     Vertex_Pos_UV vertexBufferData[] =
     {
@@ -206,8 +211,6 @@ bool ShipyardViewer::CreateApp(HWND windowHandle, uint32_t windowWidth, uint32_t
     m_IndexBufferHandle = m_pGfxRenderDevice->CreateIndexBuffer(36, true, false, indices);
     m_TextureHandle = m_pGfxRenderDevice->CreateTexture2D(2, 2, GfxFormat::R8G8B8A8_UNORM, false, textureData, false);
 
-    GFXTexture2D& texture = m_pGfxRenderDevice->GetTexture2D(m_TextureHandle);
-
     InplaceArray<DescriptorSetEntryDeclaration, 2> descriptorSetEntryDeclarations;
     DescriptorSetEntryDeclaration& constantBufferEntry = descriptorSetEntryDeclarations.Grow();
     constantBufferEntry.rootIndex = 0;
@@ -218,11 +221,7 @@ bool ShipyardViewer::CreateApp(HWND windowHandle, uint32_t windowWidth, uint32_t
     textureEntry.numResources = 1;
 
     m_GfxDescriptorSetHandle =
-        m_pGfxRenderDevice->CreateDescriptorSet(DescriptorSetType::ConstantBuffer_ShaderResource_UnorderedAccess_Views, gfxRootSignature, descriptorSetEntryDeclarations);
-
-    GFXDescriptorSet& gfxDescriptorSet = m_pGfxRenderDevice->GetDescriptorSet(m_GfxDescriptorSetHandle);
-
-    gfxDescriptorSet.SetDescriptorForRootIndex(1, texture);
+        m_pGfxRenderDevice->CreateDescriptorSet(DescriptorSetType::ConstantBuffer_ShaderResource_UnorderedAccess_Views, m_GfxRootSignatureHandle, descriptorSetEntryDeclarations);
 
     m_TestTextureHandle = m_pGfxRenderDevice->CreateTexture2D(windowWidth, windowHeight, GfxFormat::R8G8B8A8_UNORM, false, nullptr, false, TextureUsage::TextureUsage_RenderTarget);
 
@@ -269,14 +268,14 @@ void ShipyardViewer::ComputeOneFrame()
                      0.0f, 0.0f, 0.0f, 1.0f);
 
     m_pDataProvider->Matrix = glm::rotate(matrix, theta, glm::vec3(0.0f, 1.0f, 0.0f));
+    m_pDataProvider->TestTexture = m_TextureHandle;
 
     InplaceArray<ShaderInputProvider*, 1> shaderInputProviders;
     shaderInputProviders.Add(m_pDataProvider);
 
-    GFXDescriptorSet& gfxDescriptorSet = m_pGfxRenderDevice->GetDescriptorSet(m_GfxDescriptorSetHandle);
-
+    // Memory stomp in allocator.
     ShaderResourceBinder shaderResourceBinder;
-    shaderResourceBinder.AddShaderResourceBinderEntry<SimpleConstantBufferProvider>(gfxDescriptorSet, 0);
+    shaderResourceBinder.AddShaderResourceBinderEntry<SimpleConstantBufferProvider>(&m_GfxDescriptorSetHandle, 0);
 
     theta += 0.001f;
 

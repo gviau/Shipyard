@@ -100,6 +100,24 @@ namespace Shipyard
             return m_Datas[index];
         }
 
+        const T& GetItem(uint32_t index) const
+        {
+            SHIP_ASSERT_MSG(!m_FreePoolIndices.IsBitSet(index), "Accessing index %u that was not previously allocated for data pool 0x%p", index, this);
+            return m_Datas[index];
+        }
+
+        T* GetItemPtr(uint32_t index)
+        {
+            SHIP_ASSERT_MSG(!m_FreePoolIndices.IsBitSet(index), "Accessing index %u that was not previously allocated for data pool 0x%p", index, this);
+            return &m_Datas[index];
+        }
+
+        const T* GetItemPtr(uint32_t index) const
+        {
+            SHIP_ASSERT_MSG(!m_FreePoolIndices.IsBitSet(index), "Accessing index %u that was not previously allocated for data pool 0x%p", index, this);
+            return &m_Datas[index];
+        }
+
         bool GetFirstAllocatedIndex(uint32_t* firstAllocatedIndex)
         {
             uint32_t idx = 0;
@@ -145,12 +163,6 @@ namespace Shipyard
             *nextAllocatedIndex = nextIndex;
 
             return true;
-        }
-
-        const T& GetItem(uint32_t index) const
-        {
-            SHIP_ASSERT_MSG(!m_FreePoolIndices.IsBitSet(index), "Accessing index %u that was not previously allocated for data pool 0x%p", index, this);
-            return m_Datas[index];
         }
 
         uint32_t GetMaxElementsInPool() const

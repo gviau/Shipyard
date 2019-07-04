@@ -85,7 +85,7 @@ namespace Shipyard
 
         bool Invalidate();
 
-        bool RetrieveShadersForShaderKey(const ShaderKey& shaderKey, uint64_t lastModifiedTimestamp, ShaderEntrySet& shaderEntrySet) const;
+        bool RetrieveShadersForShaderKey(const ShaderKey& shaderKey, ShaderEntrySet& shaderEntrySet) const;
 
         void RemoveShadersForShaderKey(const ShaderKey& shaderKey);
         void AppendShadersForShaderKey(const ShaderKey& shaderKey, ShaderEntrySet& shaderEntrySet);

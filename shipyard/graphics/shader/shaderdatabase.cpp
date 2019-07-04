@@ -120,7 +120,7 @@ bool ShaderDatabase::Invalidate()
     return true;
 }
 
-bool ShaderDatabase::RetrieveShadersForShaderKey(const ShaderKey& shaderKey, uint64_t lastModifiedTimestamp, ShaderEntrySet& shaderEntrySet) const
+bool ShaderDatabase::RetrieveShadersForShaderKey(const ShaderKey& shaderKey, ShaderEntrySet& shaderEntrySet) const
 {
     uint32_t shaderSetIndex = 0;
     uint32_t numShaderEntries = m_ShaderEntryKeys.Size();

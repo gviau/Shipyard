@@ -34,9 +34,7 @@ bool ShaderHandlerManager::Initialize(GFXRenderDevice& gfxRenderDevice, ShaderDa
     errorShaderKey.SetShaderFamily(ShaderFamily::Error);
 
     ShaderDatabase::ShaderEntrySet compiledShaderEntrySet;
-    uint64_t lastModifiedTimestamp = 0;
-
-    if (m_ShaderDatabase->RetrieveShadersForShaderKey(errorShaderKey, lastModifiedTimestamp, compiledShaderEntrySet))
+    if (m_ShaderDatabase->RetrieveShadersForShaderKey(errorShaderKey, compiledShaderEntrySet))
     {
         return false;
     }
@@ -89,7 +87,7 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
     uint64_t lastModifiedTimestamp = shaderWatcher.GetTimestampForShaderKey(shaderKey);
 
     ShaderDatabase::ShaderEntrySet compiledShaderEntrySet;
-    bool foundValidShaderInDatabase = m_ShaderDatabase->RetrieveShadersForShaderKey(shaderKey, lastModifiedTimestamp, compiledShaderEntrySet);
+    bool foundValidShaderInDatabase = m_ShaderDatabase->RetrieveShadersForShaderKey(shaderKey, compiledShaderEntrySet);
 
     bool gotRecompiledSinceLastAccess = false;
     bool isShaderKeyCompiled = true;
@@ -139,7 +137,7 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
 
         if (shaderKey.GetShaderFamily() == ShaderFamily::Error)
         {
-            foundValidShaderInDatabase = m_ShaderDatabase->RetrieveShadersForShaderKey(shaderKey, lastModifiedTimestamp, compiledShaderEntrySet);
+            foundValidShaderInDatabase = m_ShaderDatabase->RetrieveShadersForShaderKey(shaderKey, compiledShaderEntrySet);
 
             SHIP_ASSERT(foundValidShaderInDatabase);
         }

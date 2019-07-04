@@ -8,18 +8,12 @@ bool DX11DescriptorSet::Create(DescriptorSetType descriptorSetType, RootSignatur
     m_DescriptorSetType = descriptorSetType;
     m_RootSignature = rootSignature;
 
-    uint32_t numResourcesToReserve = 0;
     for (const DescriptorSetEntryDeclaration& descriptorSetEntryDeclaration : descriptorSetEntryDeclarations)
     {
-        numResourcesToReserve = max(numResourcesToReserve, uint32_t(descriptorSetEntryDeclaration.rootIndex + 1));
-    }
-
-    m_Resources.Resize(numResourcesToReserve);
-
-    for (const DescriptorSetEntryDeclaration& descriptorSetEntryDeclaration : descriptorSetEntryDeclarations)
-    {
-        DescriptorSetEntry& newDescriptorSetEntry = m_Resources[descriptorSetEntryDeclaration.rootIndex];
+        DescriptorSetEntry& newDescriptorSetEntry = m_DescriptorSetEntries.Grow();
         newDescriptorSetEntry.descriptorResources.Resize(descriptorSetEntryDeclaration.numResources);
+        newDescriptorSetEntry.rootIndex = descriptorSetEntryDeclaration.rootIndex;
+        newDescriptorSetEntry.descriptorRangeIndex = descriptorSetEntryDeclaration.descriptorRangeIndex;
     }
 
     return true;

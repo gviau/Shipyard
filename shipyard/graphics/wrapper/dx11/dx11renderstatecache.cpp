@@ -255,18 +255,20 @@ void DX11RenderStateCache::BindDescriptorSet(const GFXDescriptorSet& descriptorS
     const Array<GFXDescriptorSet::DescriptorSetEntry>& resourcesToBind = descriptorSet.GetDescriptorSetEntries();
     const Array<RootSignatureParameterEntry>& rootSignatureParameters = rootSignature.GetRootSignatureParameters();
 
-    for (uint32_t rootIndex = 0; rootIndex < resourcesToBind.Size(); rootIndex++)
+    for (const GFXDescriptorSet::DescriptorSetEntry& descriptorSetEntry : resourcesToBind)
     {
-        const GFXDescriptorSet::DescriptorSetEntry& descriptorSetEntry = resourcesToBind[rootIndex];
-
-        const RootSignatureParameterEntry& rootSignatureParameter = rootSignatureParameters[rootIndex];
+        const RootSignatureParameterEntry& rootSignatureParameter = rootSignatureParameters[descriptorSetEntry.rootIndex];
 
         if (rootSignatureParameter.parameterType == RootSignatureParameterType::DescriptorTable)
         {
-            BindDescriptorTableFromDescriptorSet(descriptorSetEntry.descriptorResources, rootSignatureParameter);
+            SHIP_ASSERT_MSG(descriptorSetEntry.rootIndex != descriptorSetEntry.InvalidDescriptorRangeIndex, "DescriptorSetTable entry wasn't setup with DescriptorSet::SetDescriptorTableForRootIndex");
+
+            BindDescriptorTableFromDescriptorSet(descriptorSetEntry.descriptorResources, descriptorSetEntry.descriptorRangeIndex, rootSignatureParameter);
         }
         else if (descriptorSetEntry.descriptorResources.Size() > 0)
         {
+            SHIP_ASSERT_MSG(descriptorSetEntry.rootIndex == descriptorSetEntry.InvalidDescriptorRangeIndex, "DescriptorSetTable entry wasn't setup with DescriptorSet::SetDescriptorForRootIndex");
+
             BindDescriptorFromDescriptorSet(descriptorSetEntry.descriptorResources[0], rootSignatureParameter);
         }
     }
@@ -442,44 +444,40 @@ void DX11RenderStateCache::BindRootSignatureDescriptorTableEntry(const RootSigna
 
 void DX11RenderStateCache::BindDescriptorTableFromDescriptorSet(
         const Array<GfxResource*>& descriptorTableResources,
+        uint32_t descriptorRangeIndex,
         const RootSignatureParameterEntry& rootSignatureParameter)
 {
-    uint32_t idx = 0;
+    const DescriptorRange& descriptorRange = rootSignatureParameter.descriptorTable.descriptorRanges[descriptorRangeIndex];
 
-    uint32_t numDescriptorRanges = rootSignatureParameter.descriptorTable.descriptorRanges.Size();
-
-    for (uint32_t i = 0; i < numDescriptorRanges; i++)
+    for (uint32_t idx = 0; idx < descriptorRange.numDescriptors; idx++)
     {
-        const DescriptorRange& descriptorRange = rootSignatureParameter.descriptorTable.descriptorRanges[i];
+        GfxResource* descriptorResource = descriptorTableResources[idx];
 
-        for (uint32_t j = 0; j < descriptorRange.numDescriptors; j++)
+        SHIP_ASSERT_MSG(descriptorResource != nullptr, "Null resources in DX11RenderStateCache::BindDescriptorTableFromDescriptorSet are not valid, you must use a dummy, valid resource instead.");
+
+        uint32_t shaderBindingSlot = descriptorRange.baseShaderRegister +idx;
+
+        switch (descriptorRange.descriptorRangeType)
         {
-            GfxResource* descriptorResource = descriptorTableResources[idx];
+        case DescriptorRangeType::ConstantBufferView:
+            BindResourceAsConstantBuffer(descriptorResource, rootSignatureParameter.shaderVisibility, shaderBindingSlot);
+            break;
 
-            uint32_t shaderBindingSlot = descriptorRange.baseShaderRegister + j;
+        case DescriptorRangeType::ShaderResourceView:
+            BindResourceAsShaderResourceView(descriptorResource, rootSignatureParameter.shaderVisibility, shaderBindingSlot);
+            break;
 
-            switch (descriptorRange.descriptorRangeType)
-            {
-            case DescriptorRangeType::ConstantBufferView:
-                BindResourceAsConstantBuffer(descriptorResource, rootSignatureParameter.shaderVisibility, shaderBindingSlot);
-                break;
-
-            case DescriptorRangeType::ShaderResourceView:
-                BindResourceAsShaderResourceView(descriptorResource, rootSignatureParameter.shaderVisibility, shaderBindingSlot);
-                break;
-
-            default:
-                SHIP_ASSERT(!"DescriptorTable range type not implemented yet");
-                break;
-            }
-
-            idx += 1;
+        default:
+            SHIP_ASSERT(!"DescriptorTable range type not implemented yet");
+            break;
         }
     }
 }
 
 void DX11RenderStateCache::BindDescriptorFromDescriptorSet(GfxResource* descriptorResource, const RootSignatureParameterEntry& rootSignatureParameter)
 {
+    SHIP_ASSERT_MSG(descriptorResource != nullptr, "Null resources in DX11RenderStateCache::BindDescriptorFromDescriptorSet are not valid, you must use a dummy, valid resource instead.");
+
     uint32_t startingBindingSlot = rootSignatureParameter.descriptor.shaderBindingSlot;
     uint32_t endingBindingSlot = startingBindingSlot + MAX(rootSignatureParameter.descriptor.registerSpace, 1);
     

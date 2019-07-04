@@ -454,7 +454,7 @@ namespace Shipyard
                 ShaderVisibility_Hull |
                 ShaderVisibility_Domain |
                 ShaderVisibility_Geometry |
-                ShaderVisibility_Compute
+                ShaderVisibility_Compute,
     };
 
     enum ShaderStage
@@ -571,14 +571,17 @@ namespace Shipyard
 
     struct DescriptorSetEntryDeclaration
     {
-        uint16_t rootIndex = 0;
+        static const uint16_t InvalidDescriptorRangeIndex = uint16_t(-1);
 
-        // numResources > 1 assumes the entry is for a descriptor table
+        uint16_t rootIndex = 0;
         uint16_t numResources = 0;
+
+        // Values other than InvalidDescriptorRangeIndex are considered to be to index inside of a descriptor table at rootIndex.
+        uint16_t descriptorRangeIndex = InvalidDescriptorRangeIndex;
     };
 
     // This class gives control to the programmer to override specific RenderStateBlock's state manually.
-    // Those overriden states will have priority over every other way to set a state (inside of the shader for example).
+    // Those overridden states will have priority over every other way to set a state (inside of the shader for example).
     class SHIPYARD_API RenderStateBlockStateOverride
     {
     public:

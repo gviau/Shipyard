@@ -46,7 +46,7 @@ namespace Shipyard
     private:
         void BindRootSignatureDescriptorTableEntry(const RootSignatureParameterEntry& rootSignatureParameter, ShaderVisibility shaderVisibilityForParameter);
 
-        void BindDescriptorTableFromDescriptorSet(const Array<GfxResource*>& descriptorTableResources, const RootSignatureParameterEntry& rootSignatureParameter);
+        void BindDescriptorTableFromDescriptorSet(const Array<GfxResource*>& descriptorTableResources, uint32_t descriptorRangeIndex, const RootSignatureParameterEntry& rootSignatureParameter);
         void BindDescriptorFromDescriptorSet(GfxResource* descriptorResource, const RootSignatureParameterEntry& rootSignatureParameter);
 
         void BindResourceAsConstantBuffer(GfxResource* descriptorResource, ShaderVisibility shaderVisibility, uint32_t shaderBindingSlot);

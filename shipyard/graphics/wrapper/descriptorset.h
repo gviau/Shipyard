@@ -12,11 +12,11 @@ namespace Shipyard
     public:
         struct DescriptorSetEntry
         {
-            static const uint32_t InvalidDescriptorRangeIndex = uint32_t(-1);
+            static const uint16_t InvalidDescriptorRangeIndex = uint16_t(-1);
 
             Array<GfxResource*> descriptorResources;
-            uint32_t rootIndex = 0;
-            uint32_t descriptorRangeIndex = InvalidDescriptorRangeIndex;
+            uint16_t rootIndex = 0;
+            uint16_t descriptorRangeIndex = InvalidDescriptorRangeIndex;
         };
 
     public:

@@ -144,12 +144,6 @@ namespace Shipyard
             m_StackBuffer[0] = '\0';
             this->SetUserPointer(m_StackBuffer, numChars);
 
-            bool notEnoughSpaceToFitInStackBuffer = (otherNumChars < numChars);
-            if (notEnoughSpaceToFitInStackBuffer)
-            {
-                m_OwnMemory = true;
-            }
-
             Resize(src.Size());
 
             Assign(src.GetBuffer());
@@ -183,6 +177,8 @@ namespace Shipyard
     using SmallInplaceStringT = InplaceStringT<gs_SmallStringSize>;
     using MediumInplaceStringT = InplaceStringT<gs_MediumStringSize>;
     using LargeInplaceStringT = InplaceStringT<gs_LargeStringSize>;
+
+    SHIPYARD_API const char* StringFormat(const char* fmt, ...);
 }
 
 #include <system/string.inl>

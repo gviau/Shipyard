@@ -261,13 +261,13 @@ void DX11RenderStateCache::BindDescriptorSet(const GFXDescriptorSet& descriptorS
 
         if (rootSignatureParameter.parameterType == RootSignatureParameterType::DescriptorTable)
         {
-            SHIP_ASSERT_MSG(descriptorSetEntry.rootIndex != descriptorSetEntry.InvalidDescriptorRangeIndex, "DescriptorSetTable entry wasn't setup with DescriptorSet::SetDescriptorTableForRootIndex");
+            SHIP_ASSERT_MSG(descriptorSetEntry.descriptorRangeIndex != descriptorSetEntry.InvalidDescriptorRangeIndex, "DescriptorSetTable entry wasn't setup with DescriptorSet::SetDescriptorTableForRootIndex");
 
             BindDescriptorTableFromDescriptorSet(descriptorSetEntry.descriptorResources, descriptorSetEntry.descriptorRangeIndex, rootSignatureParameter);
         }
         else if (descriptorSetEntry.descriptorResources.Size() > 0)
         {
-            SHIP_ASSERT_MSG(descriptorSetEntry.rootIndex == descriptorSetEntry.InvalidDescriptorRangeIndex, "DescriptorSetTable entry wasn't setup with DescriptorSet::SetDescriptorForRootIndex");
+            SHIP_ASSERT_MSG(descriptorSetEntry.descriptorRangeIndex == descriptorSetEntry.InvalidDescriptorRangeIndex, "DescriptorSetTable entry wasn't setup with DescriptorSet::SetDescriptorForRootIndex");
 
             BindDescriptorFromDescriptorSet(descriptorSetEntry.descriptorResources[0], rootSignatureParameter);
         }

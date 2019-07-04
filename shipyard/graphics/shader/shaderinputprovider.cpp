@@ -92,10 +92,19 @@ uint32_t ShaderInputProviderManager::GetShaderInputProviderDeclarationIndex(cons
 
 bool ShaderInputProviderManager::WriteEveryShaderInputProviderFile()
 {
+    WriteShaderInputProviderUtilsFile();
+
+    size_t numBytesBeforeThisProviderInUnifiedBuffer = 0;
+
     ShaderInputProviderDeclaration* pCurrent = m_pHead;
     while (pCurrent != nullptr)
     {
-        WriteSingleShaderInputProviderFile(pCurrent);
+        WriteSingleShaderInputProviderFile(pCurrent, numBytesBeforeThisProviderInUnifiedBuffer);
+
+        if (pCurrent->m_ShaderInputProviderUsage == ShaderInputProviderUsage::PerInstance)
+        {
+            numBytesBeforeThisProviderInUnifiedBuffer += pCurrent->m_RequiredSizeForProvider * SHIP_MAX_BATCHED_DRAW_CALLS_PER_MATERIAL;
+        }
 
         pCurrent = pCurrent->m_pNextRegisteredShaderInputProviderDeclaration;
     }
@@ -103,7 +112,35 @@ bool ShaderInputProviderManager::WriteEveryShaderInputProviderFile()
     return true;
 }
 
-bool ShaderInputProviderManager::WriteSingleShaderInputProviderFile(ShaderInputProviderDeclaration* pShaderInputProviderDeclaration)
+bool ShaderInputProviderManager::WriteShaderInputProviderUtilsFile()
+{
+    FileHandler shaderInputProviderUtilsFile;
+    shaderInputProviderUtilsFile.Open("shaders\\shaderinputproviders\\ShaderInputProviderUtils.hlsl", FileHandlerOpenFlag(FileHandlerOpenFlag::FileHandlerOpenFlag_Write | FileHandlerOpenFlag::FileHandlerOpenFlag_Create));
+
+    if (!shaderInputProviderUtilsFile.IsOpen())
+    {
+        return false;
+    }
+
+    StringA content;
+    content += "/**\n* AUTO-GENERATED FILE\n**/\n";
+    content += "#ifndef SHADER_INPUT_PROVIDER_UTILS_HLSL\n";
+    content += "#define SHADER_INPUT_PROVIDER_UTILS_HLSL\n\n";
+
+    content += "ByteAddressBuffer g_UnifiedConstantBuffer;\n";
+
+    // content += "#define UINT_TO_FLOAT(val) asfloat(val)\n";
+    // content += "#define UINT2_TO_FLOAT2(val) float2(UINT_TO_FLOAT(val.x), UINT_TO_FLOAT(val.y))\n";
+    // content += "#define UINT3_TO_FLOAT3(val) float3(UINT_TO_FLOAT(val.x), UINT_TO_FLOAT(val.y))\n";
+
+    content += "#endif";
+
+    shaderInputProviderUtilsFile.WriteChars(0, content.GetBuffer(), content.Size());
+
+    return true;
+}
+
+bool ShaderInputProviderManager::WriteSingleShaderInputProviderFile(ShaderInputProviderDeclaration* pShaderInputProviderDeclaration, size_t numBytesBeforeThisProviderInUnifiedBuffer)
 {
     StringT shaderInputProviderFileName;
     shaderInputProviderFileName = "shaders\\shaderinputproviders\\";
@@ -111,30 +148,46 @@ bool ShaderInputProviderManager::WriteSingleShaderInputProviderFile(ShaderInputP
     shaderInputProviderFileName += ".hlsl";
 
     FileHandler shaderInputProviderFile;
-    shaderInputProviderFile.Open(shaderInputProviderFileName.GetBuffer(), FileHandlerOpenFlag(FileHandlerOpenFlag::FileHandlerOpenFlag_Write | FileHandlerOpenFlag::FileHandlerOpenFlag_Create));
-
-    if (!shaderInputProviderFile.IsOpen())
-    {
-        return false;
-    }
 
     StringA content;
 
     content += "/**\n* AUTO-GENERATED FILE\n**/\n";
+    content += "#ifndef SHADER_INPUT_PROVIDER_";
+    content += pShaderInputProviderDeclaration->m_ShaderInputProviderName;
+    content += "\n";
+    content += "#define SHADER_INPUT_PROVIDER_";
+    content += pShaderInputProviderDeclaration->m_ShaderInputProviderName;
+    content += "\n\n";
 
-    if (ShaderInputProviderUtils::IsUsingConstantBuffer(pShaderInputProviderDeclaration->m_ShaderInputProviderUsage))
+    bool isUsingConstantBuffer = ShaderInputProviderUtils::IsUsingConstantBuffer(pShaderInputProviderDeclaration->m_ShaderInputProviderUsage);
+
+    if (isUsingConstantBuffer)
     {
         content += "cbuffer ";
+
+        content += pShaderInputProviderDeclaration->m_ShaderInputProviderName;
+
+        content += "Data";
+
+        // Register is temporary, until ShaderCompiler deduces binding points by reflection
+        content += " : register(b0)";
+        content += "\n{\n";
     }
     else
     {
-        content += "struct ";
+        content += "#include \"shaderinputproviders\\ShaderInputProviderUtils.hlsl\"\n";
+
+        content += "#define SHADER_INPUT_PROVIDER_STRIDE ";
+
+        content += StringFormat("%llu", pShaderInputProviderDeclaration->m_RequiredSizeForProvider);
+        content += "\n";
+
+        content += "#define SHADER_INPUT_PROVIDER_OFFSET_IN_GLOBAL_BUFFER ";
+        content += StringFormat("%llu", numBytesBeforeThisProviderInUnifiedBuffer);
+        content += "\n\n";
+
+        // content += "struct ";
     }
-
-    content += pShaderInputProviderDeclaration->m_ShaderInputProviderName;
-
-    // Register is temporary, until ShaderCompiler deduces binding points by reflection
-    content += "Data : register(b0)\n{\n";
 
     for (uint32_t i = 0; i < pShaderInputProviderDeclaration->m_NumShaderInputDeclarations; i++)
     {
@@ -142,13 +195,54 @@ bool ShaderInputProviderManager::WriteSingleShaderInputProviderFile(ShaderInputP
 
         if (shaderInputDeclaration.Type == ShaderInputType::Scalar)
         {
-            WriteSingleShaderScalarInput(shaderInputDeclaration, content);
+            WriteSingleShaderScalarInput(shaderInputDeclaration, content, isUsingConstantBuffer);
         }
     }
 
-    content += "};\n";
+    if (isUsingConstantBuffer)
+    {
+        content += "};\n";
+    }
+    
+    content += "\n";
 
     WriteShaderInputsOutsideOfStruct(pShaderInputProviderDeclaration, content);
+
+    content += "\n";
+
+    if (pShaderInputProviderDeclaration->m_ShaderInputProviderUsage == ShaderInputProviderUsage::PerInstance)
+    {
+        WriteShaderInputProviderUnifiedBufferAccessMethod(pShaderInputProviderDeclaration, content);
+
+        content += "\n";
+        content += "#undef SHADER_INPUT_PROVIDER_STRIDE\n";
+        content += "#undef SHADER_INPUT_PROVIDER_OFFSET_IN_GLOBAL_BUFFER\n";
+    }
+
+    content += "\n#endif";
+
+    // We first decide if we want to overwrite. If it's the same content, do nothing. Otherwise, overwriting the file will
+    // cause a shader recompilation for every shader family including this provider, since the write timestamp would have changed.
+    shaderInputProviderFile.Open(shaderInputProviderFileName.GetBuffer(), FileHandlerOpenFlag::FileHandlerOpenFlag_Read);
+    if (shaderInputProviderFile.IsOpen())
+    {
+        StringA shaderInputProviderFileContent;
+        shaderInputProviderFile.ReadWholeFile(shaderInputProviderFileContent);
+
+        if (shaderInputProviderFileContent == content)
+        {
+            return true;
+        }
+
+        shaderInputProviderFile.Close();
+    }
+
+    shaderInputProviderFile.Open(shaderInputProviderFileName.GetBuffer(), FileHandlerOpenFlag(FileHandlerOpenFlag::FileHandlerOpenFlag_Write | FileHandlerOpenFlag::FileHandlerOpenFlag_Create));
+
+    if (!shaderInputProviderFile.IsOpen())
+    {
+        return false;
+    }
 
     shaderInputProviderFile.WriteChars(0, content.GetBuffer(), content.Size());
     shaderInputProviderFile.Close();
@@ -156,10 +250,15 @@ bool ShaderInputProviderManager::WriteSingleShaderInputProviderFile(ShaderInputP
     return true;
 }
 
-bool ShaderInputProviderManager::WriteSingleShaderScalarInput(const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration, StringA& content)
+bool ShaderInputProviderManager::WriteSingleShaderScalarInput(const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration, StringA& content, bool isUsingConstantBuffer)
 {
     // Indented with respect to struct root, for easier readability.
     content += "    ";
+
+    if (!isUsingConstantBuffer)
+    {
+        content += "static ";
+    }
 
     SHIP_STATIC_ASSERT_MSG(uint32_t(ShaderInputScalarType::Count) == 33, "ShaderInputScalarType size changed, need to update this switch case!");
 
@@ -352,7 +451,392 @@ bool ShaderInputProviderManager::WriteSingleShaderInputOutsideOfStruct(const Sha
     content += shaderInputDeclaration.Name;
 
     // Register is temporary, until ShaderCompiler deduces binding points by reflection
-    content += " : register(t0);\n";
+    content += " : register(t1);\n";
+
+    return true;
+}
+
+bool ShaderInputProviderManager::WriteShaderInputProviderUnifiedBufferAccessMethod(ShaderInputProviderDeclaration* pShaderInputProviderDeclaration, StringA& content)
+{
+    content += "void Load";
+    content += pShaderInputProviderDeclaration->m_ShaderInputProviderName;
+    content += "ConstantsForInstance(uint instanceIndex)\n{\n";
+
+    content += "    uint offsetInUnifiedBuffer = instanceIndex * SHADER_INPUT_PROVIDER_STRIDE + SHADER_INPUT_PROVIDER_OFFSET_IN_GLOBAL_BUFFER;\n";
+
+    for (uint32_t i = 0; i < pShaderInputProviderDeclaration->m_NumShaderInputDeclarations; i++)
+    {
+        ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration = pShaderInputProviderDeclaration->m_ShaderInputDeclarations[i];
+
+        if (shaderInputDeclaration.Type == ShaderInputType::Scalar)
+        {
+            WriteShaderInputScalarLoadFromBuffer(shaderInputDeclaration, content);
+        }
+    }
+
+    content += "}\n";
+
+
+    return true;
+}
+
+namespace ShaderInputProviderUtils
+{
+    enum class ScalarHighLevelType
+    {
+        Float,
+        Double,
+        Half,
+        Int,
+        Uint,
+        Bool
+    };
+
+    void GetBaseHighLevelScalarType(ScalarHighLevelType scalarHighLevelType, uint32_t numComponentsX, StringA& castType)
+    {
+        switch (scalarHighLevelType)
+        {
+        case ScalarHighLevelType::Float:    castType += "float"; break;
+        case ScalarHighLevelType::Double:   castType += "double"; break;
+        case ScalarHighLevelType::Half:     castType += "half"; break;
+        case ScalarHighLevelType::Int:      castType += "int"; break;
+        case ScalarHighLevelType::Uint:     castType += "uint"; break;
+        case ScalarHighLevelType::Bool:     castType += "bool"; break;
+
+        default:
+            SHIP_ASSERT(!"Unimplemted");
+            break;
+        }
+
+        switch (numComponentsX)
+        {
+        case 2: castType += "2"; break;
+        case 3: castType += "3"; break;
+        case 4: castType += "4"; break;
+        default: break;
+        }
+    }
+
+    void AddLoadingCodeFromUnifiedBufferForShaderInput(ScalarHighLevelType scalarHighLevelType, uint32_t numComponentsX, uint32_t numComponentsY, uint32_t offsetInBuffer, StringA& content)
+    {
+        SHIP_ASSERT(numComponentsX > 0);
+        SHIP_ASSERT(numComponentsY > 0);
+
+        InplaceStringA<8> highLevelScalarType;
+        GetBaseHighLevelScalarType(scalarHighLevelType, numComponentsX, highLevelScalarType);
+
+        InplaceStringA<10> castType = highLevelScalarType;
+
+        switch (numComponentsY)
+        {
+        case 2: castType += "x2"; break;
+        case 3: castType += "x3"; break;
+        case 4: castType += "x4"; break;
+        default: break;
+        }
+
+        if (numComponentsY > 1)
+        {
+            content += "transpose(";
+        }
+
+        content += castType;
+        content += "(";
+
+        if (numComponentsY > 1)
+        {
+            content += "\n";
+        }
+
+        for (uint32_t y = 0; y < numComponentsY; y++)
+        {
+            if (numComponentsY > 1)
+            {
+                content += "        ";
+                content += highLevelScalarType;
+                content += "(";
+            }
+
+            switch (scalarHighLevelType)
+            {
+            case ScalarHighLevelType::Double:
+                content += "asdouble(";
+                break;
+
+            case ScalarHighLevelType::Float:
+            case ScalarHighLevelType::Half:
+                content += "asfloat(";
+                break;
+
+            case ScalarHighLevelType::Int:
+                content += "asint(";
+                break;
+
+            default:
+                break;
+            }
+
+            switch (numComponentsX)
+            {
+            case 1:
+                content += StringFormat("g_UnifiedConstantBuffer.Load(offsetInUnifiedBuffer + 0x%x)", offsetInBuffer);
+                break;
+
+            case 2:
+                content += StringFormat("g_UnifiedConstantBuffer.Load2(offsetInUnifiedBuffer + 0x%x)", offsetInBuffer);
+                break;
+
+            case 3:
+                content += StringFormat("g_UnifiedConstantBuffer.Load3(offsetInUnifiedBuffer + 0x%x)", offsetInBuffer);
+                break;
+
+            case 4:
+                content += StringFormat("g_UnifiedConstantBuffer.Load4(offsetInUnifiedBuffer + 0x%x)", offsetInBuffer);
+                break;
+            }
+
+            switch (scalarHighLevelType)
+            {
+            case ScalarHighLevelType::Bool:
+                offsetInBuffer += numComponentsX;
+                break;
+
+            case ScalarHighLevelType::Half:
+                offsetInBuffer += numComponentsX * 2;
+                break;
+
+            case ScalarHighLevelType::Float:
+            case ScalarHighLevelType::Int:
+            case ScalarHighLevelType::Uint:
+                offsetInBuffer += numComponentsX * 4;
+                break;
+
+            case ScalarHighLevelType::Double:
+                offsetInBuffer += numComponentsX * 8;
+                break;
+
+            default:
+                SHIP_ASSERT(!"Unsupported scalar type");
+                break;
+            }
+            
+            if (numComponentsY > 1)
+            {
+                content += ")";
+            }
+
+            switch (scalarHighLevelType)
+            {
+            case ScalarHighLevelType::Double:
+            case ScalarHighLevelType::Float:
+            case ScalarHighLevelType::Half:
+            case ScalarHighLevelType::Int:
+                content += ")";
+                break;
+
+            default:
+                break;
+            }
+
+            bool isNotLastYComponent = (y < numComponentsY - 1);
+            if (isNotLastYComponent)
+            {
+                content += ",\n";
+            }
+        }
+
+        if (numComponentsY > 1)
+        {
+            content += ")";
+        }
+
+        content += ");\n";
+    }
+}
+
+bool ShaderInputProviderManager::WriteShaderInputScalarLoadFromBuffer(const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration, StringA& content)
+{
+    // Indented with respect to method root, for easier readability.
+    content += "    ";
+    content += shaderInputDeclaration.Name;
+    content += " = ";
+
+    SHIP_STATIC_ASSERT_MSG(uint32_t(ShaderInputScalarType::Count) == 33, "ShaderInputScalarType size changed, need to update this switch case!");
+
+    ShaderInputProviderUtils::ScalarHighLevelType scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Float;
+    uint32_t numComponentsX = 0;
+    uint32_t numComponentsY = 0;
+
+    switch (shaderInputDeclaration.ScalarType)
+    {
+    case ShaderInputScalarType::Float:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Float;
+        numComponentsX = 1;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Float2:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Float;
+        numComponentsX = 2;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Float3:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Float;
+        numComponentsX = 3;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Float4:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Float;
+        numComponentsX = 4;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Half:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Half;
+        numComponentsX = 1;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Half2:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Half;
+        numComponentsX = 2;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Half3:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Half;
+        numComponentsX = 3;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Half4:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Half;
+        numComponentsX = 4;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Double:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Double;
+        numComponentsX = 1;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Double2:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Double;
+        numComponentsX = 2;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Double3:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Double;
+        numComponentsX = 3;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Double4:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Double;
+        numComponentsX = 4;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Int:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Int;
+        numComponentsX = 1;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Int2:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Int;
+        numComponentsX = 2;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Int3:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Int;
+        numComponentsX = 3;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Int4:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Int;
+        numComponentsX = 4;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Uint:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Uint;
+        numComponentsX = 1;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Uint2:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Uint;
+        numComponentsX = 2;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Uint3:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Uint;
+        numComponentsX = 3;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Uint4:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Uint;
+        numComponentsX = 4;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Bool:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Bool;
+        numComponentsX = 1;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Bool2:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Bool;
+        numComponentsX = 2;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Bool3:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Bool;
+        numComponentsX = 3;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Bool4:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Bool;
+        numComponentsX = 4;
+        numComponentsY = 1;
+        break;
+    case ShaderInputScalarType::Float2x2:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Float;
+        numComponentsX = 2;
+        numComponentsY = 2;
+        break;
+    case ShaderInputScalarType::Float3x3:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Float;
+        numComponentsX = 3;
+        numComponentsY = 3;
+        break;
+    case ShaderInputScalarType::Float4x4:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Float;
+        numComponentsX = 4;
+        numComponentsY = 4;
+        break;
+    case ShaderInputScalarType::Half2x2:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Half;
+        numComponentsX = 2;
+        numComponentsY = 2;
+        break;
+    case ShaderInputScalarType::Half3x3:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Half;
+        numComponentsX = 3;
+        numComponentsY = 3;
+        break;
+    case ShaderInputScalarType::Half4x4:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Half;
+        numComponentsX = 4;
+        numComponentsY = 4;
+        break;
+    case ShaderInputScalarType::Double2x2:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Double;
+        numComponentsX = 2;
+        numComponentsY = 2;
+        break;
+    case ShaderInputScalarType::Double3x3:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Double;
+        numComponentsX = 3;
+        numComponentsY = 3;
+        break;
+    case ShaderInputScalarType::Double4x4:
+        scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Double;
+        numComponentsX = 4;
+        numComponentsY = 4;
+        break;
+    }
+
+    ShaderInputProviderUtils::AddLoadingCodeFromUnifiedBufferForShaderInput(scalarHighLevelType, numComponentsX, numComponentsY, shaderInputDeclaration.DataOffsetInBuffer, content);
 
     return true;
 }

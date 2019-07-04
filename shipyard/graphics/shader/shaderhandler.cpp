@@ -58,7 +58,7 @@ void ShaderHandler::ApplyShaderInputProviders(
         }
     }
 
-    shaderResourceBinder.BindShaderInputProvders(gfxRenderDevice, shaderInputProviders);
+    shaderResourceBinder.BindShaderInputProvders(gfxRenderDevice, gfxDirectRenderCommandList, shaderInputProviders);
 }
 
 }

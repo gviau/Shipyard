@@ -27,8 +27,10 @@ struct ps_output
 	float4 color : SV_TARGET;
 };
 
-vs_output VS_Main(vs_input input)
+vs_output VS_Main(vs_input input, uint instanceId : SV_InstanceID)
 {
+	LoadSimpleConstantBufferProviderConstantsForInstance(instanceId);
+
 	vs_output output;
 	output.pos = mul(Test, float4(input.pos.xyz, 1.0));
 	output.uv = input.uv;

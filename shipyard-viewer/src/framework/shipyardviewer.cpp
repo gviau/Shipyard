@@ -33,7 +33,7 @@ struct SimpleConstantBufferProvider : public BaseShaderInputProvider<SimpleConst
     GFXTexture2DHandle TestTexture;
 };
 
-SHIP_DECLARE_SHADER_INPUT_PROVIDER_BEGIN(SimpleConstantBufferProvider, Default)
+SHIP_DECLARE_SHADER_INPUT_PROVIDER_BEGIN(SimpleConstantBufferProvider, PerInstance)
 {
     SHIP_SCALAR_SHADER_INPUT(ShaderInputScalarType::Float4x4, "Test", Matrix);
     SHIP_TEXTURE2D_SHADER_INPUT(ShaderInputScalarType::Float4, "TestTexture", TestTexture);
@@ -151,19 +151,24 @@ bool ShipyardViewer::CreateApp(HWND windowHandle, uint32_t windowWidth, uint32_t
     m_GfxDepthStencilRenderTargetHandle = m_pGfxRenderDevice->CreateDepthStencilRenderTarget(m_GfxDepthTextureHandle);
 
     Array<RootSignatureParameterEntry> rootSignatureParameters;
-    rootSignatureParameters.Resize(2);
+    rootSignatureParameters.Resize(1);
 
-    rootSignatureParameters[0].parameterType = RootSignatureParameterType::ConstantBufferView;
-    rootSignatureParameters[0].shaderVisibility = ShaderVisibility_Vertex;
-    rootSignatureParameters[0].descriptor.shaderBindingSlot = 0;
+    // rootSignatureParameters[0].parameterType = RootSignatureParameterType::ShaderResourceView;
+    // rootSignatureParameters[0].shaderVisibility = ShaderVisibility_Vertex;
+    // rootSignatureParameters[0].descriptor.shaderBindingSlot = 0;
 
-    rootSignatureParameters[1].parameterType = RootSignatureParameterType::DescriptorTable;
-    rootSignatureParameters[1].shaderVisibility = ShaderVisibility_Pixel;
+    rootSignatureParameters[0].parameterType = RootSignatureParameterType::DescriptorTable;
+    rootSignatureParameters[0].shaderVisibility = ShaderVisibility(ShaderVisibility_Vertex | ShaderVisibility_Pixel);
 
-    DescriptorRange& descriptorRange = rootSignatureParameters[1].descriptorTable.descriptorRanges.Grow();
-    descriptorRange.descriptorRangeType = DescriptorRangeType::ShaderResourceView;
-    descriptorRange.baseShaderRegister = 0;
-    descriptorRange.numDescriptors = 1;
+    DescriptorRange& unifiedBufferDescriptorRange = rootSignatureParameters[0].descriptorTable.descriptorRanges.Grow();
+    unifiedBufferDescriptorRange.descriptorRangeType = DescriptorRangeType::ShaderResourceView;
+    unifiedBufferDescriptorRange.baseShaderRegister = 0;
+    unifiedBufferDescriptorRange.numDescriptors = 1;
+
+    DescriptorRange& textureDescriptorRange = rootSignatureParameters[0].descriptorTable.descriptorRanges.Grow();
+    textureDescriptorRange.descriptorRangeType = DescriptorRangeType::ShaderResourceView;
+    textureDescriptorRange.baseShaderRegister = 1;
+    textureDescriptorRange.numDescriptors = 1;
 
     m_GfxRootSignatureHandle = m_pGfxRenderDevice->CreateRootSignature(rootSignatureParameters);
 
@@ -212,13 +217,15 @@ bool ShipyardViewer::CreateApp(HWND windowHandle, uint32_t windowWidth, uint32_t
     m_TextureHandle = m_pGfxRenderDevice->CreateTexture2D(2, 2, GfxFormat::R8G8B8A8_UNORM, false, textureData, false);
 
     InplaceArray<DescriptorSetEntryDeclaration, 2> descriptorSetEntryDeclarations;
-    DescriptorSetEntryDeclaration& constantBufferEntry = descriptorSetEntryDeclarations.Grow();
-    constantBufferEntry.rootIndex = 0;
-    constantBufferEntry.numResources = 1;
+    DescriptorSetEntryDeclaration& unifiedBufferEntry = descriptorSetEntryDeclarations.Grow();
+    unifiedBufferEntry.rootIndex = 0;
+    unifiedBufferEntry.numResources = 1;
+    unifiedBufferEntry.descriptorRangeIndex = 0;
 
     DescriptorSetEntryDeclaration& textureEntry = descriptorSetEntryDeclarations.Grow();
-    textureEntry.rootIndex = 1;
+    textureEntry.rootIndex = 0;
     textureEntry.numResources = 1;
+    textureEntry.descriptorRangeIndex = 1;
 
     m_GfxDescriptorSetHandle =
         m_pGfxRenderDevice->CreateDescriptorSet(DescriptorSetType::ConstantBuffer_ShaderResource_UnorderedAccess_Views, m_GfxRootSignatureHandle, descriptorSetEntryDeclarations);
@@ -274,8 +281,8 @@ void ShipyardViewer::ComputeOneFrame()
     shaderInputProviders.Add(m_pDataProvider);
 
     // Memory stomp in allocator.
-    ShaderResourceBinder shaderResourceBinder;
-    shaderResourceBinder.AddShaderResourceBinderEntry<SimpleConstantBufferProvider>(&m_GfxDescriptorSetHandle, 0);
+    ShaderResourceBinder shaderResourceBinder(&m_GfxDescriptorSetHandle);
+    shaderResourceBinder.AddShaderResourceBinderEntry<SimpleConstantBufferProvider>(0);
 
     theta += 0.001f;
 

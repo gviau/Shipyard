@@ -1,5 +1,7 @@
 #include <graphics/shader/shaderresourcebinder.h>
 
+#include <graphics/material/materialunifiedconstantbuffer.h>
+
 #include <graphics/shader/shaderinputprovider.h>
 
 #include <system/systemdebug.h>
@@ -7,9 +9,22 @@
 namespace Shipyard
 {;
 
-void ShaderResourceBinder::BindShaderInputProvders(GFXRenderDevice& gfxRenderDevice, const Array<ShaderInputProvider*>& shaderInputProviders) const
+ShaderResourceBinder::ShaderResourceBinder(GFXDescriptorSetHandle* pGfxDescriptorSetHandle)
+    : m_pGfxDescriptorSetHandle(pGfxDescriptorSetHandle)
+{
+    SHIP_ASSERT(m_pGfxDescriptorSetHandle != nullptr);
+}
+
+void ShaderResourceBinder::BindShaderInputProvders(
+        GFXRenderDevice& gfxRenderDevice,
+        GFXDirectRenderCommandList& gfxDirectRenderCommandList,
+        const Array<ShaderInputProvider*>& shaderInputProviders) const
 {
     ShaderInputProviderManager& shaderInputProviderManager = GetShaderInputProviderManager();
+
+    GFXDescriptorSet& gfxDescriptorSet = gfxRenderDevice.GetDescriptorSet(*m_pGfxDescriptorSetHandle);
+
+    InplaceArray<GFXTexture2D*, GfxConstants::GfxConstants_MaxShaderResourceViewsBoundPerShaderStage> texture2Ds;
 
     for (ShaderInputProvider* shaderInputProvider : shaderInputProviders)
     {
@@ -17,8 +32,6 @@ void ShaderResourceBinder::BindShaderInputProvders(GFXRenderDevice& gfxRenderDev
         {
             if (shaderInputProvider->GetShaderInputProviderDeclaration() == shaderResourceBinderEntry.Declaration)
             {
-                GFXDescriptorSet& gfxDescriptorSet = gfxRenderDevice.GetDescriptorSet(*shaderResourceBinderEntry.GfxDescriptorSetHandleToBindTo);
-
                 if (ShaderInputProviderUtils::IsUsingConstantBuffer(shaderResourceBinderEntry.Declaration->GetShaderInputProviderUsage()))
                 {
                     if (shaderInputProvider->m_GfxConstantBufferHandle.handle != InvalidGfxHandle)
@@ -33,7 +46,6 @@ void ShaderResourceBinder::BindShaderInputProvders(GFXRenderDevice& gfxRenderDev
                 
                 if (numTexture2DHandles > 0)
                 {
-                    InplaceArray<GFXTexture2D*, GfxConstants::GfxConstants_MaxShaderResourceViewsBoundPerShaderStage> texture2Ds;
                     for (uint32_t i = 0; i < numTexture2DHandles; i++)
                     {
 
@@ -46,15 +58,23 @@ void ShaderResourceBinder::BindShaderInputProvders(GFXRenderDevice& gfxRenderDev
                         GFXTexture2D* gfxTexture2D = gfxRenderDevice.GetTexture2DPtr(gfxTexture2DHandle);
                         texture2Ds.Add(gfxTexture2D);
                     }
-
-                    // Temporary assignation to root index + 1
-                    gfxDescriptorSet.SetDescriptorTableForRootIndex(shaderResourceBinderEntry.RootIndexToBindTo + 1, texture2Ds);
                 }
 
                 break;
             }
         }
     }
+
+    GFXMaterialUnifiedConstantBuffer& gfxMaterialUnifiedConstantBuffer = GetGFXMaterialUnifiedConstantBuffer();
+    GFXByteBufferHandle gfxByteBufferHandle = gfxMaterialUnifiedConstantBuffer.BindMaterialUnfiedConstantBuffer(gfxDirectRenderCommandList);
+    
+    GFXByteBuffer* pGfxByteBuffer = gfxRenderDevice.GetByteBufferPtr(gfxByteBufferHandle);
+
+    InplaceArray<GFXByteBuffer*, 1> gfxByteBuffers;
+    gfxByteBuffers.Add(pGfxByteBuffer);
+
+    gfxDescriptorSet.SetDescriptorTableForRootIndex(0, 0, gfxByteBuffers);
+    gfxDescriptorSet.SetDescriptorTableForRootIndex(0, 1, texture2Ds);
 }
 
 }

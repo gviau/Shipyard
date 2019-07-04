@@ -16,26 +16,30 @@ namespace Shipyard
     class SHIPYARD_API ShaderResourceBinder
     {
     public:
+        ShaderResourceBinder(GFXDescriptorSetHandle* pGfxDescriptorSetHandle);
+
         template <typename ShaderInputProviderType>
-        void AddShaderResourceBinderEntry(GFXDescriptorSetHandle* gfxDescriptorSetHandleToBindTo, uint16_t rootIndexToBindTo)
+        void AddShaderResourceBinderEntry(uint16_t rootIndexToBindTo)
         {
             ShaderResourceBinderEntry& shaderResourceBinderEntry = m_ShaderResourceBinderEntries.Grow();
             shaderResourceBinderEntry.Declaration = ShaderInputProviderType::ms_ShaderInputProviderDeclaration;
-            shaderResourceBinderEntry.GfxDescriptorSetHandleToBindTo = gfxDescriptorSetHandleToBindTo;
             shaderResourceBinderEntry.RootIndexToBindTo = rootIndexToBindTo;
         }
 
-        void BindShaderInputProvders(GFXRenderDevice& gfxRenderDevice, const Array<ShaderInputProvider*>& shaderInputProviders) const;
+        void BindShaderInputProvders(
+                GFXRenderDevice& gfxRenderDevice,
+                GFXDirectRenderCommandList& gfxDirectRenderCommandList,
+                const Array<ShaderInputProvider*>& shaderInputProviders) const;
 
     private:
         struct ShaderResourceBinderEntry
         {
             ShaderInputProviderDeclaration* Declaration;
-            GFXDescriptorSetHandle* GfxDescriptorSetHandleToBindTo;
             uint16_t RootIndexToBindTo;
         };
 
     private:
+        GFXDescriptorSetHandle* m_pGfxDescriptorSetHandle;
         Array<ShaderResourceBinderEntry> m_ShaderResourceBinderEntries;
     };
 }

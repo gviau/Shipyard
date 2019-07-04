@@ -39,7 +39,7 @@ DX11RenderDevice::~DX11RenderDevice()
 
 bool DX11RenderDevice::Create()
 {
-    UINT flags = D3D11_CREATE_DEVICE_DEBUG;
+    UINT flags = 0; // D3D11_CREATE_DEVICE_DEBUG;
     HRESULT hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, NULL, flags, nullptr, 0, D3D11_SDK_VERSION, &m_Device, nullptr, &m_ImmediateDeviceContext);
     if (FAILED(hr))
     {
@@ -383,6 +383,16 @@ GFXByteBuffer& DX11RenderDevice::GetByteBuffer(GFXByteBufferHandle gfxByteBuffer
 const GFXByteBuffer& DX11RenderDevice::GetByteBuffer(GFXByteBufferHandle gfxByteBufferHandle) const
 {
     return m_ByteBufferPool.GetItem(gfxByteBufferHandle.handle);
+}
+
+GFXByteBuffer* DX11RenderDevice::GetByteBufferPtr(GFXByteBufferHandle gfxByteBufferHandle)
+{
+    return m_ByteBufferPool.GetItemPtr(gfxByteBufferHandle.handle);
+}
+
+const GFXByteBuffer* DX11RenderDevice::GetByteBufferPtr(GFXByteBufferHandle gfxByteBufferHandle) const
+{
+    return m_ByteBufferPool.GetItemPtr(gfxByteBufferHandle.handle);
 }
 
 GFXTexture2DHandle DX11RenderDevice::CreateTexture2D(uint32_t width, uint32_t height, GfxFormat pixelFormat, bool dynamic, void* initialData, bool generateMips, TextureUsage textureUsage)

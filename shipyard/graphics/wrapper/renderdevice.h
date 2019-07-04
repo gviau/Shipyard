@@ -37,6 +37,8 @@ namespace Shipyard
         virtual void DestroyByteBuffer(GFXByteBufferHandle gfxByteBufferHandle) = 0;
         virtual GFXByteBuffer& GetByteBuffer(GFXByteBufferHandle gfxByteBufferHandle) = 0;
         virtual const GFXByteBuffer& GetByteBuffer(GFXByteBufferHandle gfxByteBufferHandle) const = 0;
+        virtual GFXByteBuffer* GetByteBufferPtr(GFXByteBufferHandle gfxByteBufferHandle) = 0;
+        virtual const GFXByteBuffer* GetByteBufferPtr(GFXByteBufferHandle gfxByteBufferHandle) const = 0;
 
         virtual GFXTexture2DHandle CreateTexture2D(
                 uint32_t width,

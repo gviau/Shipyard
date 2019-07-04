@@ -50,6 +50,8 @@ namespace Shipyard
         void DestroyByteBuffer(GFXByteBufferHandle gfxByteBufferHandle);
         GFXByteBuffer& GetByteBuffer(GFXByteBufferHandle gfxByteBufferHandle);
         const GFXByteBuffer& GetByteBuffer(GFXByteBufferHandle gfxByteBufferHandle) const;
+        GFXByteBuffer* GetByteBufferPtr(GFXByteBufferHandle gfxByteBufferHandle);
+        const GFXByteBuffer* GetByteBufferPtr(GFXByteBufferHandle gfxByteBufferHandle) const;
 
         GFXTexture2DHandle CreateTexture2D(
                 uint32_t width,

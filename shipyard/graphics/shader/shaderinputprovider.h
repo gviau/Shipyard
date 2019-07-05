@@ -148,6 +148,13 @@ namespace Shipyard
             size_t DataSize = 0;
         };
 
+        struct ShaderInputCopyRange
+        {
+            shipInt32 DataOffsetInProvider = 0;
+            shipInt32 DataOffsetInBuffer = 0;
+            size_t DataSizeToCopy = 0;
+        };
+
         enum
         {
             MaxShaderInputsPerProvider = 1024,
@@ -165,8 +172,10 @@ namespace Shipyard
     protected:
         const shipChar* m_ShaderInputProviderName;
         ShaderInputDeclaration m_ShaderInputDeclarations[MaxShaderInputsPerProvider];
+        ShaderInputCopyRange m_ShaderInputCopyRanges[MaxShaderInputsPerProvider];
         ShaderInputProviderUsage m_ShaderInputProviderUsage;
         shipUint32 m_NumShaderInputDeclarations;
+        shipUint32 m_NumShaderInputCopyRanges;
         shipUint32 m_RequiredSizeForProvider;
         shipUint32 m_ShaderInputProviderDeclarationIndex;
 
@@ -209,6 +218,8 @@ namespace Shipyard
         ShaderInputProviderManager(const ShaderInputProviderManager& src) = delete;
         ShaderInputProviderManager(const ShaderInputProviderManager&& src) = delete;
         ShaderInputProviderManager& operator= (const ShaderInputProviderManager& rhs) = delete;
+
+        void InitializeShaderInputProviderDeclarationCopyRanges(ShaderInputProviderDeclaration* pShaderInputProviderDeclaration) const;
 
         shipBool WriteEveryShaderInputProviderFile();
 
@@ -352,7 +363,7 @@ namespace Shipyard
         m_ShaderInputDeclarations[m_NumShaderInputDeclarations].DataOffsetInProvider = static_cast<shipInt32>(size_t(pDataPtr)) - static_cast<shipInt32>(size_t(pBasePtr)); \
         m_ShaderInputDeclarations[m_NumShaderInputDeclarations].DataOffsetInBuffer = offsetInBuffer; \
         m_ShaderInputDeclarations[m_NumShaderInputDeclarations].DataSize = sizeof(pBasePtr->shaderInputData); \
-        offsetInBuffer += sizeof(pBasePtr->shaderInputData); \
+        offsetInBuffer += ((shaderInputType == ShaderInputType::Scalar) ? sizeof(pBasePtr->shaderInputData) : 0); \
         m_NumShaderInputDeclarations += 1; \
         m_RequiredSizeForProvider += ((shaderInputType == ShaderInputType::Scalar) ? sizeof(pBasePtr->shaderInputData) : 0);
 

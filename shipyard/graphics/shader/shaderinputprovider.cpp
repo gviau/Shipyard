@@ -67,6 +67,8 @@ shipBool ShaderInputProviderManager::Initialize(BaseRenderDevice& gfxRenderDevic
     {
         pCurrent->m_ShaderInputProviderDeclarationIndex = shaderInputProviderIdx;
 
+        InitializeShaderInputProviderDeclarationCopyRanges(pCurrent);
+
         pCurrent = pCurrent->m_pNextRegisteredShaderInputProviderDeclaration;
 
         shaderInputProviderIdx += 1;
@@ -88,6 +90,103 @@ shipUint32 ShaderInputProviderManager::GetRequiredSizeForProvider(const ShaderIn
 shipUint32 ShaderInputProviderManager::GetShaderInputProviderDeclarationIndex(const ShaderInputProvider& shaderInputProvider) const
 {
     return shaderInputProvider.GetShaderInputProviderDeclarationIndex();
+}
+
+void ShaderInputProviderManager::InitializeShaderInputProviderDeclarationCopyRanges(ShaderInputProviderDeclaration* pShaderInputProviderDeclaration) const
+{
+    shipUint32 numShaderInputDeclarations = pShaderInputProviderDeclaration->m_NumShaderInputDeclarations;
+
+    InplaceArray<ShaderInputProviderDeclaration::ShaderInputDeclaration, ShaderInputProviderDeclaration::MaxShaderInputsPerProvider> sortedShaderInputDeclarations;
+
+    for (shipUint32 i = 0; i < numShaderInputDeclarations; i++)
+    {
+        const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration = pShaderInputProviderDeclaration->m_ShaderInputDeclarations[i];
+        if (shaderInputDeclaration.Type != ShaderInputType::Scalar)
+        {
+            continue;
+        }
+
+        shipInt32 dataOffsetInProvider = shaderInputDeclaration.DataOffsetInProvider;
+
+        shipUint32 insertIdx = 0;
+        for (; insertIdx < sortedShaderInputDeclarations.Size(); insertIdx++)
+        {
+            if (sortedShaderInputDeclarations[insertIdx].DataOffsetInProvider > dataOffsetInProvider)
+            {
+                break;
+            }
+        }
+
+        sortedShaderInputDeclarations.InsertAt(insertIdx, shaderInputDeclaration);
+    }
+
+    if (sortedShaderInputDeclarations.Empty())
+    {
+        return;
+    }
+
+    // Group shader inputs that are continuous both in the provider and in the buffer. Worst-case scenario, we get the same
+    // number of memcopies when uploading the provider, best case, we get a single memcopy for the whole provider.
+    shipInt32 startOffsetInBuffer = 0x7fffffff;
+    shipInt32 endOffsetInBuffer = 0x7fffffff;
+    shipInt32 startOffsetInProvider = 0xffffffff;
+    shipInt32 endOffsetInProvider = 0xffffffff;
+    shipBool firstEntry = true;
+
+    for (const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration : sortedShaderInputDeclarations)
+    {
+        if (shaderInputDeclaration.DataOffsetInProvider == endOffsetInProvider && shaderInputDeclaration.DataOffsetInBuffer == endOffsetInBuffer)
+        {
+            endOffsetInBuffer += shipInt32(shaderInputDeclaration.DataSize);
+            endOffsetInProvider += shipInt32(shaderInputDeclaration.DataSize);
+        }
+        else
+        {
+            if (!firstEntry)
+            {
+                shipInt32 dataSizeToCopy = (endOffsetInProvider - startOffsetInProvider);
+                SHIP_ASSERT(dataSizeToCopy > 0);
+                SHIP_ASSERT(dataSizeToCopy == (endOffsetInBuffer - startOffsetInBuffer));
+
+                ShaderInputProviderDeclaration::ShaderInputCopyRange& newEntry = pShaderInputProviderDeclaration->m_ShaderInputCopyRanges[pShaderInputProviderDeclaration->m_NumShaderInputCopyRanges];
+                newEntry.DataOffsetInBuffer = startOffsetInBuffer;
+                newEntry.DataOffsetInProvider = startOffsetInProvider;
+                newEntry.DataSizeToCopy = dataSizeToCopy;
+
+                pShaderInputProviderDeclaration->m_NumShaderInputCopyRanges += 1;
+            }
+
+            startOffsetInBuffer = shaderInputDeclaration.DataOffsetInBuffer;
+            startOffsetInProvider = shaderInputDeclaration.DataOffsetInProvider;
+            endOffsetInBuffer = startOffsetInBuffer + shipInt32(shaderInputDeclaration.DataSize);
+            endOffsetInProvider = startOffsetInProvider + shipInt32(shaderInputDeclaration.DataSize);
+
+            firstEntry = false;
+        }
+    }
+
+    // Write left-over
+    shipBool leftOver = (pShaderInputProviderDeclaration->m_NumShaderInputCopyRanges == 0);
+
+    if (!leftOver)
+    {
+        shipInt32 lastDataOffsetInBufferAdded = pShaderInputProviderDeclaration->m_ShaderInputCopyRanges[pShaderInputProviderDeclaration->m_NumShaderInputCopyRanges - 1].DataOffsetInBuffer;
+        leftOver = (lastDataOffsetInBufferAdded != startOffsetInBuffer);
+    }
+
+    if (leftOver)
+    {
+        shipInt32 dataSizeToCopy = (endOffsetInProvider - startOffsetInProvider);
+        SHIP_ASSERT(dataSizeToCopy > 0);
+        SHIP_ASSERT(dataSizeToCopy == (endOffsetInBuffer - startOffsetInBuffer));
+
+        ShaderInputProviderDeclaration::ShaderInputCopyRange& newEntry = pShaderInputProviderDeclaration->m_ShaderInputCopyRanges[pShaderInputProviderDeclaration->m_NumShaderInputCopyRanges];
+        newEntry.DataOffsetInBuffer = startOffsetInBuffer;
+        newEntry.DataOffsetInProvider = startOffsetInProvider;
+        newEntry.DataSizeToCopy = dataSizeToCopy;
+
+        pShaderInputProviderDeclaration->m_NumShaderInputCopyRanges += 1;
+    }
 }
 
 shipBool ShaderInputProviderManager::WriteEveryShaderInputProviderFile()
@@ -865,19 +964,15 @@ void ShaderInputProviderManager::CopyShaderInputsToBuffer(const ShaderInputProvi
 
     ShaderInputProviderDeclaration* shaderInputProviderDeclaration = shaderInputProvider.GetShaderInputProviderDeclaration();
 
-    for (shipUint32 shaderInputIdx = 0; shaderInputIdx < shaderInputProviderDeclaration->m_NumShaderInputDeclarations; shaderInputIdx++)
+    for (shipUint32 i = 0; i < shaderInputProviderDeclaration->m_NumShaderInputCopyRanges; i++)
     {
-        const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration = shaderInputProviderDeclaration->m_ShaderInputDeclarations[shaderInputIdx];
-        if (shaderInputDeclaration.Type != ShaderInputType::Scalar)
-        {
-            continue;
-        }
+        const ShaderInputProviderDeclaration::ShaderInputCopyRange& shaderInputCopyRange = shaderInputProviderDeclaration->m_ShaderInputCopyRanges[i];
 
         // Might need to change this to not always use a memcpy, overhead might be too big for small data sizes?
-        void* pDest = reinterpret_cast<void*>(shipInt64(pBuffer) + shipInt64(shaderInputDeclaration.DataOffsetInBuffer));
-        void* pSrc = reinterpret_cast<void*>(shipInt64(pShaderInputProvider) + shipInt64(shaderInputDeclaration.DataOffsetInProvider));
+        void* pDest = reinterpret_cast<void*>(shipInt64(pBuffer) + shipInt64(shaderInputCopyRange.DataOffsetInBuffer));
+        void* pSrc = reinterpret_cast<void*>(shipInt64(pShaderInputProvider) + shipInt64(shaderInputCopyRange.DataOffsetInProvider));
 
-        memcpy(pDest, pSrc, shaderInputDeclaration.DataSize);
+        memcpy(pDest, pSrc, shaderInputCopyRange.DataSizeToCopy);
     }
 }
 
@@ -936,6 +1031,7 @@ ShaderInputProviderManager& GetShaderInputProviderManager()
 
 ShaderInputProviderDeclaration::ShaderInputProviderDeclaration()
     : m_NumShaderInputDeclarations(0)
+    , m_NumShaderInputCopyRanges(0)
     , m_RequiredSizeForProvider(0)
     , m_ShaderInputProviderDeclarationIndex(0)
     , m_pNextRegisteredShaderInputProviderDeclaration(nullptr)

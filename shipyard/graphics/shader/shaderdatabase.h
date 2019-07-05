@@ -14,7 +14,7 @@ namespace Shipyard
     class SHIPYARD_API ShaderDatabase
     {
     public:
-        enum : uint64_t
+        enum : shipUint64
         {
             // Increment version if changes were made to shaders or database that would render already existing databases
             // incompatible.
@@ -27,24 +27,24 @@ namespace Shipyard
         struct DatabaseHeader
         {
             // Used to identify a shader database, regardless of file extension.
-            uint64_t lowMagic;
-            uint64_t highMagic;
+            shipUint64 lowMagic;
+            shipUint64 highMagic;
 
-            uint32_t platform;
+            shipUint32 platform;
 
             // Used to determine if database's content is compatible.
-            uint32_t databaseVersionNumber;
+            shipUint32 databaseVersionNumber;
         };
 
         struct ShaderEntriesHeader
         {
-            uint32_t numShaderEntries = 0;
+            shipUint32 numShaderEntries = 0;
         };
 
         struct ShaderEntryHeader
         {
             ShaderKey shaderKey;
-            uint64_t lastModifiedTimestamp = 0;
+            shipUint64 lastModifiedTimestamp = 0;
 
             size_t rawVertexShaderSize = 0;
             size_t rawPixelShaderSize = 0;
@@ -57,7 +57,7 @@ namespace Shipyard
     public:
         struct ShaderEntrySet
         {
-            uint64_t lastModifiedTimestamp = 0;
+            shipUint64 lastModifiedTimestamp = 0;
 
             size_t rawVertexShaderSize = 0;
             size_t rawPixelShaderSize = 0;
@@ -66,12 +66,12 @@ namespace Shipyard
             size_t rawGeometryShaderSize = 0;
             size_t rawComputeShaderSize = 0;
 
-            uint8_t* rawVertexShader = nullptr;
-            uint8_t* rawPixelShader = nullptr;
-            uint8_t* rawHullShader = nullptr;
-            uint8_t* rawDomainShader = nullptr;
-            uint8_t* rawGeometryShader = nullptr;
-            uint8_t* rawComputeShader = nullptr;
+            shipUint8* rawVertexShader = nullptr;
+            shipUint8* rawPixelShader = nullptr;
+            shipUint8* rawHullShader = nullptr;
+            shipUint8* rawDomainShader = nullptr;
+            shipUint8* rawGeometryShader = nullptr;
+            shipUint8* rawComputeShader = nullptr;
 
             RenderStateBlock renderStateBlock;
         };
@@ -80,12 +80,12 @@ namespace Shipyard
         ShaderDatabase();
         ~ShaderDatabase();
 
-        bool Load(const StringT& filename);
+        shipBool Load(const StringT& filename);
         void Close();
 
-        bool Invalidate();
+        shipBool Invalidate();
 
-        bool RetrieveShadersForShaderKey(const ShaderKey& shaderKey, ShaderEntrySet& shaderEntrySet) const;
+        shipBool RetrieveShadersForShaderKey(const ShaderKey& shaderKey, ShaderEntrySet& shaderEntrySet) const;
 
         void RemoveShadersForShaderKey(const ShaderKey& shaderKey);
         void AppendShadersForShaderKey(const ShaderKey& shaderKey, ShaderEntrySet& shaderEntrySet);
@@ -97,7 +97,7 @@ namespace Shipyard
         };
 
     private:
-        void LoadNextShaderEntry(uint8_t*& databaseBuffer, BigArray<ShaderEntryKey>& shaderEntryKeys, BigArray<ShaderEntrySet>& shaderEntrySets) const;
+        void LoadNextShaderEntry(shipUint8*& databaseBuffer, BigArray<ShaderEntryKey>& shaderEntryKeys, BigArray<ShaderEntrySet>& shaderEntrySets) const;
 
         StringT m_Filename;
         FileHandler m_FileHandler;

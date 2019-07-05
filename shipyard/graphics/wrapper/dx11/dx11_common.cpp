@@ -106,9 +106,9 @@ D3D11_CULL_MODE ConvertShipyardCullModeToDX11(CullMode cullMode)
     return D3D11_CULL_NONE;
 }
 
-const char* ConvertShipyardSemanticNameToDX11(SemanticName semanticName)
+const shipChar* ConvertShipyardSemanticNameToDX11(SemanticName semanticName)
 {
-    const char* dx11SemanticName = "";
+    const shipChar* dx11SemanticName = "";
 
     switch (semanticName)
     {
@@ -202,9 +202,9 @@ D3D11_BLEND_OP ConvertShipyardBlendOperatorToDX11(BlendOperator blendOperator)
     return blendOp;
 }
 
-uint8_t ConvertShipyardRenderTargetWriteMaskToDX11(RenderTargetWriteMask renderTargetWriteMask)
+shipUint8 ConvertShipyardRenderTargetWriteMaskToDX11(RenderTargetWriteMask renderTargetWriteMask)
 {
-    uint8_t mask = 0;
+    shipUint8 mask = 0;
 
     if ((renderTargetWriteMask & RenderTargetWriteMask::RenderTargetWriteMask_R) > 0)
     {
@@ -247,7 +247,7 @@ D3D11_MAP ConvertShipyardMapFlagToDX11(MapFlag mapFlag)
     return D3D11_MAP_READ;
 }
 
-const char* GetD3DShaderVersion(D3D_FEATURE_LEVEL featureLevel)
+const shipChar* GetD3DShaderVersion(D3D_FEATURE_LEVEL featureLevel)
 {
     switch (featureLevel)
     {

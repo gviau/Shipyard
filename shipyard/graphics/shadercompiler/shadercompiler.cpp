@@ -15,18 +15,18 @@
 namespace Shipyard
 {;
 
-const char* ShaderCompiler::RenderStateBlockName = "RenderState";
+const shipChar* ShaderCompiler::RenderStateBlockName = "RenderState";
 
-volatile bool ShaderCompiler::m_RunShaderCompilerThread = true;
+volatile shipBool ShaderCompiler::m_RunShaderCompilerThread = true;
 
-extern const char* g_ShaderFamilyFilenames[uint8_t(ShaderFamily::Count)];
-extern uint8_t g_NumBitsForShaderOption[uint32_t(ShaderOption::Count)];
-extern const char* g_ShaderOptionString[uint32_t(ShaderOption::Count)];
+extern const shipChar* g_ShaderFamilyFilenames[shipUint8(ShaderFamily::Count)];
+extern shipUint8 g_NumBitsForShaderOption[shipUint32(ShaderOption::Count)];
+extern const shipChar* g_ShaderOptionString[shipUint32(ShaderOption::Count)];
 
 class ShaderCompilerIncludeHandler : public ID3DInclude
 {
 public:
-    STDMETHOD(Open)(D3D_INCLUDE_TYPE includeType, const char* includeFilename, const void* parentData, const void** outData, UINT* outByteLength)
+    STDMETHOD(Open)(D3D_INCLUDE_TYPE includeType, const shipChar* includeFilename, const void* parentData, const void** outData, UINT* outByteLength)
     {
         StringT filename = ((includeType == D3D_INCLUDE_LOCAL) ? (StringT(ShaderCompiler::GetInstance().GetShaderDirectoryName()) + includeFilename) : includeFilename);
 
@@ -97,14 +97,14 @@ void ShaderCompiler::AddCompilationRequestForShaderKey(ShaderKey shaderKey)
     m_ShaderCompilationRequestLock.unlock();
 }
 
-bool ShaderCompiler::GetRawShadersForShaderKey(ShaderKey shaderKey, ShaderDatabase::ShaderEntrySet& compiledShaderEntrySet, bool& gotRecompiledSinceLastAccess)
+shipBool ShaderCompiler::GetRawShadersForShaderKey(ShaderKey shaderKey, ShaderDatabase::ShaderEntrySet& compiledShaderEntrySet, shipBool& gotRecompiledSinceLastAccess)
 {
     ShaderKey errorShaderKey;
     errorShaderKey.SetShaderFamily(ShaderFamily::Error);
 
     gotRecompiledSinceLastAccess = false;
 
-    bool isShaderCompiled = true;
+    shipBool isShaderCompiled = true;
 
     m_ShaderCompilationRequestLock.lock();
 
@@ -125,19 +125,19 @@ bool ShaderCompiler::GetRawShadersForShaderKey(ShaderKey shaderKey, ShaderDataba
         {
             if (shaderKeyEntry.m_CompiledVertexShaderBlob != nullptr)
             {
-                compiledShaderEntrySet.rawVertexShader = (uint8_t*)shaderKeyEntry.m_CompiledVertexShaderBlob->GetBufferPointer();
+                compiledShaderEntrySet.rawVertexShader = (shipUint8*)shaderKeyEntry.m_CompiledVertexShaderBlob->GetBufferPointer();
                 compiledShaderEntrySet.rawVertexShaderSize = shaderKeyEntry.m_CompiledVertexShaderBlob->GetBufferSize();
             }
 
             if (shaderKeyEntry.m_CompiledPixelShaderBlob != nullptr)
             {
-                compiledShaderEntrySet.rawPixelShader = (uint8_t*)shaderKeyEntry.m_CompiledPixelShaderBlob->GetBufferPointer();
+                compiledShaderEntrySet.rawPixelShader = (shipUint8*)shaderKeyEntry.m_CompiledPixelShaderBlob->GetBufferPointer();
                 compiledShaderEntrySet.rawPixelShaderSize = shaderKeyEntry.m_CompiledPixelShaderBlob->GetBufferSize();
             }
 
             if (shaderKeyEntry.m_CompiledComputeShaderBlob != nullptr)
             {
-                compiledShaderEntrySet.rawComputeShader = (uint8_t*)shaderKeyEntry.m_CompiledComputeShaderBlob->GetBufferPointer();
+                compiledShaderEntrySet.rawComputeShader = (shipUint8*)shaderKeyEntry.m_CompiledComputeShaderBlob->GetBufferPointer();
                 compiledShaderEntrySet.rawComputeShaderSize = shaderKeyEntry.m_CompiledComputeShaderBlob->GetBufferSize();
             }
 
@@ -167,7 +167,7 @@ void ShaderCompiler::ShaderCompilerThreadFunction()
     {
         Sleep(100);
 
-        uint32_t shaderFamilyToCompileIndex = 0;
+        shipUint32 shaderFamilyToCompileIndex = 0;
 
         if (m_ShaderKeysToCompile.Size() > 0 && m_CurrentShaderKeyBeingCompiled.GetShaderFamily() == ShaderFamily::Count)
         {
@@ -196,14 +196,14 @@ void ShaderCompiler::ShaderCompilerThreadFunction()
     }
 }
 
-bool SplitShaderSourceAndRenderStateBlock(StringA& shaderSource, StringA& renderStateBlockSource)
+shipBool SplitShaderSourceAndRenderStateBlock(StringA& shaderSource, StringA& renderStateBlockSource)
 {
     size_t renderStateBlockStartIndex = shaderSource.FindIndexOfFirstCaseInsensitive(ShaderCompiler::RenderStateBlockName, 0);
     if (renderStateBlockStartIndex != shaderSource.InvalidIndex)
     {
         // Make sure it's not in comments
         size_t inlineCommentBeforeRenderStateBlockStartIndex = shaderSource.FindIndexOfFirstReverse("//", renderStateBlockStartIndex);
-        bool isRenderStateBlockInComment = (inlineCommentBeforeRenderStateBlockStartIndex != shaderSource.InvalidIndex);
+        shipBool isRenderStateBlockInComment = (inlineCommentBeforeRenderStateBlockStartIndex != shaderSource.InvalidIndex);
 
         if (isRenderStateBlockInComment)
         {
@@ -237,7 +237,7 @@ bool SplitShaderSourceAndRenderStateBlock(StringA& shaderSource, StringA& render
             return false;
         }
 
-        uint32_t bracketCount = 1;
+        shipUint32 bracketCount = 1;
         size_t endingBracketIndex = 0;
 
         for (endingBracketIndex = openingBracketIndex + 1; (bracketCount > 0 || endingBracketIndex < shaderSource.Size()); endingBracketIndex++)
@@ -262,7 +262,7 @@ bool SplitShaderSourceAndRenderStateBlock(StringA& shaderSource, StringA& render
 }
 
 // Reads a shader file and separates it into the shader source and, if any entry available, the render state pipeline source.
-bool ReadShaderFile(const StringT& sourceFilename, StringA& shaderSource, StringA& renderStateBlockSource)
+shipBool ReadShaderFile(const StringT& sourceFilename, StringA& shaderSource, StringA& renderStateBlockSource)
 {
     // This is kind of ugly: if a file is saved inside of Visual Studio with the AutoRecover feature enabled, it will
     // first save the file's content in a temporary file, and then copy the content to the real file before quickly deleting the
@@ -271,9 +271,9 @@ bool ReadShaderFile(const StringT& sourceFilename, StringA& shaderSource, String
     FileHandler shaderFile(sourceFilename, FileHandlerOpenFlag::FileHandlerOpenFlag_Read);
     if (!shaderFile.IsOpen())
     {
-        constexpr uint32_t timesToTryOpeningAgain = 5;
+        constexpr shipUint32 timesToTryOpeningAgain = 5;
 
-        uint32_t i = 0;
+        shipUint32 i = 0;
         for (; i < timesToTryOpeningAgain; i++)
         {
             Sleep(100);
@@ -285,7 +285,7 @@ bool ReadShaderFile(const StringT& sourceFilename, StringA& shaderSource, String
             }
         }
 
-        bool couldntOpenFile = (i == timesToTryOpeningAgain);
+        shipBool couldntOpenFile = (i == timesToTryOpeningAgain);
         if (couldntOpenFile)
         {
             return false;
@@ -307,12 +307,12 @@ bool ReadShaderFile(const StringT& sourceFilename, StringA& shaderSource, String
 void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
 {
     SmallInplaceStringT sourceFilename = m_ShaderDirectoryName;
-    sourceFilename += g_ShaderFamilyFilenames[uint32_t(shaderFamily)];
+    sourceFilename += g_ShaderFamilyFilenames[shipUint32(shaderFamily)];
 
     StringA shaderSource;
     LargeInplaceStringA renderStateBlockSource;
 
-    bool couldReadShaderFile = ReadShaderFile(sourceFilename, shaderSource, renderStateBlockSource);
+    shipBool couldReadShaderFile = ReadShaderFile(sourceFilename, shaderSource, renderStateBlockSource);
     if (!couldReadShaderFile)
     {
         return;
@@ -321,15 +321,15 @@ void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
     Array<ShaderOption> everyPossibleShaderOption;
     ShaderKey::GetShaderKeyOptionsForShaderFamily(shaderFamily, everyPossibleShaderOption);
 
-    uint32_t numBitsInShaderKey = 0;
+    shipUint32 numBitsInShaderKey = 0;
     for (ShaderOption shaderOption : everyPossibleShaderOption)
     {
-        numBitsInShaderKey += uint32_t(g_NumBitsForShaderOption[uint32_t(shaderOption)]);
+        numBitsInShaderKey += shipUint32(g_NumBitsForShaderOption[shipUint32(shaderOption)]);
     }
 
-    uint32_t everyShaderOptionSet = ((1 << numBitsInShaderKey) - 1);
+    shipUint32 everyShaderOptionSet = ((1 << numBitsInShaderKey) - 1);
 
-    uint32_t possibleNumberOfPermutations = everyShaderOptionSet + 1;
+    shipUint32 possibleNumberOfPermutations = everyShaderOptionSet + 1;
 
     ShaderKey shaderKey;
     shaderKey.SetShaderFamily(shaderFamily);
@@ -337,9 +337,9 @@ void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
     ShaderKey::RawShaderKeyType baseRawShaderKey = shaderKey.GetRawShaderKey();
 
     // Go through every permutation of shader options
-    uint32_t shaderOptionAsInt = everyShaderOptionSet;
+    shipUint32 shaderOptionAsInt = everyShaderOptionSet;
 
-    for (uint32_t i = 0; i < possibleNumberOfPermutations; i++)
+    for (shipUint32 i = 0; i < possibleNumberOfPermutations; i++)
     {
         ShaderKey currentShaderKeyToCompile;
         currentShaderKeyToCompile.m_RawShaderKey = (baseRawShaderKey | (shaderOptionAsInt << ShaderKey::ms_ShaderOptionShift));
@@ -353,12 +353,12 @@ void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
 void ShaderCompiler::CompileShaderKey(const ShaderKey& shaderKeyToCompile)
 {
     SmallInplaceStringT sourceFilename = m_ShaderDirectoryName;
-    sourceFilename += g_ShaderFamilyFilenames[uint32_t(shaderKeyToCompile.GetShaderFamily())];
+    sourceFilename += g_ShaderFamilyFilenames[shipUint32(shaderKeyToCompile.GetShaderFamily())];
 
     StringA shaderSource;
     LargeInplaceStringA renderStateBlockSource;
 
-    bool couldReadShaderFile = ReadShaderFile(sourceFilename, shaderSource, renderStateBlockSource);
+    shipBool couldReadShaderFile = ReadShaderFile(sourceFilename, shaderSource, renderStateBlockSource);
     if (!couldReadShaderFile)
     {
         return;
@@ -387,12 +387,12 @@ void ShaderCompiler::CompileShaderKey(
 
     for (ShaderOption shaderOption : everyPossibleShaderOptionForShaderKey)
     {
-        uint32_t valueForShaderOption = shaderKeyToCompile.GetShaderOptionValue(shaderOption);
+        shipUint32 valueForShaderOption = shaderKeyToCompile.GetShaderOptionValue(shaderOption);
 
         D3D_SHADER_MACRO shaderDefine;
-        shaderDefine.Name = g_ShaderOptionString[uint32_t(shaderOption)];
+        shaderDefine.Name = g_ShaderOptionString[shipUint32(shaderOption)];
 
-        char* buf = reinterpret_cast<char*>(SHIP_ALLOC(8, 1));
+        shipChar* buf = reinterpret_cast<shipChar*>(SHIP_ALLOC(8, 1));
         sprintf_s(buf, 8, "%u", valueForShaderOption);
 
         shaderDefine.Definition = buf;
@@ -439,7 +439,7 @@ void ShaderCompiler::CompileShaderKey(
 
 ID3D10Blob* ShaderCompiler::CompileVertexShaderForShaderKey(const StringT& sourceFilename, const StringA& source, D3D_SHADER_MACRO* shaderOptionDefines)
 {
-    static const char* vertexShaderEntryPoint = "VS_Main";
+    static const shipChar* vertexShaderEntryPoint = "VS_Main";
 
     if (source.FindIndexOfFirst(vertexShaderEntryPoint, 0) == StringA::InvalidIndex)
     {
@@ -451,7 +451,7 @@ ID3D10Blob* ShaderCompiler::CompileVertexShaderForShaderKey(const StringT& sourc
 
 ID3D10Blob* ShaderCompiler::CompilePixelShaderForShaderKey(const StringT& sourceFilename, const StringA& source, D3D_SHADER_MACRO* shaderOptionDefines)
 {
-    static const char* pixelShaderEntryPoint = "PS_Main";
+    static const shipChar* pixelShaderEntryPoint = "PS_Main";
 
     if (source.FindIndexOfFirst(pixelShaderEntryPoint, 0) == StringA::InvalidIndex)
     {
@@ -463,7 +463,7 @@ ID3D10Blob* ShaderCompiler::CompilePixelShaderForShaderKey(const StringT& source
 
 ID3D10Blob* ShaderCompiler::CompileComputeShaderForShaderKey(const StringT& sourceFilename, const StringA& source, D3D_SHADER_MACRO* shaderOptionDefines)
 {
-    static const char* computeShaderEntryPoint = "CS_Main";
+    static const shipChar* computeShaderEntryPoint = "CS_Main";
 
     if (source.FindIndexOfFirst(computeShaderEntryPoint, 0) == StringA::InvalidIndex)
     {
@@ -495,7 +495,7 @@ ID3D10Blob* ShaderCompiler::CompileShader(const StringT& shaderSourceFilename, c
     {
         if (preprocessError != nullptr)
         {
-            char* errorMsg = (char*)preprocessError->GetBufferPointer();
+            shipChar* errorMsg = (shipChar*)preprocessError->GetBufferPointer();
             OutputDebugString(errorMsg);
         }
     }
@@ -505,10 +505,10 @@ ID3D10Blob* ShaderCompiler::CompileShader(const StringT& shaderSourceFilename, c
     {
         if (error != nullptr)
         {
-            char* errorMsg = (char*)error->GetBufferPointer();
+            shipChar* errorMsg = (shipChar*)error->GetBufferPointer();
             OutputDebugString(errorMsg);
 
-            char* data = (char*)preprocessedBlob->GetBufferPointer();
+            shipChar* data = (shipChar*)preprocessedBlob->GetBufferPointer();
             OutputDebugString(data);
         }
 
@@ -520,7 +520,7 @@ ID3D10Blob* ShaderCompiler::CompileShader(const StringT& shaderSourceFilename, c
 
 ShaderCompiler::CompiledShaderKeyEntry& ShaderCompiler::GetCompiledShaderKeyEntry(ShaderKey::RawShaderKeyType rawShaderKey)
 {
-    uint32_t idx = 0;
+    shipUint32 idx = 0;
     for (; idx < m_CompiledShaderKeyEntries.Size(); idx++)
     {
         if (m_CompiledShaderKeyEntries[idx].m_RawShaderKey == rawShaderKey)

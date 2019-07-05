@@ -6,7 +6,7 @@
 
 namespace Shipyard
 {
-    enum class RenderCommandType : uint8_t
+    enum class RenderCommandType : shipUint8
     {
         ClearFullRenderTarget,
         ClearSingleRenderTarget,
@@ -24,28 +24,28 @@ namespace Shipyard
     struct ClearFullRenderTargetCommand : BaseRenderCommand
     {
         GFXRenderTargetHandle gfxRenderTargetHandle = { InvalidGfxHandle };
-        float red = 0.0f;
-        float green = 0.0f;
-        float blue = 0.0f;
-        float alpha = 0.0f;
+        shipFloat red = 0.0f;
+        shipFloat green = 0.0f;
+        shipFloat blue = 0.0f;
+        shipFloat alpha = 0.0f;
     };
 
     struct ClearSingleRenderTargetCommand : BaseRenderCommand
     {
         GFXRenderTargetHandle gfxRenderTargetHandle = { InvalidGfxHandle };
-        uint32_t renderTargetIndex = 0;
-        float red = 0.0f;
-        float green = 0.0f;
-        float blue = 0.0f;
-        float alpha = 0.0f;
+        shipUint32 renderTargetIndex = 0;
+        shipFloat red = 0.0f;
+        shipFloat green = 0.0f;
+        shipFloat blue = 0.0f;
+        shipFloat alpha = 0.0f;
     };
 
     struct ClearDepthStencilRenderTargetCommand : BaseRenderCommand
     {
         GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle = { InvalidGfxHandle };
         DepthStencilClearFlag depthStencilClearFlag = DepthStencilClearFlag::Depth;
-        float depthValue = 1.0f;
-        uint8_t stencilValue = 0;
+        shipFloat depthValue = 1.0f;
+        shipUint8 stencilValue = 0;
     };
 
     struct DrawCommand : BaseRenderCommand
@@ -60,10 +60,10 @@ namespace Shipyard
         PrimitiveTopology primitiveTopologyToUse = PrimitiveTopology::TriangleList;
         RenderStateBlockStateOverride* pRenderStateBlockStateOverride = nullptr;
         GFXVertexBufferHandle* pGfxVertexBufferHandles = nullptr;
-        uint32_t startSlot = 0;
-        uint32_t numVertexBuffers = 0;
-        uint32_t startVertexLocation = 0;
-        uint32_t* pVertexBufferOffsets = nullptr;
+        shipUint32 startSlot = 0;
+        shipUint32 numVertexBuffers = 0;
+        shipUint32 startVertexLocation = 0;
+        shipUint32* pVertexBufferOffsets = nullptr;
     };
 
     struct DrawIndexedCommand : BaseRenderCommand
@@ -79,15 +79,15 @@ namespace Shipyard
         RenderStateBlockStateOverride* pRenderStateBlockStateOverride = nullptr;
         GFXVertexBufferHandle* pGfxVertexBufferHandles = nullptr;
         GFXIndexBufferHandle gfxIndexBufferHandle = { InvalidGfxHandle };
-        uint32_t startSlot = 0;
-        uint32_t numVertexBuffers = 0;
-        uint32_t startVertexLocation = 0;
-        uint32_t* pVertexBufferOffsets = nullptr;
-        uint32_t startIndexLocation = 0;
-        uint32_t indexBufferOffset = 0;
+        shipUint32 startSlot = 0;
+        shipUint32 numVertexBuffers = 0;
+        shipUint32 startVertexLocation = 0;
+        shipUint32* pVertexBufferOffsets = nullptr;
+        shipUint32 startIndexLocation = 0;
+        shipUint32 indexBufferOffset = 0;
     };
 
-    enum class MapBufferType : uint8_t
+    enum class MapBufferType : shipUint8
     {
         Vertex,
         Index,

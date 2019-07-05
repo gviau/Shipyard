@@ -23,7 +23,7 @@
 namespace Shipyard
 {;
 
-extern ID3D11InputLayout* g_RegisteredInputLayouts[uint32_t(VertexFormatType::VertexFormatType_Count)];
+extern ID3D11InputLayout* g_RegisteredInputLayouts[shipUint32(VertexFormatType::VertexFormatType_Count)];
 
 DX11RenderStateCache::DX11RenderStateCache(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
     : m_Device(device)
@@ -54,7 +54,7 @@ void DX11RenderStateCache::Reset()
     m_PrimitiveTopology = PrimitiveTopology::TriangleList;
 
     m_NumRenderTargets = 0;
-    for (uint32_t i = 0; i < GfxConstants::GfxConstants_MaxRenderTargetsBound; i++)
+    for (shipUint32 i = 0; i < GfxConstants::GfxConstants_MaxRenderTargetsBound; i++)
     {
         m_RenderTargetsFormat[i] = GfxFormat::Unknown;
     }
@@ -96,27 +96,27 @@ void DX11RenderStateCache::Reset()
     memset(m_NativeRenderTargets, 0, sizeof(m_NativeRenderTargets));
     m_NativeDepthStencilView = nullptr;
 
-    for (uint32_t i = 0; i < GfxConstants::GfxConstants_MaxConstantBufferViewsBoundPerShaderStage; i++)
+    for (shipUint32 i = 0; i < GfxConstants::GfxConstants_MaxConstantBufferViewsBoundPerShaderStage; i++)
     {
         m_ConstantBufferViewsShaderVisibility[i] = ShaderVisibility::ShaderVisibility_None;
     }
 
-    for (uint32_t i = 0; i < GfxConstants::GfxConstants_MaxShaderResourceViewsBoundPerShaderStage; i++)
+    for (shipUint32 i = 0; i < GfxConstants::GfxConstants_MaxShaderResourceViewsBoundPerShaderStage; i++)
     {
         m_ShaderResourceViewsShaderVisibility[i] = ShaderVisibility::ShaderVisibility_None;
     }
 
-    for (uint32_t i = 0; i < GfxConstants::GfxConstants_MaxUnorderedAccessViewsBoundPerShaderStage; i++)
+    for (shipUint32 i = 0; i < GfxConstants::GfxConstants_MaxUnorderedAccessViewsBoundPerShaderStage; i++)
     {
         m_UnorderedAccessViewsShaderVisibility[i] = ShaderVisibility::ShaderVisibility_None;
     }
 
-    for (uint32_t i = 0; i < GfxConstants::GfxConstants_MaxSamplersBoundPerShaderStage; i++)
+    for (shipUint32 i = 0; i < GfxConstants::GfxConstants_MaxSamplersBoundPerShaderStage; i++)
     {
         m_SamplersShaderVisibility[i] = ShaderVisibility::ShaderVisibility_None;
     }
 
-    for (uint32_t shaderStage = 0; shaderStage < ShaderStage::ShaderStage_Count; shaderStage++)
+    for (shipUint32 shaderStage = 0; shaderStage < ShaderStage::ShaderStage_Count; shaderStage++)
     {
         m_DirtySlotShaderResourceViewsPerShaderStage[shaderStage].Clear();
         m_DirtySlotConstantBufferViewsPerShaderStage[shaderStage].Clear();
@@ -144,10 +144,10 @@ void DX11RenderStateCache::BindRootSignature(const GFXRootSignature& rootSignatu
         {
         case RootSignatureParameterType::ConstantBufferView:
             {
-                uint32_t startingBindingSlot = rootSignatureParameter.descriptor.shaderBindingSlot;
-                uint32_t endingBindingSlot = startingBindingSlot + MAX(rootSignatureParameter.descriptor.registerSpace, 1);
+                shipUint32 startingBindingSlot = rootSignatureParameter.descriptor.shaderBindingSlot;
+                shipUint32 endingBindingSlot = startingBindingSlot + MAX(rootSignatureParameter.descriptor.registerSpace, 1);
 
-                for (uint32_t bindingSlot = startingBindingSlot; bindingSlot < endingBindingSlot; bindingSlot++)
+                for (shipUint32 bindingSlot = startingBindingSlot; bindingSlot < endingBindingSlot; bindingSlot++)
                 {
                     m_ConstantBufferViewsShaderVisibility[bindingSlot] = shaderVisibilityForParameter;
                 }
@@ -157,10 +157,10 @@ void DX11RenderStateCache::BindRootSignature(const GFXRootSignature& rootSignatu
 
         case RootSignatureParameterType::ShaderResourceView:
             {
-                uint32_t startingBindingSlot = rootSignatureParameter.descriptor.shaderBindingSlot;
-                uint32_t endingBindingSlot = startingBindingSlot + MAX(rootSignatureParameter.descriptor.registerSpace, 1);
+                shipUint32 startingBindingSlot = rootSignatureParameter.descriptor.shaderBindingSlot;
+                shipUint32 endingBindingSlot = startingBindingSlot + MAX(rootSignatureParameter.descriptor.registerSpace, 1);
 
-                for (uint32_t bindingSlot = startingBindingSlot; bindingSlot < endingBindingSlot; bindingSlot++)
+                for (shipUint32 bindingSlot = startingBindingSlot; bindingSlot < endingBindingSlot; bindingSlot++)
                 {
                     m_ShaderResourceViewsShaderVisibility[bindingSlot] = shaderVisibilityForParameter;
                 }
@@ -170,10 +170,10 @@ void DX11RenderStateCache::BindRootSignature(const GFXRootSignature& rootSignatu
 
         case RootSignatureParameterType::UnorderedAccessView:
             {
-                uint32_t startingBindingSlot = rootSignatureParameter.descriptor.shaderBindingSlot;
-                uint32_t endingBindingSlot = startingBindingSlot + MAX(rootSignatureParameter.descriptor.registerSpace, 1);
+                shipUint32 startingBindingSlot = rootSignatureParameter.descriptor.shaderBindingSlot;
+                shipUint32 endingBindingSlot = startingBindingSlot + MAX(rootSignatureParameter.descriptor.registerSpace, 1);
 
-                for (uint32_t bindingSlot = startingBindingSlot; bindingSlot < endingBindingSlot; bindingSlot++)
+                for (shipUint32 bindingSlot = startingBindingSlot; bindingSlot < endingBindingSlot; bindingSlot++)
                 {
                     m_UnorderedAccessViewsShaderVisibility[bindingSlot] = shaderVisibilityForParameter;
                 }
@@ -278,8 +278,8 @@ void DX11RenderStateCache::BindRenderTarget(const GFXRenderTarget& renderTarget)
 {
     ID3D11RenderTargetView* const * renderTargetViews = renderTarget.GetRenderTargetViews();
 
-    bool changeRenderTargets = false;
-    for (uint32_t i = 0; i < GfxConstants::GfxConstants_MaxRenderTargetsBound; i++)
+    shipBool changeRenderTargets = false;
+    for (shipUint32 i = 0; i < GfxConstants::GfxConstants_MaxRenderTargetsBound; i++)
     {
         if (m_NativeRenderTargets[i] != renderTargetViews[i])
         {
@@ -317,7 +317,7 @@ void DX11RenderStateCache::SetViewport(const GfxViewport& gfxViewport)
     }
 }
 
-void DX11RenderStateCache::SetVertexBuffers(GFXVertexBuffer* const * vertexBuffers, uint32_t startSlot, uint32_t numVertexBuffers, uint32_t* vertexBufferOffsets)
+void DX11RenderStateCache::SetVertexBuffers(GFXVertexBuffer* const * vertexBuffers, shipUint32 startSlot, shipUint32 numVertexBuffers, shipUint32* vertexBufferOffsets)
 {
     if (m_VertexBufferStartSlot != startSlot ||
         m_NumVertexBuffers != numVertexBuffers)
@@ -327,7 +327,7 @@ void DX11RenderStateCache::SetVertexBuffers(GFXVertexBuffer* const * vertexBuffe
 
         memset(m_NativeVertexBuffers, 0, sizeof(m_NativeVertexBuffers));
 
-        for (uint32_t i = 0; i < numVertexBuffers; i++)
+        for (shipUint32 i = 0; i < numVertexBuffers; i++)
         {
             if (vertexBuffers[i] != nullptr)
             {
@@ -341,9 +341,9 @@ void DX11RenderStateCache::SetVertexBuffers(GFXVertexBuffer* const * vertexBuffe
     }
     else
     {
-        bool changeVertexBuffers = false;
+        shipBool changeVertexBuffers = false;
 
-        for (uint32_t i = 0; i < numVertexBuffers; i++)
+        for (shipUint32 i = 0; i < numVertexBuffers; i++)
         {
             if (vertexBufferOffsets[i] != m_VertexBufferOffsets[i + startSlot])
             {
@@ -353,7 +353,7 @@ void DX11RenderStateCache::SetVertexBuffers(GFXVertexBuffer* const * vertexBuffe
             m_VertexBufferOffsets[i + startSlot] = vertexBufferOffsets[i];
         }
 
-        for (uint32_t i = 0; i < numVertexBuffers; i++)
+        for (shipUint32 i = 0; i < numVertexBuffers; i++)
         {
             if (vertexBuffers[i] == nullptr && m_NativeVertexBuffers[i + startSlot] != nullptr ||
                 vertexBuffers[i]->GetBuffer() != m_NativeVertexBuffers[i + startSlot])
@@ -371,7 +371,7 @@ void DX11RenderStateCache::SetVertexBuffers(GFXVertexBuffer* const * vertexBuffe
     }
 }
 
-void DX11RenderStateCache::SetIndexBuffer(const GFXIndexBuffer& indexBuffer, uint32_t indexBufferOffset)
+void DX11RenderStateCache::SetIndexBuffer(const GFXIndexBuffer& indexBuffer, shipUint32 indexBufferOffset)
 {
     DXGI_FORMAT indexFormat = (indexBuffer.Uses2BytesPerIndex() ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT);
     if (DXGI_FORMAT(m_IndexBufferFormat) != indexFormat ||
@@ -388,9 +388,9 @@ void DX11RenderStateCache::SetIndexBuffer(const GFXIndexBuffer& indexBuffer, uin
 
 void DX11RenderStateCache::BindRootSignatureDescriptorTableEntry(const RootSignatureParameterEntry& rootSignatureParameter, ShaderVisibility shaderVisibilityForParameter)
 {
-    uint32_t numDescriptorRanges = rootSignatureParameter.descriptorTable.descriptorRanges.Size();
+    shipUint32 numDescriptorRanges = rootSignatureParameter.descriptorTable.descriptorRanges.Size();
 
-    for (uint32_t i = 0; i < numDescriptorRanges; i++)
+    for (shipUint32 i = 0; i < numDescriptorRanges; i++)
     {
         const DescriptorRange& descriptorRange = rootSignatureParameter.descriptorTable.descriptorRanges[i];
 
@@ -398,10 +398,10 @@ void DX11RenderStateCache::BindRootSignatureDescriptorTableEntry(const RootSigna
         {
         case DescriptorRangeType::ConstantBufferView:
             {
-            uint32_t startingBindingSlot = descriptorRange.baseShaderRegister;
-            uint32_t endingBindingSlot = startingBindingSlot + descriptorRange.numDescriptors;
+            shipUint32 startingBindingSlot = descriptorRange.baseShaderRegister;
+            shipUint32 endingBindingSlot = startingBindingSlot + descriptorRange.numDescriptors;
 
-                for (uint32_t bindingSlot = startingBindingSlot; bindingSlot < endingBindingSlot; bindingSlot++)
+                for (shipUint32 bindingSlot = startingBindingSlot; bindingSlot < endingBindingSlot; bindingSlot++)
                 {
                     m_ConstantBufferViewsShaderVisibility[bindingSlot] = shaderVisibilityForParameter;
                 }
@@ -411,10 +411,10 @@ void DX11RenderStateCache::BindRootSignatureDescriptorTableEntry(const RootSigna
 
         case DescriptorRangeType::ShaderResourceView:
             {
-                uint32_t startingBindingSlot = descriptorRange.baseShaderRegister;
-                uint32_t endingBindingSlot = startingBindingSlot + descriptorRange.numDescriptors;
+                shipUint32 startingBindingSlot = descriptorRange.baseShaderRegister;
+                shipUint32 endingBindingSlot = startingBindingSlot + descriptorRange.numDescriptors;
 
-                for (uint32_t bindingSlot = startingBindingSlot; bindingSlot < endingBindingSlot; bindingSlot++)
+                for (shipUint32 bindingSlot = startingBindingSlot; bindingSlot < endingBindingSlot; bindingSlot++)
                 {
                     m_ShaderResourceViewsShaderVisibility[bindingSlot] = shaderVisibilityForParameter;
                 }
@@ -424,10 +424,10 @@ void DX11RenderStateCache::BindRootSignatureDescriptorTableEntry(const RootSigna
 
         case DescriptorRangeType::UnorderedAccessView:
             {
-                uint32_t startingBindingSlot = descriptorRange.baseShaderRegister;
-                uint32_t endingBindingSlot = startingBindingSlot + descriptorRange.numDescriptors;
+                shipUint32 startingBindingSlot = descriptorRange.baseShaderRegister;
+                shipUint32 endingBindingSlot = startingBindingSlot + descriptorRange.numDescriptors;
 
-                for (uint32_t bindingSlot = startingBindingSlot; bindingSlot < endingBindingSlot; bindingSlot++)
+                for (shipUint32 bindingSlot = startingBindingSlot; bindingSlot < endingBindingSlot; bindingSlot++)
                 {
                     m_UnorderedAccessViewsShaderVisibility[bindingSlot] = shaderVisibilityForParameter;
                 }
@@ -444,18 +444,18 @@ void DX11RenderStateCache::BindRootSignatureDescriptorTableEntry(const RootSigna
 
 void DX11RenderStateCache::BindDescriptorTableFromDescriptorSet(
         const Array<GfxResource*>& descriptorTableResources,
-        uint32_t descriptorRangeIndex,
+        shipUint32 descriptorRangeIndex,
         const RootSignatureParameterEntry& rootSignatureParameter)
 {
     const DescriptorRange& descriptorRange = rootSignatureParameter.descriptorTable.descriptorRanges[descriptorRangeIndex];
 
-    for (uint32_t idx = 0; idx < descriptorRange.numDescriptors; idx++)
+    for (shipUint32 idx = 0; idx < descriptorRange.numDescriptors; idx++)
     {
         GfxResource* descriptorResource = descriptorTableResources[idx];
 
         SHIP_ASSERT_MSG(descriptorResource != nullptr, "Null resources in DX11RenderStateCache::BindDescriptorTableFromDescriptorSet are not valid, you must use a dummy, valid resource instead.");
 
-        uint32_t shaderBindingSlot = descriptorRange.baseShaderRegister +idx;
+        shipUint32 shaderBindingSlot = descriptorRange.baseShaderRegister +idx;
 
         switch (descriptorRange.descriptorRangeType)
         {
@@ -478,10 +478,10 @@ void DX11RenderStateCache::BindDescriptorFromDescriptorSet(GfxResource* descript
 {
     SHIP_ASSERT_MSG(descriptorResource != nullptr, "Null resources in DX11RenderStateCache::BindDescriptorFromDescriptorSet are not valid, you must use a dummy, valid resource instead.");
 
-    uint32_t startingBindingSlot = rootSignatureParameter.descriptor.shaderBindingSlot;
-    uint32_t endingBindingSlot = startingBindingSlot + MAX(rootSignatureParameter.descriptor.registerSpace, 1);
+    shipUint32 startingBindingSlot = rootSignatureParameter.descriptor.shaderBindingSlot;
+    shipUint32 endingBindingSlot = startingBindingSlot + MAX(rootSignatureParameter.descriptor.registerSpace, 1);
     
-    for (uint32_t bindingSlot = startingBindingSlot; bindingSlot < endingBindingSlot; bindingSlot++)
+    for (shipUint32 bindingSlot = startingBindingSlot; bindingSlot < endingBindingSlot; bindingSlot++)
     {
         switch (rootSignatureParameter.parameterType)
         {
@@ -502,7 +502,7 @@ void DX11RenderStateCache::BindDescriptorFromDescriptorSet(GfxResource* descript
 }
 
 
-void DX11RenderStateCache::BindResourceAsConstantBuffer(GfxResource* descriptorResource, ShaderVisibility shaderVisibility, uint32_t shaderBindingSlot)
+void DX11RenderStateCache::BindResourceAsConstantBuffer(GfxResource* descriptorResource, ShaderVisibility shaderVisibility, shipUint32 shaderBindingSlot)
 {
     GFXConstantBuffer* constantBuffer = static_cast<GFXConstantBuffer*>(descriptorResource);
     ID3D11Buffer* nativeBuffer = constantBuffer->GetBuffer();
@@ -517,7 +517,7 @@ void DX11RenderStateCache::BindResourceAsConstantBuffer(GfxResource* descriptorR
     }
 }
 
-void DX11RenderStateCache::BindResourceAsShaderResourceView(GfxResource* descriptorResource, ShaderVisibility shaderVisibility, uint32_t shaderBindingSlot)
+void DX11RenderStateCache::BindResourceAsShaderResourceView(GfxResource* descriptorResource, ShaderVisibility shaderVisibility, shipUint32 shaderBindingSlot)
 {
     GfxResourceType resourceType = descriptorResource->GetResourceType();
 
@@ -694,21 +694,21 @@ void DX11RenderStateCache::CommitStateChangesForGraphics(GFXRenderDevice& gfxRen
 
     if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ConstantBufferViews))
     {
-        for (uint32_t shaderStage = 0; shaderStage < ShaderStage::ShaderStage_Count; shaderStage++)
+        for (shipUint32 shaderStage = 0; shaderStage < ShaderStage::ShaderStage_Count; shaderStage++)
         {
             if (m_DirtySlotConstantBufferViewsPerShaderStage[shaderStage].IsClear())
             {
                 continue;
             }
 
-            uint32_t startingBindingSlot = 0;
-            uint32_t firstBindingSlot = 0;
+            shipUint32 startingBindingSlot = 0;
+            shipUint32 firstBindingSlot = 0;
 
             ConstantBufferViewsSetterFunctionPtr constantBufferViewsSetterForShaderStage = g_ConstantBufferViewsSetterTable[shaderStage];
 
             while (m_DirtySlotConstantBufferViewsPerShaderStage[shaderStage].GetFirstBitSet(startingBindingSlot, firstBindingSlot))
             {
-                uint32_t numBindingSlotsToSet = m_DirtySlotConstantBufferViewsPerShaderStage[shaderStage].GetLongestRangeWithBitsSet(firstBindingSlot);
+                shipUint32 numBindingSlotsToSet = m_DirtySlotConstantBufferViewsPerShaderStage[shaderStage].GetLongestRangeWithBitsSet(firstBindingSlot);
 
                 (m_DeviceContext->*constantBufferViewsSetterForShaderStage)(firstBindingSlot, numBindingSlotsToSet, &m_NativeConstantBufferViews[firstBindingSlot]);
 
@@ -723,21 +723,21 @@ void DX11RenderStateCache::CommitStateChangesForGraphics(GFXRenderDevice& gfxRen
 
     if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ShaderResourceViews))
     {
-        for (uint32_t shaderStage = 0; shaderStage < ShaderStage::ShaderStage_Count; shaderStage++)
+        for (shipUint32 shaderStage = 0; shaderStage < ShaderStage::ShaderStage_Count; shaderStage++)
         {
             if (m_DirtySlotShaderResourceViewsPerShaderStage[shaderStage].IsClear())
             {
                 continue;
             }
 
-            uint32_t startingBindingSlot = 0;
-            uint32_t firstBindingSlot = 0;
+            shipUint32 startingBindingSlot = 0;
+            shipUint32 firstBindingSlot = 0;
 
             ShaderResourceViewsSetterFunctionPtr shaderResourceViewsSetterForShaderStage = g_ShaderResourceViewsSetterTable[shaderStage];
 
             while (m_DirtySlotShaderResourceViewsPerShaderStage[shaderStage].GetFirstBitSet(startingBindingSlot, firstBindingSlot))
             {
-                uint32_t numBindingSlotsToSet = m_DirtySlotShaderResourceViewsPerShaderStage[shaderStage].GetLongestRangeWithBitsSet(firstBindingSlot);
+                shipUint32 numBindingSlotsToSet = m_DirtySlotShaderResourceViewsPerShaderStage[shaderStage].GetLongestRangeWithBitsSet(firstBindingSlot);
 
                 (m_DeviceContext->*shaderResourceViewsSetterForShaderStage)(firstBindingSlot, numBindingSlotsToSet, &m_NativeShaderResourceViews[firstBindingSlot]);
 
@@ -775,14 +775,14 @@ void DX11RenderStateCache::CommitStateChangesForGraphics(GFXRenderDevice& gfxRen
 
         GetVertexFormat(vertexFormatType, vertexFormat);
 
-        m_DeviceContext->IASetInputLayout(g_RegisteredInputLayouts[uint32_t(vertexFormatType)]);
+        m_DeviceContext->IASetInputLayout(g_RegisteredInputLayouts[shipUint32(vertexFormatType)]);
 
         m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexFormatType);
     }
 
     if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexBuffers))
     {
-        uint32_t vertexBufferStrides[GfxConstants::GfxConstants_MaxVertexBuffers];
+        shipUint32 vertexBufferStrides[GfxConstants::GfxConstants_MaxVertexBuffers];
 
         if (m_NumVertexBuffers != 0)
         {
@@ -790,8 +790,8 @@ void DX11RenderStateCache::CommitStateChangesForGraphics(GFXRenderDevice& gfxRen
 
             GetVertexFormat(m_VertexFormatType, vertexFormat);
 
-            uint32_t stride = vertexFormat->GetSize();
-            for (uint32_t i = 0; i < GfxConstants::GfxConstants_MaxVertexBuffers; i++)
+            shipUint32 stride = vertexFormat->GetSize();
+            for (shipUint32 i = 0; i < GfxConstants::GfxConstants_MaxVertexBuffers; i++)
             {
                 vertexBufferStrides[i] = stride;
             }
@@ -875,7 +875,7 @@ ID3D11BlendState* DX11RenderStateCache::CreateBlendState(const BlendState& blend
     blendDesc.AlphaToCoverageEnable = blendState.m_AlphaToCoverageEnable;
     blendDesc.IndependentBlendEnable = blendState.m_IndependentBlendEnable;
 
-    for (uint32_t i = 0; i < GfxConstants::GfxConstants_MaxRenderTargetsBound; i++)
+    for (shipUint32 i = 0; i < GfxConstants::GfxConstants_MaxRenderTargetsBound; i++)
     {
         D3D11_RENDER_TARGET_BLEND_DESC& renderTargetBlendDesc = blendDesc.RenderTarget[i];
         const RenderTargetBlendState& renderTargetBlendState = blendState.renderTargetBlendStates[i];

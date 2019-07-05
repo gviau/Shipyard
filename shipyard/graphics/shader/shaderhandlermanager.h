@@ -21,7 +21,7 @@ namespace Shipyard
         ShaderHandlerManager();
         virtual ~ShaderHandlerManager();
 
-        bool Initialize(GFXRenderDevice& gfxRenderDevice, ShaderDatabase& shaderDatabase);
+        shipBool Initialize(GFXRenderDevice& gfxRenderDevice, ShaderDatabase& shaderDatabase);
         void Destroy();
 
         ShaderHandler* GetShaderHandlerForShaderKey(ShaderKey shaderKey);

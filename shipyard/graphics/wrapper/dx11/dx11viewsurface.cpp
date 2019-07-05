@@ -25,10 +25,10 @@ DX11ViewSurface::DX11ViewSurface()
 {
 }
 
-bool DX11ViewSurface::Create(
+shipBool DX11ViewSurface::Create(
         DX11RenderDevice& renderDevice,
-        uint32_t width,
-        uint32_t height,
+        shipUint32 width,
+        shipUint32 height,
         GfxFormat viewSurfaceFormat,
         HWND windowHandle)
 {

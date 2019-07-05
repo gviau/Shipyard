@@ -28,25 +28,25 @@ namespace Shipyard
         DX11RenderDevice();
         ~DX11RenderDevice();
 
-        bool Create();
+        shipBool Create();
         void Destroy();
 
-        GFXVertexBufferHandle CreateVertexBuffer(uint32_t numVertices, VertexFormatType vertexFormatType, bool dynamic, void* initialData);
+        GFXVertexBufferHandle CreateVertexBuffer(shipUint32 numVertices, VertexFormatType vertexFormatType, shipBool dynamic, void* initialData);
         void DestroyVertexBuffer(GFXVertexBufferHandle gfxVertexBufferHandle);
         GFXVertexBuffer& GetVertexBuffer(GFXVertexBufferHandle gfxVertexBufferHandle);
         const GFXVertexBuffer& GetVertexBuffer(GFXVertexBufferHandle gfxVertexBufferHandle) const;
 
-        GFXIndexBufferHandle CreateIndexBuffer(uint32_t numIndices, bool uses2BytesPerIndex, bool dynamic, void* initialData);
+        GFXIndexBufferHandle CreateIndexBuffer(shipUint32 numIndices, shipBool uses2BytesPerIndex, shipBool dynamic, void* initialData);
         void DestroyIndexBuffer(GFXIndexBufferHandle gfxIndexBufferHandle);
         GFXIndexBuffer& GetIndexBuffer(GFXIndexBufferHandle gfxIndexBufferHandle);
         const GFXIndexBuffer& GetIndexBuffer(GFXIndexBufferHandle gfxIndexBufferHandle) const;
 
-        GFXConstantBufferHandle CreateConstantBuffer(uint32_t dataSizeInBytes, bool dynamic, void* initialData);
+        GFXConstantBufferHandle CreateConstantBuffer(shipUint32 dataSizeInBytes, shipBool dynamic, void* initialData);
         void DestroyConstantBuffer(GFXConstantBufferHandle gfxConstantBufferHandle);
         GFXConstantBuffer& GetConstantBuffer(GFXConstantBufferHandle gfxConstantBufferHandle);
         const GFXConstantBuffer& GetConstantBuffer(GFXConstantBufferHandle gfxConstantBufferHandle) const;
 
-        GFXByteBufferHandle CreateByteBuffer(ByteBuffer::ByteBufferCreationFlags byteBufferCreationFlags, uint32_t dataSizeInBytes, bool dynamic, void* initialData);
+        GFXByteBufferHandle CreateByteBuffer(ByteBuffer::ByteBufferCreationFlags byteBufferCreationFlags, shipUint32 dataSizeInBytes, shipBool dynamic, void* initialData);
         void DestroyByteBuffer(GFXByteBufferHandle gfxByteBufferHandle);
         GFXByteBuffer& GetByteBuffer(GFXByteBufferHandle gfxByteBufferHandle);
         const GFXByteBuffer& GetByteBuffer(GFXByteBufferHandle gfxByteBufferHandle) const;
@@ -54,12 +54,12 @@ namespace Shipyard
         const GFXByteBuffer* GetByteBufferPtr(GFXByteBufferHandle gfxByteBufferHandle) const;
 
         GFXTexture2DHandle CreateTexture2D(
-                uint32_t width,
-                uint32_t height,
+                shipUint32 width,
+                shipUint32 height,
                 GfxFormat pixelFormat,
-                bool dynamic,
+                shipBool dynamic,
                 void* initialData,
-                bool generateMips,
+                shipBool generateMips,
                 TextureUsage textureUsage = TextureUsage::TextureUsage_Default);
         void DestroyTexture2D(GFXTexture2DHandle gfxTexture2dHandle);
         GFXTexture2D& GetTexture2D(GFXTexture2DHandle gfxTexture2dHandle);
@@ -67,7 +67,7 @@ namespace Shipyard
         GFXTexture2D* GetTexture2DPtr(GFXTexture2DHandle gfxTexture2dHandle);
         const GFXTexture2D* GetTexture2DPtr(GFXTexture2DHandle gfxTexture2dHandle) const;
 
-        GFXRenderTargetHandle CreateRenderTarget(GFXTexture2DHandle* texturesToAttach, uint32_t numTexturesToAttach);
+        GFXRenderTargetHandle CreateRenderTarget(GFXTexture2DHandle* texturesToAttach, shipUint32 numTexturesToAttach);
         void DestroyRenderTarget(GFXRenderTargetHandle gfxRenderTargetHandle);
         GFXRenderTarget& GetRenderTarget(GFXRenderTargetHandle gfxRenderTargetHandle);
         const GFXRenderTarget& GetRenderTarget(GFXRenderTargetHandle gfxRenderTargetHandle) const;
@@ -77,12 +77,12 @@ namespace Shipyard
         GFXDepthStencilRenderTarget& GetDepthStencilRenderTarget(GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle);
         const GFXDepthStencilRenderTarget& GetDepthStencilRenderTarget(GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle) const;
 
-        GFXVertexShaderHandle CreateVertexShader(void* shaderData, uint64_t shaderDataSize);
+        GFXVertexShaderHandle CreateVertexShader(void* shaderData, shipUint64 shaderDataSize);
         void DestroyVertexShader(GFXVertexShaderHandle gfxVertexShaderHandle);
         GFXVertexShader& GetVertexShader(GFXVertexShaderHandle gfxVertexShaderHandle);
         const GFXVertexShader& GetVertexShader(GFXVertexShaderHandle gfxVertexShaderHandle) const;
 
-        GFXPixelShaderHandle CreatePixelShader(void* shaderData, uint64_t shaderDataSize);
+        GFXPixelShaderHandle CreatePixelShader(void* shaderData, shipUint64 shaderDataSize);
         void DestroyPixelShader(GFXPixelShaderHandle gfxPixelShaderHandle);
         GFXPixelShader& GetPixelShader(GFXPixelShaderHandle gfxPixelShaderHandle);
         const GFXPixelShader& GetPixelShader(GFXPixelShaderHandle gfxPixelShaderHandle) const;
@@ -104,7 +104,7 @@ namespace Shipyard
         GFXDescriptorSet& GetDescriptorSet(GFXDescriptorSetHandle gfxDescriptorSetHandle);
         const GFXDescriptorSet& GetDescriptorSet(GFXDescriptorSetHandle gfxDescriptorSetHandle) const;
 
-        IDXGISwapChain* CreateSwapchain(uint32_t width, uint32_t height, GfxFormat format, HWND hWnd, GFXTexture2DHandle& swapChainTextureHandle);
+        IDXGISwapChain* CreateSwapchain(shipUint32 width, shipUint32 height, GfxFormat format, HWND hWnd, GFXTexture2DHandle& swapChainTextureHandle);
 
         ID3D11Device* GetDevice() const { return m_Device; }
         ID3D11DeviceContext* GetImmediateDeviceContext() const { return m_ImmediateDeviceContext; }

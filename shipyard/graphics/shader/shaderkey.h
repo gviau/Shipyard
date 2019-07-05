@@ -3,12 +3,10 @@
 #include <system/array.h>
 #include <system/platform.h>
 
-#include <cinttypes>
-
 namespace Shipyard
 {
-    enum class ShaderFamily : uint8_t;
-    enum class ShaderOption : uint32_t;
+    enum class ShaderFamily : shipUint8;
+    enum class ShaderOption : shipUint32;
 
     class ShaderCompiler;
 
@@ -17,14 +15,14 @@ namespace Shipyard
         friend class ShaderCompiler;
 
     public:
-        typedef uint32_t RawShaderKeyType;
+        typedef shipUint32 RawShaderKeyType;
         ShaderKey();
 
         void SetShaderFamily(ShaderFamily shaderFamily);
-        void SetShaderOption(ShaderOption shaderOption, uint32_t value);
+        void SetShaderOption(ShaderOption shaderOption, shipUint32 value);
 
         ShaderFamily GetShaderFamily() const;
-        uint32_t GetShaderOptionValue(ShaderOption shaderOption) const;
+        shipUint32 GetShaderOptionValue(ShaderOption shaderOption) const;
 
         RawShaderKeyType GetRawShaderKey() const;
 
@@ -33,9 +31,9 @@ namespace Shipyard
         static void GetShaderKeyOptionsForShaderFamily(ShaderFamily shaderFamily, Array<ShaderOption>& shaderOptions);
 
         // Required to be used in a map (ShaderHandlerManager)
-        bool operator< (const ShaderKey& rhs) const { return m_RawShaderKey < rhs.m_RawShaderKey; }
-        bool operator== (const ShaderKey& rhs) const { return m_RawShaderKey == rhs.m_RawShaderKey; }
-        bool operator!= (const ShaderKey& rhs) const { return m_RawShaderKey != rhs.m_RawShaderKey; }
+        shipBool operator< (const ShaderKey& rhs) const { return m_RawShaderKey < rhs.m_RawShaderKey; }
+        shipBool operator== (const ShaderKey& rhs) const { return m_RawShaderKey == rhs.m_RawShaderKey; }
+        shipBool operator!= (const ShaderKey& rhs) const { return m_RawShaderKey != rhs.m_RawShaderKey; }
 
         static const RawShaderKeyType ms_ShaderFamilyMask = 0xFF;
         static const RawShaderKeyType ms_ShaderOptionMask = 0xFFFFFF;

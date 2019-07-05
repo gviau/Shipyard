@@ -5,7 +5,7 @@ namespace Shipyard
 
 void NormalizePath(StringT& path)
 {
-    char* pBuffer = path.GetWriteBuffer();
+    shipChar* pBuffer = path.GetWriteBuffer();
 
     while (*pBuffer != '\0')
     {
@@ -22,8 +22,8 @@ void NormalizePath(const StringT& pathToNormalize, StringT* normalizedPath)
 {
     normalizedPath->Resize(pathToNormalize.Size());
 
-    const char* pBuffer = pathToNormalize.GetBuffer();
-    char* pOutBuffer = normalizedPath->GetWriteBuffer();
+    const shipChar* pBuffer = pathToNormalize.GetBuffer();
+    shipChar* pOutBuffer = normalizedPath->GetWriteBuffer();
 
     while (*pBuffer != '\0')
     {

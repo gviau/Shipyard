@@ -7,7 +7,7 @@ namespace Shipyard
     class SHIPYARD_API DX11DescriptorSet : public DescriptorSet
     {
     public:
-        bool Create(DescriptorSetType descriptorSetType, RootSignature* rootSignature, const Array<DescriptorSetEntryDeclaration>& descriptorSetEntryDeclarations);
+        shipBool Create(DescriptorSetType descriptorSetType, RootSignature* rootSignature, const Array<DescriptorSetEntryDeclaration>& descriptorSetEntryDeclarations);
         void Destroy();
     };
 }

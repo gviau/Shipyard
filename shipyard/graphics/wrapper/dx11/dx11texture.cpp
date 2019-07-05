@@ -102,14 +102,14 @@ DX11Texture2D::DX11Texture2D(ID3D11Device& device, ID3D11Texture2D& texture, Gfx
     m_PixelFormat = format;
 }
 
-bool DX11Texture2D::Create(
+shipBool DX11Texture2D::Create(
         ID3D11Device& device,
-        uint32_t width,
-        uint32_t height,
+        shipUint32 width,
+        shipUint32 height,
         GfxFormat pixelFormat,
-        bool dynamic,
+        shipBool dynamic,
         void* initialData,
-        bool generateMips,
+        shipBool generateMips,
         TextureUsage textureUsage)
 {
     m_Width = width;
@@ -169,7 +169,7 @@ bool DX11Texture2D::Create(
     HRESULT hr;
     if (initialData != nullptr)
     {
-        uint32_t rowPitch = GetRowPitch(width, pixelFormat);
+        shipUint32 rowPitch = GetRowPitch(width, pixelFormat);
 
         D3D11_SUBRESOURCE_DATA data;
         data.pSysMem = initialData;

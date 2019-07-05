@@ -18,9 +18,9 @@ ShaderInputProvider::~ShaderInputProvider()
 
 namespace ShaderInputProviderUtils
 {
-    bool IsUsingConstantBuffer(ShaderInputProviderUsage shaderInputProviderUsage)
+    shipBool IsUsingConstantBuffer(ShaderInputProviderUsage shaderInputProviderUsage)
     {
-        SHIP_STATIC_ASSERT_MSG(uint32_t(ShaderInputProviderUsage::Count) == 2, "ShaderInputProviderUsage size changed, need to update this method!");
+        SHIP_STATIC_ASSERT_MSG(shipUint32(ShaderInputProviderUsage::Count) == 2, "ShaderInputProviderUsage size changed, need to update this method!");
 
         switch (shaderInputProviderUsage)
         {
@@ -57,11 +57,11 @@ void ShaderInputProviderManager::RegisterShaderInputProviderDeclaration(ShaderIn
     m_pHead = &shaderInputProviderDeclaration;
 }
 
-bool ShaderInputProviderManager::Initialize(BaseRenderDevice& gfxRenderDevice)
+shipBool ShaderInputProviderManager::Initialize(BaseRenderDevice& gfxRenderDevice)
 {
     m_GfxRenderDevice = &gfxRenderDevice;
 
-    uint32_t shaderInputProviderIdx = 0;
+    shipUint32 shaderInputProviderIdx = 0;
     ShaderInputProviderDeclaration* pCurrent = m_pHead;
     while (pCurrent != nullptr)
     {
@@ -80,17 +80,17 @@ void ShaderInputProviderManager::Destroy()
 
 }
 
-uint32_t ShaderInputProviderManager::GetRequiredSizeForProvider(const ShaderInputProvider& shaderInputProvider) const
+shipUint32 ShaderInputProviderManager::GetRequiredSizeForProvider(const ShaderInputProvider& shaderInputProvider) const
 {
     return shaderInputProvider.GetRequiredSizeForProvider();
 }
 
-uint32_t ShaderInputProviderManager::GetShaderInputProviderDeclarationIndex(const ShaderInputProvider& shaderInputProvider) const
+shipUint32 ShaderInputProviderManager::GetShaderInputProviderDeclarationIndex(const ShaderInputProvider& shaderInputProvider) const
 {
     return shaderInputProvider.GetShaderInputProviderDeclarationIndex();
 }
 
-bool ShaderInputProviderManager::WriteEveryShaderInputProviderFile()
+shipBool ShaderInputProviderManager::WriteEveryShaderInputProviderFile()
 {
     WriteShaderInputProviderUtilsFile();
 
@@ -112,7 +112,7 @@ bool ShaderInputProviderManager::WriteEveryShaderInputProviderFile()
     return true;
 }
 
-bool ShaderInputProviderManager::WriteShaderInputProviderUtilsFile()
+shipBool ShaderInputProviderManager::WriteShaderInputProviderUtilsFile()
 {
     FileHandler shaderInputProviderUtilsFile;
     shaderInputProviderUtilsFile.Open("shaders\\shaderinputproviders\\ShaderInputProviderUtils.hlsl", FileHandlerOpenFlag(FileHandlerOpenFlag::FileHandlerOpenFlag_Write | FileHandlerOpenFlag::FileHandlerOpenFlag_Create));
@@ -129,10 +129,6 @@ bool ShaderInputProviderManager::WriteShaderInputProviderUtilsFile()
 
     content += "ByteAddressBuffer g_UnifiedConstantBuffer;\n";
 
-    // content += "#define UINT_TO_FLOAT(val) asfloat(val)\n";
-    // content += "#define UINT2_TO_FLOAT2(val) float2(UINT_TO_FLOAT(val.x), UINT_TO_FLOAT(val.y))\n";
-    // content += "#define UINT3_TO_FLOAT3(val) float3(UINT_TO_FLOAT(val.x), UINT_TO_FLOAT(val.y))\n";
-
     content += "#endif";
 
     shaderInputProviderUtilsFile.WriteChars(0, content.GetBuffer(), content.Size());
@@ -140,7 +136,7 @@ bool ShaderInputProviderManager::WriteShaderInputProviderUtilsFile()
     return true;
 }
 
-bool ShaderInputProviderManager::WriteSingleShaderInputProviderFile(ShaderInputProviderDeclaration* pShaderInputProviderDeclaration, size_t numBytesBeforeThisProviderInUnifiedBuffer)
+shipBool ShaderInputProviderManager::WriteSingleShaderInputProviderFile(ShaderInputProviderDeclaration* pShaderInputProviderDeclaration, size_t numBytesBeforeThisProviderInUnifiedBuffer)
 {
     StringT shaderInputProviderFileName;
     shaderInputProviderFileName = "shaders\\shaderinputproviders\\";
@@ -159,7 +155,7 @@ bool ShaderInputProviderManager::WriteSingleShaderInputProviderFile(ShaderInputP
     content += pShaderInputProviderDeclaration->m_ShaderInputProviderName;
     content += "\n\n";
 
-    bool isUsingConstantBuffer = ShaderInputProviderUtils::IsUsingConstantBuffer(pShaderInputProviderDeclaration->m_ShaderInputProviderUsage);
+    shipBool isUsingConstantBuffer = ShaderInputProviderUtils::IsUsingConstantBuffer(pShaderInputProviderDeclaration->m_ShaderInputProviderUsage);
 
     if (isUsingConstantBuffer)
     {
@@ -189,7 +185,7 @@ bool ShaderInputProviderManager::WriteSingleShaderInputProviderFile(ShaderInputP
         // content += "struct ";
     }
 
-    for (uint32_t i = 0; i < pShaderInputProviderDeclaration->m_NumShaderInputDeclarations; i++)
+    for (shipUint32 i = 0; i < pShaderInputProviderDeclaration->m_NumShaderInputDeclarations; i++)
     {
         ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration = pShaderInputProviderDeclaration->m_ShaderInputDeclarations[i];
 
@@ -250,7 +246,7 @@ bool ShaderInputProviderManager::WriteSingleShaderInputProviderFile(ShaderInputP
     return true;
 }
 
-bool ShaderInputProviderManager::WriteSingleShaderScalarInput(const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration, StringA& content, bool isUsingConstantBuffer)
+shipBool ShaderInputProviderManager::WriteSingleShaderScalarInput(const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration, StringA& content, shipBool isUsingConstantBuffer)
 {
     // Indented with respect to struct root, for easier readability.
     content += "    ";
@@ -260,7 +256,7 @@ bool ShaderInputProviderManager::WriteSingleShaderScalarInput(const ShaderInputP
         content += "static ";
     }
 
-    SHIP_STATIC_ASSERT_MSG(uint32_t(ShaderInputScalarType::Count) == 33, "ShaderInputScalarType size changed, need to update this switch case!");
+    SHIP_STATIC_ASSERT_MSG(shipUint32(ShaderInputScalarType::Count) == 33, "ShaderInputScalarType size changed, need to update this switch case!");
 
     switch (shaderInputDeclaration.ScalarType)
     {
@@ -371,9 +367,9 @@ bool ShaderInputProviderManager::WriteSingleShaderScalarInput(const ShaderInputP
     return true;
 }
 
-bool ShaderInputProviderManager::WriteShaderInputsOutsideOfStruct(ShaderInputProviderDeclaration* pShaderInputProviderDeclaration, StringA& content)
+shipBool ShaderInputProviderManager::WriteShaderInputsOutsideOfStruct(ShaderInputProviderDeclaration* pShaderInputProviderDeclaration, StringA& content)
 {
-    for (uint32_t i = 0; i < pShaderInputProviderDeclaration->m_NumShaderInputDeclarations; i++)
+    for (shipUint32 i = 0; i < pShaderInputProviderDeclaration->m_NumShaderInputDeclarations; i++)
     {
         ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration = pShaderInputProviderDeclaration->m_ShaderInputDeclarations[i];
 
@@ -388,9 +384,9 @@ bool ShaderInputProviderManager::WriteShaderInputsOutsideOfStruct(ShaderInputPro
     return true;
 }
 
-bool ShaderInputProviderManager::WriteSingleShaderInputOutsideOfStruct(const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration, StringA& content)
+shipBool ShaderInputProviderManager::WriteSingleShaderInputOutsideOfStruct(const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration, StringA& content)
 {
-    SHIP_STATIC_ASSERT_MSG(uint32_t(ShaderInputScalarType::Count) == 33, "ShaderInputScalarType size changed, need to update this switch case!");
+    SHIP_STATIC_ASSERT_MSG(shipUint32(ShaderInputScalarType::Count) == 33, "ShaderInputScalarType size changed, need to update this switch case!");
 
     switch (shaderInputDeclaration.Type)
     {
@@ -456,7 +452,7 @@ bool ShaderInputProviderManager::WriteSingleShaderInputOutsideOfStruct(const Sha
     return true;
 }
 
-bool ShaderInputProviderManager::WriteShaderInputProviderUnifiedBufferAccessMethod(ShaderInputProviderDeclaration* pShaderInputProviderDeclaration, StringA& content)
+shipBool ShaderInputProviderManager::WriteShaderInputProviderUnifiedBufferAccessMethod(ShaderInputProviderDeclaration* pShaderInputProviderDeclaration, StringA& content)
 {
     content += "void Load";
     content += pShaderInputProviderDeclaration->m_ShaderInputProviderName;
@@ -464,7 +460,7 @@ bool ShaderInputProviderManager::WriteShaderInputProviderUnifiedBufferAccessMeth
 
     content += "    uint offsetInUnifiedBuffer = instanceIndex * SHADER_INPUT_PROVIDER_STRIDE + SHADER_INPUT_PROVIDER_OFFSET_IN_GLOBAL_BUFFER;\n";
 
-    for (uint32_t i = 0; i < pShaderInputProviderDeclaration->m_NumShaderInputDeclarations; i++)
+    for (shipUint32 i = 0; i < pShaderInputProviderDeclaration->m_NumShaderInputDeclarations; i++)
     {
         ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration = pShaderInputProviderDeclaration->m_ShaderInputDeclarations[i];
 
@@ -492,7 +488,7 @@ namespace ShaderInputProviderUtils
         Bool
     };
 
-    void GetBaseHighLevelScalarType(ScalarHighLevelType scalarHighLevelType, uint32_t numComponentsX, StringA& castType)
+    void GetBaseHighLevelScalarType(ScalarHighLevelType scalarHighLevelType, shipUint32 numComponentsX, StringA& castType)
     {
         switch (scalarHighLevelType)
         {
@@ -517,7 +513,7 @@ namespace ShaderInputProviderUtils
         }
     }
 
-    void AddLoadingCodeFromUnifiedBufferForShaderInput(ScalarHighLevelType scalarHighLevelType, uint32_t numComponentsX, uint32_t numComponentsY, uint32_t offsetInBuffer, StringA& content)
+    void AddLoadingCodeFromUnifiedBufferForShaderInput(ScalarHighLevelType scalarHighLevelType, shipUint32 numComponentsX, shipUint32 numComponentsY, shipUint32 offsetInBuffer, StringA& content)
     {
         SHIP_ASSERT(numComponentsX > 0);
         SHIP_ASSERT(numComponentsY > 0);
@@ -548,7 +544,7 @@ namespace ShaderInputProviderUtils
             content += "\n";
         }
 
-        for (uint32_t y = 0; y < numComponentsY; y++)
+        for (shipUint32 y = 0; y < numComponentsY; y++)
         {
             if (numComponentsY > 1)
             {
@@ -638,7 +634,7 @@ namespace ShaderInputProviderUtils
                 break;
             }
 
-            bool isNotLastYComponent = (y < numComponentsY - 1);
+            shipBool isNotLastYComponent = (y < numComponentsY - 1);
             if (isNotLastYComponent)
             {
                 content += ",\n";
@@ -654,18 +650,18 @@ namespace ShaderInputProviderUtils
     }
 }
 
-bool ShaderInputProviderManager::WriteShaderInputScalarLoadFromBuffer(const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration, StringA& content)
+shipBool ShaderInputProviderManager::WriteShaderInputScalarLoadFromBuffer(const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration, StringA& content)
 {
     // Indented with respect to method root, for easier readability.
     content += "    ";
     content += shaderInputDeclaration.Name;
     content += " = ";
 
-    SHIP_STATIC_ASSERT_MSG(uint32_t(ShaderInputScalarType::Count) == 33, "ShaderInputScalarType size changed, need to update this switch case!");
+    SHIP_STATIC_ASSERT_MSG(shipUint32(ShaderInputScalarType::Count) == 33, "ShaderInputScalarType size changed, need to update this switch case!");
 
     ShaderInputProviderUtils::ScalarHighLevelType scalarHighLevelType = ShaderInputProviderUtils::ScalarHighLevelType::Float;
-    uint32_t numComponentsX = 0;
-    uint32_t numComponentsY = 0;
+    shipUint32 numComponentsX = 0;
+    shipUint32 numComponentsY = 0;
 
     switch (shaderInputDeclaration.ScalarType)
     {
@@ -843,7 +839,7 @@ bool ShaderInputProviderManager::WriteShaderInputScalarLoadFromBuffer(const Shad
 
 void ShaderInputProviderManager::GetShaderInputProviderDeclarations(Array<ShaderInputProviderDeclaration*>& shaderInputProviderDeclarations) const
 {
-    uint32_t numShaderInputProviderDeclarations = 0;
+    shipUint32 numShaderInputProviderDeclarations = 0;
     ShaderInputProviderDeclaration* pCurrent = m_pHead;
     while (pCurrent != nullptr)
     {
@@ -869,7 +865,7 @@ void ShaderInputProviderManager::CopyShaderInputsToBuffer(const ShaderInputProvi
 
     ShaderInputProviderDeclaration* shaderInputProviderDeclaration = shaderInputProvider.GetShaderInputProviderDeclaration();
 
-    for (uint32_t shaderInputIdx = 0; shaderInputIdx < shaderInputProviderDeclaration->m_NumShaderInputDeclarations; shaderInputIdx++)
+    for (shipUint32 shaderInputIdx = 0; shaderInputIdx < shaderInputProviderDeclaration->m_NumShaderInputDeclarations; shaderInputIdx++)
     {
         const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration = shaderInputProviderDeclaration->m_ShaderInputDeclarations[shaderInputIdx];
         if (shaderInputDeclaration.Type != ShaderInputType::Scalar)
@@ -878,8 +874,8 @@ void ShaderInputProviderManager::CopyShaderInputsToBuffer(const ShaderInputProvi
         }
 
         // Might need to change this to not always use a memcpy, overhead might be too big for small data sizes?
-        void* pDest = reinterpret_cast<void*>(int64_t(pBuffer) + int64_t(shaderInputDeclaration.DataOffsetInBuffer));
-        void* pSrc = reinterpret_cast<void*>(int64_t(pShaderInputProvider) + int64_t(shaderInputDeclaration.DataOffsetInProvider));
+        void* pDest = reinterpret_cast<void*>(shipInt64(pBuffer) + shipInt64(shaderInputDeclaration.DataOffsetInBuffer));
+        void* pSrc = reinterpret_cast<void*>(shipInt64(pShaderInputProvider) + shipInt64(shaderInputDeclaration.DataOffsetInProvider));
 
         memcpy(pDest, pSrc, shaderInputDeclaration.DataSize);
     }
@@ -890,8 +886,8 @@ void ShaderInputProviderManager::CreateShaderInputProviderConstantBuffer(ShaderI
     SHIP_ASSERT(m_GfxRenderDevice != nullptr);
     GFXRenderDevice* gfxRenderDevice = static_cast<GFXRenderDevice*>(m_GfxRenderDevice);
 
-    uint32_t constantBufferSize = shaderInputProvider->GetRequiredSizeForProvider();
-    constexpr bool dynamic = true;
+    shipUint32 constantBufferSize = shaderInputProvider->GetRequiredSizeForProvider();
+    constexpr shipBool dynamic = true;
     constexpr void* initialData = nullptr;
 
     shaderInputProvider->m_GfxConstantBufferHandle = gfxRenderDevice->CreateConstantBuffer(constantBufferSize, dynamic, initialData);
@@ -905,17 +901,17 @@ void ShaderInputProviderManager::DestroyShaderInputProviderConstantBuffer(Shader
     gfxRenderDevice->DestroyConstantBuffer(shaderInputProvider->m_GfxConstantBufferHandle);
 }
 
-uint32_t ShaderInputProviderManager::GetTexture2DHandlesFromProvider(const ShaderInputProvider& shaderInputProvider, GFXTexture2DHandle* pGfxTextureHandles) const
+shipUint32 ShaderInputProviderManager::GetTexture2DHandlesFromProvider(const ShaderInputProvider& shaderInputProvider, GFXTexture2DHandle* pGfxTextureHandles) const
 {
-    uint32_t numTexture2DHandles = 0;
+    shipUint32 numTexture2DHandles = 0;
     size_t providerAddress = reinterpret_cast<size_t>(&shaderInputProvider);
 
     ShaderInputProviderDeclaration* shaderInputProviderDeclaration = shaderInputProvider.GetShaderInputProviderDeclaration();
 
-    uint32_t numShaderInputDeclarations = 0;
+    shipUint32 numShaderInputDeclarations = 0;
     const ShaderInputProviderDeclaration::ShaderInputDeclaration* shaderInputDeclarations = shaderInputProviderDeclaration->GetShaderInputDeclarations(numShaderInputDeclarations);
 
-    for (uint32_t i = 0; i < numShaderInputDeclarations; i++)
+    for (shipUint32 i = 0; i < numShaderInputDeclarations; i++)
     {
         const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration = shaderInputDeclarations[i];
 
@@ -947,19 +943,19 @@ ShaderInputProviderDeclaration::ShaderInputProviderDeclaration()
     GetShaderInputProviderManager().RegisterShaderInputProviderDeclaration(*this);
 }
 
-const ShaderInputProviderDeclaration::ShaderInputDeclaration* ShaderInputProviderDeclaration::GetShaderInputDeclarations(uint32_t& numShaderInputDeclarations) const
+const ShaderInputProviderDeclaration::ShaderInputDeclaration* ShaderInputProviderDeclaration::GetShaderInputDeclarations(shipUint32& numShaderInputDeclarations) const
 {
     numShaderInputDeclarations = m_NumShaderInputDeclarations;
 
     return m_ShaderInputDeclarations;
 }
 
-uint32_t ShaderInputProviderDeclaration::GetRequiredSizeForProvider() const
+shipUint32 ShaderInputProviderDeclaration::GetRequiredSizeForProvider() const
 {
     return m_RequiredSizeForProvider;
 }
 
-uint32_t ShaderInputProviderDeclaration::GetShaderInputProviderDeclarationIndex() const
+shipUint32 ShaderInputProviderDeclaration::GetShaderInputProviderDeclarationIndex() const
 {
     return m_ShaderInputProviderDeclarationIndex;
 }
@@ -970,37 +966,37 @@ ShaderInputProviderUsage ShaderInputProviderDeclaration::GetShaderInputProviderU
 }
 
 // template <typename T> ShaderInputScalarType GetShaderInputScalarType(const T& data) { return ShaderInputScalarType::Unknown; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const float& data) { return ShaderInputScalarType::Float; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::vec2& data) { return ShaderInputScalarType::Float2; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::vec3& data) { return ShaderInputScalarType::Float3; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::vec4& data) { return ShaderInputScalarType::Float4; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipFloat& data) { return ShaderInputScalarType::Float; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipVec2& data) { return ShaderInputScalarType::Float2; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipVec3& data) { return ShaderInputScalarType::Float3; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipVec4& data) { return ShaderInputScalarType::Float4; }
 
-template <> ShaderInputScalarType GetShaderInputScalarType(const double& data) { return ShaderInputScalarType::Double; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::dvec2& data) { return ShaderInputScalarType::Double2; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::dvec3& data) { return ShaderInputScalarType::Double3; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::dvec4& data) { return ShaderInputScalarType::Double4; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipDouble& data) { return ShaderInputScalarType::Double; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipDVec2& data) { return ShaderInputScalarType::Double2; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipDVec3& data) { return ShaderInputScalarType::Double3; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipDVec4& data) { return ShaderInputScalarType::Double4; }
 
-template <> ShaderInputScalarType GetShaderInputScalarType(const int32_t& data) { return ShaderInputScalarType::Int; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::ivec2& data) { return ShaderInputScalarType::Int2; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::ivec3& data) { return ShaderInputScalarType::Int3; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::ivec4& data) { return ShaderInputScalarType::Int4; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipInt32& data) { return ShaderInputScalarType::Int; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipIVec2& data) { return ShaderInputScalarType::Int2; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipIVec3& data) { return ShaderInputScalarType::Int3; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipIVec4& data) { return ShaderInputScalarType::Int4; }
 
-template <> ShaderInputScalarType GetShaderInputScalarType(const uint32_t& data) { return ShaderInputScalarType::Uint; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::uvec2& data) { return ShaderInputScalarType::Uint2; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::uvec3& data) { return ShaderInputScalarType::Uint3; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::uvec4& data) { return ShaderInputScalarType::Uint4; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipUint32& data) { return ShaderInputScalarType::Uint; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipUVec2& data) { return ShaderInputScalarType::Uint2; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipUVec3& data) { return ShaderInputScalarType::Uint3; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipUVec4& data) { return ShaderInputScalarType::Uint4; }
 
-template <> ShaderInputScalarType GetShaderInputScalarType(const bool& data) { return ShaderInputScalarType::Bool; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::bvec2& data) { return ShaderInputScalarType::Bool2; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::bvec3& data) { return ShaderInputScalarType::Bool3; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::bvec4& data) { return ShaderInputScalarType::Bool4; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipBool& data) { return ShaderInputScalarType::Bool; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipBVec2& data) { return ShaderInputScalarType::Bool2; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipBVec3& data) { return ShaderInputScalarType::Bool3; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipBVec4& data) { return ShaderInputScalarType::Bool4; }
 
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::mat2x2& data) { return ShaderInputScalarType::Float2x2; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::mat3x3& data) { return ShaderInputScalarType::Float3x3; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::mat4x4& data) { return ShaderInputScalarType::Float4x4; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipMat2x2& data) { return ShaderInputScalarType::Float2x2; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipMat3x3& data) { return ShaderInputScalarType::Float3x3; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipMat4x4& data) { return ShaderInputScalarType::Float4x4; }
 
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::dmat2x2& data) { return ShaderInputScalarType::Double2x2; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::dmat3x3& data) { return ShaderInputScalarType::Double3x3; }
-template <> ShaderInputScalarType GetShaderInputScalarType(const glm::dmat4x4& data) { return ShaderInputScalarType::Double4x4; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipDMat2x2& data) { return ShaderInputScalarType::Double2x2; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipDMat3x3& data) { return ShaderInputScalarType::Double3x3; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const shipDMat4x4& data) { return ShaderInputScalarType::Double4x4; }
 
 }

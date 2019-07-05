@@ -1,6 +1,8 @@
 #pragma once
 
-// This file is heavely inspired from Ogre3D's OgrePlatform.h file and
+#include <cinttypes>
+
+// This file is heavily inspired from Ogre3D's OgrePlatform.h file and
 // OgrePlatformInformation.h files. Big thanks to them.
 namespace Shipyard
 {
@@ -94,4 +96,19 @@ namespace Shipyard
 
     // Uncomment the following to have virtual methods in each of the wrappers' base class to make sure that your implementation is valid
 #define DEBUG_WRAPPER_INTERFACE_COMPILATION
+
+    // Shipyard types
+    using shipBool = bool;
+    using shipChar = char;
+    using shipByte = unsigned char;
+    using shipInt8 = int8_t;
+    using shipUint8 = uint8_t;
+    using shipInt16 = int16_t;
+    using shipUint16 = uint16_t;
+    using shipInt32 = int32_t;
+    using shipUint32 = uint32_t;
+    using shipInt64 = int64_t;
+    using shipUint64 = uint64_t;
+    using shipFloat = float;
+    using shipDouble = double;
 }

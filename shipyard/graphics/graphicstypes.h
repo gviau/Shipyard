@@ -1,10 +1,10 @@
 #pragma once
 
-#include <inttypes.h>
+#include <system/platform.h>
 
 namespace Shipyard
 {
-    const uint32_t InvalidGfxHandle = 0xffffffff;
+    const shipUint32 InvalidGfxHandle = 0xffffffff;
 
     struct GFXVertexBufferHandle
     {
@@ -14,13 +14,13 @@ namespace Shipyard
 
         }
 
-        GFXVertexBufferHandle(uint32_t _handle)
+        GFXVertexBufferHandle(shipUint32 _handle)
             : handle(_handle)
         {
 
         }
 
-        uint32_t handle;
+        shipUint32 handle;
     };
 
     struct GFXIndexBufferHandle
@@ -31,13 +31,13 @@ namespace Shipyard
 
         }
 
-        GFXIndexBufferHandle(uint32_t _handle)
+        GFXIndexBufferHandle(shipUint32 _handle)
             : handle(_handle)
         {
 
         }
 
-        uint32_t handle;
+        shipUint32 handle;
     };
 
     struct GFXConstantBufferHandle
@@ -48,13 +48,13 @@ namespace Shipyard
 
         }
 
-        GFXConstantBufferHandle(uint32_t _handle)
+        GFXConstantBufferHandle(shipUint32 _handle)
             : handle(_handle)
         {
 
         }
 
-        uint32_t handle;
+        shipUint32 handle;
     };
 
     struct GFXByteBufferHandle
@@ -65,13 +65,13 @@ namespace Shipyard
 
         }
 
-        GFXByteBufferHandle(uint32_t _handle)
+        GFXByteBufferHandle(shipUint32 _handle)
             : handle(_handle)
         {
 
         }
 
-        uint32_t handle;
+        shipUint32 handle;
     };
 
     struct GFXDescriptorSetHandle
@@ -82,13 +82,13 @@ namespace Shipyard
 
         }
 
-        GFXDescriptorSetHandle(uint32_t _handle)
+        GFXDescriptorSetHandle(shipUint32 _handle)
             : handle(_handle)
         {
 
         }
 
-        uint32_t handle;
+        shipUint32 handle;
     };
 
     struct GFXPipelineStateObjectHandle
@@ -99,13 +99,13 @@ namespace Shipyard
 
         }
 
-        GFXPipelineStateObjectHandle(uint32_t _handle)
+        GFXPipelineStateObjectHandle(shipUint32 _handle)
             : handle(_handle)
         {
 
         }
 
-        uint32_t handle;
+        shipUint32 handle;
     };
 
     struct GFXRenderTargetHandle
@@ -116,13 +116,13 @@ namespace Shipyard
 
         }
 
-        GFXRenderTargetHandle(uint32_t _handle)
+        GFXRenderTargetHandle(shipUint32 _handle)
             : handle(_handle)
         {
 
         }
 
-        uint32_t handle;
+        shipUint32 handle;
     };
 
     struct GFXDepthStencilRenderTargetHandle
@@ -133,13 +133,13 @@ namespace Shipyard
 
         }
 
-        GFXDepthStencilRenderTargetHandle(uint32_t _handle)
+        GFXDepthStencilRenderTargetHandle(shipUint32 _handle)
             : handle(_handle)
         {
 
         }
 
-        uint32_t handle;
+        shipUint32 handle;
     };
 
     struct GFXRootSignatureHandle
@@ -150,13 +150,13 @@ namespace Shipyard
 
         }
 
-        GFXRootSignatureHandle(uint32_t _handle)
+        GFXRootSignatureHandle(shipUint32 _handle)
             : handle(_handle)
         {
 
         }
 
-        uint32_t handle;
+        shipUint32 handle;
     };
 
     struct GFXVertexShaderHandle
@@ -167,13 +167,13 @@ namespace Shipyard
 
         }
 
-        GFXVertexShaderHandle(uint32_t _handle)
+        GFXVertexShaderHandle(shipUint32 _handle)
             : handle(_handle)
         {
 
         }
 
-        uint32_t handle;
+        shipUint32 handle;
     };
 
     struct GFXPixelShaderHandle
@@ -184,13 +184,13 @@ namespace Shipyard
 
         }
 
-        GFXPixelShaderHandle(uint32_t _handle)
+        GFXPixelShaderHandle(shipUint32 _handle)
             : handle(_handle)
         {
 
         }
 
-        uint32_t handle;
+        shipUint32 handle;
     };
 
     struct GFXTexture2DHandle
@@ -201,12 +201,12 @@ namespace Shipyard
 
         }
 
-        GFXTexture2DHandle(uint32_t _handle)
+        GFXTexture2DHandle(shipUint32 _handle)
             : handle(_handle)
         {
 
         }
 
-        uint32_t handle;
+        shipUint32 handle;
     };
 }

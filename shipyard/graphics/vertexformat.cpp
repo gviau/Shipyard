@@ -54,7 +54,7 @@ VertexFormat_Pos_UV_Normal::VertexFormat_Pos_UV_Normal()
 
 void GetVertexFormat(VertexFormatType vertexFormatType, VertexFormat*& vertexFormat)
 {
-    SHIP_STATIC_ASSERT_MSG(uint32_t(VertexFormatType::VertexFormatType_Count) == 5, "Update the GetVertexFormat function if you add or remove vertex formats");
+    SHIP_STATIC_ASSERT_MSG(shipUint32(VertexFormatType::VertexFormatType_Count) == 5, "Update the GetVertexFormat function if you add or remove vertex formats");
 
     switch (vertexFormatType)
     {
@@ -67,16 +67,16 @@ void GetVertexFormat(VertexFormatType vertexFormatType, VertexFormat*& vertexFor
 }
 
 
-bool VertexFormatTypeContainsColor(VertexFormatType type)
+shipBool VertexFormatTypeContainsColor(VertexFormatType type)
 {
-    SHIP_STATIC_ASSERT_MSG(uint32_t(VertexFormatType::VertexFormatType_Count) == 5, "Update the VertexFormatTypeContainsColor function if you add or remove vertex formats");
+    SHIP_STATIC_ASSERT_MSG(shipUint32(VertexFormatType::VertexFormatType_Count) == 5, "Update the VertexFormatTypeContainsColor function if you add or remove vertex formats");
 
     return (type == VertexFormatType::Pos_Color);
 }
 
-bool VertexFormatTypeContainsUV(VertexFormatType type)
+shipBool VertexFormatTypeContainsUV(VertexFormatType type)
 {
-    SHIP_STATIC_ASSERT_MSG(uint32_t(VertexFormatType::VertexFormatType_Count) == 5, "Update the VertexFormatTypeContainsUV function if you add or remove vertex formats");
+    SHIP_STATIC_ASSERT_MSG(shipUint32(VertexFormatType::VertexFormatType_Count) == 5, "Update the VertexFormatTypeContainsUV function if you add or remove vertex formats");
 
     switch (type)
     {
@@ -88,9 +88,9 @@ bool VertexFormatTypeContainsUV(VertexFormatType type)
     return false;
 }
 
-bool VertexFormatTypeContainsNormals(VertexFormatType type)
+shipBool VertexFormatTypeContainsNormals(VertexFormatType type)
 {
-    SHIP_STATIC_ASSERT_MSG(uint32_t(VertexFormatType::VertexFormatType_Count) == 5, "Update the VertexFormatTypeContainsNormals function if you add or remove vertex formats");
+    SHIP_STATIC_ASSERT_MSG(shipUint32(VertexFormatType::VertexFormatType_Count) == 5, "Update the VertexFormatTypeContainsNormals function if you add or remove vertex formats");
 
     switch (type)
     {

@@ -20,10 +20,10 @@ namespace Shipyard
     public:
         DX11ViewSurface();
 
-        bool Create(
+        shipBool Create(
                 DX11RenderDevice& renderDevice,
-                uint32_t width,
-                uint32_t height,
+                shipUint32 width,
+                shipUint32 height,
                 GfxFormat viewSurfaceFormat,
                 HWND windowHandle);
         void Destroy();

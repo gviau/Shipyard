@@ -19,7 +19,7 @@ namespace Shipyard
     public:
         DX11VertexShader();
 
-        bool Create(ID3D11Device& device, void* shaderData, uint64_t shaderDataSize);
+        shipBool Create(ID3D11Device& device, void* shaderData, shipUint64 shaderDataSize);
         void Destroy();
 
         ID3D11VertexShader* GetShader() const { return m_VertexShader; }
@@ -33,7 +33,7 @@ namespace Shipyard
     public:
         DX11PixelShader();
 
-        bool Create(ID3D11Device& device, void* shaderData, uint64_t shaderDataSize);
+        shipBool Create(ID3D11Device& device, void* shaderData, shipUint64 shaderDataSize);
         void Destroy();
 
         ID3D11PixelShader* GetShader() const { return m_PixelShader; }

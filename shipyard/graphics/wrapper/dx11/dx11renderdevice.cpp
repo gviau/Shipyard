@@ -22,7 +22,7 @@ namespace Shipyard
 {;
 
 // Used to not have to constantly create new input layouts
-ID3D11InputLayout* g_RegisteredInputLayouts[uint32_t(VertexFormatType::VertexFormatType_Count)];
+ID3D11InputLayout* g_RegisteredInputLayouts[shipUint32(VertexFormatType::VertexFormatType_Count)];
 
 ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatType vertexFormatType);
 
@@ -37,7 +37,7 @@ DX11RenderDevice::~DX11RenderDevice()
     Destroy();
 }
 
-bool DX11RenderDevice::Create()
+shipBool DX11RenderDevice::Create()
 {
     UINT flags = 0; // D3D11_CREATE_DEVICE_DEBUG;
     HRESULT hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, NULL, flags, nullptr, 0, D3D11_SDK_VERSION, &m_Device, nullptr, &m_ImmediateDeviceContext);
@@ -47,7 +47,7 @@ bool DX11RenderDevice::Create()
         return false;
     }
 
-    for (uint32_t i = 0; i < uint32_t(VertexFormatType::VertexFormatType_Count); i++)
+    for (shipUint32 i = 0; i < shipUint32(VertexFormatType::VertexFormatType_Count); i++)
     {
         g_RegisteredInputLayouts[i] = RegisterVertexFormatType(m_Device, VertexFormatType(i));
     }
@@ -129,7 +129,7 @@ bool DX11RenderDevice::Create()
 
 void DX11RenderDevice::Destroy()
 {
-    for (uint32_t i = 0; i < uint32_t(VertexFormatType::VertexFormatType_Count); i++)
+    for (shipUint32 i = 0; i < shipUint32(VertexFormatType::VertexFormatType_Count); i++)
     {
         if (g_RegisteredInputLayouts[i] != nullptr)
         {
@@ -137,7 +137,7 @@ void DX11RenderDevice::Destroy()
         }
     }
 
-    uint32_t indexToFree = 0;
+    shipUint32 indexToFree = 0;
     if (m_VertexBufferPool.GetFirstAllocatedIndex(&indexToFree))
     {
         do
@@ -257,13 +257,13 @@ void DX11RenderDevice::Destroy()
     }
 }
 
-GFXVertexBufferHandle DX11RenderDevice::CreateVertexBuffer(uint32_t numVertices, VertexFormatType vertexFormatType, bool dynamic, void* initialData)
+GFXVertexBufferHandle DX11RenderDevice::CreateVertexBuffer(shipUint32 numVertices, VertexFormatType vertexFormatType, shipBool dynamic, void* initialData)
 {
     GFXVertexBufferHandle gfxVertexBufferHandle;
     gfxVertexBufferHandle.handle = m_VertexBufferPool.GetNewItemIndex();
 
     GFXVertexBuffer& gfxVertexBuffer = m_VertexBufferPool.GetItem(gfxVertexBufferHandle.handle);
-    bool isValid = gfxVertexBuffer.Create(*m_Device, *m_ImmediateDeviceContext, numVertices, vertexFormatType, dynamic, initialData);
+    shipBool isValid = gfxVertexBuffer.Create(*m_Device, *m_ImmediateDeviceContext, numVertices, vertexFormatType, dynamic, initialData);
 
     SHIP_ASSERT(isValid);
     
@@ -289,13 +289,13 @@ const GFXVertexBuffer& DX11RenderDevice::GetVertexBuffer(GFXVertexBufferHandle g
     return m_VertexBufferPool.GetItem(gfxVertexBufferHandle.handle);
 }
 
-GFXIndexBufferHandle DX11RenderDevice::CreateIndexBuffer(uint32_t numIndices, bool uses2BytesPerIndex, bool dynamic, void* initialData)
+GFXIndexBufferHandle DX11RenderDevice::CreateIndexBuffer(shipUint32 numIndices, shipBool uses2BytesPerIndex, shipBool dynamic, void* initialData)
 {
     GFXIndexBufferHandle gfxIndexBufferHandle;
     gfxIndexBufferHandle.handle = m_IndexBufferPool.GetNewItemIndex();
 
     GFXIndexBuffer& gfxIndexBuffer = m_IndexBufferPool.GetItem(gfxIndexBufferHandle.handle);
-    bool isValid = gfxIndexBuffer.Create(*m_Device, *m_ImmediateDeviceContext, numIndices, uses2BytesPerIndex, dynamic, initialData);
+    shipBool isValid = gfxIndexBuffer.Create(*m_Device, *m_ImmediateDeviceContext, numIndices, uses2BytesPerIndex, dynamic, initialData);
 
     SHIP_ASSERT(isValid);
 
@@ -321,13 +321,13 @@ const GFXIndexBuffer& DX11RenderDevice::GetIndexBuffer(GFXIndexBufferHandle gfxI
     return m_IndexBufferPool.GetItem(gfxIndexBufferHandle.handle);
 }
 
-GFXConstantBufferHandle DX11RenderDevice::CreateConstantBuffer(uint32_t dataSizeInBytes, bool dynamic, void* initialData)
+GFXConstantBufferHandle DX11RenderDevice::CreateConstantBuffer(shipUint32 dataSizeInBytes, shipBool dynamic, void* initialData)
 {
     GFXConstantBufferHandle gfxConstantBufferHandle;
     gfxConstantBufferHandle.handle = m_ConstantBufferPool.GetNewItemIndex();
 
     GFXConstantBuffer& gfxConstantBuffer = m_ConstantBufferPool.GetItem(gfxConstantBufferHandle.handle);
-    bool isValid = gfxConstantBuffer.Create(*m_Device, *m_ImmediateDeviceContext, dataSizeInBytes, dynamic, initialData);
+    shipBool isValid = gfxConstantBuffer.Create(*m_Device, *m_ImmediateDeviceContext, dataSizeInBytes, dynamic, initialData);
 
     SHIP_ASSERT(isValid);
 
@@ -353,13 +353,13 @@ const GFXConstantBuffer& DX11RenderDevice::GetConstantBuffer(GFXConstantBufferHa
     return m_ConstantBufferPool.GetItem(gfxConstantBufferHandle.handle);
 }
 
-GFXByteBufferHandle DX11RenderDevice::CreateByteBuffer(ByteBuffer::ByteBufferCreationFlags byteBufferCreationFlags, uint32_t dataSizeInBytes, bool dynamic, void* initialData)
+GFXByteBufferHandle DX11RenderDevice::CreateByteBuffer(ByteBuffer::ByteBufferCreationFlags byteBufferCreationFlags, shipUint32 dataSizeInBytes, shipBool dynamic, void* initialData)
 {
     GFXByteBufferHandle gfxByteBufferHandle;
     gfxByteBufferHandle.handle = m_ByteBufferPool.GetNewItemIndex();
 
     GFXByteBuffer& gfxByteBuffer = m_ByteBufferPool.GetItem(gfxByteBufferHandle.handle);
-    bool isValid = gfxByteBuffer.Create(*m_Device, *m_ImmediateDeviceContext, byteBufferCreationFlags, dataSizeInBytes, dynamic, initialData);
+    shipBool isValid = gfxByteBuffer.Create(*m_Device, *m_ImmediateDeviceContext, byteBufferCreationFlags, dataSizeInBytes, dynamic, initialData);
 
     SHIP_ASSERT(isValid);
 
@@ -395,13 +395,13 @@ const GFXByteBuffer* DX11RenderDevice::GetByteBufferPtr(GFXByteBufferHandle gfxB
     return m_ByteBufferPool.GetItemPtr(gfxByteBufferHandle.handle);
 }
 
-GFXTexture2DHandle DX11RenderDevice::CreateTexture2D(uint32_t width, uint32_t height, GfxFormat pixelFormat, bool dynamic, void* initialData, bool generateMips, TextureUsage textureUsage)
+GFXTexture2DHandle DX11RenderDevice::CreateTexture2D(shipUint32 width, shipUint32 height, GfxFormat pixelFormat, shipBool dynamic, void* initialData, shipBool generateMips, TextureUsage textureUsage)
 {
     GFXTexture2DHandle gfxTexture2dHandle;
     gfxTexture2dHandle.handle = m_Texture2dPool.GetNewItemIndex();
 
     GFXTexture2D& gfxTexture2d = m_Texture2dPool.GetItem(gfxTexture2dHandle.handle);
-    bool isValid = gfxTexture2d.Create(*m_Device, width, height, pixelFormat, dynamic, initialData, generateMips, textureUsage);
+    shipBool isValid = gfxTexture2d.Create(*m_Device, width, height, pixelFormat, dynamic, initialData, generateMips, textureUsage);
 
     SHIP_ASSERT(isValid);
 
@@ -437,7 +437,7 @@ const GFXTexture2D* DX11RenderDevice::GetTexture2DPtr(GFXTexture2DHandle gfxText
     return m_Texture2dPool.GetItemPtr(gfxTexture2dHandle.handle);
 }
 
-GFXRenderTargetHandle DX11RenderDevice::CreateRenderTarget(GFXTexture2DHandle* texturesToAttach, uint32_t numTexturesToAttach)
+GFXRenderTargetHandle DX11RenderDevice::CreateRenderTarget(GFXTexture2DHandle* texturesToAttach, shipUint32 numTexturesToAttach)
 {
     GFXRenderTargetHandle gfxRenderTargetHandle;
     gfxRenderTargetHandle.handle = m_RenderTargetPool.GetNewItemIndex();
@@ -445,7 +445,7 @@ GFXRenderTargetHandle DX11RenderDevice::CreateRenderTarget(GFXTexture2DHandle* t
     GFXRenderTarget& gfxRenderTarget = m_RenderTargetPool.GetItem(gfxRenderTargetHandle.handle);
 
     GFXTexture2D* textures[GfxConstants_MaxRenderTargetsBound];
-    for (uint32_t i = 0; i < numTexturesToAttach; i++)
+    for (shipUint32 i = 0; i < numTexturesToAttach; i++)
     {
         if (texturesToAttach[i].handle == InvalidGfxHandle)
         {
@@ -457,7 +457,7 @@ GFXRenderTargetHandle DX11RenderDevice::CreateRenderTarget(GFXTexture2DHandle* t
         }
     }
 
-    bool isValid = gfxRenderTarget.Create(*m_Device, textures, numTexturesToAttach);
+    shipBool isValid = gfxRenderTarget.Create(*m_Device, textures, numTexturesToAttach);
 
     SHIP_ASSERT(isValid);
 
@@ -494,7 +494,7 @@ GFXDepthStencilRenderTargetHandle DX11RenderDevice::CreateDepthStencilRenderTarg
 
     GFXTexture2D& gfxDepthStencilTexture = m_Texture2dPool.GetItem(depthStencilTexture.handle);
 
-    bool isValid = gfxDepthStencilRenderTarget.Create(*m_Device, gfxDepthStencilTexture);
+    shipBool isValid = gfxDepthStencilRenderTarget.Create(*m_Device, gfxDepthStencilTexture);
 
     SHIP_ASSERT(isValid);
 
@@ -520,13 +520,13 @@ const GFXDepthStencilRenderTarget& DX11RenderDevice::GetDepthStencilRenderTarget
     return m_DepthStencilRenderTargetPool.GetItem(gfxDepthStencilRenderTargetHandle.handle);
 }
 
-GFXVertexShaderHandle DX11RenderDevice::CreateVertexShader(void* shaderData, uint64_t shaderDataSize)
+GFXVertexShaderHandle DX11RenderDevice::CreateVertexShader(void* shaderData, shipUint64 shaderDataSize)
 {
     GFXVertexShaderHandle gfxVertexShaderHandle;
     gfxVertexShaderHandle.handle = m_VertexShaderPool.GetNewItemIndex();
 
     GFXVertexShader& gfxVertexShader = m_VertexShaderPool.GetItem(gfxVertexShaderHandle.handle);
-    bool isValid = gfxVertexShader.Create(*m_Device, shaderData, shaderDataSize);
+    shipBool isValid = gfxVertexShader.Create(*m_Device, shaderData, shaderDataSize);
 
     SHIP_ASSERT(isValid);
 
@@ -552,13 +552,13 @@ const GFXVertexShader& DX11RenderDevice::GetVertexShader(GFXVertexShaderHandle g
     return m_VertexShaderPool.GetItem(gfxVertexShaderHandle.handle);
 }
 
-GFXPixelShaderHandle DX11RenderDevice::CreatePixelShader(void* shaderData, uint64_t shaderDataSize)
+GFXPixelShaderHandle DX11RenderDevice::CreatePixelShader(void* shaderData, shipUint64 shaderDataSize)
 {
     GFXPixelShaderHandle gfxPixelShaderHandle;
     gfxPixelShaderHandle.handle = m_PixelShaderPool.GetNewItemIndex();
 
     GFXPixelShader& gfxPixelShader = m_PixelShaderPool.GetItem(gfxPixelShaderHandle.handle);
-    bool isValid = gfxPixelShader.Create(*m_Device, shaderData, shaderDataSize);
+    shipBool isValid = gfxPixelShader.Create(*m_Device, shaderData, shaderDataSize);
 
     SHIP_ASSERT(isValid);
 
@@ -590,7 +590,7 @@ GFXRootSignatureHandle DX11RenderDevice::CreateRootSignature(const Array<RootSig
     gfxRootSignatureHandle.handle = m_RootSignaturePool.GetNewItemIndex();
 
     GFXRootSignature& gfxRootSignature = m_RootSignaturePool.GetItem(gfxRootSignatureHandle.handle);
-    bool isValid = gfxRootSignature.Create(rootSignatureParameters);
+    shipBool isValid = gfxRootSignature.Create(rootSignatureParameters);
 
     SHIP_ASSERT(isValid);
 
@@ -632,7 +632,7 @@ GFXPipelineStateObjectHandle DX11RenderDevice::CreatePipelineStateObject(const P
     gfxPipelineStateObjectHandle.handle = m_PipelineStateObjectPool.GetNewItemIndex();
 
     GFXPipelineStateObject& gfxPipelineStateObject = m_PipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
-    bool isValid = gfxPipelineStateObject.Create(pipelineStateObjectCreationParameters);
+    shipBool isValid = gfxPipelineStateObject.Create(pipelineStateObjectCreationParameters);
 
     SHIP_ASSERT(isValid);
 
@@ -668,7 +668,7 @@ GFXDescriptorSetHandle DX11RenderDevice::CreateDescriptorSet(DescriptorSetType d
     GFXDescriptorSet& gfxDescriptorSet = m_DescriptorSetPool.GetItem(gfxDescriptorSetHandle.handle);
     GFXRootSignature* rootSignature = m_RootSignaturePool.GetItemPtr(gfxRootSignatureHandle.handle);
 
-    bool isValid = gfxDescriptorSet.Create(descriptorSetType, rootSignature, descriptorSetEntryDeclarations);
+    shipBool isValid = gfxDescriptorSet.Create(descriptorSetType, rootSignature, descriptorSetEntryDeclarations);
 
     SHIP_ASSERT(isValid);
 
@@ -694,7 +694,7 @@ const GFXDescriptorSet& DX11RenderDevice::GetDescriptorSet(GFXDescriptorSetHandl
     return m_DescriptorSetPool.GetItem(gfxDescriptorSetHandle.handle);
 }
 
-IDXGISwapChain* DX11RenderDevice::CreateSwapchain(uint32_t width, uint32_t height, GfxFormat format, HWND hWnd, GFXTexture2DHandle& swapChainTextureHandle)
+IDXGISwapChain* DX11RenderDevice::CreateSwapchain(shipUint32 width, shipUint32 height, GfxFormat format, HWND hWnd, GFXTexture2DHandle& swapChainTextureHandle)
 {
     DXGI_FORMAT backBufferFormat = ConvertShipyardFormatToDX11(format);
 
@@ -757,9 +757,9 @@ IDXGISwapChain* DX11RenderDevice::CreateSwapchain(uint32_t width, uint32_t heigh
 
 ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatType vertexFormatType)
 {
-    SHIP_STATIC_ASSERT_MSG(uint32_t(VertexFormatType::VertexFormatType_Count) == 5, "Update the RegisterVertexFormatType function if you add or remove vertex formats");
+    SHIP_STATIC_ASSERT_MSG(shipUint32(VertexFormatType::VertexFormatType_Count) == 5, "Update the RegisterVertexFormatType function if you add or remove vertex formats");
 
-    uint32_t idx = uint32_t(vertexFormatType);
+    shipUint32 idx = shipUint32(vertexFormatType);
     SHIP_ASSERT(g_RegisteredInputLayouts[idx] == nullptr);
 
     // Create a dummy shader just to validate the input layout
@@ -799,7 +799,7 @@ ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatTy
     StringA shaderVersion = GetD3DShaderVersion(featureLevel);
 
     StringA version = ("vs_" + shaderVersion);
-    uint32_t flags = 0;
+    shipUint32 flags = 0;
 
 #ifdef _DEBUG
     flags = D3DCOMPILE_DEBUG;
@@ -810,7 +810,7 @@ ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatTy
     {
         if (error != nullptr)
         {
-            char* errorMsg = (char*)error->GetBufferPointer();
+            shipChar* errorMsg = (shipChar*)error->GetBufferPointer();
             OutputDebugString(errorMsg);
 
             error->Release();
@@ -822,7 +822,7 @@ ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatTy
     }
 
     ID3D11VertexShader* shader = nullptr;
-    bool success = true;
+    shipBool success = true;
     hr = device->CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), nullptr, &shader);
     if (FAILED(hr))
     {
@@ -846,10 +846,10 @@ ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatTy
     GetVertexFormat(vertexFormatType, vertexFormat);
 
     const InputLayout* inputLayouts = vertexFormat->GetInputLayouts();
-    uint32_t numInputLayouts = vertexFormat->GetNumInputLayouts();
+    shipUint32 numInputLayouts = vertexFormat->GetNumInputLayouts();
 
     Array<D3D11_INPUT_ELEMENT_DESC> inputElements;
-    for (uint32_t i = 0; i < numInputLayouts; i++)
+    for (shipUint32 i = 0; i < numInputLayouts; i++)
     {
         const InputLayout& inputLayout = inputLayouts[i];
 

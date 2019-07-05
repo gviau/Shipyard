@@ -17,10 +17,10 @@ namespace Shipyard
     public:
         DX11RenderTarget();
 
-        bool Create(ID3D11Device& device, DX11Texture2D** texturesToAttach, uint32_t numTexturesToAttach);
+        shipBool Create(ID3D11Device& device, DX11Texture2D** texturesToAttach, shipUint32 numTexturesToAttach);
         void Destroy();
 
-        uint32_t GetNumRenderTargetsAttached() const { return m_NumRenderTargetsAttached; }
+        shipUint32 GetNumRenderTargetsAttached() const { return m_NumRenderTargetsAttached; }
 
         ID3D11RenderTargetView* const * GetRenderTargetViews() const { return m_RenderTargetViews; }
         ID3D11ShaderResourceView* const * GetRenderTargetShaderResourceView() const { return m_RenderTargetShaderResourceViews; }
@@ -31,8 +31,8 @@ namespace Shipyard
         ID3D11ShaderResourceView* m_RenderTargetShaderResourceViews[GfxConstants::GfxConstants_MaxRenderTargetsBound];
         GfxFormat m_Formats[GfxConstants::GfxConstants_MaxRenderTargetsBound];
 
-        uint32_t m_NumRenderTargetsAttached;
-        bool m_IsValid;
+        shipUint32 m_NumRenderTargetsAttached;
+        shipBool m_IsValid;
     };
 
     class SHIPYARD_API DX11DepthStencilRenderTarget : public DepthStencilRenderTarget
@@ -40,7 +40,7 @@ namespace Shipyard
     public:
         DX11DepthStencilRenderTarget();
 
-        bool Create(ID3D11Device& device, DX11Texture2D& depthStencilTexture);
+        shipBool Create(ID3D11Device& device, DX11Texture2D& depthStencilTexture);
         void Destroy();
 
         ID3D11DepthStencilView* const GetDepthStencilView() const { return m_DepthStencilView; }

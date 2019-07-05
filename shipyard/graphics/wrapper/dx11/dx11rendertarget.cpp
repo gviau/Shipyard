@@ -23,16 +23,16 @@ DX11RenderTarget::DX11RenderTarget()
 {
     memset(m_RenderTargetViews, 0, sizeof(m_RenderTargetViews[0]) * GfxConstants::GfxConstants_MaxRenderTargetsBound);
     memset(m_RenderTargetShaderResourceViews, 0, sizeof(m_RenderTargetShaderResourceViews[0]) * GfxConstants::GfxConstants_MaxRenderTargetsBound);
-    memset(m_Formats, uint16_t(GfxFormat::Unknown), sizeof(m_Formats[0]) * GfxConstants::GfxConstants_MaxRenderTargetsBound);
+    memset(m_Formats, shipUint16(GfxFormat::Unknown), sizeof(m_Formats[0]) * GfxConstants::GfxConstants_MaxRenderTargetsBound);
 }
 
-bool DX11RenderTarget::Create(ID3D11Device& device, DX11Texture2D** texturesToAttach, uint32_t numTexturesToAttach)
+shipBool DX11RenderTarget::Create(ID3D11Device& device, DX11Texture2D** texturesToAttach, shipUint32 numTexturesToAttach)
 {
     m_NumRenderTargetsAttached = numTexturesToAttach;
 
-    bool isFirstRenderTarget = true;
+    shipBool isFirstRenderTarget = true;
 
-    for (uint32_t i = 0; i < m_NumRenderTargetsAttached; i++)
+    for (shipUint32 i = 0; i < m_NumRenderTargetsAttached; i++)
     {
         DX11Texture2D* gfxTexture = reinterpret_cast<DX11Texture2D*>(texturesToAttach[i]);
         if (gfxTexture == nullptr)
@@ -80,7 +80,7 @@ bool DX11RenderTarget::Create(ID3D11Device& device, DX11Texture2D** texturesToAt
 
 void DX11RenderTarget::Destroy()
 {
-    for (uint32_t i = 0; i < m_NumRenderTargetsAttached; i++)
+    for (shipUint32 i = 0; i < m_NumRenderTargetsAttached; i++)
     {
         if (m_RenderTargetViews[i] != nullptr)
         {
@@ -95,7 +95,7 @@ void DX11RenderTarget::Destroy()
 
     memset(m_RenderTargetViews, 0, sizeof(m_RenderTargetViews[0]) * GfxConstants::GfxConstants_MaxRenderTargetsBound);
     memset(m_RenderTargetShaderResourceViews, 0, sizeof(m_RenderTargetShaderResourceViews[0]) * GfxConstants::GfxConstants_MaxRenderTargetsBound);
-    memset(m_Formats, uint16_t(GfxFormat::Unknown), sizeof(m_Formats[0]) * GfxConstants::GfxConstants_MaxRenderTargetsBound);
+    memset(m_Formats, shipUint16(GfxFormat::Unknown), sizeof(m_Formats[0]) * GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
     m_NumRenderTargetsAttached = 0;
 }
@@ -108,7 +108,7 @@ DX11DepthStencilRenderTarget::DX11DepthStencilRenderTarget()
 
 }
 
-bool DX11DepthStencilRenderTarget::Create(ID3D11Device& device, GFXTexture2D& depthStencilTexture)
+shipBool DX11DepthStencilRenderTarget::Create(ID3D11Device& device, GFXTexture2D& depthStencilTexture)
 {
     if ((depthStencilTexture.GetTextureUsage() & TextureUsage::TextureUsage_DepthStencil) == 0)
     {

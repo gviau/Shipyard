@@ -18,7 +18,7 @@
 namespace Shipyard
 {;
 
-bool GetArrayIndexIfOptionIsAnArray(const StringA& value, uint32_t* outValue)
+shipBool GetArrayIndexIfOptionIsAnArray(const StringA& value, shipUint32* outValue)
 {
     size_t indexOfEndingBracket = value.FindIndexOfFirstReverse(']', value.Size() - 1);
     if (indexOfEndingBracket == StringA::InvalidIndex)
@@ -34,12 +34,12 @@ bool GetArrayIndexIfOptionIsAnArray(const StringA& value, uint32_t* outValue)
 
     StringA numberString = value.Substring(indexOfStartingBracket + 1, indexOfEndingBracket - indexOfStartingBracket - 1);
 
-    *outValue = uint32_t(atoi(numberString.GetBuffer()));
+    *outValue = shipUint32(atoi(numberString.GetBuffer()));
 
     return true;
 }
 
-RenderStateBlockCompilationError InterpretBooleanValue(const StringA& value, bool* outValue)
+RenderStateBlockCompilationError InterpretBooleanValue(const StringA& value, shipBool* outValue)
 {
     RenderStateBlockCompilationError renderStateBlockCompilationError = RenderStateBlockCompilationError::NoError;
 
@@ -65,7 +65,7 @@ RenderStateBlockCompilationError InterpretIntegerValue(const StringA& value, Int
     RenderStateBlockCompilationError renderStateBlockCompilationError = RenderStateBlockCompilationError::NoError;
 
     size_t startingIndex = 0;
-    bool isNegative = false;
+    shipBool isNegative = false;
     if (value[0] == '-')
     {
         startingIndex = 1;
@@ -80,7 +80,7 @@ RenderStateBlockCompilationError InterpretIntegerValue(const StringA& value, Int
         {
             int c = int(hexadecimalValue[i]);
 
-            bool isCharacterInvalidHexadecimal = ((c < int('0') || c > int('9')) && (c < int('a') || c > int('f')) && (c < int('A') || c > int('F')));
+            shipBool isCharacterInvalidHexadecimal = ((c < int('0') || c > int('9')) && (c < int('a') || c > int('f')) && (c < int('A') || c > int('F')));
             if (isCharacterInvalidHexadecimal)
             {
                 renderStateBlockCompilationError = RenderStateBlockCompilationError::InvalidValueTypeForOption;
@@ -101,9 +101,9 @@ RenderStateBlockCompilationError InterpretIntegerValue(const StringA& value, Int
 
         for (size_t i = 0; i < binaryValue.Size(); i++)
         {
-            char c = binaryValue[i];
+            shipChar c = binaryValue[i];
 
-            bool isCharacterInvalidBinary = (c != '0' && c != '1');
+            shipBool isCharacterInvalidBinary = (c != '0' && c != '1');
             if (isCharacterInvalidBinary)
             {
                 renderStateBlockCompilationError = RenderStateBlockCompilationError::InvalidValueTypeForOption;
@@ -124,7 +124,7 @@ RenderStateBlockCompilationError InterpretIntegerValue(const StringA& value, Int
         {
             int c = int(value[i]);
 
-            bool isCharacterInvalidDecimal = (c < int('0') || c > int('9'));
+            shipBool isCharacterInvalidDecimal = (c < int('0') || c > int('9'));
             if (isCharacterInvalidDecimal)
             {
                 renderStateBlockCompilationError = RenderStateBlockCompilationError::InvalidValueTypeForOption;
@@ -139,7 +139,7 @@ RenderStateBlockCompilationError InterpretIntegerValue(const StringA& value, Int
     return renderStateBlockCompilationError;
 }
 
-RenderStateBlockCompilationError InterpretFloatValue(const StringA& value, float* outValue)
+RenderStateBlockCompilationError InterpretFloatValue(const StringA& value, shipFloat* outValue)
 {
     RenderStateBlockCompilationError renderStateBlockCompilationError = RenderStateBlockCompilationError::NoError;
 
@@ -147,7 +147,7 @@ RenderStateBlockCompilationError InterpretFloatValue(const StringA& value, float
     {
         int c = int(value[i]);
 
-        bool isCharacterInvalidFloat = ((c < int('0') || c > int('9')) && c != int('-') && c != int('.') && c != int('f') && c != int('F'));
+        shipBool isCharacterInvalidFloat = ((c < int('0') || c > int('9')) && c != int('-') && c != int('.') && c != int('f') && c != int('F'));
         if (isCharacterInvalidFloat)
         {
             renderStateBlockCompilationError = RenderStateBlockCompilationError::InvalidValueTypeForOption;
@@ -155,7 +155,7 @@ RenderStateBlockCompilationError InterpretFloatValue(const StringA& value, float
         }
     }
 
-    *outValue = float(atof(value.GetBuffer()));
+    *outValue = shipFloat(atof(value.GetBuffer()));
 
     return renderStateBlockCompilationError;
 }
@@ -416,9 +416,9 @@ RenderStateBlockCompilationError InterpretRenderTargetWriteMask(const StringA& v
     {
         RenderTargetWriteMask renderTargetWriteMask = RenderTargetWriteMask::RenderTargetWriteMask_None;
 
-        for (uint32_t i = 0; i < value.Size(); i++)
+        for (shipUint32 i = 0; i < value.Size(); i++)
         {
-            char c = value[i];
+            shipChar c = value[i];
 
             if (tolower(c) == tolower('R'))
             {
@@ -470,7 +470,7 @@ RenderStateBlockCompilationError InterpretRenderPipelineStateOption(
 
     RenderStateBlockCompilationError renderStateBlockCompilationError = RenderStateBlockCompilationError::UnrecognizedOption;
 
-    uint32_t arrayIndex = 0;
+    shipUint32 arrayIndex = 0;
     if (GetArrayIndexIfOptionIsAnArray(renderPipelineStateOption, &arrayIndex))
     {
         if (renderPipelineStateOption.FindIndexOfFirstCaseInsensitive("BlendEnable", 0) == 0)
@@ -630,7 +630,7 @@ RenderStateBlockCompilationError InterpretRenderPipelineStateOption(
     return renderStateBlockCompilationError;
 }
 
-extern const char* g_ShaderOptionString[uint32_t(ShaderOption::Count)];
+extern const shipChar* g_ShaderOptionString[shipUint32(ShaderOption::Count)];
 
 void GetEffectiveRenderPipelineBlockForShaderKey(
         const ShaderKey& shaderKey,
@@ -643,12 +643,12 @@ void GetEffectiveRenderPipelineBlockForShaderKey(
 
     for (ShaderOption shaderOption : everyPossibleShaderOption)
     {
-        uint32_t valueForShaderOption = shaderKey.GetShaderOptionValue(shaderOption);
+        shipUint32 valueForShaderOption = shaderKey.GetShaderOptionValue(shaderOption);
 
         D3D_SHADER_MACRO shaderDefine;
-        shaderDefine.Name = g_ShaderOptionString[uint32_t(shaderOption)];
+        shaderDefine.Name = g_ShaderOptionString[shipUint32(shaderOption)];
 
-        char* buf = reinterpret_cast<char*>(SHIP_ALLOC(8, 1));
+        shipChar* buf = reinterpret_cast<shipChar*>(SHIP_ALLOC(8, 1));
         sprintf_s(buf, 8, "%u", valueForShaderOption);
 
         shaderDefine.Definition = buf;
@@ -679,7 +679,7 @@ void GetEffectiveRenderPipelineBlockForShaderKey(
     {
         // D3DPreprocess inserts a null character at the end of the preprocess string, and appends the initial string afterwards.
         // Let's remove the initial string.
-        size_t preprocessedOutputSize = strlen((char*)preprocessedOutput->GetBufferPointer());
+        size_t preprocessedOutputSize = strlen((shipChar*)preprocessedOutput->GetBufferPointer());
 
         if (preprocessedOutputSize > 0)
         {
@@ -734,11 +734,11 @@ SHIPYARD_API RenderStateBlockCompilationError CompileRenderStateBlock(
     renderPipelineStateOption.Reserve(256);
     renderPipelineStateValue.Reserve(256);
 
-    bool processOption = true;
+    shipBool processOption = true;
 
     for (size_t i = 0; i < effectiveRenderPipelineBlockSource.Size(); i++)
     {
-        char c = effectiveRenderPipelineBlockSource[i];
+        shipChar c = effectiveRenderPipelineBlockSource[i];
 
         if (c == ';')
         {

@@ -17,11 +17,11 @@ namespace Shipyard
     public:
         VertexBuffer();
 
-        uint32_t GetNumVertices() const { return m_NumVertices; }
+        shipUint32 GetNumVertices() const { return m_NumVertices; }
         VertexFormatType GetVertexFormatType() const { return m_VertexFormatType; }
 
     protected:
-        uint32_t m_NumVertices;
+        shipUint32 m_NumVertices;
         VertexFormatType m_VertexFormatType;
     };
 
@@ -30,12 +30,12 @@ namespace Shipyard
     public:
         IndexBuffer();
 
-        uint32_t GetNumIndices() const { return m_NumIndices; }
-        bool Uses2BytesPerIndex() const { return m_Uses2BytesPerIndex; }
+        shipUint32 GetNumIndices() const { return m_NumIndices; }
+        shipBool Uses2BytesPerIndex() const { return m_Uses2BytesPerIndex; }
 
     protected:
-        uint32_t m_NumIndices;
-        bool m_Uses2BytesPerIndex;
+        shipUint32 m_NumIndices;
+        shipBool m_Uses2BytesPerIndex;
     };
 
     class SHIPYARD_API ConstantBuffer

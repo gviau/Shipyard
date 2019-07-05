@@ -18,7 +18,7 @@ LinearAllocator::~LinearAllocator()
     SHIP_ASSERT_MSG(m_pHeap == nullptr, "It is required to manually call Destroy on the LinearAllocator %p to control when to free the memory.", this);
 }
 
-bool LinearAllocator::Create(void* pHeap, size_t heapSize)
+shipBool LinearAllocator::Create(void* pHeap, size_t heapSize)
 {
     m_pHeap = pHeap;
     m_HeapSize = heapSize;
@@ -35,7 +35,7 @@ void LinearAllocator::Destroy()
 void* LinearAllocator::Allocate(size_t size, size_t alignment 
 
         #ifdef SHIP_ALLOCATOR_DEBUG_INFO
-            , const char* pAllocationFilename
+            , const shipChar* pAllocationFilename
             , int allocationLineNumber
         #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
@@ -61,7 +61,7 @@ void* LinearAllocator::Allocate(size_t size, size_t alignment
 
         newAllocationOffset = allocationOffsetToUse + size;
 
-        bool validAllocation = (newAllocationOffset <= m_HeapSize);
+        shipBool validAllocation = (newAllocationOffset <= m_HeapSize);
         if (!validAllocation)
         {
             return nullptr;

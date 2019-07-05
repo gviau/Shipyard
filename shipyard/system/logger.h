@@ -16,7 +16,7 @@
 
 namespace Shipyard
 {
-    enum LogLevel : uint8_t
+    enum LogLevel : shipUint8
     {
         LogLevel_Debug = 0x01,
         LogLevel_Info = 0x02,
@@ -35,15 +35,15 @@ namespace Shipyard
             return s_Logger;
         }
 
-        bool OpenLog(const char* pLogFilename);
+        shipBool OpenLog(const shipChar* pLogFilename);
         void CloseLog();
 
         void SetLogLevel(LogLevel logLevel);
 
-        void LogDebug(const char* pMessage, ...);
-        void LogInfo(const char* pMessage, ...);
-        void LogWarning(const char* pMessage, ...);
-        void LogError(const char* pMessage, ...);
+        void LogDebug(const shipChar* pMessage, ...);
+        void LogInfo(const shipChar* pMessage, ...);
+        void LogWarning(const shipChar* pMessage, ...);
+        void LogError(const shipChar* pMessage, ...);
 
     private:
         Logger();
@@ -58,7 +58,7 @@ namespace Shipyard
 
         std::mutex m_LoggerLock;
 
-        bool m_IsLogOpen;
+        shipBool m_IsLogOpen;
     };
 
     SHIPYARD_API Logger& GetLogger();

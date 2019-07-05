@@ -16,15 +16,15 @@ struct ID3D10Blob;
 
 namespace Shipyard
 {
-    enum class ShaderFamily : uint8_t;
-    enum class ShaderOption : uint32_t;
+    enum class ShaderFamily : shipUint8;
+    enum class ShaderOption : shipUint32;
 
     class SHIPYARD_API ShaderCompiler : public Singleton<ShaderCompiler>
     {
         friend class Singleton<ShaderCompiler>;
 
     public:
-        static const char* RenderStateBlockName;
+        static const shipChar* RenderStateBlockName;
 
     public:
         ShaderCompiler();
@@ -36,7 +36,7 @@ namespace Shipyard
 
         // Returns false if the ShaderKey isn't compiled yet, in which case the blob returned are from the error ShaderKey that corresponds to the
         // ShaderKey passed
-        bool GetRawShadersForShaderKey(ShaderKey shaderKey, ShaderDatabase::ShaderEntrySet& compiledShaderEntrySet, bool& gotRecompiledSinceLastAccess);
+        shipBool GetRawShadersForShaderKey(ShaderKey shaderKey, ShaderDatabase::ShaderEntrySet& compiledShaderEntrySet, shipBool& gotRecompiledSinceLastAccess);
 
         void SetShaderDirectoryName(const StringT& shaderDirectoryName);
         const StringT& GetShaderDirectoryName() const { return m_ShaderDirectoryName; }
@@ -56,8 +56,8 @@ namespace Shipyard
             void Reset();
 
             ShaderKey::RawShaderKeyType m_RawShaderKey;
-            bool m_GotRecompiledSinceLastAccess;
-            bool m_GotCompilationError;
+            shipBool m_GotRecompiledSinceLastAccess;
+            shipBool m_GotCompilationError;
 
             ID3D10Blob* m_CompiledVertexShaderBlob;
             ID3D10Blob* m_CompiledPixelShaderBlob;
@@ -89,7 +89,7 @@ namespace Shipyard
         std::thread m_ShaderCompilerThread;
         mutable std::mutex m_ShaderCompilationRequestLock;
 
-        static volatile bool m_RunShaderCompilerThread;
+        static volatile shipBool m_RunShaderCompilerThread;
 
         SmallInplaceStringT m_ShaderDirectoryName;
 

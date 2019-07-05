@@ -6,8 +6,6 @@
 
 #include <system/memory/memoryutils.h>
 
-#include <stdint.h>
-
 #ifndef SHIP_OPTIMIZED
 
 // This define allows logging of some information about allocation and deallocation.
@@ -37,7 +35,7 @@ namespace Shipyard
         virtual void* Allocate(size_t size, size_t alignment
         
                 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
-                    , const char* pAllocationFilename
+                    , const shipChar* pAllocationFilename
                     , int allocationLineNumber
                 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
@@ -50,8 +48,8 @@ namespace Shipyard
         size_t GetHeapSize() const { return m_HeapSize; }
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
-        void SetAllocatorDebugName(const char* pAllocatorDebugName) { m_pAllocatorDebugName = pAllocatorDebugName; }
-        const char* GetAllocatorDebugName() const { return m_pAllocatorDebugName; }
+        void SetAllocatorDebugName(const shipChar* pAllocatorDebugName) { m_pAllocatorDebugName = pAllocatorDebugName; }
+        const shipChar* GetAllocatorDebugName() const { return m_pAllocatorDebugName; }
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
     protected:
@@ -59,7 +57,7 @@ namespace Shipyard
         size_t m_HeapSize;
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
-        const char* m_pAllocatorDebugName;
+        const shipChar* m_pAllocatorDebugName;
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
     };
 }

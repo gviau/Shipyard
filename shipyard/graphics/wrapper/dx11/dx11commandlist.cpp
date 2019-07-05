@@ -43,7 +43,7 @@ DX11BaseRenderCommandList::~DX11BaseRenderCommandList()
     Destroy();
 }
 
-bool DX11BaseRenderCommandList::Create()
+shipBool DX11BaseRenderCommandList::Create()
 {
     m_pCommandListHeap = SHIP_ALLOC(SHIP_COMMAND_LIST_HEAP_SIZE, SHIP_CACHE_LINE_SIZE);
 
@@ -102,7 +102,7 @@ BaseRenderCommand* DX11BaseRenderCommandList::GetNewRenderCommand(RenderCommandT
 
 #ifdef SHIP_COMMAND_LIST_GROWABLE_HEAP
 
-    bool notEnoughSpaceToStoreThisRenderCommand = ((m_CommandListHeapCurrentPointer + renderCommandSize) > m_CommandListHeapSize);
+    shipBool notEnoughSpaceToStoreThisRenderCommand = ((m_CommandListHeapCurrentPointer + renderCommandSize) > m_CommandListHeapSize);
     if (notEnoughSpaceToStoreThisRenderCommand)
     {
         m_pCommandListHeap = GrowCommandListHeap(m_CommandListHeapSize * 2);

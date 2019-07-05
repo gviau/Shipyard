@@ -19,14 +19,14 @@ namespace Shipyard
         FixedHeapAllocator();
         ~FixedHeapAllocator();
 
-        bool Create(void* pHeap, size_t heapSize);
+        shipBool Create(void* pHeap, size_t heapSize);
         void Destroy();
 
         // Alignment must be a power of 2 and non-zero.
         virtual void* Allocate(size_t size, size_t alignment
         
                 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
-                    , const char* pAllocationFilename
+                    , const shipChar* pAllocationFilename
                     , int allocationLineNumber
                 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
@@ -58,7 +58,7 @@ namespace Shipyard
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         struct MemoryInfo
         {
-            uint64_t numBlocksAllocated = 0;
+            shipUint64 numBlocksAllocated = 0;
             size_t heapSize = 0;
             size_t numBytesUsed = 0;
             size_t numUserBytesAllocated = 0;

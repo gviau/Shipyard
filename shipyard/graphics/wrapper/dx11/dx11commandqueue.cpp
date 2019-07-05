@@ -26,7 +26,7 @@ DX11CommandQueue::~DX11CommandQueue()
     Destroy();
 }
 
-bool DX11CommandQueue::Create()
+shipBool DX11CommandQueue::Create()
 {
     return true;
 }
@@ -36,9 +36,9 @@ void DX11CommandQueue::Destroy()
 
 }
 
-void DX11CommandQueue::ExecuteCommandLists(GFXRenderCommandList** ppRenderCommandLists, uint32_t numRenderCommandLists)
+void DX11CommandQueue::ExecuteCommandLists(GFXRenderCommandList** ppRenderCommandLists, shipUint32 numRenderCommandLists)
 {
-    for (uint32_t i = 0; i < numRenderCommandLists; i++)
+    for (shipUint32 i = 0; i < numRenderCommandLists; i++)
     {
         GFXRenderCommandList* pRenderCommandList = ppRenderCommandLists[i];
 
@@ -100,7 +100,7 @@ size_t DX11CommandQueue::ClearFullRenderTarget(BaseRenderCommand* pCmd)
 
     ID3D11RenderTargetView* const * renderTargetViews = gfxRenderTarget.GetRenderTargetViews();
 
-    for (uint32_t i = 0; i < GfxConstants::GfxConstants_MaxRenderTargetsBound; i++)
+    for (shipUint32 i = 0; i < GfxConstants::GfxConstants_MaxRenderTargetsBound; i++)
     {
         if (renderTargetViews[i] == nullptr)
         {
@@ -174,7 +174,7 @@ size_t DX11CommandQueue::Draw(BaseRenderCommand* pCmd)
 
     SHIP_ASSERT(drawCommand.numVertexBuffers < GfxConstants_MaxVertexBuffers);
     GFXVertexBuffer* gfxVertexBuffers[GfxConstants_MaxVertexBuffers];
-    for (uint32_t i = drawCommand.startSlot; i < (drawCommand.startSlot + drawCommand.numVertexBuffers); i++)
+    for (shipUint32 i = drawCommand.startSlot; i < (drawCommand.startSlot + drawCommand.numVertexBuffers); i++)
     {
         gfxVertexBuffers[i] = &m_RenderDevice.GetVertexBuffer(drawCommand.pGfxVertexBufferHandles[i]);
     }
@@ -183,7 +183,7 @@ size_t DX11CommandQueue::Draw(BaseRenderCommand* pCmd)
 
     m_RenderStateCache.CommitStateChangesForGraphics(m_RenderDevice);
 
-    uint32_t numVertices = ((drawCommand.numVertexBuffers > 0) ? m_RenderDevice.GetVertexBuffer(drawCommand.pGfxVertexBufferHandles[drawCommand.startSlot]).GetNumVertices() : 1);
+    shipUint32 numVertices = ((drawCommand.numVertexBuffers > 0) ? m_RenderDevice.GetVertexBuffer(drawCommand.pGfxVertexBufferHandles[drawCommand.startSlot]).GetNumVertices() : 1);
     m_DeviceContext->Draw(numVertices, drawCommand.startVertexLocation);
 
     return sizeof(DrawCommand);
@@ -213,7 +213,7 @@ size_t DX11CommandQueue::DrawIndexed(BaseRenderCommand* pCmd)
 
     SHIP_ASSERT(drawIndexedCommand.numVertexBuffers < GfxConstants_MaxVertexBuffers);
     GFXVertexBuffer* gfxVertexBuffers[GfxConstants_MaxVertexBuffers];
-    for (uint32_t i = drawIndexedCommand.startSlot; i < (drawIndexedCommand.startSlot + drawIndexedCommand.numVertexBuffers); i++)
+    for (shipUint32 i = drawIndexedCommand.startSlot; i < (drawIndexedCommand.startSlot + drawIndexedCommand.numVertexBuffers); i++)
     {
         gfxVertexBuffers[i] = &m_RenderDevice.GetVertexBuffer(drawIndexedCommand.pGfxVertexBufferHandles[i]);
     }

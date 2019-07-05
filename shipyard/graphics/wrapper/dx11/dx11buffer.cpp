@@ -38,7 +38,7 @@ void DX11BaseBuffer::Destroy()
     m_DeviceContext = nullptr;
 }
 
-bool DX11VertexBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t numVertices, VertexFormatType vertexFormatType, bool dynamic, void* initialData)
+shipBool DX11VertexBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, shipUint32 numVertices, VertexFormatType vertexFormatType, shipBool dynamic, void* initialData)
 {
     m_NumVertices = numVertices;
     m_VertexFormatType = vertexFormatType;
@@ -73,7 +73,7 @@ bool DX11VertexBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& deviceC
     return true;
 }
 
-bool DX11IndexBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t numIndices, bool uses2BytesPerIndex, bool dynamic, void* initialData)
+shipBool DX11IndexBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, shipUint32 numIndices, shipBool uses2BytesPerIndex, shipBool dynamic, void* initialData)
 {
     m_NumIndices = numIndices;
     m_Uses2BytesPerIndex = uses2BytesPerIndex;
@@ -81,7 +81,7 @@ bool DX11IndexBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& deviceCo
 
     D3D11_USAGE usage = (dynamic) ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
 
-    uint32_t indexSizeInBytes = (uses2BytesPerIndex ? 2 : 4);
+    shipUint32 indexSizeInBytes = (uses2BytesPerIndex ? 2 : 4);
 
     m_SizeInBytes = numIndices * indexSizeInBytes;
 
@@ -107,7 +107,7 @@ bool DX11IndexBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& deviceCo
     return true;
 }
 
-bool DX11ConstantBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t dataSizeInBytes, bool dynamic, void* initialData)
+shipBool DX11ConstantBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, shipUint32 dataSizeInBytes, shipBool dynamic, void* initialData)
 {
     m_DeviceContext = &deviceContext;
     m_SizeInBytes = dataSizeInBytes;
@@ -147,12 +147,12 @@ bool DX11ConstantBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& devic
     return true;
 }
 
-bool DX11ByteBuffer::Create(
+shipBool DX11ByteBuffer::Create(
         ID3D11Device& device,
         ID3D11DeviceContext& deviceContext,
         ByteBufferCreationFlags byteBufferCreationFlags,
-        uint32_t dataSizeInBytes,
-        bool dynamic,
+        shipUint32 dataSizeInBytes,
+        shipBool dynamic,
         void* initialData)
 {
     m_DeviceContext = &deviceContext;

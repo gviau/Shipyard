@@ -6,8 +6,6 @@
 
 #include <system/array.h>
 
-#include <cinttypes>
-
 namespace Shipyard
 {
     class ShaderInputProvider;
@@ -19,7 +17,7 @@ namespace Shipyard
         ShaderResourceBinder(GFXDescriptorSetHandle* pGfxDescriptorSetHandle);
 
         template <typename ShaderInputProviderType>
-        void AddShaderResourceBinderEntry(uint16_t rootIndexToBindTo)
+        void AddShaderResourceBinderEntry(shipUint16 rootIndexToBindTo)
         {
             ShaderResourceBinderEntry& shaderResourceBinderEntry = m_ShaderResourceBinderEntries.Grow();
             shaderResourceBinderEntry.Declaration = ShaderInputProviderType::ms_ShaderInputProviderDeclaration;
@@ -35,7 +33,7 @@ namespace Shipyard
         struct ShaderResourceBinderEntry
         {
             ShaderInputProviderDeclaration* Declaration;
-            uint16_t RootIndexToBindTo;
+            shipUint16 RootIndexToBindTo;
         };
 
     private:

@@ -3,7 +3,7 @@
 namespace Shipyard
 {;
 
-bool IsDepthStencilFormat(GfxFormat format)
+shipBool IsDepthStencilFormat(GfxFormat format)
 {
     switch (format)
     {
@@ -18,7 +18,7 @@ bool IsDepthStencilFormat(GfxFormat format)
     }
 }
 
-enum RenderStateBlockState : uint8_t
+enum RenderStateBlockState : shipUint8
 {
     RenderStateBlockState_DepthBias,
     RenderStateBlockState_DepthBiasClamp,
@@ -277,13 +277,13 @@ void RenderStateBlockStateOverride::OverrideDepthBiasState(int overrideValue)
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_DepthBias);
 }
 
-void RenderStateBlockStateOverride::OverrideDepthBiasClampState(float overrideValue)
+void RenderStateBlockStateOverride::OverrideDepthBiasClampState(shipFloat overrideValue)
 {
     m_RenderStateBlockOverride.rasterizerState.m_DepthBiasClamp = overrideValue;
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_DepthBiasClamp);
 }
 
-void RenderStateBlockStateOverride::OverrideSlopeScaledDepthBiasState(float overrideValue)
+void RenderStateBlockStateOverride::OverrideSlopeScaledDepthBiasState(shipFloat overrideValue)
 {
     m_RenderStateBlockOverride.rasterizerState.m_SlopeScaledDepthBias = overrideValue;
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_SlopeScaledDepthBias);
@@ -301,31 +301,31 @@ void RenderStateBlockStateOverride::OverrideCullModeState(CullMode overrideValue
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_CullMode);
 }
 
-void RenderStateBlockStateOverride::OverrideIsFrontCounterClockwiseState(bool overrideValue)
+void RenderStateBlockStateOverride::OverrideIsFrontCounterClockwiseState(shipBool overrideValue)
 {
     m_RenderStateBlockOverride.rasterizerState.m_IsFrontCounterClockwise = overrideValue;
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_IsFrontCounterClockwise);
 }
 
-void RenderStateBlockStateOverride::OverrideDepthClipEnableState(bool overrideValue)
+void RenderStateBlockStateOverride::OverrideDepthClipEnableState(shipBool overrideValue)
 {
     m_RenderStateBlockOverride.rasterizerState.m_DepthClipEnable = overrideValue;
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_DepthClipEnable);
 }
 
-void RenderStateBlockStateOverride::OverrideScissorEnableState(bool overrideValue)
+void RenderStateBlockStateOverride::OverrideScissorEnableState(shipBool overrideValue)
 {
     m_RenderStateBlockOverride.rasterizerState.m_ScissorEnable = overrideValue;
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_ScissorEnable);
 }
 
-void RenderStateBlockStateOverride::OverrideMultisampleEnableState(bool overrideValue)
+void RenderStateBlockStateOverride::OverrideMultisampleEnableState(shipBool overrideValue)
 {
     m_RenderStateBlockOverride.rasterizerState.m_MultisampleEnable = overrideValue;
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_MultisampleEnable);
 }
 
-void RenderStateBlockStateOverride::OverrideAntialiasedLineEnableState(bool overrideValue)
+void RenderStateBlockStateOverride::OverrideAntialiasedLineEnableState(shipBool overrideValue)
 {
     m_RenderStateBlockOverride.rasterizerState.m_AntialiasedLineEnable = overrideValue;
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_AntialiasedLineEnable);
@@ -337,13 +337,13 @@ void RenderStateBlockStateOverride::OverrideDepthComparisonFuncState(ComparisonF
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_DepthComparisonFunc);
 }
 
-void RenderStateBlockStateOverride::OverrideStencilReadMaskState(uint8_t overrideValue)
+void RenderStateBlockStateOverride::OverrideStencilReadMaskState(shipUint8 overrideValue)
 {
     m_RenderStateBlockOverride.depthStencilState.m_StencilReadMask = overrideValue;
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_StencilReadMask);
 }
 
-void RenderStateBlockStateOverride::OverrideStencilWriteMaskState(uint8_t overrideValue)
+void RenderStateBlockStateOverride::OverrideStencilWriteMaskState(shipUint8 overrideValue)
 {
     m_RenderStateBlockOverride.depthStencilState.m_StencilWriteMask = overrideValue;
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_StencilWriteMask);
@@ -397,61 +397,61 @@ void RenderStateBlockStateOverride::OverrideBackFaceStencilComparisonFuncState(C
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_BackFaceStencilComparisonFunc);
 }
 
-void RenderStateBlockStateOverride::OverrideDepthEnableState(bool overrideValue)
+void RenderStateBlockStateOverride::OverrideDepthEnableState(shipBool overrideValue)
 {
     m_RenderStateBlockOverride.depthStencilState.m_DepthEnable = overrideValue;
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_DepthEnable);
 }
 
-void RenderStateBlockStateOverride::OverrideEnableDepthWriteState(bool overrideValue)
+void RenderStateBlockStateOverride::OverrideEnableDepthWriteState(shipBool overrideValue)
 {
     m_RenderStateBlockOverride.depthStencilState.m_EnableDepthWrite = overrideValue;
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_EnableDepthWrite);
 }
 
-void RenderStateBlockStateOverride::OverrideStencilEnableState(bool overrideValue)
+void RenderStateBlockStateOverride::OverrideStencilEnableState(shipBool overrideValue)
 {
     m_RenderStateBlockOverride.depthStencilState.m_StencilEnable = overrideValue;
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_StencilEnable);
 }
 
-void RenderStateBlockStateOverride::OverrideRedBlendUserFactor(float overrideValue)
+void RenderStateBlockStateOverride::OverrideRedBlendUserFactor(shipFloat overrideValue)
 {
     m_RenderStateBlockOverride.blendState.m_RedBlendUserFactor = overrideValue;
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_RedBlendUserFactor);
 }
 
-void RenderStateBlockStateOverride::OverrideGreenBlendUserFactor(float overrideValue)
+void RenderStateBlockStateOverride::OverrideGreenBlendUserFactor(shipFloat overrideValue)
 {
     m_RenderStateBlockOverride.blendState.m_GreenBlendUserFactor = overrideValue;
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_GreenBlendUserFactor);
 }
 
-void RenderStateBlockStateOverride::OverrideBlueBlendUserFactor(float overrideValue)
+void RenderStateBlockStateOverride::OverrideBlueBlendUserFactor(shipFloat overrideValue)
 {
     m_RenderStateBlockOverride.blendState.m_BlueBlendUserFactor = overrideValue;
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_BlueBlendUserFactor);
 }
 
-void RenderStateBlockStateOverride::OverrideAlphaBlendUserFactor(float overrideValue)
+void RenderStateBlockStateOverride::OverrideAlphaBlendUserFactor(shipFloat overrideValue)
 {
     m_RenderStateBlockOverride.blendState.m_AlphaBlendUserFactor = overrideValue;
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_AlphaBlendUserFactor);
 }
 
-void RenderStateBlockStateOverride::OverrideAlphaToCoverageEnable(bool overrideValue)
+void RenderStateBlockStateOverride::OverrideAlphaToCoverageEnable(shipBool overrideValue)
 {
     m_RenderStateBlockOverride.blendState.m_AlphaToCoverageEnable = overrideValue;
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_AlphaToCoverageEnable);
 }
 
-void RenderStateBlockStateOverride::OverrideIndependentBlendEnable(bool overrideValue)
+void RenderStateBlockStateOverride::OverrideIndependentBlendEnable(shipBool overrideValue)
 {
     m_RenderStateBlockOverride.blendState.m_IndependentBlendEnable = overrideValue;
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_IndependentBlendEnable);
 }
 
-void RenderStateBlockStateOverride::OverrideBlendEnable(bool overrideValue, uint32_t renderTargetIndex)
+void RenderStateBlockStateOverride::OverrideBlendEnable(shipBool overrideValue, shipUint32 renderTargetIndex)
 {
     SHIP_ASSERT(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
@@ -459,7 +459,7 @@ void RenderStateBlockStateOverride::OverrideBlendEnable(bool overrideValue, uint
     m_OverridenState.SetBit((RenderStateBlockState_1_BlendEnable - RenderStateBlockState_0_BlendEnable) * renderTargetIndex + RenderStateBlockState_0_BlendEnable);
 }
 
-void RenderStateBlockStateOverride::OverrideSourceBlend(BlendFactor overrideValue, uint32_t renderTargetIndex)
+void RenderStateBlockStateOverride::OverrideSourceBlend(BlendFactor overrideValue, shipUint32 renderTargetIndex)
 {
     SHIP_ASSERT(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
@@ -467,7 +467,7 @@ void RenderStateBlockStateOverride::OverrideSourceBlend(BlendFactor overrideValu
     m_OverridenState.SetBit((RenderStateBlockState_1_SourceBlend - RenderStateBlockState_0_SourceBlend) * renderTargetIndex + RenderStateBlockState_0_SourceBlend);
 }
 
-void RenderStateBlockStateOverride::OverrideDestBlend(BlendFactor overrideValue, uint32_t renderTargetIndex)
+void RenderStateBlockStateOverride::OverrideDestBlend(BlendFactor overrideValue, shipUint32 renderTargetIndex)
 {
     SHIP_ASSERT(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
@@ -475,7 +475,7 @@ void RenderStateBlockStateOverride::OverrideDestBlend(BlendFactor overrideValue,
     m_OverridenState.SetBit((RenderStateBlockState_1_DestBlend - RenderStateBlockState_0_DestBlend) * renderTargetIndex + RenderStateBlockState_0_DestBlend);
 }
 
-void RenderStateBlockStateOverride::OverrideBlendOperator(BlendOperator overrideValue, uint32_t renderTargetIndex)
+void RenderStateBlockStateOverride::OverrideBlendOperator(BlendOperator overrideValue, shipUint32 renderTargetIndex)
 {
     SHIP_ASSERT(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
@@ -483,7 +483,7 @@ void RenderStateBlockStateOverride::OverrideBlendOperator(BlendOperator override
     m_OverridenState.SetBit((RenderStateBlockState_1_BlendOperator - RenderStateBlockState_0_BlendOperator) * renderTargetIndex + RenderStateBlockState_0_BlendOperator);
 }
 
-void RenderStateBlockStateOverride::OverrideSourceAlphaBlend(BlendFactor overrideValue, uint32_t renderTargetIndex)
+void RenderStateBlockStateOverride::OverrideSourceAlphaBlend(BlendFactor overrideValue, shipUint32 renderTargetIndex)
 {
     SHIP_ASSERT(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
@@ -491,7 +491,7 @@ void RenderStateBlockStateOverride::OverrideSourceAlphaBlend(BlendFactor overrid
     m_OverridenState.SetBit((RenderStateBlockState_1_SourceAlphaBlend - RenderStateBlockState_0_SourceAlphaBlend) * renderTargetIndex + RenderStateBlockState_0_SourceAlphaBlend);
 }
 
-void RenderStateBlockStateOverride::OverrideDestAlphaBlend(BlendFactor overrideValue, uint32_t renderTargetIndex)
+void RenderStateBlockStateOverride::OverrideDestAlphaBlend(BlendFactor overrideValue, shipUint32 renderTargetIndex)
 {
     SHIP_ASSERT(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
@@ -499,7 +499,7 @@ void RenderStateBlockStateOverride::OverrideDestAlphaBlend(BlendFactor overrideV
     m_OverridenState.SetBit((RenderStateBlockState_1_DestAlphaBlend - RenderStateBlockState_0_DestAlphaBlend) * renderTargetIndex + RenderStateBlockState_0_DestAlphaBlend);
 }
 
-void RenderStateBlockStateOverride::OverrideAlphaBlendOperator(BlendOperator overrideValue, uint32_t renderTargetIndex)
+void RenderStateBlockStateOverride::OverrideAlphaBlendOperator(BlendOperator overrideValue, shipUint32 renderTargetIndex)
 {
     SHIP_ASSERT(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
@@ -507,7 +507,7 @@ void RenderStateBlockStateOverride::OverrideAlphaBlendOperator(BlendOperator ove
     m_OverridenState.SetBit((RenderStateBlockState_1_AlphaBlendOperator - RenderStateBlockState_0_AlphaBlendOperator) * renderTargetIndex + RenderStateBlockState_0_AlphaBlendOperator);
 }
 
-void RenderStateBlockStateOverride::OverrideRenderTargetWriteMask(RenderTargetWriteMask overrideValue, uint32_t renderTargetIndex)
+void RenderStateBlockStateOverride::OverrideRenderTargetWriteMask(RenderTargetWriteMask overrideValue, shipUint32 renderTargetIndex)
 {
     SHIP_ASSERT(renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 

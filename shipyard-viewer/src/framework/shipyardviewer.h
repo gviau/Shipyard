@@ -28,12 +28,12 @@ namespace Shipyard
     public:
         ~ShipyardViewer();
 
-        bool CreateApp(HWND windowHandle, uint32_t windowWidth, uint32_t windowHeight);
+        shipBool CreateApp(HWND windowHandle, shipUint32 windowWidth, shipUint32 windowHeight);
         void ComputeOneFrame();
 
     private:
-        uint32_t m_WindowWidth = 0;
-        uint32_t m_WindowHeight = 0;
+        shipUint32 m_WindowWidth = 0;
+        shipUint32 m_WindowHeight = 0;
 
         GraphicsSingletonStorer* m_pGraphicsSingletonStorer = nullptr;
 

@@ -42,11 +42,11 @@ void ShaderResourceBinder::BindShaderInputProvders(
                 }
 
                 GFXTexture2DHandle gfxTexture2DHandles[GfxConstants::GfxConstants_MaxShaderResourceViewsBoundPerShaderStage];
-                uint32_t numTexture2DHandles = shaderInputProviderManager.GetTexture2DHandlesFromProvider(*shaderInputProvider, gfxTexture2DHandles);
+                shipUint32 numTexture2DHandles = shaderInputProviderManager.GetTexture2DHandlesFromProvider(*shaderInputProvider, gfxTexture2DHandles);
                 
                 if (numTexture2DHandles > 0)
                 {
-                    for (uint32_t i = 0; i < numTexture2DHandles; i++)
+                    for (shipUint32 i = 0; i < numTexture2DHandles; i++)
                     {
 
                         GFXTexture2DHandle gfxTexture2DHandle = gfxTexture2DHandles[i];

@@ -22,14 +22,14 @@ namespace Shipyard
         // pHeap is assumed to be aligned to chunkSize bytes.
         // chunkSize is assumed to be at least sizeof(void*) bytes, because free chunks are used
         // as pointers to next free chunks.
-        bool Create(void* pHeap, size_t numChunks, size_t chunkSize);
+        shipBool Create(void* pHeap, size_t numChunks, size_t chunkSize);
         void Destroy();
 
         // Alignment must be a power of 2 and non-zero.
         virtual void* Allocate(size_t size, size_t alignment
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
-                    , const char* pAllocationFilename
+                    , const shipChar* pAllocationFilename
                     , int allocationLineNumber
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
@@ -58,7 +58,7 @@ namespace Shipyard
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         struct MemoryInfo
         {
-            uint64_t numBlocksAllocated = 0;
+            shipUint64 numBlocksAllocated = 0;
             size_t heapSize = 0;
             size_t numBytesUsed = 0;
             size_t numUserBytesAllocated = 0;

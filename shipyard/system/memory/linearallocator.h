@@ -12,14 +12,14 @@ namespace Shipyard
         LinearAllocator();
         ~LinearAllocator();
 
-        bool Create(void* pHeap, size_t heapSize);
+        shipBool Create(void* pHeap, size_t heapSize);
         void Destroy();
 
         // Alignment must be a power of 2 and non-zero.
         virtual void* Allocate(size_t size, size_t alignment
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
-                    , const char* pAllocationFilename
+                    , const shipChar* pAllocationFilename
                     , int allocationLineNumber
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 

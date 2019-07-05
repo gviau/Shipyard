@@ -24,7 +24,7 @@ namespace Shipyard
         // maxConstantBufferPoolHeapSize sets a limit on the allocated buffer for the unified material constant buffer.
         // If the declared ShaderInputProviders' total memory usage * SHIP_MAX_BATCHED_DRAW_CALLS_PER_MATERIAL is greater
         // than this value, the method will return false, since it won't be able to allocate the buffer.
-        bool Create(BaseRenderDevice& renderDevice, BaseAllocator* pAllocator, size_t maxConstantBufferPoolHeapSize);
+        shipBool Create(BaseRenderDevice& renderDevice, BaseAllocator* pAllocator, size_t maxConstantBufferPoolHeapSize);
         void Destroy();
 
         // This must be called before a draw call. Not thread-safe.
@@ -46,9 +46,9 @@ namespace Shipyard
         BaseAllocator* m_pAllocator;
         void* m_pConstantBufferHeap;
         size_t m_ConstantBufferHeapSize;
-        bool m_IsDirty;
+        shipBool m_IsDirty;
 
-        Array<uint32_t> m_ShaderInputProviderRequiredSizes;
+        Array<shipUint32> m_ShaderInputProviderRequiredSizes;
         Array<size_t> m_WriteOffsetsPerShaderInputProvider;
 
         // Constant buffer emulated through a big byte buffer.

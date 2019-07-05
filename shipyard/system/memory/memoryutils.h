@@ -2,8 +2,6 @@
 
 #include <system/platform.h>
 
-#include <cinttypes>
-
 namespace Shipyard
 {
     namespace MemoryUtils
@@ -13,7 +11,7 @@ namespace Shipyard
             return (address + (alignment - 1)) & (~(alignment - 1));
         }
 
-        SHIP_INLINE bool IsAddressAligned(size_t address, size_t alignment)
+        SHIP_INLINE shipBool IsAddressAligned(size_t address, size_t alignment)
         {
             return ((address & (alignment - 1)) == 0);
         }

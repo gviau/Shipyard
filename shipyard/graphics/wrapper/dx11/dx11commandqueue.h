@@ -21,10 +21,10 @@ namespace Shipyard
         DX11CommandQueue(GFXRenderDevice& gfxRenderDevice, CommandQueueType commandQueueType);
         ~DX11CommandQueue();
 
-        bool Create();
+        shipBool Create();
         void Destroy();
 
-        void ExecuteCommandLists(GFXRenderCommandList** ppRenderCommandLists, uint32_t numRenderCommandLists);
+        void ExecuteCommandLists(GFXRenderCommandList** ppRenderCommandLists, shipUint32 numRenderCommandLists);
 
     private:
         struct DrawItem

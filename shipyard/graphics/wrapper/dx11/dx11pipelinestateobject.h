@@ -9,7 +9,7 @@ namespace Shipyard
     class SHIPYARD_API DX11PipelineStateObject : public PipelineStateObject
     {
     public:
-        bool Create(const PipelineStateObjectCreationParameters& creationParameters);
+        shipBool Create(const PipelineStateObjectCreationParameters& creationParameters);
         void Destroy();
 
         const PipelineStateObjectCreationParameters& GetCreationParameters() const;

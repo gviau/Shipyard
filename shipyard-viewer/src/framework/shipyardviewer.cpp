@@ -20,7 +20,6 @@
 
 #include <system/logger.h>
 
-#include <extern/glm/glm.hpp>
 #include <extern/glm/gtc/matrix_transform.hpp>
 #include <extern/glm/gtc/type_ptr.hpp>
 
@@ -29,7 +28,7 @@ namespace Shipyard
 
 struct SimpleConstantBufferProvider : public BaseShaderInputProvider<SimpleConstantBufferProvider>
 {
-    glm::mat4x4 Matrix;
+    shipMat4x4 Matrix;
     GFXTexture2DHandle TestTexture;
 };
 
@@ -72,7 +71,7 @@ ShipyardViewer::~ShipyardViewer()
     free(m_pHeap);
 }
 
-bool ShipyardViewer::CreateApp(HWND windowHandle, uint32_t windowWidth, uint32_t windowHeight)
+shipBool ShipyardViewer::CreateApp(HWND windowHandle, shipUint32 windowWidth, shipUint32 windowHeight)
 {
     GetLogger().OpenLog("shipyard_viewer.log");
 
@@ -135,7 +134,7 @@ bool ShipyardViewer::CreateApp(HWND windowHandle, uint32_t windowWidth, uint32_t
     m_pGfxDirectCommandQueue->Create();
 
     m_pGfxViewSurface = SHIP_NEW(GFXViewSurface, 1);
-    bool isValid = m_pGfxViewSurface->Create(*m_pGfxRenderDevice, windowWidth, windowHeight, GfxFormat::R8G8B8A8_UNORM, windowHandle);
+    shipBool isValid = m_pGfxViewSurface->Create(*m_pGfxRenderDevice, windowWidth, windowHeight, GfxFormat::R8G8B8A8_UNORM, windowHandle);
 
     SHIP_ASSERT(isValid);
 
@@ -206,7 +205,7 @@ bool ShipyardViewer::CreateApp(HWND windowHandle, uint32_t windowWidth, uint32_t
         7, 5, 4
     };
 
-    uint8_t textureData[] =
+    shipUint8 textureData[] =
     {
         255, 255, 255, 255, 255, 0, 0, 255,
         255, 0, 0, 255, 255, 0, 0, 255
@@ -254,13 +253,13 @@ void ShipyardViewer::ComputeOneFrame()
     GFXMaterialUnifiedConstantBuffer& gfxMaterialUnifiedConstantBuffer = GetGFXMaterialUnifiedConstantBuffer();
     gfxMaterialUnifiedConstantBuffer.PrepareForNextDrawCall();
 
-    static float theta = 0.0f;
+    static shipFloat theta = 0.0f;
 
     GfxViewport gfxViewport;
     gfxViewport.topLeftX = 0.0f;
     gfxViewport.topLeftY = 0.0f;
-    gfxViewport.width = float(m_WindowWidth);
-    gfxViewport.height = float(m_WindowHeight);
+    gfxViewport.width = shipFloat(m_WindowWidth);
+    gfxViewport.height = shipFloat(m_WindowHeight);
     gfxViewport.minDepth = 0.0f;
     gfxViewport.maxDepth = 1.0f;
 
@@ -274,7 +273,7 @@ void ShipyardViewer::ComputeOneFrame()
                      0.0f, 0.0f, 1.0f, 0.25f,
                      0.0f, 0.0f, 0.0f, 1.0f);
 
-    m_pDataProvider->Matrix = glm::rotate(matrix, theta, glm::vec3(0.0f, 1.0f, 0.0f));
+    m_pDataProvider->Matrix = glm::rotate(matrix, theta, shipVec3(0.0f, 1.0f, 0.0f));
     m_pDataProvider->TestTexture = m_TextureHandle;
 
     InplaceArray<ShaderInputProvider*, 1> shaderInputProviders;
@@ -301,7 +300,7 @@ void ShipyardViewer::ComputeOneFrame()
     pClearDepthStencilRenderTargetCommand->depthValue = 1.0f;
     pClearDepthStencilRenderTargetCommand->stencilValue = 0;
 
-    static volatile uint32_t value = 0;
+    static volatile shipUint32 value = 0;
 
     SET_SHADER_OPTION(shaderKey, Test2Bits, value);
 
@@ -309,7 +308,7 @@ void ShipyardViewer::ComputeOneFrame()
 
     pShaderHandler->ApplyShaderInputProviders(*m_pGfxRenderDevice, *m_pGfxDirectRenderCommandList, shaderResourceBinder, shaderInputProviders);
 
-    uint32_t vertexBufferOffsets = 0;
+    shipUint32 vertexBufferOffsets = 0;
 
     DrawIndexedCommand* pDrawIndexedCommand = m_pGfxDirectRenderCommandList->DrawIndexed();
     pDrawIndexedCommand->gfxViewport = gfxViewport;

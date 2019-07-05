@@ -22,7 +22,7 @@ namespace Shipyard
 
         void StopThread();
 
-        uint64_t GetTimestampForShaderKey(const ShaderKey& shaderKey) const;
+        shipUint64 GetTimestampForShaderKey(const ShaderKey& shaderKey) const;
 
         void SetShaderDirectoryName(const StringT& shaderDirectoryName);
 
@@ -35,14 +35,14 @@ namespace Shipyard
             {}
 
             StringA m_Filename;
-            uint64_t m_LastWriteTimestamp;
+            shipUint64 m_LastWriteTimestamp;
         };
 
     private:
         void ShaderWatcherThreadFunction();
 
         std::thread m_ShaderWatcherThread;
-        static volatile bool m_RunShaderWatcherThread;
+        static volatile shipBool m_RunShaderWatcherThread;
 
         mutable std::mutex m_ShaderWatcherLock;
 

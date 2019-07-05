@@ -8,7 +8,7 @@ namespace Shipyard
 #define CREATE_OPTION(option, numBits) \
     numBits,
 
-uint8_t g_NumBitsForShaderOption[uint32_t(ShaderOption::Count)] =
+shipUint8 g_NumBitsForShaderOption[shipUint32(ShaderOption::Count)] =
 {
 #include <graphics/shader/shaderoptiondefinitions.h>
 };
@@ -16,7 +16,7 @@ uint8_t g_NumBitsForShaderOption[uint32_t(ShaderOption::Count)] =
 #define CREATE_OPTION(option, numBits) \
     #option,
 
-const char* g_ShaderOptionString[uint32_t(ShaderOption::Count)] =
+const shipChar* g_ShaderOptionString[shipUint32(ShaderOption::Count)] =
 {
 #include <graphics/shader/shaderoptiondefinitions.h>
 };

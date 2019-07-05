@@ -6,7 +6,7 @@
 
 namespace Shipyard
 {
-    enum FileHandlerOpenFlag : uint8_t
+    enum FileHandlerOpenFlag : shipUint8
     {
         FileHandlerOpenFlag_Read = 0x01,
         FileHandlerOpenFlag_Write = 0x02,
@@ -21,22 +21,22 @@ namespace Shipyard
     public:
         BaseFileHandler();
         BaseFileHandler(const StringT& filename, FileHandlerOpenFlag openFlag);
-        BaseFileHandler(const char* filename, FileHandlerOpenFlag openFlag);
+        BaseFileHandler(const shipChar* filename, FileHandlerOpenFlag openFlag);
 
 #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
-        virtual bool Open(const StringT& filename, FileHandlerOpenFlag openFlag) = 0;
-        virtual bool Open(const char* filename, FileHandlerOpenFlag openFlag) = 0;
-        virtual bool IsOpen() const = 0;
+        virtual shipBool Open(const StringT& filename, FileHandlerOpenFlag openFlag) = 0;
+        virtual shipBool Open(const shipChar* filename, FileHandlerOpenFlag openFlag) = 0;
+        virtual shipBool IsOpen() const = 0;
         virtual void Close() = 0;
 
         // Returns the number of characters read
-        virtual size_t ReadChars(size_t startingPosition, char* content, size_t numChars) = 0;
+        virtual size_t ReadChars(size_t startingPosition, shipChar* content, size_t numChars) = 0;
         virtual size_t ReadChars(size_t startingPosition, StringA& content, size_t numChars) = 0;
         virtual size_t ReadWholeFile(StringA& content) = 0;
 
-        virtual void WriteChars(size_t startingPosition, const char* chars, size_t numChars, bool flush = false) = 0;
-        virtual void InsertChars(size_t startingPosition, const char* chars, size_t numChars, bool flush = false) = 0;
-        virtual void AppendChars(const char* chars, size_t numChars, bool flush = false) = 0;
+        virtual void WriteChars(size_t startingPosition, const shipChar* chars, size_t numChars, shipBool flush = false) = 0;
+        virtual void InsertChars(size_t startingPosition, const shipChar* chars, size_t numChars, shipBool flush = false) = 0;
+        virtual void AppendChars(const shipChar* chars, size_t numChars, shipBool flush = false) = 0;
         virtual void RemoveChars(size_t startingPosition, size_t numCharsToRemove) = 0;
 
         virtual size_t Size() = 0;

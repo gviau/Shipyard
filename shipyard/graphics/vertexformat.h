@@ -50,7 +50,7 @@ namespace Shipyard
 #define NEW_INPUT_LAYOUT(semanticName, semanticIndex, format, inputSlot, byteOffset, isDataPerInstance, instanceDataStepRate) \
     { semanticName, semanticIndex, format, inputSlot, byteOffset, isDataPerInstance, instanceDataStepRate }
 
-    enum class VertexFormatType : uint16_t
+    enum class VertexFormatType : shipUint16
     {
         Pos,
         Pos_Color,
@@ -70,52 +70,52 @@ namespace Shipyard
         }
 
         const InputLayout* GetInputLayouts() const { return m_InputLayouts; }
-        uint32_t GetNumInputLayouts() const { return m_NumInputLayouts; }
+        shipUint32 GetNumInputLayouts() const { return m_NumInputLayouts; }
 
-        virtual uint32_t GetSize() const = 0;
+        virtual shipUint32 GetSize() const = 0;
 
     protected:
         InputLayout m_InputLayouts[GfxConstants::GfxConstants_MaxInputLayouts];
-        uint32_t m_NumInputLayouts;
+        shipUint32 m_NumInputLayouts;
     };
 
     class VertexFormat_Pos : public VertexFormat
     {
     public:
         VertexFormat_Pos();
-        virtual uint32_t GetSize() const override { return sizeof(Vertex_Pos); }
+        virtual shipUint32 GetSize() const override { return sizeof(Vertex_Pos); }
     };
 
     class VertexFormat_Pos_Color : public VertexFormat
     {
     public:
         VertexFormat_Pos_Color();
-        virtual uint32_t GetSize() const override { return sizeof(Vertex_Pos_Color); }
+        virtual shipUint32 GetSize() const override { return sizeof(Vertex_Pos_Color); }
     };
 
     class VertexFormat_Pos_UV : public VertexFormat
     {
     public:
         VertexFormat_Pos_UV();
-        virtual uint32_t GetSize() const override { return sizeof(Vertex_Pos_UV); }
+        virtual shipUint32 GetSize() const override { return sizeof(Vertex_Pos_UV); }
     };
 
     class VertexFormat_Pos_Normal : public VertexFormat
     {
     public:
         VertexFormat_Pos_Normal();
-        virtual uint32_t GetSize() const override { return sizeof(Vertex_Pos_Normal); }
+        virtual shipUint32 GetSize() const override { return sizeof(Vertex_Pos_Normal); }
     };
 
     class VertexFormat_Pos_UV_Normal : public VertexFormat
     {
     public:
         VertexFormat_Pos_UV_Normal();
-        virtual uint32_t GetSize() const override { return sizeof(Vertex_Pos_UV_Normal); }
+        virtual shipUint32 GetSize() const override { return sizeof(Vertex_Pos_UV_Normal); }
     };
 
     void GetVertexFormat(VertexFormatType vertexFormatType, VertexFormat*& vertexFormat);
-    bool VertexFormatTypeContainsColor(VertexFormatType type);
-    bool VertexFormatTypeContainsUV(VertexFormatType type);
-    bool VertexFormatTypeContainsNormals(VertexFormatType type);
+    shipBool VertexFormatTypeContainsColor(VertexFormatType type);
+    shipBool VertexFormatTypeContainsUV(VertexFormatType type);
+    shipBool VertexFormatTypeContainsNormals(VertexFormatType type);
 }

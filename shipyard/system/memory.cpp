@@ -20,20 +20,20 @@ GlobalAllocator::~GlobalAllocator()
     Destroy();
 }
 
-bool GlobalAllocator::Create(AllocatorInitEntry* pInitEntries, uint32_t numAllocators)
+shipBool GlobalAllocator::Create(AllocatorInitEntry* pInitEntries, shipUint32 numAllocators)
 {
     SHIP_ASSERT(pInitEntries != nullptr);
     SHIP_ASSERT(numAllocators > 0);
 
     size_t lastSize = 0;
 
-    for (uint32_t i = 0; i < numAllocators ; i++)
+    for (shipUint32 i = 0; i < numAllocators ; i++)
     {
         const AllocatorInitEntry& allocatorInitEntry = pInitEntries[i];
 
         SHIP_ASSERT(allocatorInitEntry.pAllocator != nullptr);
 
-        bool lastAllocator = (i == (numAllocators - 1));
+        shipBool lastAllocator = (i == (numAllocators - 1));
 
         if (lastAllocator)
         {
@@ -79,7 +79,7 @@ void GlobalAllocator::Destroy()
 void* GlobalAllocator::Allocate(size_t size, size_t alignment
 
         #ifdef SHIP_ALLOCATOR_DEBUG_INFO
-            , const char* pAllocationFilename
+            , const shipChar* pAllocationFilename
             , int allocationLineNumber
         #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
@@ -91,7 +91,7 @@ void* GlobalAllocator::Allocate(size_t size, size_t alignment
 
     std::lock_guard<std::mutex> lock(m_Lock);
 
-    uint32_t allocatorIndexToUse = 0;
+    shipUint32 allocatorIndexToUse = 0;
 
     for (; allocatorIndexToUse < m_NumAllocators; allocatorIndexToUse++)
     {
@@ -135,7 +135,7 @@ void GlobalAllocator::Deallocate(const void* memory)
 
     size_t memoryAddress = size_t(memory);
 
-    for (uint32_t i = 0; i < m_NumAllocators; i++)
+    for (shipUint32 i = 0; i < m_NumAllocators; i++)
     {
         AllocatorAddressRange& allocatorAddressRange = m_pAllocators[i];
 

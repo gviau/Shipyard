@@ -2,13 +2,13 @@ namespace Shipyard
 {;
 
 template <class T>
-uint32_t BaseShaderInputProvider<T>::GetRequiredSizeForProvider() const
+shipUint32 BaseShaderInputProvider<T>::GetRequiredSizeForProvider() const
 {
     return ms_ShaderInputProviderDeclaration->GetRequiredSizeForProvider();
 }
 
 template <class T>
-uint32_t BaseShaderInputProvider<T>::GetShaderInputProviderDeclarationIndex() const
+shipUint32 BaseShaderInputProvider<T>::GetShaderInputProviderDeclarationIndex() const
 {
     return ms_ShaderInputProviderDeclaration->GetShaderInputProviderDeclarationIndex();
 }

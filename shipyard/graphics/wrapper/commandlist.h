@@ -21,7 +21,7 @@ namespace Shipyard
     {
     public:
 #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
-        virtual bool Create() = 0;
+        virtual shipBool Create() = 0;
         virtual void Destroy() = 0;
 
         virtual void Close() = 0;

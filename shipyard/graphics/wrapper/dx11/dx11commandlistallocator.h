@@ -9,7 +9,7 @@ namespace Shipyard
     public:
         DX11CommandListAllocator(GFXRenderDevice& gfxRenderDevice);
 
-        bool Create();
+        shipBool Create();
         void Destroy();
     };
 }

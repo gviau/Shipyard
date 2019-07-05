@@ -20,7 +20,7 @@ DX11VertexShader::DX11VertexShader()
 
 }
 
-bool DX11VertexShader::Create(ID3D11Device& device, void* shaderData, uint64_t shaderDataSize)
+shipBool DX11VertexShader::Create(ID3D11Device& device, void* shaderData, shipUint64 shaderDataSize)
 {
     HRESULT hr = device.CreateVertexShader(shaderData, SIZE_T(shaderDataSize), nullptr, &m_VertexShader);
     if (FAILED(hr))
@@ -46,7 +46,7 @@ DX11PixelShader::DX11PixelShader()
 
 }
 
-bool DX11PixelShader::Create(ID3D11Device& device, void* shaderData, uint64_t shaderDataSize)
+shipBool DX11PixelShader::Create(ID3D11Device& device, void* shaderData, shipUint64 shaderDataSize)
 {
     HRESULT hr = device.CreatePixelShader(shaderData, SIZE_T(shaderDataSize), nullptr, &m_PixelShader);
     if (FAILED(hr))

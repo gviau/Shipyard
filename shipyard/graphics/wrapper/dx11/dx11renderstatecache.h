@@ -38,22 +38,22 @@ namespace Shipyard
 
         void SetViewport(const GfxViewport& gfxViewport);
 
-        void SetVertexBuffers(GFXVertexBuffer* const * vertexBuffers, uint32_t startSlot, uint32_t numVertexBuffers, uint32_t* vertexBufferOffsets);
-        void SetIndexBuffer(const GFXIndexBuffer& indexBuffer, uint32_t indexBufferOffset);
+        void SetVertexBuffers(GFXVertexBuffer* const * vertexBuffers, shipUint32 startSlot, shipUint32 numVertexBuffers, shipUint32* vertexBufferOffsets);
+        void SetIndexBuffer(const GFXIndexBuffer& indexBuffer, shipUint32 indexBufferOffset);
 
         void CommitStateChangesForGraphics(GFXRenderDevice& gfxRenderDevice);
 
     private:
         void BindRootSignatureDescriptorTableEntry(const RootSignatureParameterEntry& rootSignatureParameter, ShaderVisibility shaderVisibilityForParameter);
 
-        void BindDescriptorTableFromDescriptorSet(const Array<GfxResource*>& descriptorTableResources, uint32_t descriptorRangeIndex, const RootSignatureParameterEntry& rootSignatureParameter);
+        void BindDescriptorTableFromDescriptorSet(const Array<GfxResource*>& descriptorTableResources, shipUint32 descriptorRangeIndex, const RootSignatureParameterEntry& rootSignatureParameter);
         void BindDescriptorFromDescriptorSet(GfxResource* descriptorResource, const RootSignatureParameterEntry& rootSignatureParameter);
 
-        void BindResourceAsConstantBuffer(GfxResource* descriptorResource, ShaderVisibility shaderVisibility, uint32_t shaderBindingSlot);
-        void BindResourceAsShaderResourceView(GfxResource* descriptorResource, ShaderVisibility shaderVisibility, uint32_t shaderBindingSlot);
+        void BindResourceAsConstantBuffer(GfxResource* descriptorResource, ShaderVisibility shaderVisibility, shipUint32 shaderBindingSlot);
+        void BindResourceAsShaderResourceView(GfxResource* descriptorResource, ShaderVisibility shaderVisibility, shipUint32 shaderBindingSlot);
 
-        template <uint32_t NumBits>
-        void MarkBindingSlotAsDirty(InplaceBitfield<NumBits>* dirtyBindingSlots, ShaderVisibility shaderVisibility, uint32_t bindingSlot)
+        template <shipUint32 NumBits>
+        void MarkBindingSlotAsDirty(InplaceBitfield<NumBits>* dirtyBindingSlots, ShaderVisibility shaderVisibility, shipUint32 bindingSlot)
         {
             if ((shaderVisibility & ShaderVisibility::ShaderVisibility_Vertex) > 0)
             {
@@ -91,7 +91,7 @@ namespace Shipyard
         ID3D11BlendState* CreateBlendState(const BlendState& blendState) const;
 
     private:
-        enum RenderStateCacheDirtyFlag : uint8_t
+        enum RenderStateCacheDirtyFlag : shipUint8
         {
             RenderStateCacheDirtyFlag_RasterizerState,
             RenderStateCacheDirtyFlag_DepthStencilState,
@@ -139,20 +139,20 @@ namespace Shipyard
         VertexFormatType m_VertexFormatType;
         PrimitiveTopology m_PrimitiveTopology;
 
-        uint32_t m_NumRenderTargets;
+        shipUint32 m_NumRenderTargets;
         GfxFormat m_RenderTargetsFormat[GfxConstants::GfxConstants_MaxRenderTargetsBound];
         GfxFormat m_DepthStencilFormat;
 
         GfxViewport m_Viewport;
 
         ID3D11Buffer* m_NativeVertexBuffers[GfxConstants::GfxConstants_MaxVertexBuffers];
-        uint32_t m_VertexBufferStartSlot;
-        uint32_t m_NumVertexBuffers;
-        uint32_t m_VertexBufferOffsets[GfxConstants::GfxConstants_MaxVertexBuffers];
+        shipUint32 m_VertexBufferStartSlot;
+        shipUint32 m_NumVertexBuffers;
+        shipUint32 m_VertexBufferOffsets[GfxConstants::GfxConstants_MaxVertexBuffers];
 
         ID3D11Buffer* m_NativeIndexBuffer;
-        uint32_t m_IndexBufferFormat;
-        uint32_t m_IndexBufferOffset;
+        shipUint32 m_IndexBufferFormat;
+        shipUint32 m_IndexBufferOffset;
 
         ShaderVisibility m_ConstantBufferViewsShaderVisibility[GfxConstants::GfxConstants_MaxConstantBufferViewsBoundPerShaderStage];
         ShaderVisibility m_ShaderResourceViewsShaderVisibility[GfxConstants::GfxConstants_MaxShaderResourceViewsBoundPerShaderStage];

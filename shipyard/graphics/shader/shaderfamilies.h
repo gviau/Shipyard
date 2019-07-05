@@ -1,10 +1,10 @@
 #pragma once
 
-#include <cinttypes>
+#include <system/platform.h>
 
 namespace Shipyard
 {
-    enum class ShaderFamily : uint8_t
+    enum class ShaderFamily : shipUint8
     {
         Error,
         Generic,

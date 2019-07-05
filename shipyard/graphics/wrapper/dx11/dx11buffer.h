@@ -32,30 +32,30 @@ namespace Shipyard
     class SHIPYARD_API DX11VertexBuffer : public VertexBuffer, public DX11BaseBuffer
     {
     public:
-        bool Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t numVertices, VertexFormatType vertexFormatType, bool dynamic, void* initialData);
+        shipBool Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, shipUint32 numVertices, VertexFormatType vertexFormatType, shipBool dynamic, void* initialData);
     };
 
     class SHIPYARD_API DX11IndexBuffer : public IndexBuffer, public DX11BaseBuffer
     {
     public:
-        bool Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t numIndices, bool uses2BytesPerIndex, bool dynamic, void* initialData);
+        shipBool Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, shipUint32 numIndices, shipBool uses2BytesPerIndex, shipBool dynamic, void* initialData);
     };
 
     class SHIPYARD_API DX11ConstantBuffer : public ConstantBuffer, public DX11BaseBuffer
     {
     public:
-        bool Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, uint32_t dataSizeInBytes, bool dynamic, void* initialData);
+        shipBool Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, shipUint32 dataSizeInBytes, shipBool dynamic, void* initialData);
     };
 
     class SHIPYARD_API DX11ByteBuffer : public ByteBuffer, public DX11BaseBuffer
     {
     public:
-        bool Create(
+        shipBool Create(
                 ID3D11Device& device,
                 ID3D11DeviceContext& deviceContext,
                 ByteBufferCreationFlags byteBufferCreationFlags,
-                uint32_t dataSizeInBytes,
-                bool dynamic,
+                shipUint32 dataSizeInBytes,
+                shipBool dynamic,
                 void* initialData);
     };
 }

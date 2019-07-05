@@ -37,7 +37,7 @@ namespace
 }
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_MEMORY_FILL
 
-bool FixedHeapAllocator::Create(void* pHeap, size_t heapSize)
+shipBool FixedHeapAllocator::Create(void* pHeap, size_t heapSize)
 {
     SHIP_ASSERT_MSG(pHeap != nullptr && heapSize > 0, "FixedHeapAllocator::Create --> Trying to initialize a fixed heap allocator with an invalid heap");
 
@@ -71,7 +71,7 @@ void FixedHeapAllocator::Destroy()
 void* FixedHeapAllocator::Allocate(size_t size, size_t alignment
 
         #ifdef SHIP_ALLOCATOR_DEBUG_INFO
-            , const char* pAllocationFilename
+            , const shipChar* pAllocationFilename
             , int allocationLineNumber
         #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
@@ -99,7 +99,7 @@ void* FixedHeapAllocator::Allocate(size_t size, size_t alignment
     
     for (FreeMemoryBlock* pCurrentFreeMemoryBlock = m_pFirstFreeMemoryBlock; pCurrentFreeMemoryBlock != nullptr; pCurrentFreeMemoryBlock = pCurrentFreeMemoryBlock->pNextFreeBlock)
     {
-        bool isMemoryBlockCandidate = (pCurrentFreeMemoryBlock->sizeOfBlockInBytesIncludingThisHeader >= requiredSize);
+        shipBool isMemoryBlockCandidate = (pCurrentFreeMemoryBlock->sizeOfBlockInBytesIncludingThisHeader >= requiredSize);
         if (!isMemoryBlockCandidate)
         {
             continue;
@@ -109,8 +109,8 @@ void* FixedHeapAllocator::Allocate(size_t size, size_t alignment
 
         size_t startingAddressOfUserBuffer = startingAddressOfBlock + minimalSpaceRequiredForHeader;
 
-        bool isBlockBigEnough = MemoryUtils::IsAddressAligned(startingAddressOfUserBuffer, alignment);
-        bool requiresAlignmentPadding = !isBlockBigEnough;
+        shipBool isBlockBigEnough = MemoryUtils::IsAddressAligned(startingAddressOfUserBuffer, alignment);
+        shipBool requiresAlignmentPadding = !isBlockBigEnough;
 
         if (requiresAlignmentPadding)
         {
@@ -135,7 +135,7 @@ void* FixedHeapAllocator::Allocate(size_t size, size_t alignment
 
         FreeMemoryBlock* pNewFreeMemoryBlock = nullptr;
 
-        bool canCreateNewFreeBlock = (remainingSizeForFreeBlock >= minimalSizeForNewFreeBlock);
+        shipBool canCreateNewFreeBlock = (remainingSizeForFreeBlock >= minimalSizeForNewFreeBlock);
         if (canCreateNewFreeBlock)
         {
             pNewFreeMemoryBlock = reinterpret_cast<FreeMemoryBlock*>(startingAddressOfUserBuffer + size);
@@ -258,7 +258,7 @@ void FixedHeapAllocator::Deallocate(const void* memory)
 
     // We want to collapse free blocks into a single continuous block if they are right next to the free block we're about to create.
     // Otherwise, we want to insert it in the list of free blocks.
-    bool isFirstFreeMemoryBlock = (m_pFirstFreeMemoryBlock == nullptr);
+    shipBool isFirstFreeMemoryBlock = (m_pFirstFreeMemoryBlock == nullptr);
     if (isFirstFreeMemoryBlock)
     {
         m_pFirstFreeMemoryBlock = pNewFreeMemoryBlock;
@@ -269,11 +269,11 @@ void FixedHeapAllocator::Deallocate(const void* memory)
 
         size_t startAddressOfFirstFreeBlock = size_t(pCurrentFreeMemoryBlock);
 
-        bool isNewFreeMemoryBlockBehindFirstFreeMemoryBlock = (startAddressOfFirstFreeBlock >= endAddressOfNewFreeBlock);
+        shipBool isNewFreeMemoryBlockBehindFirstFreeMemoryBlock = (startAddressOfFirstFreeBlock >= endAddressOfNewFreeBlock);
 
         if (isNewFreeMemoryBlockBehindFirstFreeMemoryBlock)
         {
-            bool canCollapseFreeMemoryBlock = (startAddressOfFirstFreeBlock == endAddressOfNewFreeBlock);
+            shipBool canCollapseFreeMemoryBlock = (startAddressOfFirstFreeBlock == endAddressOfNewFreeBlock);
             if (canCollapseFreeMemoryBlock)
             {
                 pNewFreeMemoryBlock->sizeOfBlockInBytesIncludingThisHeader += pCurrentFreeMemoryBlock->sizeOfBlockInBytesIncludingThisHeader;
@@ -302,11 +302,11 @@ void FixedHeapAllocator::Deallocate(const void* memory)
             {
                 size_t endAddressOfCurrentFreeBlock = size_t(pCurrentFreeMemoryBlock) + pCurrentFreeMemoryBlock->sizeOfBlockInBytesIncludingThisHeader;
 
-                bool isNewFreeMemoryBlockAfterLastFreeMemoryBlock = (pNextFreeMemoryBlock == nullptr);
+                shipBool isNewFreeMemoryBlockAfterLastFreeMemoryBlock = (pNextFreeMemoryBlock == nullptr);
 
                 if (isNewFreeMemoryBlockAfterLastFreeMemoryBlock)
                 {
-                    bool canCollapsePreviousMemoryBlock = (endAddressOfCurrentFreeBlock == startAddressOfNewFreeBlock);
+                    shipBool canCollapsePreviousMemoryBlock = (endAddressOfCurrentFreeBlock == startAddressOfNewFreeBlock);
                     if (canCollapsePreviousMemoryBlock)
                     {
                         pCurrentFreeMemoryBlock->sizeOfBlockInBytesIncludingThisHeader += pNewFreeMemoryBlock->sizeOfBlockInBytesIncludingThisHeader;
@@ -331,11 +331,11 @@ void FixedHeapAllocator::Deallocate(const void* memory)
                 {
                     size_t startAddressOfNextFreeBlock = size_t(pNextFreeMemoryBlock);
                  
-                    bool isBetweenTwoFreeMemoryBlocks = (startAddressOfNextFreeBlock >= endAddressOfNewFreeBlock);
+                    shipBool isBetweenTwoFreeMemoryBlocks = (startAddressOfNextFreeBlock >= endAddressOfNewFreeBlock);
                     if (isBetweenTwoFreeMemoryBlocks)
                     {
-                        bool canCollapsePreviousFreeMemoryBlock = (endAddressOfCurrentFreeBlock == startAddressOfNewFreeBlock);
-                        bool canCollapseNextFreeMemoryBlock = (startAddressOfNextFreeBlock == endAddressOfNewFreeBlock);
+                        shipBool canCollapsePreviousFreeMemoryBlock = (endAddressOfCurrentFreeBlock == startAddressOfNewFreeBlock);
+                        shipBool canCollapseNextFreeMemoryBlock = (startAddressOfNextFreeBlock == endAddressOfNewFreeBlock);
 
                         if (canCollapsePreviousFreeMemoryBlock && canCollapseNextFreeMemoryBlock)
                         {

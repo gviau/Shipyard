@@ -12,9 +12,9 @@ BaseTexture::BaseTexture()
 
 }
 
-uint32_t GetBytesPerPixel(GfxFormat pixelFormat)
+shipUint32 GetBytesPerPixel(GfxFormat pixelFormat)
 {
-    uint32_t bytesPerPixel = 0;
+    shipUint32 bytesPerPixel = 0;
 
     switch (pixelFormat)
     {
@@ -94,16 +94,16 @@ uint32_t GetBytesPerPixel(GfxFormat pixelFormat)
     return bytesPerPixel;
 }
 
-uint32_t GetRowPitch(uint32_t width, GfxFormat pixelFormat)
+shipUint32 GetRowPitch(shipUint32 width, GfxFormat pixelFormat)
 {
-    uint32_t bytesPerPixel = GetBytesPerPixel(pixelFormat);
+    shipUint32 bytesPerPixel = GetBytesPerPixel(pixelFormat);
 
     return bytesPerPixel * width;
 }
 
-uint32_t Get2DSlicePitch(uint32_t width, uint32_t height, GfxFormat pixelFormat)
+shipUint32 Get2DSlicePitch(shipUint32 width, shipUint32 height, GfxFormat pixelFormat)
 {
-    uint32_t rowPitch = GetRowPitch(width, pixelFormat);
+    shipUint32 rowPitch = GetRowPitch(width, pixelFormat);
     return height * rowPitch;
 }
 

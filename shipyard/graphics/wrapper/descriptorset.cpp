@@ -7,7 +7,7 @@
 namespace Shipyard
 {;
 
-void DescriptorSet::SetDescriptorForRootIndex(uint32_t rootIndex, GfxResource& descriptorResource)
+void DescriptorSet::SetDescriptorForRootIndex(shipUint32 rootIndex, GfxResource& descriptorResource)
 {
     RootSignatureParameterType paramType = m_RootSignature->GetRootSignatureParameters()[rootIndex].parameterType;
 
@@ -21,14 +21,14 @@ void DescriptorSet::SetDescriptorForRootIndex(uint32_t rootIndex, GfxResource& d
     descriptorSetEntry.descriptorResources[0] = &descriptorResource;
 }
 
-void DescriptorSet::SetDescriptorTableForRootIndex(uint32_t rootIndex, uint32_t descriptorRangeIndex, const Array<GfxResource*>& descriptorTableResources)
+void DescriptorSet::SetDescriptorTableForRootIndex(shipUint32 rootIndex, shipUint32 descriptorRangeIndex, const Array<GfxResource*>& descriptorTableResources)
 {
     SHIP_ASSERT(descriptorTableResources.Size() > 0);
     SHIP_ASSERT(m_RootSignature->GetRootSignatureParameters()[rootIndex].parameterType == RootSignatureParameterType::DescriptorTable);
 
     DescriptorSetEntry* pDescriptorSetEntry = nullptr;
 
-    for (uint32_t i = 0; i < m_DescriptorSetEntries.Size(); i++)
+    for (shipUint32 i = 0; i < m_DescriptorSetEntries.Size(); i++)
     {
         if (m_DescriptorSetEntries[i].rootIndex == rootIndex && m_DescriptorSetEntries[i].descriptorRangeIndex == descriptorRangeIndex)
         {
@@ -39,7 +39,7 @@ void DescriptorSet::SetDescriptorTableForRootIndex(uint32_t rootIndex, uint32_t 
 
     SHIP_ASSERT_MSG(pDescriptorSetEntry != nullptr, "DescriptorSetEntry for root index %d and for descriptor range index %d wasn't found. Was it created for a descriptor table?", rootIndex, descriptorRangeIndex);
 
-    for (uint32_t i = 0; i < descriptorTableResources.Size(); i++)
+    for (shipUint32 i = 0; i < descriptorTableResources.Size(); i++)
     {
         GfxResource* descriptorResource = descriptorTableResources[i];
         pDescriptorSetEntry->descriptorResources[i] = descriptorResource;

@@ -113,7 +113,7 @@ String<CharType>::String(const String<CharType>& src)
     }
     else
     {
-        SetUserPointer(src.m_Buffer, uint32_t(src.m_Capacity));
+        SetUserPointer(src.m_Buffer, shipUint32(src.m_Capacity));
     }
 }
 
@@ -703,7 +703,7 @@ void String<CharType>::Erase(size_t pos, size_t length)
 
     size_t endIndex = pos + length;
 
-    bool needToMoveChars = (endIndex < m_NumChars);
+    shipBool needToMoveChars = (endIndex < m_NumChars);
     if (needToMoveChars)
     {
         size_t numCharsToMove = m_NumChars - length - pos;
@@ -837,7 +837,7 @@ size_t String<CharType>::Capacity() const
 }
 
 template <typename CharType>
-bool String<CharType>::IsEmpty() const
+shipBool String<CharType>::IsEmpty() const
 {
     return (m_NumChars == 0);
 }
@@ -861,7 +861,7 @@ size_t String<CharType>::FindIndexOfFirst(const String<CharType>& strToFind, siz
 
     for (size_t i = startingPos; i < numCharsToSearch; i++)
     {
-        bool foundString = true;
+        shipBool foundString = true;
 
         for (size_t j = 0; j < strToFind.m_NumChars; j++)
         {
@@ -900,7 +900,7 @@ size_t String<CharType>::FindIndexOfFirst(const CharType* strToFind, size_t numC
 
     for (size_t i = startingPos; i < numCharsToSearch; i++)
     {
-        bool foundString = true;
+        shipBool foundString = true;
 
         for (size_t j = 0; j < numChars; j++)
         {
@@ -953,7 +953,7 @@ size_t String<CharType>::FindIndexOfFirstReverse(const String<CharType>& strToFi
     {
         size_t idx = i - 1;
 
-        bool foundString = true;
+        shipBool foundString = true;
 
         for (size_t j = 0; j < strToFind.m_NumChars; j++)
         {
@@ -986,7 +986,7 @@ size_t String<CharType>::FindIndexOfFirstReverse(const CharType* strToFind, size
     {
         size_t idx = i - 1;
 
-        bool foundString = true;
+        shipBool foundString = true;
 
         for (size_t j = 0; j < numChars; j++)
         {
@@ -1048,7 +1048,7 @@ size_t String<CharType>::FindIndexOfFirstCaseInsensitive(const String<CharType>&
 
     for (size_t i = startingPos; i < endPos; i++)
     {
-        bool foundString = true;
+        shipBool foundString = true;
 
         for (size_t j = 0; j < strToFind.m_NumChars; j++)
         {
@@ -1088,7 +1088,7 @@ size_t String<CharType>::FindIndexOfFirstCaseInsensitive(const CharType* strToFi
 
     for (size_t i = startingPos; i < endPos; i++)
     {
-        bool foundString = true;
+        shipBool foundString = true;
 
         for (size_t j = 0; j < numChars; j++)
         {
@@ -1143,7 +1143,7 @@ size_t String<CharType>::FindIndexOfFirstCaseInsensitiveReverse(const String<Cha
     {
         size_t idx = i - 1;
 
-        bool foundString = true;
+        shipBool foundString = true;
 
         for (size_t j = 0; j < strToFind.m_NumChars; j++)
         {
@@ -1176,7 +1176,7 @@ size_t String<CharType>::FindIndexOfFirstCaseInsensitiveReverse(const CharType* 
     {
         size_t idx = i - 1;
 
-        bool foundString = true;
+        shipBool foundString = true;
 
         for (size_t j = 0; j < numChars; j++)
         {
@@ -1345,7 +1345,7 @@ int String<CharType>::CompareCaseInsensitive(const CharType* str) const
 }
 
 template <typename CharType>
-bool String<CharType>::EqualCaseInsensitive(const String<CharType>& str) const
+shipBool String<CharType>::EqualCaseInsensitive(const String<CharType>& str) const
 {
     if (m_NumChars != str.m_NumChars)
     {
@@ -1369,7 +1369,7 @@ bool String<CharType>::EqualCaseInsensitive(const String<CharType>& str) const
 }
 
 template <typename CharType>
-bool String<CharType>::EqualCaseInsensitive(const CharType* str, size_t numChars) const
+shipBool String<CharType>::EqualCaseInsensitive(const CharType* str, size_t numChars) const
 {
     if (m_NumChars != numChars)
     {
@@ -1393,13 +1393,13 @@ bool String<CharType>::EqualCaseInsensitive(const CharType* str, size_t numChars
 }
 
 template <typename CharType>
-bool String<CharType>::EqualCaseInsensitive(const CharType* str) const
+shipBool String<CharType>::EqualCaseInsensitive(const CharType* str) const
 {
     return EqualCaseInsensitive(str, strlen(str));
 }
 
 template <typename CharType>
-void String<CharType>::Format(const char* format, ...)
+void String<CharType>::Format(const shipChar* format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -1419,7 +1419,7 @@ void String<CharType>::Format(const char* format, ...)
 }
 
 template <typename CharType>
-bool String<CharType>::operator== (const String<CharType>& rhs) const
+shipBool String<CharType>::operator== (const String<CharType>& rhs) const
 {
     if (m_NumChars != rhs.m_NumChars)
     {
@@ -1438,7 +1438,7 @@ bool String<CharType>::operator== (const String<CharType>& rhs) const
 }
 
 template <typename CharType>
-bool String<CharType>::operator== (const CharType* rhs) const
+shipBool String<CharType>::operator== (const CharType* rhs) const
 {
     size_t numChars = strlen(rhs);
 
@@ -1459,7 +1459,7 @@ bool String<CharType>::operator== (const CharType* rhs) const
 }
 
 template <typename CharType>
-bool String<CharType>::operator!= (const String<CharType>& rhs) const
+shipBool String<CharType>::operator!= (const String<CharType>& rhs) const
 {
     if (m_NumChars != rhs.m_NumChars)
     {
@@ -1478,7 +1478,7 @@ bool String<CharType>::operator!= (const String<CharType>& rhs) const
 }
 
 template <typename CharType>
-bool String<CharType>::operator!= (const CharType* rhs) const
+shipBool String<CharType>::operator!= (const CharType* rhs) const
 {
     size_t numChars = strlen(rhs);
 
@@ -1529,7 +1529,7 @@ BaseAllocator* String<CharType>::GetAllocator() const
 }
 
 template <typename CharType>
-void String<CharType>::SetUserPointer(CharType* userArray, uint32_t stringSize)
+void String<CharType>::SetUserPointer(CharType* userArray, shipUint32 stringSize)
 {
     Clear();
 

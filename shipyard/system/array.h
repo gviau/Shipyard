@@ -6,7 +6,6 @@
 #include <system/platform.h>
 #include <system/systemdebug.h>
 
-#include <cinttypes>
 #include <stdlib.h>
 
 #include <new>
@@ -43,32 +42,32 @@ namespace Shipyard
                 m_IteratorPtr = rhs.m_IteratorPtr;
             }
 
-            bool operator== (const ConstIterator& rhs) const
+            shipBool operator== (const ConstIterator& rhs) const
             {
                 return (m_IteratorPtr == rhs.m_IteratorPtr);
             }
 
-            bool operator!= (const ConstIterator& rhs) const
+            shipBool operator!= (const ConstIterator& rhs) const
             {
                 return (m_IteratorPtr != rhs.m_IteratorPtr);
             }
 
-            bool operator< (const ConstIterator& rhs)  const
+            shipBool operator< (const ConstIterator& rhs)  const
             {
                 return (m_IteratorPtr < rhs.m_IteratorPtr);
             }
 
-            bool operator<= (const ConstIterator& rhs) const
+            shipBool operator<= (const ConstIterator& rhs) const
             {
                 return (m_IteratorPtr <= rhs.m_IteratorPtr);
             }
 
-            bool operator> (const ConstIterator& rhs) const
+            shipBool operator> (const ConstIterator& rhs) const
             {
                 return (m_IteratorPtr > rhs.m_IteratorPtr);
             }
 
-            bool operator>= (const ConstIterator& rhs) const
+            shipBool operator>= (const ConstIterator& rhs) const
             {
                 return (m_IteratorPtr >= rhs.m_IteratorPtr);
             }
@@ -173,7 +172,7 @@ namespace Shipyard
             Reserve(4);
         }
 
-        Array(uint32_t initialCapacity, BaseAllocator* pAllocator = nullptr)
+        Array(shipUint32 initialCapacity, BaseAllocator* pAllocator = nullptr)
             : m_pAllocator(pAllocator)
             , m_Array(nullptr)
             , m_ArraySizeAndCapacity(0)
@@ -202,11 +201,11 @@ namespace Shipyard
 
             Reserve(src.Capacity());
 
-            uint32_t srcSize = src.Size();
+            shipUint32 srcSize = src.Size();
 
             m_ArraySizeAndCapacity |= srcSize;
 
-            for (uint32_t i = 0; i < srcSize; i++)
+            for (shipUint32 i = 0; i < srcSize; i++)
             {
                 m_Array[i] = src[i];
             }
@@ -221,11 +220,11 @@ namespace Shipyard
 
             Reserve(src.Capacity());
 
-            uint32_t srcSize = src.Size();
+            shipUint32 srcSize = src.Size();
 
             m_ArraySizeAndCapacity |= srcSize;
 
-            for (uint32_t i = 0; i < srcSize; i++)
+            for (shipUint32 i = 0; i < srcSize; i++)
             {
                 m_Array[i] = src[i];
             }
@@ -241,11 +240,11 @@ namespace Shipyard
 
                 Reserve(rhs.Capacity());
 
-                uint32_t srcSize = rhs.Size();
+                shipUint32 srcSize = rhs.Size();
 
                 m_ArraySizeAndCapacity |= srcSize;
 
-                for (uint32_t i = 0; i < srcSize; i++)
+                for (shipUint32 i = 0; i < srcSize; i++)
                 {
                     m_Array[i] = rhs[i];
                 }
@@ -265,11 +264,11 @@ namespace Shipyard
 
                 Reserve(rhs.Capacity());
 
-                uint32_t srcSize = rhs.Size();
+                shipUint32 srcSize = rhs.Size();
 
                 m_ArraySizeAndCapacity |= srcSize;
 
-                for (uint32_t i = 0; i < srcSize; i++)
+                for (shipUint32 i = 0; i < srcSize; i++)
                 {
                     m_Array[i] = rhs[i];
                 }
@@ -278,13 +277,13 @@ namespace Shipyard
             return *this;
         }
 
-        T& operator[] (uint32_t index)
+        T& operator[] (shipUint32 index)
         {
             SHIP_ASSERT(index < Size());
             return m_Array[index];
         }
 
-        const T& operator[] (uint32_t index) const
+        const T& operator[] (shipUint32 index) const
         {
             SHIP_ASSERT(index < Size());
             return m_Array[index];
@@ -292,7 +291,7 @@ namespace Shipyard
 
         T& Front()
         {
-            uint32_t currentSize = Size();
+            shipUint32 currentSize = Size();
             SHIP_ASSERT(currentSize > 0);
 
             return m_Array[0];
@@ -300,7 +299,7 @@ namespace Shipyard
 
         const T& Front() const
         {
-            uint32_t currentSize = Size();
+            shipUint32 currentSize = Size();
             SHIP_ASSERT(currentSize > 0);
 
             return m_Array[0];
@@ -308,7 +307,7 @@ namespace Shipyard
 
         T& Back()
         {
-            uint32_t currentSize = Size();
+            shipUint32 currentSize = Size();
             SHIP_ASSERT(currentSize > 0);
 
             return m_Array[currentSize - 1];
@@ -316,7 +315,7 @@ namespace Shipyard
 
         const T& Back() const
         {
-            uint32_t currentSize = Size();
+            shipUint32 currentSize = Size();
             SHIP_ASSERT(currentSize > 0);
 
             return m_Array[currentSize - 1];
@@ -324,14 +323,14 @@ namespace Shipyard
 
         void Add(const T& element)
         {
-            uint32_t currentSize = Size();
+            shipUint32 currentSize = Size();
             SHIP_ASSERT(currentSize < 16383);
 
-            uint32_t currentCapacity = Capacity();
+            shipUint32 currentCapacity = Capacity();
 
             if ((currentSize + 1) > currentCapacity)
             {
-                uint32_t newCapacity = MIN(currentCapacity * 2, 16383);
+                shipUint32 newCapacity = MIN(currentCapacity * 2, 16383);
                 Reserve(MAX(newCapacity, 4));
             }
 
@@ -348,7 +347,7 @@ namespace Shipyard
 
         void Pop()
         {
-            uint32_t currentSize = Size();
+            shipUint32 currentSize = Size();
             SHIP_ASSERT(currentSize > 0);
 
             m_Array[currentSize - 1].~T();
@@ -358,13 +357,13 @@ namespace Shipyard
 
         void Remove(const T& elementToRemove)
         {
-            uint32_t currentSize = Size();
+            shipUint32 currentSize = Size();
             if (currentSize == 0)
             {
                 return;
             }
 
-            for (uint32_t i = 0; i < currentSize; i++)
+            for (shipUint32 i = 0; i < currentSize; i++)
             {
                 if (m_Array[i] == elementToRemove)
                 {
@@ -374,9 +373,9 @@ namespace Shipyard
             }
         }
 
-        void RemoveAt(uint32_t indexToRemove)
+        void RemoveAt(shipUint32 indexToRemove)
         {
-            uint32_t currentSize = Size();
+            shipUint32 currentSize = Size();
             SHIP_ASSERT(indexToRemove < currentSize);
 
             // Fast remove by swapping the index to remove with the last one.
@@ -385,16 +384,16 @@ namespace Shipyard
             Pop();
         }
 
-        void RemoveAtPreserveOrder(uint32_t indexToRemove)
+        void RemoveAtPreserveOrder(shipUint32 indexToRemove)
         {
-            uint32_t currentSize = Size();
+            shipUint32 currentSize = Size();
             SHIP_ASSERT(indexToRemove < currentSize);
 
             if (currentSize > 1)
             {
                 m_Array[indexToRemove].~T();
 
-                for (uint32_t i = indexToRemove; i < (currentSize - 1); i++)
+                for (shipUint32 i = indexToRemove; i < (currentSize - 1); i++)
                 {
                     m_Array[i] = m_Array[i + 1];
                 }
@@ -411,8 +410,8 @@ namespace Shipyard
         {
             if ((m_ArraySizeAndCapacity & BORROWED_MEMORY_FLAG) == 0)
             {
-                uint32_t currentCapacity = Capacity();
-                for (uint32_t i = 0; i < currentCapacity; i++)
+                shipUint32 currentCapacity = Capacity();
+                for (shipUint32 i = 0; i < currentCapacity; i++)
                 {
                     m_Array[i].~T();
                 }
@@ -424,30 +423,30 @@ namespace Shipyard
             m_ArraySizeAndCapacity = 0;
         }
 
-        bool Empty() const
+        shipBool Empty() const
         {
             return (Size() == 0);
         }
 
-        void InsertAt(uint32_t indexToInsertAt, const T& elementToInsert)
+        void InsertAt(shipUint32 indexToInsertAt, const T& elementToInsert)
         {
-            uint32_t currentSize = Size();
+            shipUint32 currentSize = Size();
             SHIP_ASSERT(currentSize < 16384);
 
-            uint32_t currentCapacity = Capacity();
+            shipUint32 currentCapacity = Capacity();
 
             if ((currentSize + 1) > currentCapacity)
             {
-                uint32_t newCapacity = MIN(currentCapacity * 2, 16383);
+                shipUint32 newCapacity = MIN(currentCapacity * 2, 16383);
                 Reserve(MAX(newCapacity, 4));
             }
 
             // We have to go in reverse order, otherwise we'd shift the element right after the index at which we want
             // to insert at every other location.
-            for (uint32_t i = currentSize + 1; i > (indexToInsertAt + 1); i--)
+            for (shipUint32 i = currentSize + 1; i > (indexToInsertAt + 1); i--)
             {
-                uint32_t currentIdx = i - 1;
-                uint32_t previousIdx = i - 2;
+                shipUint32 currentIdx = i - 1;
+                shipUint32 previousIdx = i - 2;
 
                 m_Array[currentIdx] = m_Array[previousIdx];
             }
@@ -457,7 +456,7 @@ namespace Shipyard
             m_ArraySizeAndCapacity += 1;
         }
 
-        void Reserve(uint32_t newCapacity)
+        void Reserve(shipUint32 newCapacity)
         {
             SHIP_ASSERT(newCapacity > 0);
             SHIP_ASSERT(newCapacity <= 16383);
@@ -471,22 +470,22 @@ namespace Shipyard
 
             T* newArray = reinterpret_cast<T*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, alignment));
 
-            for (uint32_t i = 0; i < newCapacity; i++)
+            for (shipUint32 i = 0; i < newCapacity; i++)
             {
                 new(newArray + i)T();
             }
 
-            uint32_t currentSize = Size();
+            shipUint32 currentSize = Size();
 
-            for (uint32_t i = 0; i < currentSize; i++)
+            for (shipUint32 i = 0; i < currentSize; i++)
             {
                 newArray[i] = m_Array[i];
             }
 
             if ((m_ArraySizeAndCapacity & BORROWED_MEMORY_FLAG) == 0)
             {
-                uint32_t currentCapacity = Capacity();
-                for (uint32_t i = 0; i < currentCapacity; i++)
+                shipUint32 currentCapacity = Capacity();
+                for (shipUint32 i = 0; i < currentCapacity; i++)
                 {
                     m_Array[i].~T();
                 }
@@ -500,23 +499,23 @@ namespace Shipyard
             m_ArraySizeAndCapacity |= (newCapacity << 14);
         }
 
-        void Resize(uint32_t newSize)
+        void Resize(shipUint32 newSize)
         {
             SHIP_ASSERT(newSize <= 16383);
 
-            uint32_t currentSize = Size();
+            shipUint32 currentSize = Size();
 
             if (newSize < currentSize)
             {
-                uint32_t numElementsToRemove = (currentSize - newSize);
-                for (uint32_t i = 0; i < numElementsToRemove; i++)
+                shipUint32 numElementsToRemove = (currentSize - newSize);
+                for (shipUint32 i = 0; i < numElementsToRemove; i++)
                 {
                     Pop();
                 }
             }
             else if (newSize > currentSize)
             {
-                uint32_t currentCapacity = Capacity();
+                shipUint32 currentCapacity = Capacity();
 
                 if (newSize > currentCapacity)
                 {
@@ -528,21 +527,21 @@ namespace Shipyard
             }
         }
 
-        uint32_t Size() const
+        shipUint32 Size() const
         {
             return (m_ArraySizeAndCapacity & 0x3FFF);
         }
 
-        uint32_t Capacity() const
+        shipUint32 Capacity() const
         {
             return ((m_ArraySizeAndCapacity >> 14) & 0x3FFF);
         }
 
-        uint32_t FindIndex(const T& elementToFind) const
+        shipUint32 FindIndex(const T& elementToFind) const
         {
-            uint32_t currentSize = Size();
+            shipUint32 currentSize = Size();
             
-            for (uint32_t i = 0; i < currentSize; i++)
+            for (shipUint32 i = 0; i < currentSize; i++)
             {
                 if (m_Array[i] == elementToFind)
                 {
@@ -550,15 +549,15 @@ namespace Shipyard
                 }
             }
 
-            return uint32_t(-1);
+            return shipUint32(-1);
         }
 
-        bool Exists(const T& elementToFind) const
+        shipBool Exists(const T& elementToFind) const
         {
-            return (FindIndex(elementToFind) != uint32_t(-1));
+            return (FindIndex(elementToFind) != shipUint32(-1));
         }
 
-        void SetUserPointer(T* userArray, uint32_t numElements, uint32_t startingSize)
+        void SetUserPointer(T* userArray, shipUint32 numElements, shipUint32 startingSize)
         {
             SHIP_ASSERT(userArray != nullptr);
             SHIP_ASSERT(numElements > 0);
@@ -588,22 +587,22 @@ namespace Shipyard
                 size_t requiredSize = sizeof(T) * capacity;
                 T* pNewArray = reinterpret_cast<T*>(SHIP_ALLOC_EX(pAllocator, requiredSize, alignment));
 
-                for (uint32_t i = 0; i < capacity; i++)
+                for (shipUint32 i = 0; i < capacity; i++)
                 {
                     new(pNewArray + i)T();
                 }
 
-                uint32_t numElements = Size();
+                shipUint32 numElements = Size();
 
-                for (uint32_t i = 0; i < numElements; i++)
+                for (shipUint32 i = 0; i < numElements; i++)
                 {
                     pNewArray[i] = m_Array[i];
                 }
 
                 if ((m_ArraySizeAndCapacity & BORROWED_MEMORY_FLAG) == 0)
                 {
-                    uint32_t currentCapacity = Capacity();
-                    for (uint32_t i = 0; i < currentCapacity; i++)
+                    shipUint32 currentCapacity = Capacity();
+                    for (shipUint32 i = 0; i < currentCapacity; i++)
                     {
                         m_Array[i].~T();
                     }
@@ -625,7 +624,7 @@ namespace Shipyard
     protected:
         BaseAllocator* m_pAllocator;
         T* m_Array;
-        uint32_t m_ArraySizeAndCapacity;
+        shipUint32 m_ArraySizeAndCapacity;
 
     public:
         Iterator begin()
@@ -658,7 +657,7 @@ namespace Shipyard
     // Instead:
     //
     // InplaceArray<ArrayType, 100> myArray;
-    template <typename T, uint32_t inplaceSize, size_t alignment = 1>
+    template <typename T, shipUint32 inplaceSize, size_t alignment = 1>
     class InplaceArray : public Array<T, alignment>
     {
     public:
@@ -691,7 +690,7 @@ namespace Shipyard
             Reserve(4);
         }
 
-        BigArray(uint32_t initialCapacity, BaseAllocator* pAllocator = nullptr)
+        BigArray(shipUint32 initialCapacity, BaseAllocator* pAllocator = nullptr)
             : m_pAllocator(pAllocator)
             , m_Array(nullptr)
             , m_Size(0)
@@ -723,7 +722,7 @@ namespace Shipyard
 
             m_Size = src.m_Size;
 
-            for (uint32_t i = 0; i < m_Size; i++)
+            for (shipUint32 i = 0; i < m_Size; i++)
             {
                 m_Array[i] = src.m_Array[i];
             }
@@ -741,7 +740,7 @@ namespace Shipyard
 
                 m_Size = rhs.m_Size;
 
-                for (uint32_t i = 0; i < m_Size; i++)
+                for (shipUint32 i = 0; i < m_Size; i++)
                 {
                     m_Array[i] = rhs.m_Array[i];
                 }
@@ -750,13 +749,13 @@ namespace Shipyard
             return *this;
         }
 
-        T& operator[] (uint32_t index)
+        T& operator[] (shipUint32 index)
         {
             SHIP_ASSERT(index < m_Size);
             return m_Array[index];
         }
 
-        const T& operator[] (uint32_t index) const
+        const T& operator[] (shipUint32 index) const
         {
             SHIP_ASSERT(index < m_Size);
             return m_Array[index];
@@ -796,7 +795,7 @@ namespace Shipyard
 
             if ((m_Size + 1) > m_Capacity)
             {
-                uint32_t newCapacity = uint32_t(MIN(uint64_t(m_Capacity) * 2, 0xFFFFFFFF));
+                shipUint32 newCapacity = shipUint32(MIN(shipUint64(m_Capacity) * 2, 0xFFFFFFFF));
                 Reserve(MAX(newCapacity, 4));
             }
 
@@ -827,7 +826,7 @@ namespace Shipyard
                 return;
             }
 
-            for (uint32_t i = 0; i < m_Size; i++)
+            for (shipUint32 i = 0; i < m_Size; i++)
             {
                 if (m_Array[i] == elementToRemove)
                 {
@@ -837,7 +836,7 @@ namespace Shipyard
             }
         }
 
-        void RemoveAt(uint32_t indexToRemove)
+        void RemoveAt(shipUint32 indexToRemove)
         {
             SHIP_ASSERT(indexToRemove < m_Size);
 
@@ -847,7 +846,7 @@ namespace Shipyard
             Pop();
         }
 
-        void RemoveAtPreserveOrder(uint32_t indexToRemove)
+        void RemoveAtPreserveOrder(shipUint32 indexToRemove)
         {
             SHIP_ASSERT(indexToRemove < m_Size);
 
@@ -855,7 +854,7 @@ namespace Shipyard
             {
                 m_Array[indexToRemove].~T();
 
-                for (uint32_t i = indexToRemove; i < (m_Size - 1); i++)
+                for (shipUint32 i = indexToRemove; i < (m_Size - 1); i++)
                 {
                     m_Array[i] = m_Array[i + 1];
                 }
@@ -870,7 +869,7 @@ namespace Shipyard
 
         void Clear()
         {
-            for (uint32_t i = 0; i < m_Capacity; i++)
+            for (shipUint32 i = 0; i < m_Capacity; i++)
             {
                 m_Array[i].~T();
             }
@@ -882,27 +881,27 @@ namespace Shipyard
             m_Capacity = 0;
         }
 
-        bool Empty() const
+        shipBool Empty() const
         {
             return (m_Size == 0);
         }
 
-        void InsertAt(uint32_t indexToInsertAt, const T& elementToInsert)
+        void InsertAt(shipUint32 indexToInsertAt, const T& elementToInsert)
         {
             SHIP_ASSERT(m_Size < 0xFFFFFFFF);
 
             if ((m_Size + 1) > m_Capacity)
             {
-                uint32_t newCapacity = uint32_t(MIN(uint64_t(m_Capacity) * 2, 0xFFFFFFFF));
+                shipUint32 newCapacity = shipUint32(MIN(shipUint64(m_Capacity) * 2, 0xFFFFFFFF));
                 Reserve(MAX(newCapacity, 4));
             }
 
             // We have to go in reverse order, otherwise we'd shift the element right after the index at which we want
             // to insert at every other location.
-            for (uint32_t i = m_Size + 1; i > (indexToInsertAt + 1); i--)
+            for (shipUint32 i = m_Size + 1; i > (indexToInsertAt + 1); i--)
             {
-                uint32_t currentIdx = i - 1;
-                uint32_t previousIdx = i - 2;
+                shipUint32 currentIdx = i - 1;
+                shipUint32 previousIdx = i - 2;
 
                 m_Array[currentIdx] = m_Array[previousIdx];
             }
@@ -912,7 +911,7 @@ namespace Shipyard
             m_Size += 1;
         }
 
-        void Reserve(uint32_t newCapacity)
+        void Reserve(shipUint32 newCapacity)
         {
             SHIP_ASSERT(newCapacity > 0);
             SHIP_ASSERT(newCapacity <= 0xFFFFFFFF);
@@ -926,17 +925,17 @@ namespace Shipyard
 
             T* newArray = reinterpret_cast<T*>(SHIP_ALLOC_EX(m_pAllocator, requiredSize, alignment));
 
-            for (uint32_t i = 0; i < newCapacity; i++)
+            for (shipUint32 i = 0; i < newCapacity; i++)
             {
                 new(newArray + i)T();
             }
 
-            for (uint32_t i = 0; i < m_Size; i++)
+            for (shipUint32 i = 0; i < m_Size; i++)
             {
                 newArray[i] = m_Array[i];
             }
 
-            for (uint32_t i = 0; i < m_Capacity; i++)
+            for (shipUint32 i = 0; i < m_Capacity; i++)
             {
                 m_Array[i].~T();
             }
@@ -948,14 +947,14 @@ namespace Shipyard
             m_Capacity = newCapacity;
         }
 
-        void Resize(uint32_t newSize)
+        void Resize(shipUint32 newSize)
         {
             SHIP_ASSERT(newSize <= 0xFFFFFFFF);
 
             if (newSize < m_Size)
             {
-                uint32_t numElementsToRemove = (m_Size - newSize);
-                for (uint32_t i = 0; i < numElementsToRemove; i++)
+                shipUint32 numElementsToRemove = (m_Size - newSize);
+                for (shipUint32 i = 0; i < numElementsToRemove; i++)
                 {
                     Pop();
                 }
@@ -971,19 +970,19 @@ namespace Shipyard
             m_Size = newSize;
         }
 
-        uint32_t Size() const
+        shipUint32 Size() const
         {
             return m_Size;
         }
 
-        uint32_t Capacity() const
+        shipUint32 Capacity() const
         {
             return m_Capacity;
         }
 
-        uint32_t FindIndex(const T& elementToFind) const
+        shipUint32 FindIndex(const T& elementToFind) const
         {
-            for (uint32_t i = 0; i < m_Size; i++)
+            for (shipUint32 i = 0; i < m_Size; i++)
             {
                 if (m_Array[i] == elementToFind)
                 {
@@ -991,12 +990,12 @@ namespace Shipyard
                 }
             }
 
-            return uint32_t(-1);
+            return shipUint32(-1);
         }
 
-        bool Exists(const T& elementToFind) const
+        shipBool Exists(const T& elementToFind) const
         {
-            return (FindIndex(elementToFind) != uint32_t(-1));
+            return (FindIndex(elementToFind) != shipUint32(-1));
         }
 
         void SetAllocator(BaseAllocator* pAllocator)
@@ -1009,17 +1008,17 @@ namespace Shipyard
             size_t requiredSize = sizeof(T) * m_Capacity;
             T* pNewArray = reinterpret_cast<T*>(SHIP_ALLOC_EX(pAllocator, requiredSize, alignment));
 
-            for (uint32_t i = 0; i < m_Capacity; i++)
+            for (shipUint32 i = 0; i < m_Capacity; i++)
             {
                 new(pNewArray + i)T();
             }
 
-            for (uint32_t i = 0; i < m_Size; i++)
+            for (shipUint32 i = 0; i < m_Size; i++)
             {
                 pNewArray[i] = m_Array[i];
             }
 
-            for (uint32_t i = 0; i < m_Capacity; i++)
+            for (shipUint32 i = 0; i < m_Capacity; i++)
             {
                 m_Array[i].~T();
             }
@@ -1033,8 +1032,8 @@ namespace Shipyard
     protected:
         BaseAllocator* m_pAllocator;
         T* m_Array;
-        uint32_t m_Size;
-        uint32_t m_Capacity;
+        shipUint32 m_Size;
+        shipUint32 m_Capacity;
 
     public:
         Iterator begin()

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stdint.h>
-
 #include <system/memory.h>
 
 namespace Shipyard
@@ -72,7 +70,7 @@ namespace Shipyard
 
         size_t Size() const;
         size_t Capacity() const;
-        bool IsEmpty() const;
+        shipBool IsEmpty() const;
 
         size_t FindIndexOfFirst(const String& strToFind, size_t startingPos) const;
         size_t FindIndexOfFirst(const CharType* strToFind, size_t numChars, size_t startingPos) const;
@@ -102,28 +100,28 @@ namespace Shipyard
         int CompareCaseInsensitive(const String& str) const;
         int CompareCaseInsensitive(const CharType* str) const;
 
-        bool EqualCaseInsensitive(const String& str) const;
-        bool EqualCaseInsensitive(const CharType* str, size_t numChars) const;
-        bool EqualCaseInsensitive(const CharType* str) const;
+        shipBool EqualCaseInsensitive(const String& str) const;
+        shipBool EqualCaseInsensitive(const CharType* str, size_t numChars) const;
+        shipBool EqualCaseInsensitive(const CharType* str) const;
 
-        void Format(const char* format, ...);
+        void Format(const shipChar* format, ...);
 
-        bool operator== (const String& rhs) const;
-        bool operator== (const CharType* rhs) const;
-        bool operator!= (const String& rhs) const;
-        bool operator!= (const CharType* rhs) const;
+        shipBool operator== (const String& rhs) const;
+        shipBool operator== (const CharType* rhs) const;
+        shipBool operator!= (const String& rhs) const;
+        shipBool operator!= (const CharType* rhs) const;
 
         void SetAllocator(BaseAllocator* pAllocator);
         BaseAllocator* GetAllocator() const;
 
-        void SetUserPointer(CharType* userArray, uint32_t stringSize);
+        void SetUserPointer(CharType* userArray, shipUint32 stringSize);
 
     protected:
         BaseAllocator* m_pAllocator;
         CharType* m_Buffer;
         size_t m_NumChars;
         size_t m_Capacity;
-        bool m_OwnMemory;
+        shipBool m_OwnMemory;
     };
 
     template <typename CharType, size_t numChars>
@@ -157,10 +155,10 @@ namespace Shipyard
         CharType m_StackBuffer[numChars];
     };
 
-    using StringA = String<char>;
+    using StringA = String<shipChar>;
     using StringT = StringA;
 
-    template<size_t numChars> using InplaceStringA = InplaceString<char, numChars>;
+    template<size_t numChars> using InplaceStringA = InplaceString<shipChar, numChars>;
     template<size_t numChars> using InplaceStringT = InplaceStringA<numChars>;
 
     static const size_t gs_TinyStringSize = 64;
@@ -178,7 +176,7 @@ namespace Shipyard
     using MediumInplaceStringT = InplaceStringT<gs_MediumStringSize>;
     using LargeInplaceStringT = InplaceStringT<gs_LargeStringSize>;
 
-    SHIPYARD_API const char* StringFormat(const char* fmt, ...);
+    SHIPYARD_API const shipChar* StringFormat(const shipChar* fmt, ...);
 }
 
 #include <system/string.inl>

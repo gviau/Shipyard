@@ -24,7 +24,7 @@ DebugAllocator::~DebugAllocator()
     SHIP_ASSERT_MSG(m_pHeap == nullptr, "It is required to manually call Destroy on the DebugAllocator %p to control when to free the memory.", this);
 }
 
-bool DebugAllocator::Create(void* pHeap, size_t heapSize)
+shipBool DebugAllocator::Create(void* pHeap, size_t heapSize)
 {
     if (pHeap == nullptr)
     {
@@ -69,7 +69,7 @@ void DebugAllocator::Destroy()
 
         // For convenience, let's pack the memory leaks by allocator. So we need to first gather the different allocators.
         BaseAllocator* pAllocators[32];
-        uint32_t numMemoryLeaksPerAllocator[32];
+        shipUint32 numMemoryLeaksPerAllocator[32];
         size_t numAllocators = 0;
 
         for (DebugAllocationInfo* pCurrentMemoryLeak = m_pFirstDebugAllocationInfo; pCurrentMemoryLeak != nullptr; pCurrentMemoryLeak = pCurrentMemoryLeak->pNextDebugAllocationInfo)
@@ -83,7 +83,7 @@ void DebugAllocator::Destroy()
                 }
             }
 
-            bool newAllocator = (idx == numAllocators);
+            shipBool newAllocator = (idx == numAllocators);
 
             if (newAllocator)
             {
@@ -121,7 +121,7 @@ void DebugAllocator::Destroy()
     m_pFirstDebugAllocationInfo = nullptr;
 }
 
-void DebugAllocator::Allocate(BaseAllocator* pAllocator, void* pAllocatedMemory, size_t size, const char* pAllocationFilename, int allocationLineNumber)
+void DebugAllocator::Allocate(BaseAllocator* pAllocator, void* pAllocatedMemory, size_t size, const shipChar* pAllocationFilename, int allocationLineNumber)
 {
     if (m_pHeap == nullptr || pAllocatedMemory == nullptr)
     {

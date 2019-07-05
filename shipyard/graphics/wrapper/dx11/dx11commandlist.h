@@ -19,7 +19,7 @@ namespace Shipyard
         DX11BaseRenderCommandList();
         ~DX11BaseRenderCommandList();
 
-        bool Create();
+        shipBool Create();
         void Destroy();
 
         void Close();

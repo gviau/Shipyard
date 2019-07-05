@@ -6,8 +6,8 @@ namespace Shipyard
 {;
 
 ShaderDatabase::ShaderDatabase()
-    : m_ShaderEntrySets(uint32_t(0))
-    , m_ShaderEntryKeys(uint32_t(0))
+    : m_ShaderEntrySets(shipUint32(0))
+    , m_ShaderEntryKeys(shipUint32(0))
 {
 
 }
@@ -17,7 +17,7 @@ ShaderDatabase::~ShaderDatabase()
     Close();
 }
 
-bool ShaderDatabase::Load(const StringT& filename)
+shipBool ShaderDatabase::Load(const StringT& filename)
 {
     m_Filename = filename;
 
@@ -35,7 +35,7 @@ bool ShaderDatabase::Load(const StringT& filename)
         return false;
     }
 
-    uint8_t* databaseBuffer = (uint8_t*)&databaseContent[0];
+    shipUint8* databaseBuffer = (shipUint8*)&databaseContent[0];
 
     DatabaseHeader databaseHeader = *(DatabaseHeader*)databaseBuffer;
     if (databaseHeader.lowMagic != LowMagicConstant || databaseHeader.highMagic != HighMagicConstant)
@@ -66,7 +66,7 @@ bool ShaderDatabase::Load(const StringT& filename)
         m_ShaderEntrySets.Reserve(shaderEntriesHeader.numShaderEntries);
     }
 
-    for (uint32_t i = 0; i < shaderEntriesHeader.numShaderEntries; i++)
+    for (shipUint32 i = 0; i < shaderEntriesHeader.numShaderEntries; i++)
     {
         LoadNextShaderEntry(databaseBuffer, m_ShaderEntryKeys, m_ShaderEntrySets);
     }
@@ -94,7 +94,7 @@ void ShaderDatabase::Close()
     m_ShaderEntrySets.Clear();
 }
 
-bool ShaderDatabase::Invalidate()
+shipBool ShaderDatabase::Invalidate()
 {
     m_FileHandler.Close();
 
@@ -112,18 +112,18 @@ bool ShaderDatabase::Invalidate()
     ShaderEntriesHeader shaderEntriesHeader;
     shaderEntriesHeader.numShaderEntries = 0;
 
-    m_FileHandler.AppendChars((const char*)&databaseHeader, sizeof(databaseHeader));
+    m_FileHandler.AppendChars((const shipChar*)&databaseHeader, sizeof(databaseHeader));
 
-    constexpr bool flush = true;
-    m_FileHandler.AppendChars((const char*)&shaderEntriesHeader, sizeof(shaderEntriesHeader), flush);
+    constexpr shipBool flush = true;
+    m_FileHandler.AppendChars((const shipChar*)&shaderEntriesHeader, sizeof(shaderEntriesHeader), flush);
 
     return true;
 }
 
-bool ShaderDatabase::RetrieveShadersForShaderKey(const ShaderKey& shaderKey, ShaderEntrySet& shaderEntrySet) const
+shipBool ShaderDatabase::RetrieveShadersForShaderKey(const ShaderKey& shaderKey, ShaderEntrySet& shaderEntrySet) const
 {
-    uint32_t shaderSetIndex = 0;
-    uint32_t numShaderEntries = m_ShaderEntryKeys.Size();
+    shipUint32 shaderSetIndex = 0;
+    shipUint32 numShaderEntries = m_ShaderEntryKeys.Size();
 
     for (; shaderSetIndex < numShaderEntries; shaderSetIndex++)
     {
@@ -134,7 +134,7 @@ bool ShaderDatabase::RetrieveShadersForShaderKey(const ShaderKey& shaderKey, Sha
         }
     }
 
-    bool foundShaderKey = (shaderSetIndex < numShaderEntries);
+    shipBool foundShaderKey = (shaderSetIndex < numShaderEntries);
     if (!foundShaderKey)
     {
         return false;
@@ -149,8 +149,8 @@ bool ShaderDatabase::RetrieveShadersForShaderKey(const ShaderKey& shaderKey, Sha
 
 void ShaderDatabase::RemoveShadersForShaderKey(const ShaderKey& shaderKey)
 {
-    uint32_t shaderSetIndexToRemove = 0;
-    uint32_t numShaderEntries = m_ShaderEntryKeys.Size();
+    shipUint32 shaderSetIndexToRemove = 0;
+    shipUint32 numShaderEntries = m_ShaderEntryKeys.Size();
 
     for (; shaderSetIndexToRemove < numShaderEntries; shaderSetIndexToRemove++)
     {
@@ -161,14 +161,14 @@ void ShaderDatabase::RemoveShadersForShaderKey(const ShaderKey& shaderKey)
         }
     }
 
-    bool foundShaderKey = (shaderSetIndexToRemove < numShaderEntries);
+    shipBool foundShaderKey = (shaderSetIndexToRemove < numShaderEntries);
     if (!foundShaderKey)
     {
         return;
     }
 
     size_t positionToRemoveInFile = sizeof(DatabaseHeader) + sizeof(ShaderEntriesHeader);
-    for (uint32_t i = 0; i < shaderSetIndexToRemove; i++)
+    for (shipUint32 i = 0; i < shaderSetIndexToRemove; i++)
     {
         const ShaderEntrySet& shaderEntrySet = m_ShaderEntrySets[i];
 
@@ -204,35 +204,35 @@ void ShaderDatabase::RemoveShadersForShaderKey(const ShaderKey& shaderKey)
     ShaderEntriesHeader shaderEntriesHeader;
 
     size_t shaderEntriesHeaderPosition = sizeof(DatabaseHeader);
-    m_FileHandler.ReadChars(shaderEntriesHeaderPosition, (char*)&shaderEntriesHeader, sizeof(shaderEntriesHeader));
+    m_FileHandler.ReadChars(shaderEntriesHeaderPosition, (shipChar*)&shaderEntriesHeader, sizeof(shaderEntriesHeader));
 
     SHIP_ASSERT(shaderEntriesHeader.numShaderEntries - 1 == m_ShaderEntryKeys.Size());
 
     shaderEntriesHeader.numShaderEntries -= 1;
 
-    constexpr bool flush = true;
-    m_FileHandler.WriteChars(shaderEntriesHeaderPosition, (char*)&shaderEntriesHeader, sizeof(shaderEntriesHeader), flush);
+    constexpr shipBool flush = true;
+    m_FileHandler.WriteChars(shaderEntriesHeaderPosition, (shipChar*)&shaderEntriesHeader, sizeof(shaderEntriesHeader), flush);
 }
 
 namespace
 {;
 
-void StealShaderMemory(uint8_t* sourceRawShader, size_t sourceShaderSize, uint8_t*& destRawShader, size_t& destShaderSize)
+void StealShaderMemory(shipUint8* sourceRawShader, size_t sourceShaderSize, shipUint8*& destRawShader, size_t& destShaderSize)
 {
     if (sourceShaderSize > 0)
     {
         destShaderSize = sourceShaderSize;
-        destRawShader = reinterpret_cast<uint8_t*>(SHIP_ALLOC(sourceShaderSize, 1));
+        destRawShader = reinterpret_cast<shipUint8*>(SHIP_ALLOC(sourceShaderSize, 1));
 
         memcpy(destRawShader, sourceRawShader, sourceShaderSize);
     }
 }
 
-void LoadShaderFromBuffer(uint8_t*& buffer, uint8_t*& rawShader, size_t shaderSize)
+void LoadShaderFromBuffer(shipUint8*& buffer, shipUint8*& rawShader, size_t shaderSize)
 {
     if (shaderSize > 0)
     {
-        rawShader = reinterpret_cast<uint8_t*>(SHIP_ALLOC(shaderSize, 1));
+        rawShader = reinterpret_cast<shipUint8*>(SHIP_ALLOC(shaderSize, 1));
 
         memcpy(rawShader, buffer, shaderSize);
 
@@ -266,12 +266,12 @@ void ShaderDatabase::AppendShadersForShaderKey(const ShaderKey& shaderKey, Shade
     ShaderEntriesHeader shaderEntriesHeader;
 
     size_t shaderEntriesHeaderPosition = sizeof(DatabaseHeader);
-    m_FileHandler.ReadChars(shaderEntriesHeaderPosition, (char*)&shaderEntriesHeader, sizeof(shaderEntriesHeader));
+    m_FileHandler.ReadChars(shaderEntriesHeaderPosition, (shipChar*)&shaderEntriesHeader, sizeof(shaderEntriesHeader));
 
     SHIP_ASSERT(shaderEntriesHeader.numShaderEntries + 1 == m_ShaderEntryKeys.Size());
 
     shaderEntriesHeader.numShaderEntries += 1;
-    m_FileHandler.WriteChars(shaderEntriesHeaderPosition, (char*)&shaderEntriesHeader, sizeof(shaderEntriesHeader));
+    m_FileHandler.WriteChars(shaderEntriesHeaderPosition, (shipChar*)&shaderEntriesHeader, sizeof(shaderEntriesHeader));
     
     ShaderEntryHeader shaderEntryHeader;
     shaderEntryHeader.shaderKey = newShaderEntryKey.shaderKey;
@@ -283,44 +283,44 @@ void ShaderDatabase::AppendShadersForShaderKey(const ShaderKey& shaderKey, Shade
     shaderEntryHeader.rawGeometryShaderSize = shaderEntrySet.rawGeometryShaderSize;
     shaderEntryHeader.rawComputeShaderSize = shaderEntrySet.rawComputeShaderSize;
 
-    m_FileHandler.AppendChars((const char*)&shaderEntryHeader, sizeof(shaderEntryHeader));
+    m_FileHandler.AppendChars((const shipChar*)&shaderEntryHeader, sizeof(shaderEntryHeader));
 
-    constexpr bool flush = true;
+    constexpr shipBool flush = true;
 
     if (shaderEntrySet.rawVertexShaderSize > 0)
     {
-        m_FileHandler.AppendChars((const char*)shaderEntrySet.rawVertexShader, shaderEntrySet.rawVertexShaderSize, flush);
+        m_FileHandler.AppendChars((const shipChar*)shaderEntrySet.rawVertexShader, shaderEntrySet.rawVertexShaderSize, flush);
     }
 
     if (shaderEntrySet.rawPixelShaderSize > 0)
     {
-        m_FileHandler.AppendChars((const char*)shaderEntrySet.rawPixelShader, shaderEntrySet.rawPixelShaderSize, flush);
+        m_FileHandler.AppendChars((const shipChar*)shaderEntrySet.rawPixelShader, shaderEntrySet.rawPixelShaderSize, flush);
     }
 
     if (shaderEntrySet.rawHullShaderSize > 0)
     {
-        m_FileHandler.AppendChars((const char*)shaderEntrySet.rawHullShader, shaderEntrySet.rawHullShaderSize, flush);
+        m_FileHandler.AppendChars((const shipChar*)shaderEntrySet.rawHullShader, shaderEntrySet.rawHullShaderSize, flush);
     }
 
     if (shaderEntrySet.rawDomainShaderSize > 0)
     {
-        m_FileHandler.AppendChars((const char*)shaderEntrySet.rawDomainShader, shaderEntrySet.rawDomainShaderSize, flush);
+        m_FileHandler.AppendChars((const shipChar*)shaderEntrySet.rawDomainShader, shaderEntrySet.rawDomainShaderSize, flush);
     }
 
     if (shaderEntrySet.rawGeometryShaderSize > 0)
     {
-        m_FileHandler.AppendChars((const char*)shaderEntrySet.rawGeometryShader, shaderEntrySet.rawGeometryShaderSize, flush);
+        m_FileHandler.AppendChars((const shipChar*)shaderEntrySet.rawGeometryShader, shaderEntrySet.rawGeometryShaderSize, flush);
     }
 
     if (shaderEntrySet.rawComputeShaderSize > 0)
     {
-        m_FileHandler.AppendChars((const char*)shaderEntrySet.rawComputeShader, shaderEntrySet.rawComputeShaderSize, flush);
+        m_FileHandler.AppendChars((const shipChar*)shaderEntrySet.rawComputeShader, shaderEntrySet.rawComputeShaderSize, flush);
     }
 
-    m_FileHandler.AppendChars((const char*)&shaderEntrySet.renderStateBlock, sizeof(shaderEntrySet.renderStateBlock), flush);
+    m_FileHandler.AppendChars((const shipChar*)&shaderEntrySet.renderStateBlock, sizeof(shaderEntrySet.renderStateBlock), flush);
 }
 
-void ShaderDatabase::LoadNextShaderEntry(uint8_t*& databaseBuffer, BigArray<ShaderEntryKey>& shaderEntryKeys, BigArray<ShaderEntrySet>& shaderEntrySets) const
+void ShaderDatabase::LoadNextShaderEntry(shipUint8*& databaseBuffer, BigArray<ShaderEntryKey>& shaderEntryKeys, BigArray<ShaderEntrySet>& shaderEntrySets) const
 {
     ShaderEntryHeader shaderEntryHeader = *(ShaderEntryHeader*)databaseBuffer;
 
@@ -348,7 +348,7 @@ void ShaderDatabase::LoadNextShaderEntry(uint8_t*& databaseBuffer, BigArray<Shad
     LoadShaderFromBuffer(databaseBuffer, newShaderEntrySet.rawGeometryShader, newShaderEntrySet.rawGeometryShaderSize);
     LoadShaderFromBuffer(databaseBuffer, newShaderEntrySet.rawComputeShader, newShaderEntrySet.rawComputeShaderSize);
 
-    memcpy((uint8_t*)&newShaderEntrySet.renderStateBlock, databaseBuffer, sizeof(newShaderEntrySet.renderStateBlock));
+    memcpy((shipUint8*)&newShaderEntrySet.renderStateBlock, databaseBuffer, sizeof(newShaderEntrySet.renderStateBlock));
     databaseBuffer += sizeof(newShaderEntrySet.renderStateBlock);
 }
 

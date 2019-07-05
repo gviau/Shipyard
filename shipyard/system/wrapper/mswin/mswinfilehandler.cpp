@@ -15,17 +15,17 @@ MswinFileHandler::MswinFileHandler(const StringT& filename, FileHandlerOpenFlag 
     Open(filename, openFlag);
 }
 
-MswinFileHandler::MswinFileHandler(const char* filename, FileHandlerOpenFlag openFlag)
+MswinFileHandler::MswinFileHandler(const shipChar* filename, FileHandlerOpenFlag openFlag)
 {
     Open(filename, openFlag);
 }
 
-bool MswinFileHandler::Open(const StringT& filename, FileHandlerOpenFlag openFlag)
+shipBool MswinFileHandler::Open(const StringT& filename, FileHandlerOpenFlag openFlag)
 {
     return Open(filename.GetBuffer(), openFlag);
 }
 
-bool MswinFileHandler::Open(const char* filename, FileHandlerOpenFlag openFlag)
+shipBool MswinFileHandler::Open(const shipChar* filename, FileHandlerOpenFlag openFlag)
 {
     m_Filename = filename;
     m_OpenFlag = openFlag;
@@ -39,7 +39,7 @@ bool MswinFileHandler::Open(const char* filename, FileHandlerOpenFlag openFlag)
     return m_File.is_open();
 }
 
-bool MswinFileHandler::IsOpen() const
+shipBool MswinFileHandler::IsOpen() const
 {
     return m_File.is_open();
 }
@@ -49,7 +49,7 @@ void MswinFileHandler::Close()
     m_File.close();
 }
 
-size_t MswinFileHandler::ReadChars(size_t startingPosition, char* content, size_t numChars)
+size_t MswinFileHandler::ReadChars(size_t startingPosition, shipChar* content, size_t numChars)
 {
     if (startingPosition > 0)
     {
@@ -84,7 +84,7 @@ size_t MswinFileHandler::ReadWholeFile(StringA& content)
     return ReadChars(startingPosition, content, fileSize);
 }
 
-void MswinFileHandler::WriteChars(size_t startingPosition, const char* chars, size_t numChars, bool flush)
+void MswinFileHandler::WriteChars(size_t startingPosition, const shipChar* chars, size_t numChars, shipBool flush)
 {
     if (startingPosition > 0)
     {
@@ -102,7 +102,7 @@ void MswinFileHandler::WriteChars(size_t startingPosition, const char* chars, si
     }
 }
 
-void MswinFileHandler::InsertChars(size_t startingPosition, const char* chars, size_t numChars, bool flush)
+void MswinFileHandler::InsertChars(size_t startingPosition, const shipChar* chars, size_t numChars, shipBool flush)
 {
     size_t sizeOfFilePartToMove = (Size() - startingPosition);
 
@@ -130,7 +130,7 @@ void MswinFileHandler::InsertChars(size_t startingPosition, const char* chars, s
     }
 }
 
-void MswinFileHandler::AppendChars(const char* chars, size_t numChars, bool flush)
+void MswinFileHandler::AppendChars(const shipChar* chars, size_t numChars, shipBool flush)
 {
     m_File.seekg(Size(), std::ios::beg);
 

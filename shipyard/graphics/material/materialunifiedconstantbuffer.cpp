@@ -25,7 +25,7 @@ GFXMaterialUnifiedConstantBuffer::~GFXMaterialUnifiedConstantBuffer()
     Destroy();
 }
 
-bool GFXMaterialUnifiedConstantBuffer::Create(BaseRenderDevice& renderDevice, BaseAllocator* pAllocator, size_t maxConstantBufferPoolHeapSize)
+shipBool GFXMaterialUnifiedConstantBuffer::Create(BaseRenderDevice& renderDevice, BaseAllocator* pAllocator, size_t maxConstantBufferPoolHeapSize)
 {
     SHIP_ASSERT(maxConstantBufferPoolHeapSize > 0);
 
@@ -38,13 +38,13 @@ bool GFXMaterialUnifiedConstantBuffer::Create(BaseRenderDevice& renderDevice, Ba
     Array<ShaderInputProviderDeclaration*> shaderInputProviderDeclarations;
     ShaderInputProviderManager::GetInstance().GetShaderInputProviderDeclarations(shaderInputProviderDeclarations);
 
-    uint32_t numShaderInputProviders = shaderInputProviderDeclarations.Size();
+    shipUint32 numShaderInputProviders = shaderInputProviderDeclarations.Size();
     m_ShaderInputProviderRequiredSizes.Reserve(numShaderInputProviders);
 
     size_t totalMemoryNeeded = 0;
     for (ShaderInputProviderDeclaration* shaderInputProviderDeclaration : shaderInputProviderDeclarations)
     {
-        uint32_t requiredSizeForProvider = shaderInputProviderDeclaration->GetRequiredSizeForProvider();
+        shipUint32 requiredSizeForProvider = shaderInputProviderDeclaration->GetRequiredSizeForProvider();
         m_ShaderInputProviderRequiredSizes.Add(requiredSizeForProvider);
 
         totalMemoryNeeded += requiredSizeForProvider;
@@ -66,7 +66,7 @@ bool GFXMaterialUnifiedConstantBuffer::Create(BaseRenderDevice& renderDevice, Ba
     m_ConstantBufferHeapSize = totalMemoryNeeded;
     
     m_WriteOffsetsPerShaderInputProvider.Reserve(numShaderInputProviders);
-    for (uint32_t i = 0; i < numShaderInputProviders; i++)
+    for (shipUint32 i = 0; i < numShaderInputProviders; i++)
     {
         m_WriteOffsetsPerShaderInputProvider.Add(0);
     }
@@ -74,11 +74,11 @@ bool GFXMaterialUnifiedConstantBuffer::Create(BaseRenderDevice& renderDevice, Ba
     m_pGfxRenderDevice = &renderDevice;
     GFXRenderDevice& gfxRenderDevice = *static_cast<GFXRenderDevice*>(m_pGfxRenderDevice);
 
-    constexpr bool dynamic = true;
+    constexpr shipBool dynamic = true;
     void* initialData = nullptr;
     m_MaterialUnifiedConstantBuffer = gfxRenderDevice.CreateByteBuffer(
             ByteBuffer::ByteBufferCreationFlags::ByteBufferCreationFlags_ShaderResourceView,
-            uint32_t(m_ConstantBufferHeapSize),
+            shipUint32(m_ConstantBufferHeapSize),
             dynamic,
             initialData);
 
@@ -134,9 +134,9 @@ GFXByteBufferHandle GFXMaterialUnifiedConstantBuffer::BindMaterialUnfiedConstant
 
 void* GFXMaterialUnifiedConstantBuffer::MapBufferForShaderInputProvider(const ShaderInputProvider& shaderInputProvider)
 {
-    uint32_t shaderInputProviderIndex = GetShaderInputProviderManager().GetShaderInputProviderDeclarationIndex(shaderInputProvider);
+    shipUint32 shaderInputProviderIndex = GetShaderInputProviderManager().GetShaderInputProviderDeclarationIndex(shaderInputProvider);
 
-    uint32_t requiredSizeForProvider = m_ShaderInputProviderRequiredSizes[shaderInputProviderIndex];
+    shipUint32 requiredSizeForProvider = m_ShaderInputProviderRequiredSizes[shaderInputProviderIndex];
     size_t& writeOffset = m_WriteOffsetsPerShaderInputProvider[shaderInputProviderIndex];
 
     size_t writeOffsetToUse = AtomicOperations<size_t>::Add(writeOffset, size_t(requiredSizeForProvider));
@@ -156,7 +156,7 @@ GFXByteBufferHandle GFXMaterialUnifiedConstantBuffer::GetUpdatedMaterialUnifiedC
     if (m_IsDirty)
     {
         // For now, Write_Discard will do. Will revisit later.
-        constexpr uint32_t bufferOffset = 0;
+        constexpr shipUint32 bufferOffset = 0;
         void* pMappedBuffer = gfxDirectRenderCommandList.MapByteBuffer(m_MaterialUnifiedConstantBuffer, MapFlag::Write_Discard, bufferOffset);
 
         memcpy(pMappedBuffer, m_pConstantBufferHeap, m_ConstantBufferHeapSize);

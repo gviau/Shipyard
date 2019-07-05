@@ -9,7 +9,7 @@ namespace Shipyard
     class SHIPYARD_API GlobalAllocator : public BaseAllocator
     {
     public:
-        static const uint32_t ms_MaxNumAllocators = 32;
+        static const shipUint32 ms_MaxNumAllocators = 32;
 
         struct AllocatorInitEntry
         {
@@ -30,7 +30,7 @@ namespace Shipyard
         // Allocators are all assumed to be created beforehand.
         // During allocations, first matching allocator found will be used. Therefore, allocators are assumed to
         // be in increasing maximum size. Last allocator's maximum size is ignored since its assumed to be the fallback allocator.
-        bool Create(AllocatorInitEntry* pInitEntries, uint32_t numAllocators);
+        shipBool Create(AllocatorInitEntry* pInitEntries, shipUint32 numAllocators);
 
         void Destroy();
 
@@ -38,7 +38,7 @@ namespace Shipyard
         virtual void* Allocate(size_t size, size_t alignment
 
                 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
-                    , const char* pAllocationFilename
+                    , const shipChar* pAllocationFilename
                     , int allocationLineNumber
                 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
@@ -65,13 +65,13 @@ namespace Shipyard
 
         size_t m_MaxAllocationSizes[ms_MaxNumAllocators];
         AllocatorAddressRange m_pAllocators[ms_MaxNumAllocators];
-        uint32_t m_NumAllocators;
+        shipUint32 m_NumAllocators;
 
         std::mutex m_Lock;
 
 #ifdef SHIP_DEBUG
         // Used to assert when we forget to initialize this guy before usage.
-        bool m_Initialized;
+        shipBool m_Initialized;
 #endif // #ifdef SHIP_DEBUG
     };
 

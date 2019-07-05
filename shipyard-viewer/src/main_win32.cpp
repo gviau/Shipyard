@@ -1,6 +1,6 @@
 #include "framework/shipyardviewer.h"
 
-#include <inttypes.h>
+#include <cinttypes>
 
 #include <windows.h>
 

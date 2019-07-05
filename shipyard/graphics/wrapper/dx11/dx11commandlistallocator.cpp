@@ -11,7 +11,7 @@ DX11CommandListAllocator::DX11CommandListAllocator(GFXRenderDevice& gfxRenderDev
 
 }
 
-bool DX11CommandListAllocator::Create()
+shipBool DX11CommandListAllocator::Create()
 {
     return true;
 }

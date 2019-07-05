@@ -18,7 +18,7 @@ Logger::~Logger()
     CloseLog();
 }
 
-bool Logger::OpenLog(const char* pLogFilename)
+shipBool Logger::OpenLog(const shipChar* pLogFilename)
 {
     CloseLog();
 
@@ -54,25 +54,25 @@ void GetCurrentTimeForLog(StringA& currentTimeForLog)
     currentTimeForLog += " - ";
 }
 
-void Log(std::ofstream& file, const char* pHeader, const char* pMessage, va_list argPtr)
+void Log(std::ofstream& file, const shipChar* pHeader, const shipChar* pMessage, va_list argPtr)
 {
     StringA currentTime;
     GetCurrentTimeForLog(currentTime);
 
     constexpr int maxCount = 4096;
-    char pBuffer[maxCount];
+    shipChar pBuffer[maxCount];
 
     vsnprintf_s(pBuffer, maxCount, maxCount - 1, pMessage, argPtr);
 
     file << currentTime.GetBuffer() << pHeader << pBuffer << std::endl;
 
-    char outputBuffer[8192];
+    shipChar outputBuffer[8192];
     sprintf_s(outputBuffer, "%s%s\n", pHeader, pBuffer);
 
     OutputDebugString(outputBuffer);
 }
 
-void Logger::LogDebug(const char* pMessage, ...)
+void Logger::LogDebug(const shipChar* pMessage, ...)
 {
     if ((m_LogLevel & LogLevel::LogLevel_Debug) == 0 || !m_IsLogOpen)
     {
@@ -91,7 +91,7 @@ void Logger::LogDebug(const char* pMessage, ...)
     m_LoggerLock.unlock();
 }
 
-void Logger::LogInfo(const char* pMessage, ...)
+void Logger::LogInfo(const shipChar* pMessage, ...)
 {
     if ((m_LogLevel & LogLevel::LogLevel_Info) == 0 || !m_IsLogOpen)
     {
@@ -110,7 +110,7 @@ void Logger::LogInfo(const char* pMessage, ...)
     m_LoggerLock.unlock();
 }
 
-void Logger::LogWarning(const char* pMessage, ...)
+void Logger::LogWarning(const shipChar* pMessage, ...)
 {
     if ((m_LogLevel & LogLevel::LogLevel_Warning) == 0 || !m_IsLogOpen)
     {
@@ -129,7 +129,7 @@ void Logger::LogWarning(const char* pMessage, ...)
     m_LoggerLock.unlock();
 }
 
-void Logger::LogError(const char* pMessage, ...)
+void Logger::LogError(const shipChar* pMessage, ...)
 {
     if ((m_LogLevel & LogLevel::LogLevel_Error) == 0 || !m_IsLogOpen)
     {

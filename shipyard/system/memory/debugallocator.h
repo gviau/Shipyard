@@ -37,10 +37,10 @@ namespace Shipyard
             return s_DebugAllocator;
         }
 
-        bool Create(void* pHeap, size_t heapSize);
+        shipBool Create(void* pHeap, size_t heapSize);
         void Destroy();
 
-        void Allocate(BaseAllocator* pAllocator, void* pAllocatedMemory, size_t size, const char* pAllocationFilename, int allocationLineNumber);
+        void Allocate(BaseAllocator* pAllocator, void* pAllocatedMemory, size_t size, const shipChar* pAllocationFilename, int allocationLineNumber);
 
         void Deallocate(const void* pAllocatedMemory);
 
@@ -63,7 +63,7 @@ namespace Shipyard
             DebugAllocationInfo* pNextDebugAllocationInfo = nullptr;
             DebugAllocationInfo* pPreviousDebugAllocationInfo = nullptr;
 
-            const char* pAllocationFilename = nullptr;
+            const shipChar* pAllocationFilename = nullptr;
             int allocationLineNumber = 0;
         };
 

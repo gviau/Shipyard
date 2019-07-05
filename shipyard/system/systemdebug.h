@@ -21,7 +21,7 @@ namespace Shipyard
     if (!(cond)) \
     { \
         constexpr int bufferSize = 4096; \
-        char buf[bufferSize]; \
+        shipChar buf[bufferSize]; \
         sprintf_s(buf, bufferSize - 1, "The condition %s failed", #cond); \
         int ret = MessageBox(NULL, buf, "Shipyard assert", MB_ABORTRETRYIGNORE | MB_ICONERROR); \
         if (ret == IDABORT) \
@@ -38,7 +38,7 @@ namespace Shipyard
     if (!(cond)) \
     { \
         constexpr int bufferSize = 4096; \
-        char buf[bufferSize]; \
+        shipChar buf[bufferSize]; \
         int startOfMsg = sprintf_s(buf, bufferSize - 1, "The condition %s failed with message: ", #cond); \
         if (startOfMsg < bufferSize - 1) \
         { \

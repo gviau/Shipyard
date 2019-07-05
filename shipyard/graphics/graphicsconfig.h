@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cinttypes>
+#include <system/platform.h>
 
 namespace Shipyard
 {

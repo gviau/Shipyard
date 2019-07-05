@@ -13,18 +13,18 @@ namespace Shipyard
 #   define NUM_BITS_PER_BITFIELD_ELEMENT 32
 #endif // #if CPU_BITS == CPU_BITS_64
 
-    template <uint32_t NumBits, size_t alignment = SHIP_CACHE_LINE_SIZE>
+    template <shipUint32 NumBits, size_t alignment = SHIP_CACHE_LINE_SIZE>
     class Bitfield
     {
     public:
 
 #if CPU_BITS == CPU_BITS_64
-        using BitfieldType = uint64_t;
+        using BitfieldType = shipUint64;
 #elif CPU_BITS == CPU_BITS_32
-        using BitfieldType = uint32_t;
+        using BitfieldType = shipUint32;
 #endif // #if CPU_BITS == CPU_BITS_64
 
-        static constexpr uint32_t ms_NumElements = ((NumBits + NUM_BITS_PER_BITFIELD_ELEMENT - 1) / NUM_BITS_PER_BITFIELD_ELEMENT);
+        static constexpr shipUint32 ms_NumElements = ((NumBits + NUM_BITS_PER_BITFIELD_ELEMENT - 1) / NUM_BITS_PER_BITFIELD_ELEMENT);
 
     public:
         Bitfield(BaseAllocator* pAllocator = nullptr)
@@ -46,7 +46,7 @@ namespace Shipyard
             }
         }
 
-        bool Create(bool setAllBits = false)
+        shipBool Create(shipBool setAllBits = false)
         {
             size_t requiredSize = sizeof(BitfieldType) * ms_NumElements;
 
@@ -72,15 +72,15 @@ namespace Shipyard
 
         void Clear()
         {
-            for (uint32_t i = 0; i < ms_NumElements; i++)
+            for (shipUint32 i = 0; i < ms_NumElements; i++)
             {
                 m_BitField[i] = 0;
             }
         }
 
-        bool IsClear() const
+        shipBool IsClear() const
         {
-            for (uint32_t i = 0; i < ms_NumElements; i++)
+            for (shipUint32 i = 0; i < ms_NumElements; i++)
             {
                 if (m_BitField[i] != 0)
                 {
@@ -91,45 +91,45 @@ namespace Shipyard
             return true;
         }
 
-        void SetBit(uint32_t bitIndex)
+        void SetBit(shipUint32 bitIndex)
         {
             SHIP_ASSERT(bitIndex < NumBits);
 
-            uint32_t elementIndex = bitIndex / NUM_BITS_PER_BITFIELD_ELEMENT;
-            uint32_t bit = bitIndex % NUM_BITS_PER_BITFIELD_ELEMENT;
+            shipUint32 elementIndex = bitIndex / NUM_BITS_PER_BITFIELD_ELEMENT;
+            shipUint32 bit = bitIndex % NUM_BITS_PER_BITFIELD_ELEMENT;
 
             m_BitField[elementIndex] |= (BitfieldType(1) << BitfieldType(bit));
         }
 
-        void UnsetBit(uint32_t bitIndex)
+        void UnsetBit(shipUint32 bitIndex)
         {
             SHIP_ASSERT(bitIndex < NumBits);
 
-            uint32_t elementIndex = bitIndex / NUM_BITS_PER_BITFIELD_ELEMENT;
-            uint32_t bit = bitIndex % NUM_BITS_PER_BITFIELD_ELEMENT;
+            shipUint32 elementIndex = bitIndex / NUM_BITS_PER_BITFIELD_ELEMENT;
+            shipUint32 bit = bitIndex % NUM_BITS_PER_BITFIELD_ELEMENT;
 
             m_BitField[elementIndex] &= ~(BitfieldType(1) << BitfieldType(bit));
         }
 
-        bool IsBitSet(uint32_t bitIndex) const
+        shipBool IsBitSet(shipUint32 bitIndex) const
         {
             SHIP_ASSERT(bitIndex < NumBits);
 
-            uint32_t elementIndex = bitIndex / NUM_BITS_PER_BITFIELD_ELEMENT;
-            uint32_t bit = bitIndex % NUM_BITS_PER_BITFIELD_ELEMENT;
+            shipUint32 elementIndex = bitIndex / NUM_BITS_PER_BITFIELD_ELEMENT;
+            shipUint32 bit = bitIndex % NUM_BITS_PER_BITFIELD_ELEMENT;
 
             return ((m_BitField[elementIndex] & (BitfieldType(1) << BitfieldType(bit))) > 0);
         }
 
-        void SetRange(uint32_t startingBitIndexInclusive, uint32_t endingBitIndexInclusive)
+        void SetRange(shipUint32 startingBitIndexInclusive, shipUint32 endingBitIndexInclusive)
         {
             SHIP_ASSERT(startingBitIndexInclusive < NumBits);
             SHIP_ASSERT(endingBitIndexInclusive < NumBits);
 
-            uint32_t startingElementIndex = startingBitIndexInclusive / NUM_BITS_PER_BITFIELD_ELEMENT;
-            uint32_t endingElementIndex = endingBitIndexInclusive / NUM_BITS_PER_BITFIELD_ELEMENT;
+            shipUint32 startingElementIndex = startingBitIndexInclusive / NUM_BITS_PER_BITFIELD_ELEMENT;
+            shipUint32 endingElementIndex = endingBitIndexInclusive / NUM_BITS_PER_BITFIELD_ELEMENT;
 
-            bool rangeInSingleElement = (startingBitIndexInclusive == endingElementIndex);
+            shipBool rangeInSingleElement = (startingBitIndexInclusive == endingElementIndex);
             if (rangeInSingleElement)
             {
                 BitfieldType maskOfBitsSetBeforeStart = ((BitfieldType(1) << BitfieldType(startingBitIndexInclusive)) - 1);
@@ -143,7 +143,7 @@ namespace Shipyard
             }
             else
             {
-                uint32_t elementIndex = startingElementIndex;
+                shipUint32 elementIndex = startingElementIndex;
 
                 BitfieldType maskOfBitsToSet = ~((BitfieldType(1) << BitfieldType(startingBitIndexInclusive)) - 1);
                 m_BitField[elementIndex] |= maskOfBitsToSet;
@@ -152,7 +152,7 @@ namespace Shipyard
 
                 for (; elementIndex <= endingElementIndex; elementIndex++)
                 {
-                    bool setFullRange = (elementIndex < endingElementIndex);
+                    shipBool setFullRange = (elementIndex < endingElementIndex);
 
                     if (setFullRange)
                     {
@@ -169,15 +169,15 @@ namespace Shipyard
             }
         }
 
-        void UnsetRange(uint32_t startingBitIndexInclusive, uint32_t endingBitIndexInclusive)
+        void UnsetRange(shipUint32 startingBitIndexInclusive, shipUint32 endingBitIndexInclusive)
         {
             SHIP_ASSERT(startingBitIndexInclusive < NumBits);
             SHIP_ASSERT(endingBitIndexInclusive < NumBits);
 
-            uint32_t startingElementIndex = startingBitIndexInclusive / NUM_BITS_PER_BITFIELD_ELEMENT;
-            uint32_t endingElementIndex = endingBitIndexInclusive / NUM_BITS_PER_BITFIELD_ELEMENT;
+            shipUint32 startingElementIndex = startingBitIndexInclusive / NUM_BITS_PER_BITFIELD_ELEMENT;
+            shipUint32 endingElementIndex = endingBitIndexInclusive / NUM_BITS_PER_BITFIELD_ELEMENT;
 
-            bool rangeInSingleElement = (startingBitIndexInclusive == endingElementIndex);
+            shipBool rangeInSingleElement = (startingBitIndexInclusive == endingElementIndex);
             if (rangeInSingleElement)
             {
                 BitfieldType maskOfBitsSetBeforeStart = ((BitfieldType(1) << BitfieldType(startingBitIndexInclusive)) - 1);
@@ -191,7 +191,7 @@ namespace Shipyard
             }
             else
             {
-                uint32_t elementIndex = startingElementIndex;
+                shipUint32 elementIndex = startingElementIndex;
 
                 BitfieldType maskOfBitsToSet = ~((BitfieldType(1) << BitfieldType(startingBitIndexInclusive)) - 1);
                 m_BitField[elementIndex] &= ~maskOfBitsToSet;
@@ -200,7 +200,7 @@ namespace Shipyard
 
                 for (; elementIndex <= endingElementIndex; elementIndex++)
                 {
-                    bool unsetFullRange = (elementIndex < endingElementIndex);
+                    shipBool unsetFullRange = (elementIndex < endingElementIndex);
                     if (unsetFullRange)
                     {
                         m_BitField[elementIndex] &= 0;
@@ -218,11 +218,11 @@ namespace Shipyard
 
         // Finds the index of the first bit set, starting from the specified bit index.
         // Returns false if a bit set to 1 after the starting bit index, including it, couldn't be found.
-        bool GetFirstBitSet(uint32_t startingBitIndex, uint32_t& firstBitSet) const
+        shipBool GetFirstBitSet(shipUint32 startingBitIndex, shipUint32& firstBitSet) const
         {
             SHIP_ASSERT(startingBitIndex < NumBits);
 
-            uint32_t elementIndex = startingBitIndex / NUM_BITS_PER_BITFIELD_ELEMENT;
+            shipUint32 elementIndex = startingBitIndex / NUM_BITS_PER_BITFIELD_ELEMENT;
             
             BitfieldType maskOfEveryBitsBeforeCleared = ~((BitfieldType(1) << BitfieldType(startingBitIndex)) - 1);
 
@@ -236,11 +236,11 @@ namespace Shipyard
 
                 unsigned char foundValue = FindFirstBitSet(&bitScanResult, maskForScan);
 
-                bool foundBitSet = (foundValue != 0);
+                shipBool foundBitSet = (foundValue != 0);
 
                 if (foundBitSet)
                 {
-                    firstBitSet = uint32_t(bitScanResult) + elementIndex * NUM_BITS_PER_BITFIELD_ELEMENT;
+                    firstBitSet = shipUint32(bitScanResult) + elementIndex * NUM_BITS_PER_BITFIELD_ELEMENT;
                     return true;
                 }
                 else
@@ -259,16 +259,16 @@ namespace Shipyard
 
         // Basically counts the number of bits set to 1 starting at the bit representing the given starting bit index.
         // The starting bit is assumed to be set to 1 in the bitfield.
-        uint32_t GetLongestRangeWithBitsSet(uint32_t startingBitIndex) const
+        shipUint32 GetLongestRangeWithBitsSet(shipUint32 startingBitIndex) const
         {
             SHIP_ASSERT(startingBitIndex < NumBits);
 
-            uint32_t elementIndex = startingBitIndex / NUM_BITS_PER_BITFIELD_ELEMENT;
+            shipUint32 elementIndex = startingBitIndex / NUM_BITS_PER_BITFIELD_ELEMENT;
             
             BitfieldType maskOfEveryBitsBeforeSet = ((BitfieldType(1) << BitfieldType(startingBitIndex)) - 1);
 
-            uint32_t numBitsSet = 0;
-            uint32_t bitIndexInFirstElementToSearch = startingBitIndex;
+            shipUint32 numBitsSet = 0;
+            shipUint32 bitIndexInFirstElementToSearch = startingBitIndex;
 
 #if COMPILER == COMPILER_MSVC
             for (; elementIndex < ms_NumElements; elementIndex++)
@@ -280,11 +280,11 @@ namespace Shipyard
                 unsigned long firstBitSet = 0;
                 unsigned char foundValue = FindFirstBitSet(&firstBitSet, maskForScan);
 
-                bool foundBitSet = (foundValue != 0);
+                shipBool foundBitSet = (foundValue != 0);
 
                 if (foundBitSet)
                 {
-                    numBitsSet = uint32_t(firstBitSet) + NUM_BITS_PER_BITFIELD_ELEMENT * elementIndex - bitIndexInFirstElementToSearch;
+                    numBitsSet = shipUint32(firstBitSet) + NUM_BITS_PER_BITFIELD_ELEMENT * elementIndex - bitIndexInFirstElementToSearch;
                     break;
                 }
                 else
@@ -306,9 +306,9 @@ namespace Shipyard
 
         void SetAllBits()
         {
-            uint32_t remainingBitsToSet = (NumBits - (ms_NumElements - 1) * NUM_BITS_PER_BITFIELD_ELEMENT);
+            shipUint32 remainingBitsToSet = (NumBits - (ms_NumElements - 1) * NUM_BITS_PER_BITFIELD_ELEMENT);
 
-            for (uint32_t elementIndex = 0; elementIndex < ms_NumElements; elementIndex++)
+            for (shipUint32 elementIndex = 0; elementIndex < ms_NumElements; elementIndex++)
             {
                 if (elementIndex != (ms_NumElements - 1))
                 {
@@ -353,7 +353,7 @@ namespace Shipyard
                 size_t requiredSize = sizeof(BitfieldType) * ms_NumElements;
                 BitfieldType* pNewBitfield = reinterpret_cast<BitfieldType*>(SHIP_ALLOC_EX(pAllocator, requiredSize, alignment));
 
-                for (uint32_t i = 0; i < ms_NumElements; i++)
+                for (shipUint32 i = 0; i < ms_NumElements; i++)
                 {
                     pNewBitfield[i] = m_BitField[i];
                 }
@@ -369,14 +369,14 @@ namespace Shipyard
     private:
         BaseAllocator* m_pAllocator;
         BitfieldType* m_BitField;
-        bool m_MemoryOwned;
+        shipBool m_MemoryOwned;
     };
 
-    template <uint32_t NumBits, size_t alignment = SHIP_CACHE_LINE_SIZE>
+    template <shipUint32 NumBits, size_t alignment = SHIP_CACHE_LINE_SIZE>
     class InplaceBitfield : public Bitfield<NumBits, alignment>
     {
     public:
-        InplaceBitfield(bool setAllBits = false)
+        InplaceBitfield(shipBool setAllBits = false)
         {
             this->SetUserPointer(m_StackBitfield);
 

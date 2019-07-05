@@ -36,14 +36,14 @@ namespace Shipyard
         DX11Texture2D();
         DX11Texture2D(ID3D11Device& device, ID3D11Texture2D& texture, GfxFormat format);
 
-        bool Create(
+        shipBool Create(
                 ID3D11Device& device,
-                uint32_t width,
-                uint32_t height,
+                shipUint32 width,
+                shipUint32 height,
                 GfxFormat pixelFormat,
-                bool dynamic,
+                shipBool dynamic,
                 void* initialData,
-                bool generateMips,
+                shipBool generateMips,
                 TextureUsage textureUsage = TextureUsage::TextureUsage_Default);
         void Destroy();
 

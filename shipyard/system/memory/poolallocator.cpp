@@ -35,7 +35,7 @@ namespace
 }
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_MEMORY_FILL
 
-bool PoolAllocator::Create(void* pHeap, size_t numChunks, size_t chunkSize)
+shipBool PoolAllocator::Create(void* pHeap, size_t numChunks, size_t chunkSize)
 {
     if (pHeap == nullptr)
     {
@@ -99,7 +99,7 @@ void PoolAllocator::Destroy()
 void* PoolAllocator::Allocate(size_t size, size_t alignment
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
-            , const char* pAllocationFilename
+            , const shipChar* pAllocationFilename
             , int allocationLineNumber
 #endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 

@@ -22,7 +22,7 @@ namespace Shipyard
     class ShaderHandler;
     class VertexShader;
 
-    enum class VertexFormatType : uint16_t;
+    enum class VertexFormatType : shipUint16;
 
     enum GfxConstants
     {
@@ -40,11 +40,11 @@ namespace Shipyard
 
     struct BytesArray
     {
-        const char* m_Bytes;
-        uint64_t m_BytesLength;
+        const shipChar* m_Bytes;
+        shipUint64 m_BytesLength;
     };
 
-    enum class PrimitiveTopology : uint8_t
+    enum class PrimitiveTopology : shipUint8
     {
         LineList,
         LineStrip,
@@ -62,14 +62,14 @@ namespace Shipyard
         Write_No_Overwrite
     };
 
-    enum class DepthStencilClearFlag : uint8_t
+    enum class DepthStencilClearFlag : shipUint8
     {
         Depth,
         Stencil,
         DepthStencil
     };
 
-    enum class GfxFormat : uint16_t
+    enum class GfxFormat : shipUint16
     {
         R32G32B32A32_FLOAT,
         R32G32B32A32_UINT,
@@ -127,15 +127,15 @@ namespace Shipyard
         Unknown
     };
 
-    bool IsDepthStencilFormat(GfxFormat format);
+    shipBool IsDepthStencilFormat(GfxFormat format);
 
-    enum class FillMode : uint8_t
+    enum class FillMode : shipUint8
     {
         Wireframe,
         Solid
     };
 
-    enum class CullMode : uint8_t
+    enum class CullMode : shipUint8
     {
         CullNone,
         CullFrontFace,
@@ -162,19 +162,19 @@ namespace Shipyard
         }
 
         int m_DepthBias;
-        float m_DepthBiasClamp;
-        float m_SlopeScaledDepthBias;
+        shipFloat m_DepthBiasClamp;
+        shipFloat m_SlopeScaledDepthBias;
 
         FillMode m_FillMode;
         CullMode m_CullMode;
 
-        bool m_IsFrontCounterClockwise;
-        bool m_DepthClipEnable;
-        bool m_ScissorEnable;
-        bool m_MultisampleEnable;
-        bool m_AntialiasedLineEnable;
+        shipBool m_IsFrontCounterClockwise;
+        shipBool m_DepthClipEnable;
+        shipBool m_ScissorEnable;
+        shipBool m_MultisampleEnable;
+        shipBool m_AntialiasedLineEnable;
 
-        bool operator== (const RasterizerState &rhs) const
+        shipBool operator== (const RasterizerState &rhs) const
         {
             return (m_DepthBias == rhs.m_DepthBias &&
                     IsAlmostEqual(m_DepthBiasClamp, rhs.m_DepthBiasClamp) &&
@@ -188,13 +188,13 @@ namespace Shipyard
                     m_AntialiasedLineEnable == rhs.m_AntialiasedLineEnable);
         }
 
-        bool operator!= (const RasterizerState& rhs) const
+        shipBool operator!= (const RasterizerState& rhs) const
         {
             return !(*this == rhs);
         }
     };
 
-    enum class ComparisonFunc : uint8_t
+    enum class ComparisonFunc : shipUint8
     {
         Never,
         Less,
@@ -206,7 +206,7 @@ namespace Shipyard
         Always
     };
 
-    enum class StencilOperation : uint8_t
+    enum class StencilOperation : shipUint8
     {
         Keep,
         Zero,
@@ -242,8 +242,8 @@ namespace Shipyard
         }
 
         ComparisonFunc m_DepthComparisonFunc;
-        uint8_t m_StencilReadMask;
-        uint8_t m_StencilWriteMask;
+        shipUint8 m_StencilReadMask;
+        shipUint8 m_StencilWriteMask;
 
         StencilOperation m_FrontFaceStencilFailOp;
         StencilOperation m_FrontFaceStencilDepthFailOp;
@@ -255,11 +255,11 @@ namespace Shipyard
         StencilOperation m_BackFaceStencilPassOp;
         ComparisonFunc m_BackFaceStencilComparisonFunc;
 
-        bool m_DepthEnable;
-        bool m_EnableDepthWrite;
-        bool m_StencilEnable;
+        shipBool m_DepthEnable;
+        shipBool m_EnableDepthWrite;
+        shipBool m_StencilEnable;
 
-        bool operator== (const DepthStencilState& rhs) const
+        shipBool operator== (const DepthStencilState& rhs) const
         {
             return (m_DepthComparisonFunc == rhs.m_DepthComparisonFunc &&
                     m_StencilReadMask == rhs.m_StencilReadMask &&
@@ -277,7 +277,7 @@ namespace Shipyard
                     m_StencilEnable == rhs.m_StencilEnable);
         }
 
-        bool operator!= (const DepthStencilState& rhs) const
+        shipBool operator!= (const DepthStencilState& rhs) const
         {
             return !(*this == rhs);
         }
@@ -298,14 +298,14 @@ namespace Shipyard
     struct InputLayout
     {
         SemanticName    m_SemanticName;
-        uint32_t        m_SemanticIndex;
+        shipUint32        m_SemanticIndex;
         GfxFormat       m_Format;
-        uint32_t        m_InputSlot;
-        uint32_t        m_ByteOffset;
-        bool            m_IsDataPerInstance;
-        uint32_t        m_InstanceDataStepRate;
+        shipUint32        m_InputSlot;
+        shipUint32        m_ByteOffset;
+        shipBool            m_IsDataPerInstance;
+        shipUint32        m_InstanceDataStepRate;
 
-        bool operator!= (const InputLayout& rhs)
+        shipBool operator!= (const InputLayout& rhs)
         {
             return (m_SemanticName != rhs.m_SemanticName &&
                     m_SemanticIndex != rhs.m_SemanticIndex &&
@@ -317,7 +317,7 @@ namespace Shipyard
         }
     };
 
-    enum class BlendFactor : uint8_t
+    enum class BlendFactor : shipUint8
     {
         Zero,
         One,
@@ -338,7 +338,7 @@ namespace Shipyard
         DualInvSrcAlpha
     };
 
-    enum class BlendOperator : uint8_t
+    enum class BlendOperator : shipUint8
     {
         Add,
         Subtract,
@@ -347,7 +347,7 @@ namespace Shipyard
         Max
     };
 
-    enum RenderTargetWriteMask : uint8_t
+    enum RenderTargetWriteMask : shipUint8
     {
         RenderTargetWriteMask_None = 0x00,
         RenderTargetWriteMask_R = 0x01,
@@ -360,7 +360,7 @@ namespace Shipyard
 
     struct RenderTargetBlendState
     {
-        bool m_BlendEnable = false;
+        shipBool m_BlendEnable = false;
         BlendFactor m_SourceBlend = BlendFactor::One;
         BlendFactor m_DestBlend = BlendFactor::Zero;
         BlendOperator m_BlendOperator = BlendOperator::Add;
@@ -369,7 +369,7 @@ namespace Shipyard
         BlendOperator m_AlphaBlendOperator = BlendOperator::Add;
         RenderTargetWriteMask m_RenderTargetWriteMask = RenderTargetWriteMask::RenderTargetWriteMask_RGBA;
 
-        bool operator== (const RenderTargetBlendState& rhs) const
+        shipBool operator== (const RenderTargetBlendState& rhs) const
         {
             return (m_BlendEnable == rhs.m_BlendEnable &&
                     m_SourceBlend == rhs.m_SourceBlend &&
@@ -381,7 +381,7 @@ namespace Shipyard
                     m_RenderTargetWriteMask == rhs.m_RenderTargetWriteMask);
         }
 
-        bool operator!= (const RenderTargetBlendState& rhs) const
+        shipBool operator!= (const RenderTargetBlendState& rhs) const
         {
             return !(*this == rhs);
         }
@@ -392,17 +392,17 @@ namespace Shipyard
         RenderTargetBlendState renderTargetBlendStates[GfxConstants::GfxConstants_MaxRenderTargetsBound];
 
         // Those are only used if at least one render target uses a BlendFactor of BlendFactor::UserFactor or BlendFactor::InvUserFactor
-        float m_RedBlendUserFactor = 1.0f;
-        float m_GreenBlendUserFactor = 1.0f;
-        float m_BlueBlendUserFactor = 1.0f;
-        float m_AlphaBlendUserFactor = 1.0f;
+        shipFloat m_RedBlendUserFactor = 1.0f;
+        shipFloat m_GreenBlendUserFactor = 1.0f;
+        shipFloat m_BlueBlendUserFactor = 1.0f;
+        shipFloat m_AlphaBlendUserFactor = 1.0f;
 
-        bool m_AlphaToCoverageEnable = false;
-        bool m_IndependentBlendEnable = false;
+        shipBool m_AlphaToCoverageEnable = false;
+        shipBool m_IndependentBlendEnable = false;
 
-        bool operator== (const BlendState& rhs) const
+        shipBool operator== (const BlendState& rhs) const
         {
-            for (uint32_t i = 0; i < GfxConstants::GfxConstants_MaxRenderTargetsBound; i++)
+            for (shipUint32 i = 0; i < GfxConstants::GfxConstants_MaxRenderTargetsBound; i++)
             {
                 if (renderTargetBlendStates[i] != rhs.renderTargetBlendStates[i])
                 {
@@ -418,7 +418,7 @@ namespace Shipyard
                     m_IndependentBlendEnable == rhs.m_IndependentBlendEnable);
         }
 
-        bool operator!= (const BlendState& rhs) const
+        shipBool operator!= (const BlendState& rhs) const
         {
             return !(*this == rhs);
         }
@@ -491,10 +491,10 @@ namespace Shipyard
         }
 
         DescriptorRangeType descriptorRangeType;
-        uint32_t numDescriptors;
-        uint32_t baseShaderRegister;
-        uint32_t registerSpace;
-        uint32_t offsetInDescriptorsFromTableStart;
+        shipUint32 numDescriptors;
+        shipUint32 baseShaderRegister;
+        shipUint32 registerSpace;
+        shipUint32 offsetInDescriptorsFromTableStart;
     };
 
     struct RootDescriptorTable
@@ -510,8 +510,8 @@ namespace Shipyard
         {
         }
 
-        uint32_t shaderBindingSlot;
-        uint32_t registerSpace;
+        shipUint32 shaderBindingSlot;
+        shipUint32 registerSpace;
     };
 
     struct RootSignatureParameterEntry
@@ -554,7 +554,7 @@ namespace Shipyard
         VertexFormatType vertexFormatType;
         PrimitiveTopology primitiveTopology;
 
-        uint32_t numRenderTargets;
+        shipUint32 numRenderTargets;
         GfxFormat renderTargetsFormat[GfxConstants::GfxConstants_MaxRenderTargetsBound];
         GfxFormat depthStencilFormat;
     };
@@ -571,13 +571,13 @@ namespace Shipyard
 
     struct DescriptorSetEntryDeclaration
     {
-        static const uint16_t InvalidDescriptorRangeIndex = uint16_t(-1);
+        static const shipUint16 InvalidDescriptorRangeIndex = shipUint16(-1);
 
-        uint16_t rootIndex = 0;
-        uint16_t numResources = 0;
+        shipUint16 rootIndex = 0;
+        shipUint16 numResources = 0;
 
         // Values other than InvalidDescriptorRangeIndex are considered to be to index inside of a descriptor table at rootIndex.
-        uint16_t descriptorRangeIndex = InvalidDescriptorRangeIndex;
+        shipUint16 descriptorRangeIndex = InvalidDescriptorRangeIndex;
     };
 
     // This class gives control to the programmer to override specific RenderStateBlock's state manually.
@@ -588,21 +588,21 @@ namespace Shipyard
         void ApplyOverridenValues(RenderStateBlock& renderStateBlock) const;
 
         void OverrideDepthBiasState(int overrideValue);
-        void OverrideDepthBiasClampState(float overrideValue);
-        void OverrideSlopeScaledDepthBiasState(float overrideValue);
+        void OverrideDepthBiasClampState(shipFloat overrideValue);
+        void OverrideSlopeScaledDepthBiasState(shipFloat overrideValue);
 
         void OverrideFillModeState(FillMode overrideValue);
         void OverrideCullModeState(CullMode overrideValue);
 
-        void OverrideIsFrontCounterClockwiseState(bool overrideValue);
-        void OverrideDepthClipEnableState(bool overrideValue);
-        void OverrideScissorEnableState(bool overrideValue);
-        void OverrideMultisampleEnableState(bool overrideValue);
-        void OverrideAntialiasedLineEnableState(bool overrideValue);
+        void OverrideIsFrontCounterClockwiseState(shipBool overrideValue);
+        void OverrideDepthClipEnableState(shipBool overrideValue);
+        void OverrideScissorEnableState(shipBool overrideValue);
+        void OverrideMultisampleEnableState(shipBool overrideValue);
+        void OverrideAntialiasedLineEnableState(shipBool overrideValue);
 
         void OverrideDepthComparisonFuncState(ComparisonFunc overrideValue);
-        void OverrideStencilReadMaskState(uint8_t overrideValue);
-        void OverrideStencilWriteMaskState(uint8_t overrideValue);
+        void OverrideStencilReadMaskState(shipUint8 overrideValue);
+        void OverrideStencilWriteMaskState(shipUint8 overrideValue);
 
         void OverrideFrontFaceStencilFailOpState(StencilOperation overrideValue);
         void OverrideFrontFaceStencilDepthFailOpState(StencilOperation overrideValue);
@@ -614,33 +614,33 @@ namespace Shipyard
         void OverrideBackFaceStencilPassOpState(StencilOperation overrideValue);
         void OverrideBackFaceStencilComparisonFuncState(ComparisonFunc overrideValue);
 
-        void OverrideDepthEnableState(bool overrideValue);
-        void OverrideEnableDepthWriteState(bool overrideValue);
-        void OverrideStencilEnableState(bool overrideValue);
+        void OverrideDepthEnableState(shipBool overrideValue);
+        void OverrideEnableDepthWriteState(shipBool overrideValue);
+        void OverrideStencilEnableState(shipBool overrideValue);
 
-        void OverrideRedBlendUserFactor(float overrideValue);
-        void OverrideGreenBlendUserFactor(float overrideValue);
-        void OverrideBlueBlendUserFactor(float overrideValue);
-        void OverrideAlphaBlendUserFactor(float overrideValue);
+        void OverrideRedBlendUserFactor(shipFloat overrideValue);
+        void OverrideGreenBlendUserFactor(shipFloat overrideValue);
+        void OverrideBlueBlendUserFactor(shipFloat overrideValue);
+        void OverrideAlphaBlendUserFactor(shipFloat overrideValue);
 
-        void OverrideAlphaToCoverageEnable(bool overrideValue);
-        void OverrideIndependentBlendEnable(bool overrideValue);
+        void OverrideAlphaToCoverageEnable(shipBool overrideValue);
+        void OverrideIndependentBlendEnable(shipBool overrideValue);
 
-        void OverrideBlendEnable(bool overrideValue, uint32_t renderTargetIndex);
-        void OverrideSourceBlend(BlendFactor overrideValue, uint32_t renderTargetIndex);
-        void OverrideDestBlend(BlendFactor overrideValue, uint32_t renderTargetIndex);
-        void OverrideBlendOperator(BlendOperator overrideValue, uint32_t renderTargetIndex);
-        void OverrideSourceAlphaBlend(BlendFactor overrideValue, uint32_t renderTargetIndex);
-        void OverrideDestAlphaBlend(BlendFactor overrideValue, uint32_t renderTargetIndex);
-        void OverrideAlphaBlendOperator(BlendOperator overrideValue, uint32_t renderTargetIndex);
-        void OverrideRenderTargetWriteMask(RenderTargetWriteMask overrideValue, uint32_t renderTargetIndex);
+        void OverrideBlendEnable(shipBool overrideValue, shipUint32 renderTargetIndex);
+        void OverrideSourceBlend(BlendFactor overrideValue, shipUint32 renderTargetIndex);
+        void OverrideDestBlend(BlendFactor overrideValue, shipUint32 renderTargetIndex);
+        void OverrideBlendOperator(BlendOperator overrideValue, shipUint32 renderTargetIndex);
+        void OverrideSourceAlphaBlend(BlendFactor overrideValue, shipUint32 renderTargetIndex);
+        void OverrideDestAlphaBlend(BlendFactor overrideValue, shipUint32 renderTargetIndex);
+        void OverrideAlphaBlendOperator(BlendOperator overrideValue, shipUint32 renderTargetIndex);
+        void OverrideRenderTargetWriteMask(RenderTargetWriteMask overrideValue, shipUint32 renderTargetIndex);
 
     private:
         InplaceBitfield<128> m_OverridenState;
         RenderStateBlock m_RenderStateBlockOverride;
     };
 
-    enum TextureUsage : uint8_t
+    enum TextureUsage : shipUint8
     {
         TextureUsage_Default = 0x00,
         TextureUsage_RenderTarget = 0x01,
@@ -658,14 +658,14 @@ namespace Shipyard
 
     struct GfxViewport
     {
-        float topLeftX = 0.0f;
-        float topLeftY = 0.0f;
-        float width = 1.0f;
-        float height = 1.0f;
-        float minDepth = 0.0f;
-        float maxDepth = 1.0f;
+        shipFloat topLeftX = 0.0f;
+        shipFloat topLeftY = 0.0f;
+        shipFloat width = 1.0f;
+        shipFloat height = 1.0f;
+        shipFloat minDepth = 0.0f;
+        shipFloat maxDepth = 1.0f;
 
-        bool operator== (const GfxViewport& rhs) const
+        shipBool operator== (const GfxViewport& rhs) const
         {
             return (IsAlmostEqual(topLeftX, rhs.topLeftX) &&
                     IsAlmostEqual(topLeftY, rhs.topLeftY) &&
@@ -675,7 +675,7 @@ namespace Shipyard
                     IsAlmostEqual(maxDepth, rhs.maxDepth));
         }
 
-        bool operator!= (const GfxViewport& rhs) const
+        shipBool operator!= (const GfxViewport& rhs) const
         {
             return (!IsAlmostEqual(topLeftX, rhs.topLeftX) ||
                     !IsAlmostEqual(topLeftY, rhs.topLeftY) ||
@@ -686,7 +686,7 @@ namespace Shipyard
         }
     };
 
-    enum class CommandQueueType : uint8_t
+    enum class CommandQueueType : shipUint8
     {
         Direct,
         Compute,

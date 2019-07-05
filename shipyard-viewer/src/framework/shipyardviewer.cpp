@@ -35,7 +35,7 @@ struct SimpleConstantBufferProvider : public BaseShaderInputProvider<SimpleConst
 
 SHIP_DECLARE_SHADER_INPUT_PROVIDER_BEGIN(SimpleConstantBufferProvider, PerInstance)
 {
-    SHIP_SCALAR_SHADER_INPUT(ShaderInputScalarType::Float4x4, "Test", Matrix);
+    SHIP_SCALAR_SHADER_INPUT("Test", Matrix);
     SHIP_TEXTURE2D_SHADER_INPUT(ShaderInputScalarType::Float4, "TestTexture", TestTexture);
 }
 SHIP_DECLARE_SHADER_INPUT_PROVIDER_END(SimpleConstantBufferProvider)

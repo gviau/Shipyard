@@ -10,6 +10,8 @@
 #include <cinttypes>
 #include <type_traits>
 
+#include <extern/glm/glm.hpp>
+
 namespace Shipyard
 {
     enum class ShaderInputProviderUsage : uint8_t
@@ -281,10 +283,43 @@ namespace Shipyard
         sizeof(double) * 4 * 4, // Double4x4
     };
 
+    template <typename T> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const T& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const float& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::vec2& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::vec3& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::vec4& data);
+
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const double& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::dvec2& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::dvec3& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::dvec4& data);
+
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const int32_t& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::ivec2& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::ivec3& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::ivec4& data);
+
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const uint32_t& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::uvec2& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::uvec3& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::uvec4& data);
+
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const bool& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::bvec2& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::bvec3& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::bvec4& data);
+
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::mat2x2& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::mat3x3& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::mat4x4& data);
+
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::dmat2x2& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::dmat3x3& data);
+    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const glm::dmat4x4& data);
+
     // These macros shouldn't be used directly.
 #define SHIP_SHADER_INPUT_BASE(shaderInputScalarType, shaderInputName) \
     SHIP_ASSERT_MSG(m_NumShaderInputDeclarations < MaxShaderInputsPerProvider, "ShaderInputProvider exceeds maximum number of %d shader inputs per provider!", MaxShaderInputsPerProvider); \
-    SHIP_STATIC_ASSERT_MSG(shaderInputScalarType != ShaderInputScalarType::Unknown, "ShaderInput type cannot be set to ShaderInputScalarType::Unknown!"); \
     SHIP_ASSERT_MSG(shaderInputName[0] != '\0', "ShaderInput name cannot be empty!");
 
     // These macros are used to create the ShaderInputProviders
@@ -323,17 +358,18 @@ namespace Shipyard
         m_RequiredSizeForProvider += ((shaderInputType == ShaderInputType::Scalar) ? sizeof(pBasePtr->shaderInputData) : 0);
 
     // These macros are used to create the ShaderInputs of a provider
-#define SHIP_SCALAR_SHADER_INPUT(shaderInputScalarType, shaderInputName, shaderInputData) \
+#define SHIP_SCALAR_SHADER_INPUT(shaderInputName, shaderInputData) \
     { \
-        SHIP_SHADER_INPUT_BASE(shaderInputScalarType, shaderInputName) \
         ShaderInputProviderType* pBasePtr = (ShaderInputProviderType*)0x10000; \
-        SHIP_STATIC_ASSERT_MSG(sizeof(pBasePtr->shaderInputData) == gs_ShaderInputScalarTypeSizeInBytes[uint32_t(shaderInputScalarType)], "Invalid shader input size!"); \
+        ShaderInputScalarType shaderInputScalarType = GetShaderInputScalarType(pBasePtr->shaderInputData); \
+        SHIP_SHADER_INPUT_BASE(shaderInputScalarType, shaderInputName) \
         SHIP_SHADER_INPUT_INTERNAL(ShaderInputType::Scalar, shaderInputScalarType, shaderInputName, shaderInputData) \
     }
 
 #define SHIP_TEXTURE2D_SHADER_INPUT(shaderInputScalarType, shaderInputName, shaderInputData) \
     { \
         SHIP_SHADER_INPUT_BASE(shaderInputScalarType, shaderInputName) \
+        SHIP_STATIC_ASSERT_MSG(shaderInputScalarType != ShaderInputScalarType::Unknown, "ShaderInput type cannot be set to ShaderInputScalarType::Unknown!"); \
         ShaderInputProviderType* pBasePtr = (ShaderInputProviderType*)0x10000; \
         ShaderInputProviderUtils::VerifyTexture2DVariableType(pBasePtr->shaderInputData); \
         SHIP_SHADER_INPUT_INTERNAL(ShaderInputType::Texture2D, shaderInputScalarType, shaderInputName, shaderInputData) \

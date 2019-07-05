@@ -969,4 +969,38 @@ ShaderInputProviderUsage ShaderInputProviderDeclaration::GetShaderInputProviderU
     return m_ShaderInputProviderUsage;
 }
 
+// template <typename T> ShaderInputScalarType GetShaderInputScalarType(const T& data) { return ShaderInputScalarType::Unknown; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const float& data) { return ShaderInputScalarType::Float; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::vec2& data) { return ShaderInputScalarType::Float2; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::vec3& data) { return ShaderInputScalarType::Float3; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::vec4& data) { return ShaderInputScalarType::Float4; }
+
+template <> ShaderInputScalarType GetShaderInputScalarType(const double& data) { return ShaderInputScalarType::Double; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::dvec2& data) { return ShaderInputScalarType::Double2; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::dvec3& data) { return ShaderInputScalarType::Double3; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::dvec4& data) { return ShaderInputScalarType::Double4; }
+
+template <> ShaderInputScalarType GetShaderInputScalarType(const int32_t& data) { return ShaderInputScalarType::Int; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::ivec2& data) { return ShaderInputScalarType::Int2; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::ivec3& data) { return ShaderInputScalarType::Int3; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::ivec4& data) { return ShaderInputScalarType::Int4; }
+
+template <> ShaderInputScalarType GetShaderInputScalarType(const uint32_t& data) { return ShaderInputScalarType::Uint; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::uvec2& data) { return ShaderInputScalarType::Uint2; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::uvec3& data) { return ShaderInputScalarType::Uint3; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::uvec4& data) { return ShaderInputScalarType::Uint4; }
+
+template <> ShaderInputScalarType GetShaderInputScalarType(const bool& data) { return ShaderInputScalarType::Bool; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::bvec2& data) { return ShaderInputScalarType::Bool2; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::bvec3& data) { return ShaderInputScalarType::Bool3; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::bvec4& data) { return ShaderInputScalarType::Bool4; }
+
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::mat2x2& data) { return ShaderInputScalarType::Float2x2; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::mat3x3& data) { return ShaderInputScalarType::Float3x3; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::mat4x4& data) { return ShaderInputScalarType::Float4x4; }
+
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::dmat2x2& data) { return ShaderInputScalarType::Double2x2; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::dmat3x3& data) { return ShaderInputScalarType::Double3x3; }
+template <> ShaderInputScalarType GetShaderInputScalarType(const glm::dmat4x4& data) { return ShaderInputScalarType::Double4x4; }
+
 }

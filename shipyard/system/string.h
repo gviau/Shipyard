@@ -177,6 +177,7 @@ namespace Shipyard
     using LargeInplaceStringT = InplaceStringT<gs_LargeStringSize>;
 
     SHIPYARD_API const shipChar* StringFormat(const shipChar* fmt, ...);
+    SHIPYARD_API shipInt32 CompareString(const shipChar* str1, const shipChar* str2);
 }
 
 #include <system/string.inl>

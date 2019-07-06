@@ -36,4 +36,28 @@ const shipChar* StringFormat(const shipChar* fmt, ...)
     return pBuffer;
 }
 
+shipInt32 CompareString(const shipChar* str1, const shipChar* str2)
+{
+    for (size_t idx = 0; true; idx++)
+    {
+        shipChar first = str1[idx];
+        shipChar second = str2[idx];
+
+        int diff = (int(first) - int(second));
+
+        if (diff < 0)
+        {
+            return -1;
+        }
+        else if (diff > 0)
+        {
+            return 1;
+        }
+        else if (first == '\0')
+        {
+            return 0;
+        }
+    }
+}
+
 }

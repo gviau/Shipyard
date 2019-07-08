@@ -279,8 +279,7 @@ void FixedHeapAllocator::Deallocate(const void* memory)
                 pNewFreeMemoryBlock->sizeOfBlockInBytesIncludingThisHeader += pCurrentFreeMemoryBlock->sizeOfBlockInBytesIncludingThisHeader;
 
                 pNewFreeMemoryBlock->pNextFreeBlock = pCurrentFreeMemoryBlock->pNextFreeBlock;
-                pNewFreeMemoryBlock->pPreviousFreeBlock = nullptr;
-
+                
                 if (pCurrentFreeMemoryBlock->pNextFreeBlock != nullptr)
                 {
                     pCurrentFreeMemoryBlock->pNextFreeBlock->pPreviousFreeBlock = pNewFreeMemoryBlock;
@@ -296,12 +295,16 @@ void FixedHeapAllocator::Deallocate(const void* memory)
         }
         else
         {
-            FreeMemoryBlock* pNextFreeMemoryBlock = pCurrentFreeMemoryBlock->pNextFreeBlock;
-
             while (pCurrentFreeMemoryBlock != nullptr)
             {
+                FreeMemoryBlock* pNextFreeMemoryBlock = pCurrentFreeMemoryBlock->pNextFreeBlock;
+
                 size_t endAddressOfCurrentFreeBlock = size_t(pCurrentFreeMemoryBlock) + pCurrentFreeMemoryBlock->sizeOfBlockInBytesIncludingThisHeader;
 
+                SHIP_ASSERT(startAddressOfNewFreeBlock >= endAddressOfCurrentFreeBlock);
+
+                // The rationale is that if it isn't behind the current block (above branch), then if there are no more block after the current
+                // then the new free block must be after the current one.
                 shipBool isNewFreeMemoryBlockAfterLastFreeMemoryBlock = (pNextFreeMemoryBlock == nullptr);
 
                 if (isNewFreeMemoryBlockAfterLastFreeMemoryBlock)
@@ -313,13 +316,6 @@ void FixedHeapAllocator::Deallocate(const void* memory)
                     }
                     else
                     {
-                        if (pCurrentFreeMemoryBlock->pNextFreeBlock != nullptr)
-                        {
-                            pCurrentFreeMemoryBlock->pNextFreeBlock->pPreviousFreeBlock = pNewFreeMemoryBlock;
-                        }
-
-                        pNewFreeMemoryBlock->pNextFreeBlock = pCurrentFreeMemoryBlock->pNextFreeBlock;
-
                         pCurrentFreeMemoryBlock->pNextFreeBlock = pNewFreeMemoryBlock;
 
                         pNewFreeMemoryBlock->pPreviousFreeBlock = pCurrentFreeMemoryBlock;
@@ -362,26 +358,25 @@ void FixedHeapAllocator::Deallocate(const void* memory)
                             pNewFreeMemoryBlock->sizeOfBlockInBytesIncludingThisHeader += pNextFreeMemoryBlock->sizeOfBlockInBytesIncludingThisHeader;
 
                             pNewFreeMemoryBlock->pNextFreeBlock = pNextFreeMemoryBlock->pNextFreeBlock;
-                            pNewFreeMemoryBlock->pPreviousFreeBlock = pNextFreeMemoryBlock->pPreviousFreeBlock;
+                            pNewFreeMemoryBlock->pPreviousFreeBlock = pCurrentFreeMemoryBlock;
 
-                            if (pNewFreeMemoryBlock->pNextFreeBlock != nullptr)
-                            {
-                                pNewFreeMemoryBlock->pNextFreeBlock->pPreviousFreeBlock = pNewFreeMemoryBlock;
-                            }
+                            pCurrentFreeMemoryBlock->pNextFreeBlock = pNewFreeMemoryBlock;
 
-                            if (pNextFreeMemoryBlock->pPreviousFreeBlock != nullptr)
+                            if (pNextFreeMemoryBlock->pNextFreeBlock != nullptr)
                             {
-                                pNextFreeMemoryBlock->pPreviousFreeBlock->pNextFreeBlock = pNewFreeMemoryBlock;
+                                pNextFreeMemoryBlock->pNextFreeBlock->pPreviousFreeBlock = pNewFreeMemoryBlock;
                             }
                         }
                         else
                         {
                             pNewFreeMemoryBlock->pNextFreeBlock = pNextFreeMemoryBlock;
-                            pNewFreeMemoryBlock->pPreviousFreeBlock = pNextFreeMemoryBlock->pPreviousFreeBlock;
+                            pNewFreeMemoryBlock->pPreviousFreeBlock = pCurrentFreeMemoryBlock;
 
-                            if (pNextFreeMemoryBlock->pPreviousFreeBlock != nullptr)
+                            pCurrentFreeMemoryBlock->pNextFreeBlock = pNewFreeMemoryBlock;
+
+                            if (pNextFreeMemoryBlock != nullptr)
                             {
-                                pNextFreeMemoryBlock->pPreviousFreeBlock->pNextFreeBlock = pNewFreeMemoryBlock;
+                                pNextFreeMemoryBlock->pPreviousFreeBlock = pNewFreeMemoryBlock;
                             }
                         }
 
@@ -390,11 +385,6 @@ void FixedHeapAllocator::Deallocate(const void* memory)
                 }
 
                 pCurrentFreeMemoryBlock = pNextFreeMemoryBlock;
-
-                if (pNextFreeMemoryBlock != nullptr)
-                {
-                    pNextFreeMemoryBlock = pNextFreeMemoryBlock->pNextFreeBlock;
-                }
             }
         }
     }

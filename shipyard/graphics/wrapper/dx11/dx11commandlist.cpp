@@ -239,6 +239,7 @@ void* DX11DirectRenderCommandList::MapVertexBuffer(GFXVertexBufferHandle gfxVert
     GFXVertexBuffer& gfxVertexBuffer = m_RenderDevice.GetVertexBuffer(gfxVertexBufferhandle);
 
     pMapBufferCommand->pBuffer = GetMappedBuffer(gfxVertexBuffer, mapFlag, m_pDeviceContext);
+    SHIP_ASSERT(pMapBufferCommand->pBuffer != nullptr);
 
     // If we're reading, then we want to offset the buffer.
     if (mapFlag == MapFlag::Read || mapFlag == MapFlag::Read_Write)
@@ -265,6 +266,7 @@ void* DX11DirectRenderCommandList::MapIndexBuffer(GFXIndexBufferHandle gfxIndexB
     GFXIndexBuffer& gfxIndexBuffer = m_RenderDevice.GetIndexBuffer(gfxIndexBufferHandle);
 
     pMapBufferCommand->pBuffer = GetMappedBuffer(gfxIndexBuffer, mapFlag, m_pDeviceContext);
+    SHIP_ASSERT(pMapBufferCommand->pBuffer != nullptr);
 
     // If we're reading, then we want to offset the buffer.
     if (mapFlag == MapFlag::Read || mapFlag == MapFlag::Read_Write)
@@ -291,6 +293,7 @@ void* DX11DirectRenderCommandList::MapConstantBuffer(GFXConstantBufferHandle gfx
     GFXConstantBuffer& gfxConstantBuffer = m_RenderDevice.GetConstantBuffer(gfxConstantBufferHandle);
 
     pMapBufferCommand->pBuffer = GetMappedBuffer(gfxConstantBuffer, mapFlag, m_pDeviceContext);
+    SHIP_ASSERT(pMapBufferCommand->pBuffer != nullptr);
 
     // If we're reading, then we want to offset the buffer.
     if (mapFlag == MapFlag::Read || mapFlag == MapFlag::Read_Write)
@@ -317,6 +320,7 @@ void* DX11DirectRenderCommandList::MapByteBuffer(GFXByteBufferHandle gfxByteBuff
     GFXByteBuffer& gfxByteBuffer = m_RenderDevice.GetByteBuffer(gfxByteBufferHandle);
 
     pMapBufferCommand->pBuffer = GetMappedBuffer(gfxByteBuffer, mapFlag, m_pDeviceContext);
+    SHIP_ASSERT(pMapBufferCommand->pBuffer != nullptr);
 
     // If we're reading, then we want to offset the buffer.
     if (mapFlag == MapFlag::Read || mapFlag == MapFlag::Read_Write)

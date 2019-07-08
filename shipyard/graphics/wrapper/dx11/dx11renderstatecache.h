@@ -172,9 +172,9 @@ namespace Shipyard
         ID3D11RenderTargetView* m_NativeRenderTargets[GfxConstants::GfxConstants_MaxRenderTargetsBound];
         ID3D11DepthStencilView* m_NativeDepthStencilView;
 
-        ID3D11ShaderResourceView* m_NativeShaderResourceViews[GfxConstants::GfxConstants_MaxShaderResourceViewsBoundPerShaderStage];
-        ID3D11Buffer* m_NativeConstantBufferViews[GfxConstants::GfxConstants_MaxConstantBufferViewsBoundPerShaderStage];
-        ID3D11UnorderedAccessView* m_NativeUnorderedAccessViews[GfxConstants::GfxConstants_MaxUnorderedAccessViewsBoundPerShaderStage];
-        ID3D11SamplerState* m_NativeSamplers[GfxConstants::GfxConstants_MaxSamplersBoundPerShaderStage];
+        ID3D11ShaderResourceView* m_NativeShaderResourceViews[ShaderStage::ShaderStage_Count][GfxConstants::GfxConstants_MaxShaderResourceViewsBoundPerShaderStage];
+        ID3D11Buffer* m_NativeConstantBufferViews[ShaderStage::ShaderStage_Count][GfxConstants::GfxConstants_MaxConstantBufferViewsBoundPerShaderStage];
+        ID3D11UnorderedAccessView* m_NativeUnorderedAccessViews[ShaderStage::ShaderStage_Count][GfxConstants::GfxConstants_MaxUnorderedAccessViewsBoundPerShaderStage];
+        ID3D11SamplerState* m_NativeSamplers[ShaderStage::ShaderStage_Count][GfxConstants::GfxConstants_MaxSamplersBoundPerShaderStage];
     };
 }

@@ -124,10 +124,13 @@ void DX11RenderStateCache::Reset()
         m_DirtySlotSamplersPerShaderStage[shaderStage].Clear();
     }
 
-    memset(m_NativeShaderResourceViews, 0, sizeof(m_NativeShaderResourceViews));
-    memset(m_NativeConstantBufferViews, 0, sizeof(m_NativeConstantBufferViews));
-    memset(m_NativeUnorderedAccessViews, 0, sizeof(m_NativeUnorderedAccessViews));
-    memset(m_NativeSamplers, 0, sizeof(m_NativeSamplers));
+    for (shipUint32 i = 0; i < shipUint32(ShaderStage::ShaderStage_Count); i++)
+    {
+        memset(m_NativeShaderResourceViews[i], 0, sizeof(m_NativeShaderResourceViews[i]));
+        memset(m_NativeConstantBufferViews[i], 0, sizeof(m_NativeConstantBufferViews[i]));
+        memset(m_NativeUnorderedAccessViews[i], 0, sizeof(m_NativeUnorderedAccessViews[i]));
+        memset(m_NativeSamplers[i], 0, sizeof(m_NativeSamplers[i]));
+    }
 
     m_RenderStateCacheDirtyFlags.Clear();
 }
@@ -507,13 +510,23 @@ void DX11RenderStateCache::BindResourceAsConstantBuffer(GfxResource* descriptorR
     GFXConstantBuffer* constantBuffer = static_cast<GFXConstantBuffer*>(descriptorResource);
     ID3D11Buffer* nativeBuffer = constantBuffer->GetBuffer();
 
-    if (m_NativeConstantBufferViews[shaderBindingSlot] != nativeBuffer)
+    for (shipUint32 i = 0; i < ShaderStage::ShaderStage_Count; i++)
     {
-        m_NativeConstantBufferViews[shaderBindingSlot] = nativeBuffer;
+        ShaderStage shaderStage = ShaderStage(i);
 
-        MarkBindingSlotAsDirty(m_DirtySlotConstantBufferViewsPerShaderStage, shaderVisibility, shaderBindingSlot);
+        if ((shaderVisibility & GetShaderVisibilityForShaderStage(shaderStage)) == 0)
+        {
+            continue;
+        }
 
-        m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ConstantBufferViews);
+        if (m_NativeConstantBufferViews[i][shaderBindingSlot] != nativeBuffer)
+        {
+            m_NativeConstantBufferViews[i][shaderBindingSlot] = nativeBuffer;
+
+            MarkBindingSlotAsDirty(m_DirtySlotConstantBufferViewsPerShaderStage, shaderVisibility, shaderBindingSlot);
+
+            m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ConstantBufferViews);
+        }
     }
 }
 
@@ -534,15 +547,24 @@ void DX11RenderStateCache::BindResourceAsShaderResourceView(GfxResource* descrip
         nativeShaderResourceView = buffer->GetShaderResourceView();
     }
 
-    if (m_NativeShaderResourceViews[shaderBindingSlot] != nativeShaderResourceView)
+    for (shipUint32 i = 0; i < ShaderStage::ShaderStage_Count; i++)
     {
-        m_NativeShaderResourceViews[shaderBindingSlot] = nativeShaderResourceView;
+        ShaderStage shaderStage = ShaderStage(i);
 
-        MarkBindingSlotAsDirty(m_DirtySlotShaderResourceViewsPerShaderStage, shaderVisibility, shaderBindingSlot);
+        if ((shaderVisibility & GetShaderVisibilityForShaderStage(shaderStage)) == 0)
+        {
+            continue;
+        }
 
-        m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ShaderResourceViews);
+        if (m_NativeShaderResourceViews[i][shaderBindingSlot] != nativeShaderResourceView)
+        {
+            m_NativeShaderResourceViews[i][shaderBindingSlot] = nativeShaderResourceView;
+
+            MarkBindingSlotAsDirty(m_DirtySlotShaderResourceViewsPerShaderStage, shaderVisibility, shaderBindingSlot);
+
+            m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ShaderResourceViews);
+        }
     }
-
 }
 
 namespace
@@ -710,7 +732,7 @@ void DX11RenderStateCache::CommitStateChangesForGraphics(GFXRenderDevice& gfxRen
             {
                 shipUint32 numBindingSlotsToSet = m_DirtySlotConstantBufferViewsPerShaderStage[shaderStage].GetLongestRangeWithBitsSet(firstBindingSlot);
 
-                (m_DeviceContext->*constantBufferViewsSetterForShaderStage)(firstBindingSlot, numBindingSlotsToSet, &m_NativeConstantBufferViews[firstBindingSlot]);
+                (m_DeviceContext->*constantBufferViewsSetterForShaderStage)(firstBindingSlot, numBindingSlotsToSet, &m_NativeConstantBufferViews[shaderStage][firstBindingSlot]);
 
                 startingBindingSlot = firstBindingSlot + numBindingSlotsToSet;
             }
@@ -739,7 +761,7 @@ void DX11RenderStateCache::CommitStateChangesForGraphics(GFXRenderDevice& gfxRen
             {
                 shipUint32 numBindingSlotsToSet = m_DirtySlotShaderResourceViewsPerShaderStage[shaderStage].GetLongestRangeWithBitsSet(firstBindingSlot);
 
-                (m_DeviceContext->*shaderResourceViewsSetterForShaderStage)(firstBindingSlot, numBindingSlotsToSet, &m_NativeShaderResourceViews[firstBindingSlot]);
+                (m_DeviceContext->*shaderResourceViewsSetterForShaderStage)(firstBindingSlot, numBindingSlotsToSet, &m_NativeShaderResourceViews[shaderStage][firstBindingSlot]);
 
                 startingBindingSlot = firstBindingSlot + numBindingSlotsToSet;
             }

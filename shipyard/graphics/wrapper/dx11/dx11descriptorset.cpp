@@ -3,10 +3,9 @@
 namespace Shipyard
 {;
 
-shipBool DX11DescriptorSet::Create(DescriptorSetType descriptorSetType, RootSignature* rootSignature, const Array<DescriptorSetEntryDeclaration>& descriptorSetEntryDeclarations)
+shipBool DX11DescriptorSet::Create(DescriptorSetType descriptorSetType, const Array<DescriptorSetEntryDeclaration>& descriptorSetEntryDeclarations)
 {
     m_DescriptorSetType = descriptorSetType;
-    m_RootSignature = rootSignature;
 
     for (const DescriptorSetEntryDeclaration& descriptorSetEntryDeclaration : descriptorSetEntryDeclarations)
     {

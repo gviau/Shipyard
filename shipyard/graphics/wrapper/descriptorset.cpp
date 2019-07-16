@@ -9,12 +9,6 @@ namespace Shipyard
 
 void DescriptorSet::SetDescriptorForRootIndex(shipUint32 rootIndex, GfxResource& descriptorResource)
 {
-    RootSignatureParameterType paramType = m_RootSignature->GetRootSignatureParameters()[rootIndex].parameterType;
-
-    SHIP_ASSERT(paramType == RootSignatureParameterType::ConstantBufferView ||
-           paramType == RootSignatureParameterType::ShaderResourceView ||
-           paramType == RootSignatureParameterType::UnorderedAccessView);
-    
     DescriptorSetEntry& descriptorSetEntry = m_DescriptorSetEntries[rootIndex];
     SHIP_ASSERT_MSG(descriptorSetEntry.descriptorRangeIndex == descriptorSetEntry.InvalidDescriptorRangeIndex, "DescriptorSetEntry for root index %d was created for a descriptor table. Use DescriptorSet::SetDescriptorTableForRootIndex instead!", rootIndex);
 
@@ -24,8 +18,7 @@ void DescriptorSet::SetDescriptorForRootIndex(shipUint32 rootIndex, GfxResource&
 void DescriptorSet::SetDescriptorTableForRootIndex(shipUint32 rootIndex, shipUint32 descriptorRangeIndex, const Array<GfxResource*>& descriptorTableResources)
 {
     SHIP_ASSERT(descriptorTableResources.Size() > 0);
-    SHIP_ASSERT(m_RootSignature->GetRootSignatureParameters()[rootIndex].parameterType == RootSignatureParameterType::DescriptorTable);
-
+    
     DescriptorSetEntry* pDescriptorSetEntry = nullptr;
 
     for (shipUint32 i = 0; i < m_DescriptorSetEntries.Size(); i++)
@@ -44,6 +37,24 @@ void DescriptorSet::SetDescriptorTableForRootIndex(shipUint32 rootIndex, shipUin
         GfxResource* descriptorResource = descriptorTableResources[i];
         pDescriptorSetEntry->descriptorResources[i] = descriptorResource;
     }
+}
+
+void DescriptorSet::SetDescriptorTableEntryForRootIndex(shipUint32 rootIndex, shipUint32 descriptorRangeIndex, shipUint32 descriptorRangeEntryIndex, GfxResource& descriptorResource)
+{
+    DescriptorSetEntry* pDescriptorSetEntry = nullptr;
+
+    for (shipUint32 i = 0; i < m_DescriptorSetEntries.Size(); i++)
+    {
+        if (m_DescriptorSetEntries[i].rootIndex == rootIndex && m_DescriptorSetEntries[i].descriptorRangeIndex == descriptorRangeIndex)
+        {
+            pDescriptorSetEntry = &m_DescriptorSetEntries[i];
+            break;
+        }
+    }
+
+    SHIP_ASSERT_MSG(pDescriptorSetEntry != nullptr, "DescriptorSetEntry for root index %d and for descriptor range index %d wasn't found. Was it created for a descriptor table?", rootIndex, descriptorRangeIndex);
+
+    pDescriptorSetEntry->descriptorResources[descriptorRangeEntryIndex] = &descriptorResource;
 }
 
 const Array<DescriptorSet::DescriptorSetEntry>& DescriptorSet::GetDescriptorSetEntries() const

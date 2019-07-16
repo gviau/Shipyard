@@ -22,13 +22,13 @@ namespace Shipyard
     public:
         void SetDescriptorForRootIndex(shipUint32 rootIndex, GfxResource& descriptorResource);
         void SetDescriptorTableForRootIndex(shipUint32 rootIndex, shipUint32 descriptorRangeIndex, const Array<GfxResource*>& descriptorTableResources);
+        void SetDescriptorTableEntryForRootIndex(shipUint32 rootIndex, shipUint32 descriptorRangeIndex, shipUint32 descriptorRangeEntryIndex, GfxResource& descriptorResource);
 
         const Array<DescriptorSetEntry>& GetDescriptorSetEntries() const;
         
         DescriptorSetType GetDescriptorSetType() const;
 
     protected:
-        const RootSignature* m_RootSignature;
         Array<DescriptorSetEntry> m_DescriptorSetEntries;
         DescriptorSetType m_DescriptorSetType;
     };

@@ -2,12 +2,13 @@
 
 #include <graphics/graphicscommon.h>
 
+#include <graphics/shader/shaderhandler.h>
+#include <graphics/shader/shaderresourcebinder.h>
+
 #include <system/systemcommon.h>
 
 #include <system/array.h>
 #include <system/wrapper/wrapper.h>
-
-#include <graphics/shader/shaderhandler.h>
 
 namespace Shipyard
 {
@@ -74,6 +75,12 @@ namespace Shipyard
             shipUint8* rawComputeShader = nullptr;
 
             RenderStateBlock renderStateBlock;
+
+            InplaceArray<RootSignatureParameterEntry, 8> rootSignatureParameters;
+
+            ShaderResourceBinder shaderResourceBinder;
+
+            InplaceArray<DescriptorSetEntryDeclaration, 8> descriptorSetEntryDeclarations;
         };
 
     public:
@@ -98,6 +105,9 @@ namespace Shipyard
 
     private:
         void LoadNextShaderEntry(shipUint8*& databaseBuffer, BigArray<ShaderEntryKey>& shaderEntryKeys, BigArray<ShaderEntrySet>& shaderEntrySets) const;
+
+        void WriteRootSignatureParameters(const Array<RootSignatureParameterEntry>& rootSignatureParameters);
+        void ReadRootSignatureParameters(shipUint8*& databaseBuffer, Array<RootSignatureParameterEntry>& rootSignatureParameters) const;
 
         StringT m_Filename;
         FileHandler m_FileHandler;

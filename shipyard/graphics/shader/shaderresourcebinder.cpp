@@ -9,72 +9,287 @@
 namespace Shipyard
 {;
 
-ShaderResourceBinder::ShaderResourceBinder(GFXDescriptorSetHandle* pGfxDescriptorSetHandle)
-    : m_pGfxDescriptorSetHandle(pGfxDescriptorSetHandle)
+void ShaderResourceBinder::AddShaderResourceBinderEntryForProviderToDescriptor(
+        const ShaderInputProviderDeclaration* shaderInputProviderDeclaration,
+        shipUint16 rootIndexToBindTo,
+        ShaderVisibility shaderStageToBindTo)
 {
-    SHIP_ASSERT(m_pGfxDescriptorSetHandle != nullptr);
+    ShaderResourceBinderEntry& shaderResourceBinderEntry = m_ShaderResourceBinderEntries.Grow();
+    shaderResourceBinderEntry.Declaration = shaderInputProviderDeclaration;
+    shaderResourceBinderEntry.RootIndexToBindTo = rootIndexToBindTo;
+    shaderResourceBinderEntry.BindDescriptorTable = false;
+
+    shaderResourceBinderEntry.BindConstantBuffer = ShaderInputProviderUtils::IsUsingConstantBuffer(shaderInputProviderDeclaration->GetShaderInputProviderUsage());
+    shaderResourceBinderEntry.BindDescriptor = false;
+    shaderResourceBinderEntry.BindGlobalBuffer = false;
+
+    shaderResourceBinderEntry.ShaderStageToBindTo = shaderStageToBindTo;
+}
+
+void ShaderResourceBinder::AddShaderResourceBinderEntryForProviderToDescriptorTable(
+        const ShaderInputProviderDeclaration* shaderInputProviderDeclaration,
+        shipUint16 rootIndexToBindTo,
+        shipUint16 descriptorRangeIndexToBind,
+        shipUint16 descriptorRangeEntryIndexToBind,
+        ShaderVisibility shaderStageToBindTo)
+{
+    ShaderResourceBinderEntry& shaderResourceBinderEntry = m_ShaderResourceBinderEntries.Grow();
+    shaderResourceBinderEntry.Declaration = shaderInputProviderDeclaration;
+    shaderResourceBinderEntry.RootIndexToBindTo = rootIndexToBindTo;
+    shaderResourceBinderEntry.DescriptorRangeIndexToBindTo = descriptorRangeIndexToBind;
+    shaderResourceBinderEntry.DescriptorRangeEntryIndexToBind = descriptorRangeEntryIndexToBind;
+    shaderResourceBinderEntry.BindDescriptorTable = true;
+
+    shaderResourceBinderEntry.BindConstantBuffer = ShaderInputProviderUtils::IsUsingConstantBuffer(shaderInputProviderDeclaration->GetShaderInputProviderUsage());
+    shaderResourceBinderEntry.BindDescriptor = false;
+    shaderResourceBinderEntry.BindGlobalBuffer = false;
+
+    shaderResourceBinderEntry.ShaderStageToBindTo = shaderStageToBindTo;
+}
+
+void ShaderResourceBinder::AddShaderResourceBinderEntryForDescriptorToDescriptor(
+        const ShaderInputProviderDeclaration* shaderInputProviderDeclaration,
+        shipUint16 rootIndexToBindTo,
+        shipInt32 offsetInProvider,
+        ShaderInputType shaderInputType,
+        ShaderVisibility shaderStageToBindTo)
+{
+    ShaderResourceBinderEntry& shaderResourceBinderEntry = m_ShaderResourceBinderEntries.Grow();
+    shaderResourceBinderEntry.Declaration = shaderInputProviderDeclaration;
+    shaderResourceBinderEntry.RootIndexToBindTo = rootIndexToBindTo;
+    shaderResourceBinderEntry.BindDescriptorTable = false;
+
+    shaderResourceBinderEntry.DataOffsetInProvider = offsetInProvider;
+    shaderResourceBinderEntry.DescriptorType = shaderInputType;
+
+    shaderResourceBinderEntry.BindConstantBuffer = false;
+    shaderResourceBinderEntry.BindDescriptor = true;
+    shaderResourceBinderEntry.BindGlobalBuffer = false;
+
+    shaderResourceBinderEntry.ShaderStageToBindTo = shaderStageToBindTo;
+}
+
+void ShaderResourceBinder::AddShaderResourceBinderEntryForDescriptorToDescriptorTable(
+        const ShaderInputProviderDeclaration* shaderInputProviderDeclaration,
+        shipUint16 rootIndexToBindTo,
+        shipUint16 descriptorRangeIndexToBind,
+        shipUint16 descriptorRangeEntryIndexToBind,
+        shipInt32 offsetInProvider,
+        ShaderInputType shaderInputType,
+        ShaderVisibility shaderStageToBindTo)
+{
+    ShaderResourceBinderEntry& shaderResourceBinderEntry = m_ShaderResourceBinderEntries.Grow();
+    shaderResourceBinderEntry.Declaration = shaderInputProviderDeclaration;
+    shaderResourceBinderEntry.RootIndexToBindTo = rootIndexToBindTo;
+    shaderResourceBinderEntry.DescriptorRangeIndexToBindTo = descriptorRangeIndexToBind;
+    shaderResourceBinderEntry.DescriptorRangeEntryIndexToBind = descriptorRangeEntryIndexToBind;
+    shaderResourceBinderEntry.BindDescriptorTable = true;
+
+    shaderResourceBinderEntry.DataOffsetInProvider = offsetInProvider;
+    shaderResourceBinderEntry.DescriptorType = shaderInputType;
+
+    shaderResourceBinderEntry.BindConstantBuffer = false;
+    shaderResourceBinderEntry.BindDescriptor = true;
+    shaderResourceBinderEntry.BindGlobalBuffer = false;
+
+    shaderResourceBinderEntry.ShaderStageToBindTo = shaderStageToBindTo;
+}
+
+void ShaderResourceBinder::AddShaderResourceBinderEntryForGlobalBufferToDescriptor(
+        ShaderInputProviderUsage shaderInputProviderUsage,
+        shipUint16 rootIndexToBindTo,
+        ShaderVisibility shaderStageToBindTo)
+{
+    ShaderResourceBinderEntry& shaderResourceBinderEntry = m_ShaderResourceBinderEntries.Grow();
+    shaderResourceBinderEntry.GlobalBufferUsage = shaderInputProviderUsage;
+    shaderResourceBinderEntry.RootIndexToBindTo = rootIndexToBindTo;
+    shaderResourceBinderEntry.BindDescriptorTable = false;
+
+    shaderResourceBinderEntry.BindConstantBuffer = false;
+    shaderResourceBinderEntry.BindDescriptor = false;
+    shaderResourceBinderEntry.BindGlobalBuffer = true;
+
+    shaderResourceBinderEntry.ShaderStageToBindTo = shaderStageToBindTo;
+}
+
+void ShaderResourceBinder::AddShaderResourceBinderEntryForGlobalBufferToDescriptorTable(
+        ShaderInputProviderUsage shaderInputProviderUsage,
+        shipUint16 rootIndexToBindTo,
+        shipUint16 descriptorRangeIndexToBind,
+        shipUint16 descriptorRangeEntryIndexToBind,
+        ShaderVisibility shaderStageToBindTo)
+{
+    ShaderResourceBinderEntry& shaderResourceBinderEntry = m_ShaderResourceBinderEntries.Grow();
+    shaderResourceBinderEntry.GlobalBufferUsage = shaderInputProviderUsage;
+    shaderResourceBinderEntry.RootIndexToBindTo = rootIndexToBindTo;
+    shaderResourceBinderEntry.DescriptorRangeIndexToBindTo = descriptorRangeIndexToBind;
+    shaderResourceBinderEntry.DescriptorRangeEntryIndexToBind = descriptorRangeEntryIndexToBind;
+    shaderResourceBinderEntry.BindDescriptorTable = true;
+
+    shaderResourceBinderEntry.BindConstantBuffer = false;
+    shaderResourceBinderEntry.BindDescriptor = false;
+    shaderResourceBinderEntry.BindGlobalBuffer = true;
+
+    shaderResourceBinderEntry.ShaderStageToBindTo = shaderStageToBindTo;
 }
 
 void ShaderResourceBinder::BindShaderInputProvders(
         GFXRenderDevice& gfxRenderDevice,
         GFXDirectRenderCommandList& gfxDirectRenderCommandList,
-        const Array<ShaderInputProvider*>& shaderInputProviders) const
+        const Array<ShaderInputProvider*>& shaderInputProviders,
+        GFXDescriptorSetHandle gfxDescriptorSetHandle) const
 {
     ShaderInputProviderManager& shaderInputProviderManager = GetShaderInputProviderManager();
 
-    GFXDescriptorSet& gfxDescriptorSet = gfxRenderDevice.GetDescriptorSet(*m_pGfxDescriptorSetHandle);
+    GFXDescriptorSet& gfxDescriptorSet = gfxRenderDevice.GetDescriptorSet(gfxDescriptorSetHandle);
 
-    InplaceArray<GFXTexture2D*, GfxConstants::GfxConstants_MaxShaderResourceViewsBoundPerShaderStage> texture2Ds;
-
-    for (ShaderInputProvider* shaderInputProvider : shaderInputProviders)
+    for (const ShaderResourceBinderEntry& shaderResourceBinderEntry : m_ShaderResourceBinderEntries)
     {
-        for (const ShaderResourceBinderEntry& shaderResourceBinderEntry : m_ShaderResourceBinderEntries)
+        if (shaderResourceBinderEntry.BindGlobalBuffer)
         {
-            if (shaderInputProvider->GetShaderInputProviderDeclaration() == shaderResourceBinderEntry.Declaration)
+            BindShaderGlobalBuffer(shaderResourceBinderEntry, gfxRenderDevice, gfxDirectRenderCommandList, gfxDescriptorSet);
+        }
+        else
+        {
+            ShaderInputProvider* shaderInputProvider = shaderInputProviderManager.GetShaderInputProviderForDeclaration(shaderInputProviders, shaderResourceBinderEntry.Declaration);
+            SHIP_ASSERT_MSG(
+                shaderInputProvider != nullptr,
+                "ShaderInputProvider %s is not present, things will break, most likely result in a GPU hang!",
+                shaderResourceBinderEntry.Declaration->GetShaderInputProviderName());
+
+            if (shaderResourceBinderEntry.BindDescriptor)
             {
-                if (ShaderInputProviderUtils::IsUsingConstantBuffer(shaderResourceBinderEntry.Declaration->GetShaderInputProviderUsage()))
-                {
-                    if (shaderInputProvider->m_GfxConstantBufferHandle.handle != InvalidGfxHandle)
-                    {
-                        GFXConstantBuffer& gfxConstantBuffer = gfxRenderDevice.GetConstantBuffer(shaderInputProvider->m_GfxConstantBufferHandle);
-                        gfxDescriptorSet.SetDescriptorForRootIndex(shaderResourceBinderEntry.RootIndexToBindTo, gfxConstantBuffer);
-                    }
-                }
-
-                GFXTexture2DHandle gfxTexture2DHandles[GfxConstants::GfxConstants_MaxShaderResourceViewsBoundPerShaderStage];
-                shipUint32 numTexture2DHandles = shaderInputProviderManager.GetTexture2DHandlesFromProvider(*shaderInputProvider, gfxTexture2DHandles);
-                
-                if (numTexture2DHandles > 0)
-                {
-                    for (shipUint32 i = 0; i < numTexture2DHandles; i++)
-                    {
-
-                        GFXTexture2DHandle gfxTexture2DHandle = gfxTexture2DHandles[i];
-                        if (gfxTexture2DHandle.handle == InvalidGfxHandle)
-                        {
-                            continue;
-                        }
-
-                        GFXTexture2D* gfxTexture2D = gfxRenderDevice.GetTexture2DPtr(gfxTexture2DHandle);
-                        texture2Ds.Add(gfxTexture2D);
-                    }
-                }
-
-                break;
+                BindShaderInputProviderDescriptor(shaderResourceBinderEntry, shaderInputProvider, gfxRenderDevice, gfxDescriptorSet);
+            }
+            else if (shaderResourceBinderEntry.BindConstantBuffer)
+            {
+                BindShaderInputProviderConstantBuffer(shaderResourceBinderEntry, shaderInputProvider, gfxRenderDevice, gfxDescriptorSet);
+            }
+            else
+            {
+                SHIP_ASSERT(!"Should not happen.");
             }
         }
     }
+}
 
-    GFXMaterialUnifiedConstantBuffer& gfxMaterialUnifiedConstantBuffer = GetGFXMaterialUnifiedConstantBuffer();
-    GFXByteBufferHandle gfxByteBufferHandle = gfxMaterialUnifiedConstantBuffer.BindMaterialUnfiedConstantBuffer(gfxDirectRenderCommandList);
+void ShaderResourceBinder::BindShaderInputProviderDescriptor(
+        const ShaderResourceBinderEntry& shaderResourceBinderEntry,
+        ShaderInputProvider* shaderInputProvider,
+        GFXRenderDevice& gfxRenderDevice,
+        GFXDescriptorSet& gfxDescriptorSet) const
+{
+    GfxResource* gfxResourceToBind = nullptr;
+
+    switch (shaderResourceBinderEntry.DescriptorType)
+    {
+    case ShaderInputType::Texture2D:
+        {
+            size_t shaderInputProviderAddress = reinterpret_cast<size_t>(shaderInputProvider);
+            size_t textureHandleAddress = shaderInputProviderAddress + shaderResourceBinderEntry.DataOffsetInProvider;
+            GFXTexture2DHandle gfxTexture2DHandle = *reinterpret_cast<GFXTexture2DHandle*>(textureHandleAddress);
+
+#ifdef VALIDATE_SHADER_INPUT_PROVIDER_BINDING
+            ShaderInputProviderDeclaration* shaderInputProviderDeclaration = shaderInputProvider->GetShaderInputProviderDeclaration();
+            SHIP_ASSERT_MSG(
+                    gfxTexture2DHandle.handle != InvalidGfxHandle,
+                    "Texture %s in ShaderInputProvider %s is not valid!",
+                    GetShaderInputProviderManager().GetShaderInputNameFromProvider(shaderInputProviderDeclaration, shaderResourceBinderEntry.DataOffsetInProvider),
+                    shaderInputProviderDeclaration->GetShaderInputProviderName());
+#endif // #ifdef VALIDATE_SHADER_INPUT_PROVIDER_BINDING
+
+            gfxResourceToBind = gfxRenderDevice.GetTexture2DPtr(gfxTexture2DHandle);
+        }
+        break;
+
+    default:
+        SHIP_ASSERT(!"Unsupported shader input type.");
+        break;
+    }
+
+    SHIP_ASSERT(gfxResourceToBind != nullptr);
+
+    if (shaderResourceBinderEntry.BindDescriptorTable)
+    {
+        gfxDescriptorSet.SetDescriptorTableEntryForRootIndex(
+                shaderResourceBinderEntry.RootIndexToBindTo,
+                shaderResourceBinderEntry.DescriptorRangeIndexToBindTo,
+                shaderResourceBinderEntry.DescriptorRangeEntryIndexToBind,
+                *gfxResourceToBind);
+    }
+    else
+    {
+        gfxDescriptorSet.SetDescriptorForRootIndex(shaderResourceBinderEntry.RootIndexToBindTo, *gfxResourceToBind);
+    }
+}
+
+void ShaderResourceBinder::BindShaderInputProviderConstantBuffer(
+        const ShaderResourceBinderEntry& shaderResourceBinderEntry,
+        ShaderInputProvider* shaderInputProvider,
+        GFXRenderDevice& gfxRenderDevice,
+        GFXDescriptorSet& gfxDescriptorSet) const
+{
+    SHIP_ASSERT_MSG(
+            shaderInputProvider->m_GfxConstantBufferHandle.handle != InvalidGfxHandle,
+            "ShaderInputProvider %s ConstantBuffer is invalid, this shouldn't happen.",
+            shaderInputProvider->GetShaderInputProviderDeclaration()->GetShaderInputProviderName());
+
+    GFXConstantBuffer& gfxConstantBuffer = gfxRenderDevice.GetConstantBuffer(shaderInputProvider->m_GfxConstantBufferHandle);
     
-    GFXByteBuffer* pGfxByteBuffer = gfxRenderDevice.GetByteBufferPtr(gfxByteBufferHandle);
+    if (shaderResourceBinderEntry.BindDescriptorTable)
+    {
+        gfxDescriptorSet.SetDescriptorTableEntryForRootIndex(
+                shaderResourceBinderEntry.RootIndexToBindTo,
+                shaderResourceBinderEntry.DescriptorRangeIndexToBindTo,
+                shaderResourceBinderEntry.DescriptorRangeEntryIndexToBind,
+                gfxConstantBuffer);
+    }
+    else
+    {
+        gfxDescriptorSet.SetDescriptorForRootIndex(shaderResourceBinderEntry.RootIndexToBindTo, gfxConstantBuffer);
+    }
+}
 
-    InplaceArray<GFXByteBuffer*, 1> gfxByteBuffers;
-    gfxByteBuffers.Add(pGfxByteBuffer);
+void ShaderResourceBinder::BindShaderGlobalBuffer(
+        const ShaderResourceBinderEntry& shaderResourceBinderEntry,
+        GFXRenderDevice& gfxRenderDevice,
+        GFXDirectRenderCommandList& gfxDirectRenderCommandList,
+        GFXDescriptorSet& gfxDescriptorSet) const
+{
+    SHIP_STATIC_ASSERT_MSG(shipUint32(ShaderInputProviderUsage::Count) == 2, "Need to update code below");
 
-    gfxDescriptorSet.SetDescriptorTableForRootIndex(0, 0, gfxByteBuffers);
-    gfxDescriptorSet.SetDescriptorTableForRootIndex(0, 1, texture2Ds);
+    switch (shaderResourceBinderEntry.GlobalBufferUsage)
+    {
+    case ShaderInputProviderUsage::PerInstance:
+        {
+            GFXMaterialUnifiedConstantBuffer& gfxMaterialUnifiedConstantBuffer = GetGFXMaterialUnifiedConstantBuffer();
+            GFXByteBufferHandle gfxByteBufferHandle = gfxMaterialUnifiedConstantBuffer.BindMaterialUnfiedConstantBuffer(gfxDirectRenderCommandList);
+
+            SHIP_ASSERT(gfxByteBufferHandle.handle != InvalidGfxHandle);
+
+            GFXByteBuffer& gfxByteBuffer = gfxRenderDevice.GetByteBuffer(gfxByteBufferHandle);
+
+            if (shaderResourceBinderEntry.BindDescriptorTable)
+            {
+                gfxDescriptorSet.SetDescriptorTableEntryForRootIndex(
+                        shaderResourceBinderEntry.RootIndexToBindTo,
+                        shaderResourceBinderEntry.DescriptorRangeIndexToBindTo,
+                        shaderResourceBinderEntry.DescriptorRangeEntryIndexToBind,
+                        gfxByteBuffer);
+            }
+            else
+            {
+                gfxDescriptorSet.SetDescriptorForRootIndex(
+                        shaderResourceBinderEntry.RootIndexToBindTo,
+                        gfxByteBuffer);
+            }
+        }
+        break;
+
+    default:
+        SHIP_ASSERT(!"Unimplemented shader input provider usage");
+        break;
+    }
 }
 
 }

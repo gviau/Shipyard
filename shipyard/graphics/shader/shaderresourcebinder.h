@@ -6,38 +6,109 @@
 
 #include <system/array.h>
 
+#ifndef SHIP_OPTIMIZED
+#define VALIDATE_SHADER_INPUT_PROVIDER_BINDING
+#endif // #ifndef SHIP_OPTIMIZED
+
 namespace Shipyard
 {
     class ShaderInputProvider;
     class ShaderInputProviderDeclaration;
 
+    enum class ShaderInputType : shipUint8;
+    enum class ShaderInputProviderUsage : shipUint8;
+
     class SHIPYARD_API ShaderResourceBinder
     {
     public:
-        ShaderResourceBinder(GFXDescriptorSetHandle* pGfxDescriptorSetHandle);
+        void AddShaderResourceBinderEntryForProviderToDescriptor(
+                const ShaderInputProviderDeclaration* shaderInputProviderDeclaration,
+                shipUint16 rootIndexToBindTo,
+                ShaderVisibility shaderStageToBindTo);
 
-        template <typename ShaderInputProviderType>
-        void AddShaderResourceBinderEntry(shipUint16 rootIndexToBindTo)
-        {
-            ShaderResourceBinderEntry& shaderResourceBinderEntry = m_ShaderResourceBinderEntries.Grow();
-            shaderResourceBinderEntry.Declaration = ShaderInputProviderType::ms_ShaderInputProviderDeclaration;
-            shaderResourceBinderEntry.RootIndexToBindTo = rootIndexToBindTo;
-        }
+        void AddShaderResourceBinderEntryForProviderToDescriptorTable(
+                const ShaderInputProviderDeclaration* shaderInputProviderDeclaration,
+                shipUint16 rootIndexToBindTo,
+                shipUint16 descriptorRangeIndexToBind,
+                shipUint16 descriptorRangeEntryIndexToBind,
+                ShaderVisibility shaderStageToBindTo);
+
+        void AddShaderResourceBinderEntryForDescriptorToDescriptor(
+                const ShaderInputProviderDeclaration* shaderInputProviderDeclaration,
+                shipUint16 rootIndexToBindTo,
+                shipInt32 offsetInProvider,
+                ShaderInputType shaderInputType,
+                ShaderVisibility shaderStageToBindTo);
+
+        void AddShaderResourceBinderEntryForDescriptorToDescriptorTable(
+                const ShaderInputProviderDeclaration* shaderInputProviderDeclaration,
+                shipUint16 rootIndexToBindTo,
+                shipUint16 descriptorRangeIndexToBind,
+                shipUint16 descriptorRangeEntryIndexToBind,
+                shipInt32 offsetInProvider,
+                ShaderInputType shaderInputType,
+                ShaderVisibility shaderStageToBindTo);
+
+        void AddShaderResourceBinderEntryForGlobalBufferToDescriptor(
+                ShaderInputProviderUsage shaderInputProviderUsage,
+                shipUint16 rootIndexToBindTo,
+                ShaderVisibility shaderStageToBindTo);
+
+        void AddShaderResourceBinderEntryForGlobalBufferToDescriptorTable(
+                ShaderInputProviderUsage shaderInputProviderUsage,
+                shipUint16 rootIndexToBindTo,
+                shipUint16 descriptorRangeIndexToBind,
+                shipUint16 descriptorRangeEntryIndexToBind,
+                ShaderVisibility shaderStageToBindTo);
 
         void BindShaderInputProvders(
                 GFXRenderDevice& gfxRenderDevice,
                 GFXDirectRenderCommandList& gfxDirectRenderCommandList,
-                const Array<ShaderInputProvider*>& shaderInputProviders) const;
+                const Array<ShaderInputProvider*>& shaderInputProviders,
+                GFXDescriptorSetHandle gfxDescriptorSetHandle) const;
 
-    private:
+    public:
         struct ShaderResourceBinderEntry
         {
-            ShaderInputProviderDeclaration* Declaration;
-            shipUint16 RootIndexToBindTo;
+            const ShaderInputProviderDeclaration* Declaration = nullptr;
+            shipUint16 RootIndexToBindTo = 0 ;
+            shipUint16 DescriptorRangeIndexToBindTo = 0;
+            shipUint16 DescriptorRangeEntryIndexToBind = 0;
+            shipInt32 DataOffsetInProvider = 0;
+
+            ShaderInputType DescriptorType;
+            ShaderInputProviderUsage GlobalBufferUsage;
+            ShaderVisibility ShaderStageToBindTo = ShaderVisibility::ShaderVisibility_None;
+
+            shipBool BindDescriptorTable = false;
+            shipBool BindConstantBuffer = false;
+            shipBool BindDescriptor = false;
+            shipBool BindGlobalBuffer = false;
         };
 
+    public:
+        Array<ShaderResourceBinderEntry>& GetShaderResourceBinderEntries() { return m_ShaderResourceBinderEntries; }
+        const Array<ShaderResourceBinderEntry>& GetShaderResourceBinderEntries() const { return m_ShaderResourceBinderEntries; }
+
     private:
-        GFXDescriptorSetHandle* m_pGfxDescriptorSetHandle;
         Array<ShaderResourceBinderEntry> m_ShaderResourceBinderEntries;
+
+        void BindShaderInputProviderDescriptor(
+                const ShaderResourceBinderEntry& shaderResourceBinderEntry,
+                ShaderInputProvider* shaderInputProvider,
+                GFXRenderDevice& gfxRenderDevice,
+                GFXDescriptorSet& gfxDescriptorSet) const;
+
+        void BindShaderInputProviderConstantBuffer(
+                const ShaderResourceBinderEntry& shaderResourceBinderEntry,
+                ShaderInputProvider* shaderInputProvider,
+                GFXRenderDevice& gfxRenderDevice,
+                GFXDescriptorSet& gfxDescriptorSet) const;
+
+        void BindShaderGlobalBuffer(
+                const ShaderResourceBinderEntry& shaderResourceBinderEntry,
+                GFXRenderDevice& gfxRenderDevice,
+                GFXDirectRenderCommandList& gfxDirectRenderCommandList,
+                GFXDescriptorSet& gfxDescriptorSet) const;
     };
 }

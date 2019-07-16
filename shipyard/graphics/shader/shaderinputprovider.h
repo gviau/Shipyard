@@ -169,6 +169,9 @@ namespace Shipyard
         shipUint32 GetShaderInputProviderDeclarationIndex() const;
         ShaderInputProviderUsage GetShaderInputProviderUsage() const;
 
+        const shipChar* GetShaderInputProviderName() const;
+        shipBool HasShaderInput(const shipChar* shaderInputName, shipInt32& offsetInProvider) const;
+
     protected:
         const shipChar* m_ShaderInputProviderName;
         ShaderInputDeclaration m_ShaderInputDeclarations[MaxShaderInputsPerProvider];
@@ -211,6 +214,12 @@ namespace Shipyard
 
         shipUint32 GetTexture2DHandlesFromProvider(const ShaderInputProvider& shaderInputProvider, GFXTexture2DHandle* pGfxTextureHandles) const;
 
+        ShaderInputProviderDeclaration* FindShaderInputProviderDeclarationFromName(const StringA& shaderInputProviderDeclarationName) const;
+
+        ShaderInputProvider* GetShaderInputProviderForDeclaration(const Array<ShaderInputProvider*>& shaderInputProviders, const ShaderInputProviderDeclaration* shaderInputProviderDeclaration) const;
+        const shipChar* GetShaderInputNameFromProvider(const ShaderInputProviderDeclaration* shaderInputProviderDeclaration, shipInt32 dataOffsetInProvider) const;
+        const shipChar* GetShaderInputProviderConstantBufferName(const ShaderInputProviderDeclaration* shaderInputProviderDeclaration) const;
+
     private:
         ShaderInputProviderManager();
         ~ShaderInputProviderManager();
@@ -240,6 +249,7 @@ namespace Shipyard
     namespace ShaderInputProviderUtils
     {
         shipBool SHIPYARD_API IsUsingConstantBuffer(ShaderInputProviderUsage shaderInputProviderUsage);
+        const shipChar* GetGlobalBufferNameFromProviderUsage(ShaderInputProviderUsage shaderInputProviderUsage);
 
         template <typename T>
         void SHIPYARD_API VerifyTexture2DVariableType(const T& shaderInputData)

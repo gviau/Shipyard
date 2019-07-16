@@ -149,28 +149,6 @@ shipBool ShipyardViewer::CreateApp(HWND windowHandle, shipUint32 windowWidth, sh
 
     m_GfxDepthStencilRenderTargetHandle = m_pGfxRenderDevice->CreateDepthStencilRenderTarget(m_GfxDepthTextureHandle);
 
-    Array<RootSignatureParameterEntry> rootSignatureParameters;
-    rootSignatureParameters.Resize(1);
-
-    // rootSignatureParameters[0].parameterType = RootSignatureParameterType::ShaderResourceView;
-    // rootSignatureParameters[0].shaderVisibility = ShaderVisibility_Vertex;
-    // rootSignatureParameters[0].descriptor.shaderBindingSlot = 0;
-
-    rootSignatureParameters[0].parameterType = RootSignatureParameterType::DescriptorTable;
-    rootSignatureParameters[0].shaderVisibility = ShaderVisibility(ShaderVisibility_Vertex | ShaderVisibility_Pixel);
-
-    DescriptorRange& unifiedBufferDescriptorRange = rootSignatureParameters[0].descriptorTable.descriptorRanges.Grow();
-    unifiedBufferDescriptorRange.descriptorRangeType = DescriptorRangeType::ShaderResourceView;
-    unifiedBufferDescriptorRange.baseShaderRegister = 0;
-    unifiedBufferDescriptorRange.numDescriptors = 1;
-
-    DescriptorRange& textureDescriptorRange = rootSignatureParameters[0].descriptorTable.descriptorRanges.Grow();
-    textureDescriptorRange.descriptorRangeType = DescriptorRangeType::ShaderResourceView;
-    textureDescriptorRange.baseShaderRegister = 1;
-    textureDescriptorRange.numDescriptors = 1;
-
-    m_GfxRootSignatureHandle = m_pGfxRenderDevice->CreateRootSignature(rootSignatureParameters);
-
     Vertex_Pos_UV vertexBufferData[] =
     {
         { { -0.5f, -0.5f, -0.25f }, { 0.0f, 0.0f } },
@@ -227,7 +205,7 @@ shipBool ShipyardViewer::CreateApp(HWND windowHandle, shipUint32 windowWidth, sh
     textureEntry.descriptorRangeIndex = 1;
 
     m_GfxDescriptorSetHandle =
-        m_pGfxRenderDevice->CreateDescriptorSet(DescriptorSetType::ConstantBuffer_ShaderResource_UnorderedAccess_Views, m_GfxRootSignatureHandle, descriptorSetEntryDeclarations);
+        m_pGfxRenderDevice->CreateDescriptorSet(DescriptorSetType::ConstantBuffer_ShaderResource_UnorderedAccess_Views, descriptorSetEntryDeclarations);
 
     m_TestTextureHandle = m_pGfxRenderDevice->CreateTexture2D(windowWidth, windowHeight, GfxFormat::R8G8B8A8_UNORM, false, nullptr, false, TextureUsage::TextureUsage_RenderTarget);
 
@@ -244,6 +222,12 @@ shipBool ShipyardViewer::CreateApp(HWND windowHandle, shipUint32 windowWidth, sh
     m_pShaderDatabase->Load("ShipyardShaderDatabase.bin");
 
     GetShaderHandlerManager().Initialize(*m_pGfxRenderDevice, *m_pShaderDatabase);
+
+    ShaderKey shaderKey;
+    shaderKey.SetShaderFamily(ShaderFamily::Generic);
+    GetShaderHandlerManager().GetShaderHandlerForShaderKey(shaderKey);
+
+    Sleep(2000);
 
     return true;
 }
@@ -279,10 +263,6 @@ void ShipyardViewer::ComputeOneFrame()
     InplaceArray<ShaderInputProvider*, 1> shaderInputProviders;
     shaderInputProviders.Add(m_pDataProvider);
 
-    // Memory stomp in allocator.
-    ShaderResourceBinder shaderResourceBinder(&m_GfxDescriptorSetHandle);
-    shaderResourceBinder.AddShaderResourceBinderEntry<SimpleConstantBufferProvider>(0);
-
     theta += 0.001f;
 
     GFXRenderTargetHandle gfxRenderTargetHandle = m_pGfxViewSurface->GetBackBufferRenderTargetHandle();
@@ -306,16 +286,15 @@ void ShipyardViewer::ComputeOneFrame()
 
     ShaderHandler* pShaderHandler = GetShaderHandlerManager().GetShaderHandlerForShaderKey(shaderKey);
 
-    pShaderHandler->ApplyShaderInputProviders(*m_pGfxRenderDevice, *m_pGfxDirectRenderCommandList, shaderResourceBinder, shaderInputProviders);
+    pShaderHandler->ApplyShaderInputProviders(*m_pGfxRenderDevice, *m_pGfxDirectRenderCommandList, shaderInputProviders);
 
     shipUint32 vertexBufferOffsets = 0;
 
     DrawIndexedCommand* pDrawIndexedCommand = m_pGfxDirectRenderCommandList->DrawIndexed();
     pDrawIndexedCommand->gfxViewport = gfxViewport;
-    pDrawIndexedCommand->pShaderHandler = pShaderHandler;
+    pDrawIndexedCommand->shaderKey = shaderKey;
     pDrawIndexedCommand->gfxRenderTargetHandle = gfxRenderTargetHandle;
     pDrawIndexedCommand->gfxDepthStencilRenderTargetHandle = m_GfxDepthStencilRenderTargetHandle;
-    pDrawIndexedCommand->gfxRootSignatureHandle = m_GfxRootSignatureHandle;
     pDrawIndexedCommand->gfxDescriptorSetHandle = m_GfxDescriptorSetHandle;
     pDrawIndexedCommand->primitiveTopologyToUse = PrimitiveTopology::TriangleList;
     pDrawIndexedCommand->pRenderStateBlockStateOverride = nullptr;

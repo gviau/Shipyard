@@ -2,6 +2,8 @@
 
 #include <graphics/wrapper/commandqueue.h>
 
+#include <graphics/shader/shaderkey.h>
+
 #include <graphics/wrapper/dx11/dx11renderstatecache.h>
 
 struct ID3D11Device;
@@ -33,17 +35,15 @@ namespace Shipyard
                     GFXRenderTargetHandle gfxRenderTargetHandle,
                     GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle,
                     const GfxViewport& gfxViewport,
-                    GFXRootSignatureHandle gfxRootSignatureHandle,
                     GFXDescriptorSetHandle gfxDescriptorSetHandle,
-                    const ShaderHandler& shaderHandlerToUse,
+                    ShaderKey shaderKeyToUse,
                     PrimitiveTopology primitiveTopologyToUse,
                     const RenderStateBlockStateOverride* pRenderStateBlockStateOverrideToUse)
                 : renderTargetHandle(gfxRenderTargetHandle)
                 , depthStencilRenderTargetHandle(gfxDepthStencilRenderTargetHandle)
                 , viewport(gfxViewport)
-                , rootSignatureHandle(gfxRootSignatureHandle)
                 , descriptorSetHandle(gfxDescriptorSetHandle)
-                , shaderHandler(shaderHandlerToUse)
+                , shaderKey(shaderKeyToUse)
                 , primitiveTopology(primitiveTopologyToUse)
                 , pRenderStateBlockStateOverride(pRenderStateBlockStateOverrideToUse)
             {}
@@ -53,10 +53,9 @@ namespace Shipyard
 
             const GfxViewport& viewport;
 
-            GFXRootSignatureHandle rootSignatureHandle;
             GFXDescriptorSetHandle descriptorSetHandle;
 
-            const ShaderHandler& shaderHandler;
+            ShaderKey shaderKey;
 
             PrimitiveTopology primitiveTopology;
 

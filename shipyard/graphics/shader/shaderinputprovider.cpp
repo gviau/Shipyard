@@ -37,6 +37,23 @@ namespace ShaderInputProviderUtils
 
         return false;
     }
+
+    const shipChar* GetGlobalBufferNameFromProviderUsage(ShaderInputProviderUsage shaderInputProviderUsage)
+    {
+        SHIP_STATIC_ASSERT_MSG(shipUint32(ShaderInputProviderUsage::Count) == 2, "Need to update code below");
+
+        switch (shaderInputProviderUsage)
+        {
+        case ShaderInputProviderUsage::PerInstance:
+            return "g_UnifiedConstantBuffer";
+
+        default:
+            SHIP_ASSERT(!"Unimplemented shader input provider usage");
+            break;
+        }
+
+        return nullptr;
+    }
 }
 
 ShaderInputProviderManager::ShaderInputProviderManager()
@@ -226,7 +243,11 @@ shipBool ShaderInputProviderManager::WriteShaderInputProviderUtilsFile()
     content += "#ifndef SHADER_INPUT_PROVIDER_UTILS_HLSL\n";
     content += "#define SHADER_INPUT_PROVIDER_UTILS_HLSL\n\n";
 
-    content += "ByteAddressBuffer g_UnifiedConstantBuffer;\n";
+    content += "ByteAddressBuffer ";
+    
+    content += ShaderInputProviderUtils::GetGlobalBufferNameFromProviderUsage(ShaderInputProviderUsage::PerInstance);
+
+    content += ";\n";
 
     content += "#endif";
 
@@ -260,12 +281,8 @@ shipBool ShaderInputProviderManager::WriteSingleShaderInputProviderFile(ShaderIn
     {
         content += "cbuffer ";
 
-        content += pShaderInputProviderDeclaration->m_ShaderInputProviderName;
+        content += GetShaderInputProviderConstantBufferName(pShaderInputProviderDeclaration);
 
-        content += "Data";
-
-        // Register is temporary, until ShaderCompiler deduces binding points by reflection
-        content += " : register(b0)";
         content += "\n{\n";
     }
     else
@@ -545,8 +562,7 @@ shipBool ShaderInputProviderManager::WriteSingleShaderInputOutsideOfStruct(const
     content += "> ";
     content += shaderInputDeclaration.Name;
 
-    // Register is temporary, until ShaderCompiler deduces binding points by reflection
-    content += " : register(t1);\n";
+    content += ";\n";
 
     return true;
 }
@@ -643,6 +659,8 @@ namespace ShaderInputProviderUtils
             content += "\n";
         }
 
+        const shipChar* unifiedConstantBufferName = ShaderInputProviderUtils::GetGlobalBufferNameFromProviderUsage(ShaderInputProviderUsage::PerInstance);
+
         for (shipUint32 y = 0; y < numComponentsY; y++)
         {
             if (numComponentsY > 1)
@@ -671,22 +689,24 @@ namespace ShaderInputProviderUtils
                 break;
             }
 
+            content += unifiedConstantBufferName;
+
             switch (numComponentsX)
             {
             case 1:
-                content += StringFormat("g_UnifiedConstantBuffer.Load(offsetInUnifiedBuffer + 0x%x)", offsetInBuffer);
+                content += StringFormat(".Load(offsetInUnifiedBuffer + 0x%x)", offsetInBuffer);
                 break;
 
             case 2:
-                content += StringFormat("g_UnifiedConstantBuffer.Load2(offsetInUnifiedBuffer + 0x%x)", offsetInBuffer);
+                content += StringFormat(".Load2(offsetInUnifiedBuffer + 0x%x)", offsetInBuffer);
                 break;
 
             case 3:
-                content += StringFormat("g_UnifiedConstantBuffer.Load3(offsetInUnifiedBuffer + 0x%x)", offsetInBuffer);
+                content += StringFormat(".Load3(offsetInUnifiedBuffer + 0x%x)", offsetInBuffer);
                 break;
 
             case 4:
-                content += StringFormat("g_UnifiedConstantBuffer.Load4(offsetInUnifiedBuffer + 0x%x)", offsetInBuffer);
+                content += StringFormat(".Load4(offsetInUnifiedBuffer + 0x%x)", offsetInBuffer);
                 break;
             }
 
@@ -1024,6 +1044,66 @@ shipUint32 ShaderInputProviderManager::GetTexture2DHandlesFromProvider(const Sha
     return numTexture2DHandles;
 }
 
+ShaderInputProviderDeclaration* ShaderInputProviderManager::FindShaderInputProviderDeclarationFromName(const StringA& shaderInputProviderDeclarationName) const
+{
+    ShaderInputProviderDeclaration* pCurrent = m_pHead;
+    while (pCurrent != nullptr)
+    {
+        if (shaderInputProviderDeclarationName == pCurrent->m_ShaderInputProviderName)
+        {
+            return pCurrent;
+        }
+
+        pCurrent = pCurrent->m_pNextRegisteredShaderInputProviderDeclaration;
+    }
+
+    return nullptr;
+}
+
+ShaderInputProvider* ShaderInputProviderManager::GetShaderInputProviderForDeclaration(
+        const Array<ShaderInputProvider*>& shaderInputProviders,
+        const ShaderInputProviderDeclaration* shaderInputProviderDeclaration) const
+{
+    for (ShaderInputProvider* shaderInputProvider : shaderInputProviders)
+    {
+        if (shaderInputProvider->GetShaderInputProviderDeclaration() == shaderInputProviderDeclaration)
+        {
+            return shaderInputProvider;
+        }
+    }
+
+    return nullptr;
+}
+
+const shipChar* ShaderInputProviderManager::GetShaderInputNameFromProvider(
+        const ShaderInputProviderDeclaration* shaderInputProviderDeclaration,
+        shipInt32 dataOffsetInProvider) const
+{
+    shipUint32 numShaderInputDeclarations;
+    const ShaderInputProviderDeclaration::ShaderInputDeclaration* shaderInputDeclarations = shaderInputProviderDeclaration->GetShaderInputDeclarations(numShaderInputDeclarations);
+
+    for (shipUint32 i = 0; i < numShaderInputDeclarations; i++)
+    {
+        const ShaderInputProviderDeclaration::ShaderInputDeclaration& shaderInputDeclaration = shaderInputDeclarations[i];
+        if (shaderInputDeclaration.DataOffsetInProvider == dataOffsetInProvider)
+        {
+            return shaderInputDeclaration.Name;
+        }
+    }
+
+    SHIP_ASSERT_MSG(
+            false,
+            "Offset provided does not map to an input in the ShaderInputProvider %s",
+            shaderInputProviderDeclaration->GetShaderInputProviderName());
+
+    return nullptr;
+}
+
+const shipChar* ShaderInputProviderManager::GetShaderInputProviderConstantBufferName(const ShaderInputProviderDeclaration* shaderInputProviderDeclaration) const
+{
+    return StringFormat("%s%s", shaderInputProviderDeclaration->m_ShaderInputProviderName, "Data");
+}
+
 ShaderInputProviderManager& GetShaderInputProviderManager()
 {
     return ShaderInputProviderManager::GetInstance();
@@ -1059,6 +1139,25 @@ shipUint32 ShaderInputProviderDeclaration::GetShaderInputProviderDeclarationInde
 ShaderInputProviderUsage ShaderInputProviderDeclaration::GetShaderInputProviderUsage() const
 {
     return m_ShaderInputProviderUsage;
+}
+
+const shipChar* ShaderInputProviderDeclaration::GetShaderInputProviderName() const
+{
+    return m_ShaderInputProviderName;
+}
+
+shipBool ShaderInputProviderDeclaration::HasShaderInput(const shipChar* shaderInputName, shipInt32& offsetInProvider) const
+{
+    for (shipUint32 i = 0; i < m_NumShaderInputDeclarations; i++)
+    {
+        if (StringCompare(m_ShaderInputDeclarations[i].Name, shaderInputName) == 0)
+        {
+            offsetInProvider = m_ShaderInputDeclarations[i].DataOffsetInProvider;
+            return true;
+        }
+    }
+
+    return false;
 }
 
 // template <typename T> ShaderInputScalarType GetShaderInputScalarType(const T& data) { return ShaderInputScalarType::Unknown; }

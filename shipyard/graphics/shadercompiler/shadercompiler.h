@@ -2,6 +2,7 @@
 
 #include <graphics/shader/shaderdatabase.h>
 #include <graphics/shader/shaderkey.h>
+#include <graphics/shader/shaderresourcebinder.h>
 
 #include <system/array.h>
 #include <system/platform.h>
@@ -44,26 +45,43 @@ namespace Shipyard
     private:
         struct CompiledShaderKeyEntry
         {
-            CompiledShaderKeyEntry()
-                : m_RawShaderKey(0)
-                , m_GotRecompiledSinceLastAccess(false)
-                , m_GotCompilationError(false)
-                , m_CompiledVertexShaderBlob(nullptr)
-                , m_CompiledPixelShaderBlob(nullptr)
-                , m_CompiledComputeShaderBlob(nullptr)
-            {}
-
             void Reset();
 
-            ShaderKey::RawShaderKeyType m_RawShaderKey;
-            shipBool m_GotRecompiledSinceLastAccess;
-            shipBool m_GotCompilationError;
+            ShaderKey::RawShaderKeyType m_RawShaderKey = 0;
+            shipBool m_GotRecompiledSinceLastAccess = false;
+            shipBool m_GotCompilationError = false;
 
-            ID3D10Blob* m_CompiledVertexShaderBlob;
-            ID3D10Blob* m_CompiledPixelShaderBlob;
-            ID3D10Blob* m_CompiledComputeShaderBlob;
+            ID3D10Blob* m_CompiledVertexShaderBlob = nullptr;
+            ID3D10Blob* m_CompiledPixelShaderBlob = nullptr;
+            ID3D10Blob* m_CompiledComputeShaderBlob = nullptr;
 
             RenderStateBlock m_CompiledRenderStateBlock;
+
+            InplaceArray<RootSignatureParameterEntry, 8> m_RootSignatureParameters;
+
+            ShaderResourceBinder m_ShaderResourceBinder;
+
+            InplaceArray<DescriptorSetEntryDeclaration, 8> m_DescriptorSetEntryDeclarations;
+        };
+
+        struct ShaderInputReflectionData
+        {
+            const char* Name;
+            shipUint16 BindPoint;
+            ShaderVisibility shaderVisibility;
+        };
+
+        struct ShaderReflectionData
+        {
+            InplaceArray<ShaderInputReflectionData, GfxConstants_MaxConstantBufferViewsBoundPerShaderStage> ConstantBufferReflectionDatas;
+            InplaceArray<ShaderInputReflectionData, GfxConstants_MaxShaderResourceViewsBoundPerShaderStage> ShaderResourceViewReflectionDatas;
+            InplaceArray<ShaderInputReflectionData, GfxConstants_MaxUnorderedAccessViewsBoundPerShaderStage> UnorderedAccessViewReflectionDatas;
+            InplaceArray<ShaderInputReflectionData, GfxConstants_MaxSamplersBoundPerShaderStage> SamplerReflctionDatas;
+
+            ShaderVisibility ConstantBuffersShaderVisibility = ShaderVisibility::ShaderVisibility_None;
+            ShaderVisibility ShaderResourceViewsShaderVisibility = ShaderVisibility::ShaderVisibility_None;
+            ShaderVisibility UnorderedAccessViewsShaderVisibility = ShaderVisibility::ShaderVisibility_None;
+            ShaderVisibility SamplersShaderVisibility = ShaderVisibility::ShaderVisibility_None;
         };
 
     private:
@@ -77,12 +95,47 @@ namespace Shipyard
                 const Array<ShaderOption>& everyPossibleShaderOptionForShaderKey,
                 const StringT& sourceFilename,
                 const StringA& shaderSource,
-                const StringA& renderStateBlockSource);
+                const StringA& renderStateBlockSource,
+                const Array<ShaderInputProviderDeclaration*>& includedShaderInputProviders);
 
         ID3D10Blob* CompileVertexShaderForShaderKey(const StringT& sourceFilename, const StringA& source, _D3D_SHADER_MACRO* shaderOptionDefines);
         ID3D10Blob* CompilePixelShaderForShaderKey(const StringT& sourceFilename, const StringA& source, _D3D_SHADER_MACRO* shaderOptionDefines);
         ID3D10Blob* CompileComputeShaderForShaderKey(const StringT& sourceFilename, const StringA& source, _D3D_SHADER_MACRO* shaderOptionDefines);
         ID3D10Blob* CompileShader(const StringT& shaderSourceFilename, const StringA& shaderSource, const StringA& version, const StringA& mainName, _D3D_SHADER_MACRO* shaderOptionDefines);
+
+        void GetReflectionDataForShader(ID3D10Blob* shaderBlob, ShaderReflectionData& shaderReflectionData, ShaderVisibility shaderVisibility) const;
+
+        void FillRootSignatureEntriesForDescriptorRangeType(
+                const Array<ShaderInputReflectionData>& shaderInputReflectionDatas,
+                DescriptorRangeType descriptorRangeType,
+                Array<RootSignatureParameterEntry>& rootSignatureParameters,
+                shipUint16 rootIndexPerDescriptorRangeTypePerShaderStage[][shipUint32(ShaderStage::ShaderStage_Count)]) const;
+
+        shipBool FillRootSignatureEntryForDescriptorRangeTypeForShaderStage(
+                const Array<ShaderInputReflectionData>& shaderInputReflectionDatas,
+                DescriptorRangeType descriptorRangeType,
+                ShaderStage shaderStage,
+                Array<RootSignatureParameterEntry>& rootSignatureParameters) const;
+
+        void CreateShaderResourceBinder(
+                const ShaderReflectionData& shaderReflectionData,
+                const Array<RootSignatureParameterEntry>& rootSignatureParameters,
+                const Array<ShaderInputProviderDeclaration*>& includedShaderInputProviders,
+                shipUint16 rootIndexPerDescriptorRangeTypePerShaderStage[][shipUint32(ShaderStage::ShaderStage_Count)],
+                ShaderResourceBinder& shaderResourceBinder);
+
+        void CreateShaderResourceBinderForDescriptorRangeType(
+                const Array<ShaderInputReflectionData>& shaderInputReflectionDatas,
+                const Array<RootSignatureParameterEntry>& rootSignatureParameters,
+                const Array<ShaderInputProviderDeclaration*>& includedShaderInputProviders,
+                shipUint16 rootIndexPerDescriptorRangeTypePerShaderStage[][shipUint32(ShaderStage::ShaderStage_Count)],
+                DescriptorRangeType descriptorRangeType,
+                ShaderResourceBinder& shaderResourceBinder);
+
+        shipUint16 GetDescriptorRangeEntryIndex(
+                const ShaderInputReflectionData& shaderInputReflectionData,
+                const Array<RootSignatureParameterEntry>& rootSignatureParameters,
+                DescriptorRangeType descriptorRangeType) const;
 
         CompiledShaderKeyEntry& GetCompiledShaderKeyEntry(ShaderKey::RawShaderKeyType rawShaderKey);
 

@@ -172,9 +172,18 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
         {
             shaderHandler->m_PixelShaderHandle = m_RenderDevice->CreatePixelShader(compiledShaderEntrySet.rawPixelShader, compiledShaderEntrySet.rawPixelShaderSize);
         }
-    }
 
-    shaderHandler->m_RenderStateBlock = compiledShaderEntrySet.renderStateBlock;
+        shaderHandler->m_RenderStateBlock = compiledShaderEntrySet.renderStateBlock;
+        shaderHandler->m_RootSignatureParameters = compiledShaderEntrySet.rootSignatureParameters;
+        shaderHandler->m_ShaderResourceBinder = compiledShaderEntrySet.shaderResourceBinder;
+
+        if (shaderHandler->m_GfxDescriptorSetHandle.handle != InvalidGfxHandle)
+        {
+            m_RenderDevice->DestroyDescriptorSet(shaderHandler->m_GfxDescriptorSetHandle);
+        }
+
+        shaderHandler->m_GfxDescriptorSetHandle = m_RenderDevice->CreateDescriptorSet(DescriptorSetType::ConstantBuffer_ShaderResource_UnorderedAccess_Views, compiledShaderEntrySet.descriptorSetEntryDeclarations);
+    }
 
     return shaderHandler;
 }

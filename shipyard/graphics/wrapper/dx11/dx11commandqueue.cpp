@@ -1,5 +1,8 @@
 #include <graphics/wrapper/dx11/dx11commandqueue.h>
 
+#include <graphics/shader/shaderhandler.h>
+#include <graphics/shader/shaderhandlermanager.h>
+
 #include <graphics/wrapper/dx11/dx11commandlist.h>
 #include <graphics/wrapper/dx11/dx11renderdevice.h>
 
@@ -163,9 +166,8 @@ size_t DX11CommandQueue::Draw(BaseRenderCommand* pCmd)
             drawCommand.gfxRenderTargetHandle,
             drawCommand.gfxDepthStencilRenderTargetHandle,
             drawCommand.gfxViewport,
-            drawCommand.gfxRootSignatureHandle,
             drawCommand.gfxDescriptorSetHandle,
-           *drawCommand.pShaderHandler,
+            drawCommand.shaderKey,
             drawCommand.primitiveTopologyToUse,
             drawCommand.pRenderStateBlockStateOverride);
 
@@ -202,9 +204,8 @@ size_t DX11CommandQueue::DrawIndexed(BaseRenderCommand* pCmd)
             drawIndexedCommand.gfxRenderTargetHandle,
             drawIndexedCommand.gfxDepthStencilRenderTargetHandle,
             drawIndexedCommand.gfxViewport,
-            drawIndexedCommand.gfxRootSignatureHandle,
             drawIndexedCommand.gfxDescriptorSetHandle,
-           *drawIndexedCommand.pShaderHandler,
+            drawIndexedCommand.shaderKey,
             drawIndexedCommand.primitiveTopologyToUse,
             drawIndexedCommand.pRenderStateBlockStateOverride);
 
@@ -287,14 +288,18 @@ size_t DX11CommandQueue::MapBuffer(BaseRenderCommand* pCmd)
 
 void DX11CommandQueue::PrepareNextDrawCalls(const DrawItem& drawItem, VertexFormatType vertexFormatType)
 {
-    const GFXRootSignature& gfxRootSignature = m_RenderDevice.GetRootSignature(drawItem.rootSignatureHandle);
+    ShaderHandler* pShaderHandler = GetShaderHandlerManager().GetShaderHandlerForShaderKey(drawItem.shaderKey);
+    SHIP_ASSERT(pShaderHandler != nullptr);
 
-    const GFXDescriptorSet& gfxDescriptorSet = m_RenderDevice.GetDescriptorSet(drawItem.descriptorSetHandle);
+    GFXRootSignature gfxRootSignature;
+    pShaderHandler->GetRootSignature(gfxRootSignature);
+
+    const GFXDescriptorSet& gfxDescriptorSet = m_RenderDevice.GetDescriptorSet(pShaderHandler->GetDescriptorSetHandle());
 
     PipelineStateObjectCreationParameters pipelineStateObjectCreationParameters;
     pipelineStateObjectCreationParameters.rootSignature = &gfxRootSignature;
 
-    drawItem.shaderHandler.ApplyShader(pipelineStateObjectCreationParameters);
+    pShaderHandler->ApplyShader(pipelineStateObjectCreationParameters);
 
     pipelineStateObjectCreationParameters.primitiveTopology = drawItem.primitiveTopology;
     pipelineStateObjectCreationParameters.vertexFormatType = vertexFormatType;

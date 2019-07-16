@@ -1,14 +1,18 @@
 #include <graphics/shadercompiler/shadercompiler.h>
 
 #include <graphics/shader/shaderfamilies.h>
+#include <graphics/shader/shaderinputprovider.h>
 #include <graphics/shader/shaderoptions.h>
 
 #include <graphics/shadercompiler/renderstateblockcompiler.h>
+
+#include <math/mathutilities.h>
 
 #pragma warning( disable : 4005 )
 
 #include <d3dcommon.h>
 #include <d3dcompiler.h>
+#include <d3d11shader.h>
 
 #pragma warning( default : 4005 )
 
@@ -58,9 +62,6 @@ ShaderCompiler::ShaderCompiler()
     : m_ShaderDirectoryName(".\\shaders\\")
 {
     m_CurrentShaderKeyBeingCompiled.SetShaderFamily(ShaderFamily::Count);
-
-    // Make sure the ShaderFamily error is compiled initialy
-    CompileShaderFamily(ShaderFamily::Error);
 
     m_ShaderCompilerThread = std::thread(&ShaderCompiler::ShaderCompilerThreadFunction, this);
 }
@@ -142,6 +143,9 @@ shipBool ShaderCompiler::GetRawShadersForShaderKey(ShaderKey shaderKey, ShaderDa
             }
 
             compiledShaderEntrySet.renderStateBlock = shaderKeyEntry.m_CompiledRenderStateBlock;
+            compiledShaderEntrySet.rootSignatureParameters = shaderKeyEntry.m_RootSignatureParameters;
+            compiledShaderEntrySet.shaderResourceBinder = shaderKeyEntry.m_ShaderResourceBinder;
+            compiledShaderEntrySet.descriptorSetEntryDeclarations = shaderKeyEntry.m_DescriptorSetEntryDeclarations;
 
             gotRecompiledSinceLastAccess = shaderKeyEntry.m_GotRecompiledSinceLastAccess;
 
@@ -163,6 +167,14 @@ void ShaderCompiler::SetShaderDirectoryName(const StringT& shaderDirectoryName)
 
 void ShaderCompiler::ShaderCompilerThreadFunction()
 {
+    // Small hack: we need to compile the error shader family at the start, but if we include any files, we'll rely
+    // on the include handler which will call ShaderCompiler::GetInstance().GetShaderDirectory, so we can't compile
+    // the shader family in the constructor, since we wouldn't have had a change yet to set the instance.
+    while (ms_Instance != nullptr);
+
+    // Make sure the ShaderFamily error is compiled initially
+    CompileShaderFamily(ShaderFamily::Error);
+
     while (m_RunShaderCompilerThread)
     {
         Sleep(100);
@@ -262,7 +274,12 @@ shipBool SplitShaderSourceAndRenderStateBlock(StringA& shaderSource, StringA& re
 }
 
 // Reads a shader file and separates it into the shader source and, if any entry available, the render state pipeline source.
-shipBool ReadShaderFile(const StringT& sourceFilename, StringA& shaderSource, StringA& renderStateBlockSource)
+// Also returns the included shader input providers.
+shipBool ReadShaderFile(
+        const StringT& sourceFilename,
+        StringA& shaderSource,
+        StringA& renderStateBlockSource,
+        Array<ShaderInputProviderDeclaration*>& includedShaderInputProviders)
 {
     // This is kind of ugly: if a file is saved inside of Visual Studio with the AutoRecover feature enabled, it will
     // first save the file's content in a temporary file, and then copy the content to the real file before quickly deleting the
@@ -299,6 +316,43 @@ shipBool ReadShaderFile(const StringT& sourceFilename, StringA& shaderSource, St
         return false;
     }
 
+    ShaderInputProviderManager& shaderInputProviderManager = GetShaderInputProviderManager();
+
+    size_t currentPos = 0;
+    const char* includeDirective = "#include \"shaderinputproviders";
+    size_t includeDirectiveLength = strlen(includeDirective);
+
+    do
+    {
+        currentPos = shaderSource.FindIndexOfFirstCaseInsensitive(includeDirective, currentPos);
+        if (currentPos == shaderSource.InvalidIndex)
+        {
+            break;
+        }
+
+        size_t shaderInputProviderDeclarationIdx = currentPos + includeDirectiveLength;
+        while (shaderSource[shaderInputProviderDeclarationIdx] == '\\' || shaderSource[shaderInputProviderDeclarationIdx] == '/')
+        {
+            shaderInputProviderDeclarationIdx += 1;
+        }
+
+        size_t endOfIncludeIdx = shaderSource.FindIndexOfFirst('.', shaderInputProviderDeclarationIdx);
+        if (endOfIncludeIdx == shaderSource.InvalidIndex)
+        {
+            break;
+        }
+
+        StringA shaderInputProviderName = shaderSource.Substring(shaderInputProviderDeclarationIdx, (endOfIncludeIdx - shaderInputProviderDeclarationIdx));
+
+        ShaderInputProviderDeclaration* shaderInputProvider = shaderInputProviderManager.FindShaderInputProviderDeclarationFromName(shaderInputProviderName);
+        if (shaderInputProvider != nullptr)
+        {
+            includedShaderInputProviders.Add(shaderInputProvider);
+        }
+
+        currentPos = endOfIncludeIdx;
+    } while (true);
+
     SplitShaderSourceAndRenderStateBlock(shaderSource, renderStateBlockSource);
 
     return true;
@@ -311,8 +365,9 @@ void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
 
     StringA shaderSource;
     LargeInplaceStringA renderStateBlockSource;
+    InplaceArray<ShaderInputProviderDeclaration*, 8> includedShaderInputProviders;
 
-    shipBool couldReadShaderFile = ReadShaderFile(sourceFilename, shaderSource, renderStateBlockSource);
+    shipBool couldReadShaderFile = ReadShaderFile(sourceFilename, shaderSource, renderStateBlockSource, includedShaderInputProviders);
     if (!couldReadShaderFile)
     {
         return;
@@ -344,7 +399,13 @@ void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
         ShaderKey currentShaderKeyToCompile;
         currentShaderKeyToCompile.m_RawShaderKey = (baseRawShaderKey | (shaderOptionAsInt << ShaderKey::ms_ShaderOptionShift));
 
-        CompileShaderKey(currentShaderKeyToCompile, everyPossibleShaderOption, sourceFilename, shaderSource, renderStateBlockSource);
+        CompileShaderKey(
+                currentShaderKeyToCompile,
+                everyPossibleShaderOption,
+                sourceFilename,
+                shaderSource,
+                renderStateBlockSource,
+                includedShaderInputProviders);
 
         shaderOptionAsInt -= 1;
     }
@@ -357,8 +418,9 @@ void ShaderCompiler::CompileShaderKey(const ShaderKey& shaderKeyToCompile)
 
     StringA shaderSource;
     LargeInplaceStringA renderStateBlockSource;
+    InplaceArray<ShaderInputProviderDeclaration*, 8> includedShaderInputProviders;
 
-    shipBool couldReadShaderFile = ReadShaderFile(sourceFilename, shaderSource, renderStateBlockSource);
+    shipBool couldReadShaderFile = ReadShaderFile(sourceFilename, shaderSource, renderStateBlockSource, includedShaderInputProviders);
     if (!couldReadShaderFile)
     {
         return;
@@ -367,7 +429,13 @@ void ShaderCompiler::CompileShaderKey(const ShaderKey& shaderKeyToCompile)
     Array<ShaderOption> everyPossibleShaderOptionForShaderKey;
     ShaderKey::GetShaderKeyOptionsForShaderFamily(shaderKeyToCompile.GetShaderFamily(), everyPossibleShaderOptionForShaderKey);
 
-    CompileShaderKey(shaderKeyToCompile, everyPossibleShaderOptionForShaderKey, sourceFilename, shaderSource, renderStateBlockSource);
+    CompileShaderKey(
+            shaderKeyToCompile,
+            everyPossibleShaderOptionForShaderKey,
+            sourceFilename,
+            shaderSource,
+            renderStateBlockSource,
+            includedShaderInputProviders);
 }
 
 void ShaderCompiler::CompileShaderKey(
@@ -375,7 +443,8 @@ void ShaderCompiler::CompileShaderKey(
         const Array<ShaderOption>& everyPossibleShaderOptionForShaderKey,
         const StringT& sourceFilename,
         const StringA& shaderSource,
-        const StringA& renderStateBlockSource)
+        const StringA& renderStateBlockSource,
+        const Array<ShaderInputProviderDeclaration*>& includedShaderInputProviders)
 {
     m_ShaderCompilationRequestLock.lock();
 
@@ -420,6 +489,86 @@ void ShaderCompiler::CompileShaderKey(
         compiledShaderKeyEntry.m_CompiledPixelShaderBlob = pixelShaderBlob;
         compiledShaderKeyEntry.m_CompiledComputeShaderBlob = computeShaderBlob;
         compiledShaderKeyEntry.m_GotRecompiledSinceLastAccess = true;
+
+        ShaderReflectionData shaderReflectionData;
+
+        GetReflectionDataForShader(vertexShaderBlob, shaderReflectionData, ShaderVisibility::ShaderVisibility_Vertex);
+        GetReflectionDataForShader(pixelShaderBlob, shaderReflectionData, ShaderVisibility::ShaderVisibility_Pixel);
+
+        constexpr shipUint32 expectedNumRootEntries = 8;
+        InplaceArray<RootSignatureParameterEntry, expectedNumRootEntries> rootSignatureParameters;
+        shipUint16 rootIndexPerDescriptorRangeTypePerShaderStage[expectedNumRootEntries][shipUint32(ShaderStage::ShaderStage_Count)];
+
+        for (shipUint32 i = 0; i < expectedNumRootEntries; i++)
+        {
+            for (shipUint32 j = 0; j < shipUint32(ShaderStage::ShaderStage_Count); j++)
+            {
+                rootIndexPerDescriptorRangeTypePerShaderStage[i][j] = shipUint16(-1);
+            }
+        }
+
+        FillRootSignatureEntriesForDescriptorRangeType(
+                shaderReflectionData.ConstantBufferReflectionDatas,
+                DescriptorRangeType::ConstantBufferView,
+                rootSignatureParameters,
+                rootIndexPerDescriptorRangeTypePerShaderStage);
+
+        FillRootSignatureEntriesForDescriptorRangeType(
+                shaderReflectionData.ShaderResourceViewReflectionDatas,
+                DescriptorRangeType::ShaderResourceView,
+                rootSignatureParameters,
+                rootIndexPerDescriptorRangeTypePerShaderStage);
+
+        FillRootSignatureEntriesForDescriptorRangeType(
+                shaderReflectionData.UnorderedAccessViewReflectionDatas,
+                DescriptorRangeType::UnorderedAccessView,
+                rootSignatureParameters,
+                rootIndexPerDescriptorRangeTypePerShaderStage);
+
+        FillRootSignatureEntriesForDescriptorRangeType(
+                shaderReflectionData.SamplerReflctionDatas,
+                DescriptorRangeType::Sampler,
+                rootSignatureParameters,
+                rootIndexPerDescriptorRangeTypePerShaderStage);
+
+        compiledShaderKeyEntry.m_RootSignatureParameters = rootSignatureParameters;
+
+        CreateShaderResourceBinder(
+                shaderReflectionData,
+                rootSignatureParameters,
+                includedShaderInputProviders,
+                rootIndexPerDescriptorRangeTypePerShaderStage,
+                compiledShaderKeyEntry.m_ShaderResourceBinder);
+
+        for (shipUint32 rootIndex = 0; rootIndex < rootSignatureParameters.Size(); rootIndex++)
+        {
+            const RootSignatureParameterEntry& rootSignatureParameterEntry = rootSignatureParameters[rootIndex];
+
+            if (rootSignatureParameterEntry.parameterType == RootSignatureParameterType::DescriptorTable)
+            {
+                for (shipUint32 descriptorRangeIndex = 0; descriptorRangeIndex < rootSignatureParameterEntry.descriptorTable.descriptorRanges.Size(); descriptorRangeIndex++)
+                {
+                    const DescriptorRange& descriptorRange = rootSignatureParameterEntry.descriptorTable.descriptorRanges[descriptorRangeIndex];
+                    if (descriptorRange.descriptorRangeType == DescriptorRangeType::Sampler)
+                    {
+                        continue;
+                    }
+
+                    DescriptorSetEntryDeclaration& descriptorSetEntryDeclaration = compiledShaderKeyEntry.m_DescriptorSetEntryDeclarations.Grow();
+                    descriptorSetEntryDeclaration.rootIndex = shipUint16(rootIndex);
+                    descriptorSetEntryDeclaration.descriptorRangeIndex = shipUint16(descriptorRangeIndex);
+                    descriptorSetEntryDeclaration.numResources = shipUint16(descriptorRange.numDescriptors);
+                }
+            }
+            else
+            {
+                SHIP_ASSERT(rootSignatureParameterEntry.parameterType != RootSignatureParameterType::Unknown);
+
+                DescriptorSetEntryDeclaration& descriptorSetEntryDeclaration = compiledShaderKeyEntry.m_DescriptorSetEntryDeclarations.Grow();
+                descriptorSetEntryDeclaration.rootIndex = shipUint16(rootIndex);
+                descriptorSetEntryDeclaration.numResources = 1;
+            }
+        }
     }
 
     RenderStateBlock renderStateBlock;
@@ -518,6 +667,347 @@ ID3D10Blob* ShaderCompiler::CompileShader(const StringT& shaderSourceFilename, c
     return shaderBlob;
 }
 
+void ShaderCompiler::GetReflectionDataForShader(
+        ID3D10Blob* shaderBlob,
+        ShaderReflectionData& shaderReflectionData,
+        ShaderVisibility shaderVisibility) const
+{
+    ID3D11ShaderReflection* pReflection = nullptr;
+    HRESULT hResult = D3DReflect(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), IID_ID3D11ShaderReflection, (void**)&pReflection);
+    if (FAILED(hResult))
+    {
+        return;
+    }
+
+    SHIP_ASSERT(pReflection != nullptr);
+
+    D3D11_SHADER_DESC shaderDesc;
+    pReflection->GetDesc(&shaderDesc);
+
+    for (UINT i = 0; i < shaderDesc.BoundResources; i++)
+    {
+        D3D11_SHADER_INPUT_BIND_DESC resourceDesc;
+        pReflection->GetResourceBindingDesc(i, &resourceDesc);
+
+        Array<ShaderInputReflectionData>* pShaderInputReflectionDatas = nullptr;
+
+        switch (resourceDesc.Type)
+        {
+        case D3D_SHADER_INPUT_TYPE::D3D_SIT_CBUFFER:
+            pShaderInputReflectionDatas = &shaderReflectionData.ConstantBufferReflectionDatas;
+            shaderReflectionData.ConstantBuffersShaderVisibility = ShaderVisibility(shaderReflectionData.ConstantBuffersShaderVisibility | shaderVisibility);
+            break;
+
+        case D3D_SHADER_INPUT_TYPE::D3D_SIT_BYTEADDRESS:
+        case D3D_SHADER_INPUT_TYPE::D3D_SIT_STRUCTURED:
+        case D3D_SHADER_INPUT_TYPE::D3D_SIT_TBUFFER:
+        case D3D_SHADER_INPUT_TYPE::D3D_SIT_TEXTURE:
+            pShaderInputReflectionDatas = &shaderReflectionData.ShaderResourceViewReflectionDatas;
+            shaderReflectionData.ShaderResourceViewsShaderVisibility = ShaderVisibility(shaderReflectionData.ShaderResourceViewsShaderVisibility | shaderVisibility);
+            break;
+
+        case D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_APPEND_STRUCTURED:
+        case D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_CONSUME_STRUCTURED:
+        case D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_RWBYTEADDRESS:
+        case D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_RWSTRUCTURED:
+        case D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_RWTYPED:
+            pShaderInputReflectionDatas = &shaderReflectionData.UnorderedAccessViewReflectionDatas;
+            shaderReflectionData.UnorderedAccessViewsShaderVisibility = ShaderVisibility(shaderReflectionData.UnorderedAccessViewsShaderVisibility | shaderVisibility);
+            break;
+
+        case D3D_SHADER_INPUT_TYPE::D3D_SIT_SAMPLER:
+            pShaderInputReflectionDatas = &shaderReflectionData.SamplerReflctionDatas;
+            shaderReflectionData.SamplersShaderVisibility = ShaderVisibility(shaderReflectionData.SamplersShaderVisibility | shaderVisibility);
+            break;
+
+        default:
+            SHIP_ASSERT(!"Unsupported type");
+            break;
+        }
+
+        if (pShaderInputReflectionDatas != nullptr)
+        {
+            Array<ShaderInputReflectionData>& shaderInputReflectionDatas = *pShaderInputReflectionDatas;
+
+            shipUint32 idx = 0;
+            for (; idx < shaderInputReflectionDatas.Size(); idx++)
+            {
+                if (StringCompare(shaderInputReflectionDatas[idx].Name, resourceDesc.Name) == 0)
+                {
+                    SHIP_ASSERT(shaderInputReflectionDatas[idx].BindPoint == resourceDesc.BindPoint);
+
+                    shaderInputReflectionDatas[idx].shaderVisibility = ShaderVisibility(shaderInputReflectionDatas[idx].shaderVisibility | shaderVisibility);
+                    break;
+                }
+            }
+
+            if (idx == shaderInputReflectionDatas.Size())
+            {
+                ShaderInputReflectionData& newEntry = shaderInputReflectionDatas.Grow();
+                newEntry.Name = resourceDesc.Name;
+                newEntry.BindPoint = shipUint16(resourceDesc.BindPoint);
+                newEntry.shaderVisibility = shaderVisibility;
+            }
+        }
+    }
+
+    pReflection->Release();
+}
+
+void ShaderCompiler::FillRootSignatureEntriesForDescriptorRangeType(
+        const Array<ShaderInputReflectionData>& shaderInputReflectionDatas,
+        DescriptorRangeType descriptorRangeType,
+        Array<RootSignatureParameterEntry>& rootSignatureParameters,
+        shipUint16 rootIndexPerDescriptorRangeTypePerShaderStage[][shipUint32(ShaderStage::ShaderStage_Count)]) const
+{
+    if (shaderInputReflectionDatas.Empty())
+    {
+        return;
+    }
+
+    for (shipUint32 i = 0; i < shipUint32(ShaderStage::ShaderStage_Count); i++)
+    {
+        ShaderStage shaderStage = ShaderStage(i);
+
+        shipBool hadAnyShaderInputForShaderStage = FillRootSignatureEntryForDescriptorRangeTypeForShaderStage(
+                shaderInputReflectionDatas,
+                descriptorRangeType,
+                shaderStage,
+                rootSignatureParameters);
+
+        if (hadAnyShaderInputForShaderStage)
+        {
+            rootIndexPerDescriptorRangeTypePerShaderStage[shipUint32(descriptorRangeType)][i] = shipUint16(rootSignatureParameters.Size() - 1);
+        }
+    }
+}
+
+shipBool ShaderCompiler::FillRootSignatureEntryForDescriptorRangeTypeForShaderStage(
+        const Array<ShaderInputReflectionData>& shaderInputReflectionDatas,
+        DescriptorRangeType descriptorRangeType,
+        ShaderStage shaderStage,
+        Array<RootSignatureParameterEntry>& rootSignatureParameters) const
+{
+    shipBool hasAnyShaderInputForShaderStage = false;
+
+    shipUint32 minBindingPoint = 255;
+    shipUint32 maxBindingPoint = 0;
+
+    ShaderVisibility shaderVisibility = GetShaderVisibilityForShaderStage(shaderStage);
+
+    for (const ShaderInputReflectionData& shaderInputReflectionData : shaderInputReflectionDatas)
+    {
+        if ((shaderInputReflectionData.shaderVisibility & shaderVisibility) > 0)
+        {
+            minBindingPoint = MIN(shaderInputReflectionData.BindPoint, minBindingPoint);
+            maxBindingPoint = MAX(shaderInputReflectionData.BindPoint, maxBindingPoint);
+
+            hasAnyShaderInputForShaderStage = true;
+        }
+    }
+
+    if (!hasAnyShaderInputForShaderStage)
+    {
+        return false;
+    }
+
+    RootSignatureParameterEntry& rootSignatureParameterEntry = rootSignatureParameters.Grow();
+
+    rootSignatureParameterEntry.parameterType = RootSignatureParameterType::DescriptorTable;
+    rootSignatureParameterEntry.shaderVisibility = shaderVisibility;
+
+    shipUint32 numDescriptors = (maxBindingPoint - minBindingPoint) + 1;
+    SHIP_ASSERT(numDescriptors > 0);
+
+    DescriptorRange& descriptorRange = rootSignatureParameterEntry.descriptorTable.descriptorRanges.Grow();
+    descriptorRange.numDescriptors = numDescriptors;
+    descriptorRange.baseShaderRegister = minBindingPoint;
+    descriptorRange.descriptorRangeType = descriptorRangeType;
+
+    return true;
+}
+
+void ShaderCompiler::CreateShaderResourceBinder(
+        const ShaderReflectionData& shaderReflectionData,
+        const Array<RootSignatureParameterEntry>& rootSignatureParameters,
+        const Array<ShaderInputProviderDeclaration*>& includedShaderInputProviders,
+        shipUint16 rootIndexPerDescriptorRangeTypePerShaderStage[][shipUint32(ShaderStage::ShaderStage_Count)],
+        ShaderResourceBinder& shaderResourceBinder)
+{
+    ShaderInputProviderManager& shaderInputProviderManager = GetShaderInputProviderManager();
+
+    for (const ShaderInputReflectionData& shaderInputReflectionData : shaderReflectionData.ConstantBufferReflectionDatas)
+    {
+        for (shipUint32 i = 0; i < shipUint32(ShaderStage::ShaderStage_Count); i++)
+        {
+            ShaderStage shaderStage = ShaderStage(i);
+
+            ShaderVisibility shaderVisibility = GetShaderVisibilityForShaderStage(shaderStage);
+
+            if ((shaderInputReflectionData.shaderVisibility & shaderVisibility) == 0)
+            {
+                continue;
+            }
+
+            for (ShaderInputProviderDeclaration* shaderInputProviderDeclaration : includedShaderInputProviders)
+            {
+                if (!ShaderInputProviderUtils::IsUsingConstantBuffer(shaderInputProviderDeclaration->GetShaderInputProviderUsage()))
+                {
+                    continue;
+                }
+
+                const shipChar* shaderInputProviderConstantBufferName = shaderInputProviderManager.GetShaderInputProviderConstantBufferName(shaderInputProviderDeclaration);
+
+                if (StringCompare(shaderInputReflectionData.Name, shaderInputProviderConstantBufferName) == 0)
+                {
+                    shipUint16 descriptorRangeEntryIndex = GetDescriptorRangeEntryIndex(shaderInputReflectionData, rootSignatureParameters, DescriptorRangeType::ConstantBufferView);
+
+                    constexpr shipUint32 descriptorRangeIndex = 0;
+                    shaderResourceBinder.AddShaderResourceBinderEntryForProviderToDescriptorTable(
+                        shaderInputProviderDeclaration,
+                        rootIndexPerDescriptorRangeTypePerShaderStage[shipUint32(DescriptorRangeType::ConstantBufferView)][i],
+                        descriptorRangeIndex,
+                        descriptorRangeEntryIndex,
+                        shaderInputReflectionData.shaderVisibility);
+
+                    break;
+                }
+            }
+        }
+    }
+
+    CreateShaderResourceBinderForDescriptorRangeType(
+            shaderReflectionData.ShaderResourceViewReflectionDatas,
+            rootSignatureParameters,
+            includedShaderInputProviders,
+            rootIndexPerDescriptorRangeTypePerShaderStage,
+            DescriptorRangeType::ShaderResourceView,
+            shaderResourceBinder);
+
+    CreateShaderResourceBinderForDescriptorRangeType(
+            shaderReflectionData.UnorderedAccessViewReflectionDatas,
+            rootSignatureParameters,
+            includedShaderInputProviders,
+            rootIndexPerDescriptorRangeTypePerShaderStage,
+            DescriptorRangeType::UnorderedAccessView,
+            shaderResourceBinder);
+
+    SHIP_STATIC_ASSERT_MSG(shipUint32(ShaderInputProviderUsage::Count) == 2, "Need to update code below this assert.");
+
+    const shipChar* unifiedConstantBufferName = ShaderInputProviderUtils::GetGlobalBufferNameFromProviderUsage(ShaderInputProviderUsage::PerInstance);
+    for (const ShaderInputReflectionData& shaderInputReflectionData : shaderReflectionData.ShaderResourceViewReflectionDatas)
+    {
+        for (shipUint32 i = 0; i < shipUint32(ShaderStage::ShaderStage_Count); i++)
+        {
+            ShaderStage shaderStage = ShaderStage(i);
+
+            ShaderVisibility shaderVisibility = GetShaderVisibilityForShaderStage(shaderStage);
+
+            if ((shaderInputReflectionData.shaderVisibility & shaderVisibility) == 0)
+            {
+                continue;
+            }
+
+            if (StringCompare(shaderInputReflectionData.Name, unifiedConstantBufferName) == 0)
+            {
+                shipUint16 descriptorRangeEntryIndex = GetDescriptorRangeEntryIndex(shaderInputReflectionData, rootSignatureParameters, DescriptorRangeType::ShaderResourceView);
+
+                constexpr shipUint32 descriptorRangeIndex = 0;
+                shaderResourceBinder.AddShaderResourceBinderEntryForGlobalBufferToDescriptorTable(
+                    ShaderInputProviderUsage::PerInstance,
+                    rootIndexPerDescriptorRangeTypePerShaderStage[shipUint32(DescriptorRangeType::ShaderResourceView)][i],
+                    descriptorRangeIndex,
+                    descriptorRangeEntryIndex,
+                    shaderInputReflectionData.shaderVisibility);
+                break;
+            }
+        }
+    }
+}
+
+void ShaderCompiler::CreateShaderResourceBinderForDescriptorRangeType(
+        const Array<ShaderInputReflectionData>& shaderInputReflectionDatas,
+        const Array<RootSignatureParameterEntry>& rootSignatureParameters,
+        const Array<ShaderInputProviderDeclaration*>& includedShaderInputProviders,
+        shipUint16 rootIndexPerDescriptorRangeTypePerShaderStage[][shipUint32(ShaderStage::ShaderStage_Count)],
+        DescriptorRangeType descriptorRangeType,
+        ShaderResourceBinder& shaderResourceBinder)
+{
+    for (const ShaderInputReflectionData& shaderInputReflectionData : shaderInputReflectionDatas)
+    {
+        for (shipUint32 i = 0; i < shipUint32(ShaderStage::ShaderStage_Count); i++)
+        {
+            ShaderStage shaderStage = ShaderStage(i);
+
+            ShaderVisibility shaderVisibility = GetShaderVisibilityForShaderStage(shaderStage);
+
+            if ((shaderInputReflectionData.shaderVisibility & shaderVisibility) == 0)
+            {
+                continue;
+            }
+
+            for (const ShaderInputProviderDeclaration* shaderInputProviderDeclaration : includedShaderInputProviders)
+            {
+                shipInt32 dataOffsetInProvider;
+                if (shaderInputProviderDeclaration->HasShaderInput(shaderInputReflectionData.Name, dataOffsetInProvider))
+                {
+                    shipUint16 descriptorRangeEntryIndex = GetDescriptorRangeEntryIndex(shaderInputReflectionData, rootSignatureParameters, descriptorRangeType);
+
+                    constexpr shipUint32 descriptorRangeIndex = 0;
+                    shaderResourceBinder.AddShaderResourceBinderEntryForDescriptorToDescriptorTable(
+                        shaderInputProviderDeclaration,
+                        rootIndexPerDescriptorRangeTypePerShaderStage[shipUint32(descriptorRangeType)][i],
+                        descriptorRangeIndex,
+                        descriptorRangeEntryIndex,
+                        dataOffsetInProvider,
+                        ShaderInputType::Texture2D,
+                        shaderInputReflectionData.shaderVisibility);
+
+                    break;
+                }
+            }
+        }
+    }
+}
+
+shipUint16 ShaderCompiler::GetDescriptorRangeEntryIndex(
+        const ShaderInputReflectionData& shaderInputReflectionData,
+        const Array<RootSignatureParameterEntry>& rootSignatureParameters,
+        DescriptorRangeType descriptorRangeType) const
+{
+    for (const RootSignatureParameterEntry& rootSignatureParameterEntry : rootSignatureParameters)
+    {
+        if ((rootSignatureParameterEntry.shaderVisibility & shaderInputReflectionData.shaderVisibility) == 0)
+        {
+            continue;
+        }
+
+        if (rootSignatureParameterEntry.parameterType != RootSignatureParameterType::DescriptorTable)
+        {
+            SHIP_ASSERT(!"ShaderCompiler only creates descriptor table entries. Please review ShaderCompiler");
+            return shipUint16(-1);
+        }
+
+        for (const DescriptorRange& descriptorRange : rootSignatureParameterEntry.descriptorTable.descriptorRanges)
+        {
+            if (descriptorRange.descriptorRangeType != descriptorRangeType)
+            {
+                continue;
+            }
+
+            SHIP_ASSERT(
+                    shaderInputReflectionData.BindPoint >= descriptorRange.baseShaderRegister &&
+                    shaderInputReflectionData.BindPoint <= (descriptorRange.baseShaderRegister + descriptorRange.numDescriptors));
+
+            return shipUint16(shaderInputReflectionData.BindPoint - descriptorRange.baseShaderRegister);
+        }
+    }
+
+    SHIP_ASSERT(!"Couldn't find the shader input inside of the root signature.");
+
+    return shipUint16(-1);
+}
+
 ShaderCompiler::CompiledShaderKeyEntry& ShaderCompiler::GetCompiledShaderKeyEntry(ShaderKey::RawShaderKeyType rawShaderKey)
 {
     shipUint32 idx = 0;
@@ -562,6 +1052,9 @@ void ShaderCompiler::CompiledShaderKeyEntry::Reset()
     }
 
     m_CompiledRenderStateBlock = RenderStateBlock();
+    m_RootSignatureParameters.Clear();
+    m_ShaderResourceBinder = ShaderResourceBinder();
+    m_DescriptorSetEntryDeclarations.Clear();
 }
 
 }

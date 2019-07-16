@@ -3,7 +3,6 @@
 #include <graphics/material/materialunifiedconstantbuffer.h>
 
 #include <graphics/shader/shaderinputprovider.h>
-#include <graphics/shader/shaderresourcebinder.h>
 
 #include <graphics/wrapper/wrapper.h>
 
@@ -27,10 +26,14 @@ void ShaderHandler::ApplyShader(PipelineStateObjectCreationParameters& pipelineS
     pipelineStateObjectCreationParameters.renderStateBlock = m_RenderStateBlock;
 }
 
+void ShaderHandler::GetRootSignature(GFXRootSignature& gfxRootSignature) const
+{
+    gfxRootSignature.Create(m_RootSignatureParameters);
+}
+
 void ShaderHandler::ApplyShaderInputProviders(
         GFXRenderDevice& gfxRenderDevice,
         GFXDirectRenderCommandList& gfxDirectRenderCommandList,
-        const ShaderResourceBinder& shaderResourceBinder,
         const Array<ShaderInputProvider*>& shaderInputProviders)
 {
     if (shaderInputProviders.Empty())
@@ -43,6 +46,12 @@ void ShaderHandler::ApplyShaderInputProviders(
     for (ShaderInputProvider* shaderInputProvider : shaderInputProviders)
     {
         SHIP_ASSERT(shaderInputProvider != nullptr);
+
+        if (shaderInputProvider->GetRequiredSizeForProvider() == 0)
+        {
+            continue;
+        }
+
         ShaderInputProviderDeclaration* shaderInputProviderDeclaration = shaderInputProvider->GetShaderInputProviderDeclaration();
 
         if (ShaderInputProviderUtils::IsUsingConstantBuffer(shaderInputProviderDeclaration->GetShaderInputProviderUsage()))
@@ -58,7 +67,7 @@ void ShaderHandler::ApplyShaderInputProviders(
         }
     }
 
-    shaderResourceBinder.BindShaderInputProvders(gfxRenderDevice, gfxDirectRenderCommandList, shaderInputProviders);
+    m_ShaderResourceBinder.BindShaderInputProvders(gfxRenderDevice, gfxDirectRenderCommandList, shaderInputProviders, m_GfxDescriptorSetHandle);
 }
 
 }

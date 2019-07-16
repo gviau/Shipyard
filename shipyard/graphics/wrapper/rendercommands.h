@@ -2,7 +2,7 @@
 
 #include <graphics/wrapper/wrapper_common.h>
 
-#include <graphics/shader/shaderhandler.h>
+#include <graphics/shader/shaderkey.h>
 
 namespace Shipyard
 {
@@ -51,11 +51,10 @@ namespace Shipyard
     struct DrawCommand : BaseRenderCommand
     {
         GfxViewport gfxViewport;
-        ShaderHandler* pShaderHandler = nullptr;
+        ShaderKey shaderKey;
 
         GFXRenderTargetHandle gfxRenderTargetHandle = { InvalidGfxHandle };
         GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle = { InvalidGfxHandle };
-        GFXRootSignatureHandle gfxRootSignatureHandle = { InvalidGfxHandle };
         GFXDescriptorSetHandle gfxDescriptorSetHandle = { InvalidGfxHandle };
         PrimitiveTopology primitiveTopologyToUse = PrimitiveTopology::TriangleList;
         RenderStateBlockStateOverride* pRenderStateBlockStateOverride = nullptr;
@@ -69,11 +68,10 @@ namespace Shipyard
     struct DrawIndexedCommand : BaseRenderCommand
     {
         GfxViewport gfxViewport;
-        ShaderHandler* pShaderHandler = nullptr;
+        ShaderKey shaderKey;
 
         GFXRenderTargetHandle gfxRenderTargetHandle = { InvalidGfxHandle };
         GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle = { InvalidGfxHandle };
-        GFXRootSignatureHandle gfxRootSignatureHandle = { InvalidGfxHandle };
         GFXDescriptorSetHandle gfxDescriptorSetHandle = { InvalidGfxHandle };
         PrimitiveTopology primitiveTopologyToUse = PrimitiveTopology::TriangleList;
         RenderStateBlockStateOverride* pRenderStateBlockStateOverride = nullptr;

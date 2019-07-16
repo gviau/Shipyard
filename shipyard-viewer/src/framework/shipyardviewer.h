@@ -55,7 +55,6 @@ namespace Shipyard
 
         GFXTexture2DHandle m_GfxDepthTextureHandle;
         GFXDepthStencilRenderTargetHandle m_GfxDepthStencilRenderTargetHandle;
-        GFXRootSignatureHandle m_GfxRootSignatureHandle;
         GFXVertexBufferHandle m_VertexBufferHandle;
         GFXIndexBufferHandle m_IndexBufferHandle;
         GFXTexture2DHandle m_TextureHandle;

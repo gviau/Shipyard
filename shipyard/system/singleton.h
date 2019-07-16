@@ -30,7 +30,7 @@ namespace Shipyard
             ms_Instance = nullptr;
         }
 
-    private:
+    protected:
         static T* ms_Instance;
 
     protected:

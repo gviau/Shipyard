@@ -271,7 +271,7 @@ void RenderStateBlockStateOverride::ApplyOverridenValues(RenderStateBlock& rende
 #undef SET_OVERRIDDEN_RENDERTARGET_BLENDSTATE_STATE_7
 }
 
-void RenderStateBlockStateOverride::OverrideDepthBiasState(int overrideValue)
+void RenderStateBlockStateOverride::OverrideDepthBiasState(shipInt32 overrideValue)
 {
     m_RenderStateBlockOverride.rasterizerState.m_DepthBias = overrideValue;
     m_OverridenState.SetBit(RenderStateBlockState::RenderStateBlockState_DepthBias);
@@ -513,6 +513,44 @@ void RenderStateBlockStateOverride::OverrideRenderTargetWriteMask(RenderTargetWr
 
     m_RenderStateBlockOverride.blendState.renderTargetBlendStates[renderTargetIndex].m_RenderTargetWriteMask = overrideValue;
     m_OverridenState.SetBit((RenderStateBlockState_1_RenderTargetWriteMask - RenderStateBlockState_0_RenderTargetWriteMask) * renderTargetIndex + RenderStateBlockState_0_RenderTargetWriteMask);
+}
+
+ShaderVisibility GetShaderVisibilityForShaderStage(ShaderStage shaderStage)
+{
+    switch (shaderStage)
+    {
+    case ShaderStage::ShaderStage_Vertex:   return ShaderVisibility::ShaderVisibility_Vertex;
+    case ShaderStage::ShaderStage_Pixel:    return ShaderVisibility::ShaderVisibility_Pixel;
+    case ShaderStage::ShaderStage_Hull:     return ShaderVisibility::ShaderVisibility_Hull;
+    case ShaderStage::ShaderStage_Domain:   return ShaderVisibility::ShaderVisibility_Domain;
+    case ShaderStage::ShaderStage_Geometry: return ShaderVisibility::ShaderVisibility_Geometry;
+    case ShaderStage::ShaderStage_Compute:  return ShaderVisibility::ShaderVisibility_Compute;
+
+    default:
+        SHIP_ASSERT(!"Should not happen");
+        break;
+    }
+
+    return ShaderVisibility::ShaderVisibility_None;
+}
+
+ShaderStage GetShaderStageForShaderVisibility(ShaderVisibility shaderVisibility)
+{
+    switch (shaderVisibility)
+    {
+    case ShaderVisibility::ShaderVisibility_Vertex:     return ShaderStage::ShaderStage_Vertex;
+    case ShaderVisibility::ShaderVisibility_Pixel:      return ShaderStage::ShaderStage_Pixel;
+    case ShaderVisibility::ShaderVisibility_Hull:       return ShaderStage::ShaderStage_Hull;
+    case ShaderVisibility::ShaderVisibility_Domain:     return ShaderStage::ShaderStage_Domain;
+    case ShaderVisibility::ShaderVisibility_Geometry:   return ShaderStage::ShaderStage_Geometry;
+    case ShaderVisibility::ShaderVisibility_Compute:    return ShaderStage::ShaderStage_Compute;
+
+    default:
+        SHIP_ASSERT(!"Should not happen");
+        break;
+    }
+
+    return ShaderStage::ShaderStage_Count;
 }
 
 }

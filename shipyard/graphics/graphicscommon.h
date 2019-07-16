@@ -161,7 +161,7 @@ namespace Shipyard
 
         }
 
-        int m_DepthBias;
+        shipInt32 m_DepthBias;
         shipFloat m_DepthBiasClamp;
         shipFloat m_SlopeScaledDepthBias;
 
@@ -587,7 +587,7 @@ namespace Shipyard
     public:
         void ApplyOverridenValues(RenderStateBlock& renderStateBlock) const;
 
-        void OverrideDepthBiasState(int overrideValue);
+        void OverrideDepthBiasState(shipInt32 overrideValue);
         void OverrideDepthBiasClampState(shipFloat overrideValue);
         void OverrideSlopeScaledDepthBiasState(shipFloat overrideValue);
 
@@ -692,4 +692,7 @@ namespace Shipyard
         Compute,
         Copy
     };
+
+    ShaderVisibility GetShaderVisibilityForShaderStage(ShaderStage shaderStage);
+    ShaderStage GetShaderStageForShaderVisibility(ShaderVisibility shaderVisibility);
 }

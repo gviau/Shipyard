@@ -199,7 +199,7 @@ namespace Shipyard
         {
             m_pAllocator = src.GetAllocator();
 
-            Reserve(src.Capacity());
+            Reserve(MAX(src.Capacity(), 4));
 
             shipUint32 srcSize = src.Size();
 
@@ -218,7 +218,7 @@ namespace Shipyard
         {
             m_pAllocator = src.GetAllocator();
 
-            Reserve(src.Capacity());
+            Reserve(MAX(src.Capacity(), 4));
 
             shipUint32 srcSize = src.Size();
 
@@ -238,7 +238,7 @@ namespace Shipyard
 
                 m_pAllocator = rhs.GetAllocator();
 
-                Reserve(rhs.Capacity());
+                Reserve(MAX(rhs.Capacity(), 4));
 
                 shipUint32 srcSize = rhs.Size();
 
@@ -262,7 +262,7 @@ namespace Shipyard
 
                 m_pAllocator = rhs.GetAllocator();
 
-                Reserve(rhs.Capacity());
+                Reserve(MAX(rhs.Capacity(), 4));
 
                 shipUint32 srcSize = rhs.Size();
 
@@ -718,7 +718,7 @@ namespace Shipyard
             , m_Size(0)
             , m_Capacity(0)
         {
-            Reserve(src.m_Capacity);
+            Reserve(MAX(src.m_Capacity, 4));
 
             m_Size = src.m_Size;
 
@@ -736,7 +736,7 @@ namespace Shipyard
 
                 m_pAllocator = rhs.m_pAllocator;
 
-                Reserve(rhs.m_Capacity);
+                Reserve(MAX(rhs.m_Capacity, 4));
 
                 m_Size = rhs.m_Size;
 

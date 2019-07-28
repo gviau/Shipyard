@@ -9,6 +9,7 @@
 #include <graphics/wrapper/dx11/dx11pipelinestateobject.h>
 #include <graphics/wrapper/dx11/dx11rendertarget.h>
 #include <graphics/wrapper/dx11/dx11rootsignature.h>
+#include <graphics/wrapper/dx11/dx11sampler.h>
 #include <graphics/wrapper/dx11/dx11shader.h>
 #include <graphics/wrapper/dx11/dx11texture.h>
 
@@ -67,6 +68,11 @@ namespace Shipyard
         GFXTexture2D* GetTexture2DPtr(GFXTexture2DHandle gfxTexture2dHandle);
         const GFXTexture2D* GetTexture2DPtr(GFXTexture2DHandle gfxTexture2dHandle) const;
 
+        GFXSamplerHandle CreateSampler(const SamplerState& samplerState);
+        void DestroySampler(GFXSamplerHandle gfxSamplerHandle);
+        GFXSampler& GetSampler(GFXSamplerHandle gfxSamplerHandle);
+        const GFXSampler& GetSampler(GFXSamplerHandle gfxSamplerHandle) const;
+
         GFXRenderTargetHandle CreateRenderTarget(GFXTexture2DHandle* texturesToAttach, shipUint32 numTexturesToAttach);
         void DestroyRenderTarget(GFXRenderTargetHandle gfxRenderTargetHandle);
         GFXRenderTarget& GetRenderTarget(GFXRenderTargetHandle gfxRenderTargetHandle);
@@ -119,6 +125,7 @@ namespace Shipyard
         DataPool<GFXConstantBuffer, SHIP_MAX_CONSTANT_BUFFERS> m_ConstantBufferPool;
         DataPool<GFXByteBuffer, SHIP_MAX_BYTE_BUFFERS> m_ByteBufferPool;
         DataPool<GFXTexture2D, SHIP_MAX_2D_TEXTURES> m_Texture2dPool;
+        DataPool<GFXSampler, SHIP_MAX_SAMPLERS> m_SamplerPool;
         DataPool<GFXRenderTarget, SHIP_MAX_RENDER_TARGETS> m_RenderTargetPool;
         DataPool<GFXDepthStencilRenderTarget, SHIP_MAX_DEPTH_STENCIL_RENDER_TARGETS> m_DepthStencilRenderTargetPool;
         DataPool<GFXVertexShader, SHIP_MAX_VERTEX_SHADERS> m_VertexShaderPool;

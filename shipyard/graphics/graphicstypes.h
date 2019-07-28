@@ -209,4 +209,21 @@ namespace Shipyard
 
         shipUint32 handle;
     };
+
+    struct GFXSamplerHandle
+    {
+        GFXSamplerHandle()
+            : handle(InvalidGfxHandle)
+        {
+
+        }
+
+        GFXSamplerHandle(shipUint32 _handle)
+            : handle(_handle)
+        {
+
+        }
+
+        shipUint32 handle;
+    };
 }

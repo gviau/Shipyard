@@ -424,6 +424,40 @@ namespace Shipyard
         }
     };
 
+    enum class SamplingFilter : shipUint8
+    {
+        Nearest,
+        Linear
+    };
+
+    enum class TextureAddressMode : shipUint8
+    {
+        Wrap,
+        Mirror,
+        Clamp,
+        Border
+    };
+
+    struct SamplerState
+    {
+        SamplingFilter MinificationFiltering = SamplingFilter::Nearest;
+        SamplingFilter MagnificationFiltering = SamplingFilter::Nearest;
+        SamplingFilter MipmapFiltering = SamplingFilter::Nearest;
+        TextureAddressMode AddressModeU = TextureAddressMode::Clamp;
+        TextureAddressMode AddressModeV = TextureAddressMode::Clamp;
+        TextureAddressMode AddressModeW = TextureAddressMode::Clamp;
+        ComparisonFunc ComparisonFunction = ComparisonFunc::Never;
+
+        shipFloat MipLodBias = 0.0f;
+        shipUint32 MaxAnisotropy = 1;
+        shipFloat BorderRGBA[4];
+        shipFloat MinLod = 0.0f;
+        shipFloat MaxLod = 100.0f;
+
+        // If set to true, the 3 sampling filter methods specified in this struct will be ignored.
+        shipBool UseAnisotropicFilter = false;
+    };
+
     enum class RootSignatureParameterType
     {
         DescriptorTable,

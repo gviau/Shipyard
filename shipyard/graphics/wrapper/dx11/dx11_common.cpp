@@ -247,6 +247,157 @@ D3D11_MAP ConvertShipyardMapFlagToDX11(MapFlag mapFlag)
     return D3D11_MAP_READ;
 }
 
+D3D11_FILTER ConvertShipyardSamplingFilterToDX11(
+        SamplingFilter minificationFilter,
+        SamplingFilter magnificationFilter,
+        SamplingFilter mipmapFilter,
+        shipBool useAnisotropicFiltering,
+        shipBool useComparisonFunction)
+{
+    if (useAnisotropicFiltering)
+    {
+        if (useComparisonFunction)
+        {
+            return D3D11_FILTER_COMPARISON_ANISOTROPIC;
+        }
+        else
+        {
+            return D3D11_FILTER_ANISOTROPIC;
+        }
+    }
+
+    if (minificationFilter == SamplingFilter::Nearest)
+    {
+        if (magnificationFilter == SamplingFilter::Nearest)
+        {
+            if (mipmapFilter == SamplingFilter::Nearest)
+            {
+                if (useComparisonFunction)
+                {
+                    return D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+                }
+                else
+                {
+                    return D3D11_FILTER_MIN_MAG_MIP_POINT;
+                }
+            }
+            else
+            {
+                if (useComparisonFunction)
+                {
+                    return D3D11_FILTER_COMPARISON_MIN_MAG_POINT_MIP_LINEAR;
+                }
+                else
+                {
+                    return D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+                }
+            }
+        }
+        else
+        {
+            if (mipmapFilter == SamplingFilter::Nearest)
+            {
+                if (useComparisonFunction)
+                {
+                    return D3D11_FILTER_COMPARISON_MIN_POINT_MAG_LINEAR_MIP_POINT;
+                }
+                else
+                {
+                    return D3D11_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
+                }
+            }
+            else
+            {
+                if (useComparisonFunction)
+                {
+                    return D3D11_FILTER_COMPARISON_MIN_POINT_MAG_MIP_LINEAR;
+                }
+                else
+                {
+                    return D3D11_FILTER_MIN_POINT_MAG_MIP_LINEAR;
+                }
+            }
+        }
+    }
+    else
+    {
+        if (magnificationFilter == SamplingFilter::Nearest)
+        {
+            if (mipmapFilter == SamplingFilter::Nearest)
+            {
+                if (useComparisonFunction)
+                {
+                    return D3D11_FILTER_COMPARISON_MIN_LINEAR_MAG_MIP_POINT;
+                }
+                else
+                {
+                    return D3D11_FILTER_MIN_LINEAR_MAG_MIP_POINT;
+                }
+            }
+            else
+            {
+                if (useComparisonFunction)
+                {
+                    return D3D11_FILTER_COMPARISON_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+                }
+                else
+                {
+                    return D3D11_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+                }
+            }
+        }
+        else
+        {
+            if (mipmapFilter == SamplingFilter::Nearest)
+            {
+                if (useComparisonFunction)
+                {
+                    return D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+                }
+                else
+                {
+                    return D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+                }
+            }
+            else
+            {
+                if (useComparisonFunction)
+                {
+                    return D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+                }
+                else
+                {
+                    return D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+                }
+            }
+        }
+    }
+}
+
+D3D11_TEXTURE_ADDRESS_MODE ConvertShipyardTextureAddressModeToDX11(TextureAddressMode textureAddressMode)
+{
+    switch (textureAddressMode)
+    {
+    case TextureAddressMode::Border:
+        return D3D11_TEXTURE_ADDRESS_BORDER;
+
+    case TextureAddressMode::Clamp:
+        return D3D11_TEXTURE_ADDRESS_CLAMP;
+
+    case TextureAddressMode::Mirror:
+        return D3D11_TEXTURE_ADDRESS_MIRROR;
+
+    case TextureAddressMode::Wrap:
+        return D3D11_TEXTURE_ADDRESS_WRAP;
+
+    default:
+        break;
+    }
+
+    SHIP_ASSERT(!"Shouldn't happen");
+    return D3D11_TEXTURE_ADDRESS_CLAMP;
+}
+
 const shipChar* GetD3DShaderVersion(D3D_FEATURE_LEVEL featureLevel)
 {
     switch (featureLevel)

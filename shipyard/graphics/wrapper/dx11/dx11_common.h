@@ -23,6 +23,13 @@ namespace Shipyard
     D3D11_BLEND_OP ConvertShipyardBlendOperatorToDX11(BlendOperator blendOperator);
     shipUint8 ConvertShipyardRenderTargetWriteMaskToDX11(RenderTargetWriteMask renderTargetWriteMask);
     D3D11_MAP ConvertShipyardMapFlagToDX11(MapFlag mapFlag);
+    D3D11_FILTER ConvertShipyardSamplingFilterToDX11(
+            SamplingFilter minificationFilter,
+            SamplingFilter magnificationFilter,
+            SamplingFilter mipmapFilter,
+            shipBool useAnisotropicFiltering,
+            shipBool useComparisonFunction);
+    D3D11_TEXTURE_ADDRESS_MODE ConvertShipyardTextureAddressModeToDX11(TextureAddressMode textureAddressMode);
 
     const shipChar* GetD3DShaderVersion(D3D_FEATURE_LEVEL featureLevel);
 }

@@ -25,6 +25,10 @@ namespace Shipyard
 #define SHIP_MAX_2D_TEXTURES 1048576
 #endif // #ifndef SHIP_MAX_2D_TEXTURES
 
+#ifndef SHIP_MAX_SAMPLERS
+#define SHIP_MAX_SAMPLERS 4096
+#endif // #ifndef SHIP_MAX_SAMPLERS
+
 #ifndef SHIP_MAX_RENDER_TARGETS
 #define SHIP_MAX_RENDER_TARGETS 8192
 #endif // #ifndef SHIP_MAX_RENDER_TARGETS

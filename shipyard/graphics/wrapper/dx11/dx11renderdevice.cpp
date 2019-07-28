@@ -82,6 +82,12 @@ shipBool DX11RenderDevice::Create()
         return false;
     }
 
+    if (!m_SamplerPool.Create())
+    {
+        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create Sampler pool.");
+        return false;
+    }
+
     if (!m_RenderTargetPool.Create())
     {
         SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create RenderTarget pool.");
@@ -181,6 +187,15 @@ void DX11RenderDevice::Destroy()
             m_Texture2dPool.GetItem(indexToFree).Destroy();
             m_Texture2dPool.ReleaseItem(indexToFree);
         } while (m_Texture2dPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+    }
+
+    if (m_SamplerPool.GetFirstAllocatedIndex(&indexToFree))
+    {
+        do
+        {
+            m_SamplerPool.GetItem(indexToFree).Destroy();
+            m_SamplerPool.ReleaseItem(indexToFree);
+        } while (m_SamplerPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
     }
 
     if (m_RenderTargetPool.GetFirstAllocatedIndex(&indexToFree))
@@ -435,6 +450,38 @@ GFXTexture2D* DX11RenderDevice::GetTexture2DPtr(GFXTexture2DHandle gfxTexture2dH
 const GFXTexture2D* DX11RenderDevice::GetTexture2DPtr(GFXTexture2DHandle gfxTexture2dHandle) const
 {
     return m_Texture2dPool.GetItemPtr(gfxTexture2dHandle.handle);
+}
+
+GFXSamplerHandle DX11RenderDevice::CreateSampler(const SamplerState& samplerState)
+{
+    GFXSamplerHandle gfxSamplerHandle;
+    gfxSamplerHandle.handle = m_SamplerPool.GetNewItemIndex();
+
+    GFXSampler& gfxSampler = m_SamplerPool.GetItem(gfxSamplerHandle.handle);
+    shipBool isValid = gfxSampler.Create(*m_Device, samplerState);
+
+    SHIP_ASSERT(isValid);
+
+    return gfxSamplerHandle;
+}
+
+void DX11RenderDevice::DestroySampler(GFXSamplerHandle gfxSamplerHandle)
+{
+    GFXSampler& gfxSampler = m_SamplerPool.GetItem(gfxSamplerHandle.handle);
+    gfxSampler.Destroy();
+
+    m_SamplerPool.ReleaseItem(gfxSamplerHandle.handle);
+    gfxSamplerHandle.handle = InvalidGfxHandle;
+}
+
+GFXSampler& DX11RenderDevice::GetSampler(GFXSamplerHandle gfxSamplerHandle)
+{
+    return m_SamplerPool.GetItem(gfxSamplerHandle.handle);
+}
+
+const GFXSampler& DX11RenderDevice::GetSampler(GFXSamplerHandle gfxSamplerHandle) const
+{
+    return m_SamplerPool.GetItem(gfxSamplerHandle.handle);
 }
 
 GFXRenderTargetHandle DX11RenderDevice::CreateRenderTarget(GFXTexture2DHandle* texturesToAttach, shipUint32 numTexturesToAttach)

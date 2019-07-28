@@ -66,7 +66,7 @@ namespace Shipyard
 
         struct ShaderInputReflectionData
         {
-            const char* Name;
+            SmallInplaceStringA Name;
             shipUint16 BindPoint;
             ShaderVisibility shaderVisibility;
         };

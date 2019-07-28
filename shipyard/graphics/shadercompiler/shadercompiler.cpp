@@ -732,7 +732,7 @@ void ShaderCompiler::GetReflectionDataForShader(
             shipUint32 idx = 0;
             for (; idx < shaderInputReflectionDatas.Size(); idx++)
             {
-                if (StringCompare(shaderInputReflectionDatas[idx].Name, resourceDesc.Name) == 0)
+                if (shaderInputReflectionDatas[idx].Name == resourceDesc.Name)
                 {
                     SHIP_ASSERT(shaderInputReflectionDatas[idx].BindPoint == resourceDesc.BindPoint);
 
@@ -858,7 +858,7 @@ void ShaderCompiler::CreateShaderResourceBinder(
 
                 const shipChar* shaderInputProviderConstantBufferName = shaderInputProviderManager.GetShaderInputProviderConstantBufferName(shaderInputProviderDeclaration);
 
-                if (StringCompare(shaderInputReflectionData.Name, shaderInputProviderConstantBufferName) == 0)
+                if (shaderInputReflectionData.Name == shaderInputProviderConstantBufferName)
                 {
                     shipUint16 descriptorRangeEntryIndex = GetDescriptorRangeEntryIndex(shaderInputReflectionData, rootSignatureParameters, DescriptorRangeType::ConstantBufferView);
 
@@ -908,7 +908,7 @@ void ShaderCompiler::CreateShaderResourceBinder(
                 continue;
             }
 
-            if (StringCompare(shaderInputReflectionData.Name, unifiedConstantBufferName) == 0)
+            if (shaderInputReflectionData.Name == unifiedConstantBufferName)
             {
                 shipUint16 descriptorRangeEntryIndex = GetDescriptorRangeEntryIndex(shaderInputReflectionData, rootSignatureParameters, DescriptorRangeType::ShaderResourceView);
 
@@ -949,7 +949,7 @@ void ShaderCompiler::CreateShaderResourceBinderForDescriptorRangeType(
             for (const ShaderInputProviderDeclaration* shaderInputProviderDeclaration : includedShaderInputProviders)
             {
                 shipInt32 dataOffsetInProvider;
-                if (shaderInputProviderDeclaration->HasShaderInput(shaderInputReflectionData.Name, dataOffsetInProvider))
+                if (shaderInputProviderDeclaration->HasShaderInput(shaderInputReflectionData.Name.GetBuffer(), dataOffsetInProvider))
                 {
                     shipUint16 descriptorRangeEntryIndex = GetDescriptorRangeEntryIndex(shaderInputReflectionData, rootSignatureParameters, descriptorRangeType);
 

@@ -168,74 +168,28 @@ void ShaderDatabase::RemoveShadersForShaderKey(const ShaderKey& shaderKey)
     }
 
     size_t positionToRemoveInFile = sizeof(DatabaseHeader) + sizeof(ShaderEntriesHeader);
-    size_t shaderEntrySetSize = 0;
+
     for (shipUint32 i = 0; i < shaderSetIndexToRemove; i++)
     {
         const ShaderEntrySet& shaderEntrySet = m_ShaderEntrySets[i];
 
-        shaderEntrySetSize =
-                (shaderEntrySet.rawVertexShaderSize + shaderEntrySet.rawPixelShaderSize + shaderEntrySet.rawHullShaderSize +
-                 shaderEntrySet.rawDomainShaderSize + shaderEntrySet.rawGeometryShaderSize + shaderEntrySet.rawComputeShaderSize +
-                 sizeof(shaderEntrySet.renderStateBlock));
-
-        shaderEntrySetSize += sizeof(shipUint32);
-
-        for (const RootSignatureParameterEntry& rootSignatureParameterEntry : shaderEntrySet.rootSignatureParameters)
-        {
-            shaderEntrySetSize += sizeof(rootSignatureParameterEntry.shaderVisibility);
-            shaderEntrySetSize += sizeof(rootSignatureParameterEntry.parameterType);
-
-            if (rootSignatureParameterEntry.parameterType == RootSignatureParameterType::DescriptorTable)
-            {
-                shipUint32 numDescriptorRanges = rootSignatureParameterEntry.descriptorTable.descriptorRanges.Size();
-                shaderEntrySetSize += sizeof(numDescriptorRanges);
-
-                if (numDescriptorRanges > 0)
-                {
-                    const DescriptorRange* descriptorRange = &rootSignatureParameterEntry.descriptorTable.descriptorRanges[0];
-                    shaderEntrySetSize += sizeof(*descriptorRange) * numDescriptorRanges;
-                }
-            }
-            else
-            {
-                shaderEntrySetSize += sizeof(rootSignatureParameterEntry.descriptor);
-            }
-        }
-        
-        const Array<ShaderResourceBinder::ShaderResourceBinderEntry>& shaderResourceBinderEntries = shaderEntrySet.shaderResourceBinder.GetShaderResourceBinderEntries();
-        shipUint32 numShaderResourceBinderEntries = shaderResourceBinderEntries.Size();
-
-        shaderEntrySetSize += sizeof(numShaderResourceBinderEntries);
-
-        if (numShaderResourceBinderEntries > 0)
-        {
-            shaderEntrySetSize += sizeof(shaderResourceBinderEntries[0]) * numShaderResourceBinderEntries;
-        }
-
-        shipUint32 numDescriptorSetEntryDeclarations = shaderEntrySet.descriptorSetEntryDeclarations.Size();
-
-        shaderEntrySetSize += sizeof(numDescriptorSetEntryDeclarations);
-
-        if (numDescriptorSetEntryDeclarations > 0)
-        {
-            shaderEntrySetSize += sizeof(shaderEntrySet.descriptorSetEntryDeclarations[0]) * numDescriptorSetEntryDeclarations;
-        }
+        size_t shaderEntrySetSize = GetShaderEntrySetSize(shaderEntrySet);
 
         positionToRemoveInFile += shaderEntrySetSize + sizeof(ShaderEntryHeader);
     }
 
-    const ShaderEntrySet& shaderEntrySet = m_ShaderEntrySets[shaderSetIndexToRemove];
+    const ShaderEntrySet& shaderEntrySetToRemove = m_ShaderEntrySets[shaderSetIndexToRemove];
 
-    size_t numCharsToRemove = shaderEntrySetSize;
+    size_t numCharsToRemove = GetShaderEntrySetSize(shaderEntrySetToRemove);
 
     numCharsToRemove += sizeof(ShaderEntryHeader);
 
-    SHIP_DELETE(shaderEntrySet.rawVertexShader);
-    SHIP_DELETE(shaderEntrySet.rawPixelShader);
-    SHIP_DELETE(shaderEntrySet.rawHullShader);
-    SHIP_DELETE(shaderEntrySet.rawDomainShader);
-    SHIP_DELETE(shaderEntrySet.rawGeometryShader);
-    SHIP_DELETE(shaderEntrySet.rawComputeShader);
+    SHIP_DELETE(shaderEntrySetToRemove.rawVertexShader);
+    SHIP_DELETE(shaderEntrySetToRemove.rawPixelShader);
+    SHIP_DELETE(shaderEntrySetToRemove.rawHullShader);
+    SHIP_DELETE(shaderEntrySetToRemove.rawDomainShader);
+    SHIP_DELETE(shaderEntrySetToRemove.rawGeometryShader);
+    SHIP_DELETE(shaderEntrySetToRemove.rawComputeShader);
 
     m_FileHandler.RemoveChars(positionToRemoveInFile, numCharsToRemove);
 
@@ -507,6 +461,59 @@ void ShaderDatabase::ReadRootSignatureParameters(shipUint8*& databaseBuffer, Arr
             databaseBuffer += sizeof(RootDescriptor);
         }
     }
+}
+
+size_t ShaderDatabase::GetShaderEntrySetSize(const ShaderEntrySet& shaderEntrySet) const
+{
+    size_t shaderEntrySetSize =
+            (shaderEntrySet.rawVertexShaderSize + shaderEntrySet.rawPixelShaderSize + shaderEntrySet.rawHullShaderSize +
+            shaderEntrySet.rawDomainShaderSize + shaderEntrySet.rawGeometryShaderSize + shaderEntrySet.rawComputeShaderSize +
+            sizeof(shaderEntrySet.renderStateBlock));
+
+    shaderEntrySetSize += sizeof(shipUint32);
+
+    for (const RootSignatureParameterEntry& rootSignatureParameterEntry : shaderEntrySet.rootSignatureParameters)
+    {
+        shaderEntrySetSize += sizeof(rootSignatureParameterEntry.shaderVisibility);
+        shaderEntrySetSize += sizeof(rootSignatureParameterEntry.parameterType);
+
+        if (rootSignatureParameterEntry.parameterType == RootSignatureParameterType::DescriptorTable)
+        {
+            shipUint32 numDescriptorRanges = rootSignatureParameterEntry.descriptorTable.descriptorRanges.Size();
+            shaderEntrySetSize += sizeof(numDescriptorRanges);
+
+            if (numDescriptorRanges > 0)
+            {
+                const DescriptorRange* descriptorRange = &rootSignatureParameterEntry.descriptorTable.descriptorRanges[0];
+                shaderEntrySetSize += sizeof(*descriptorRange) * numDescriptorRanges;
+            }
+        }
+        else
+        {
+            shaderEntrySetSize += sizeof(rootSignatureParameterEntry.descriptor);
+        }
+    }
+
+    const Array<ShaderResourceBinder::ShaderResourceBinderEntry>& shaderResourceBinderEntries = shaderEntrySet.shaderResourceBinder.GetShaderResourceBinderEntries();
+    shipUint32 numShaderResourceBinderEntries = shaderResourceBinderEntries.Size();
+
+    shaderEntrySetSize += sizeof(numShaderResourceBinderEntries);
+
+    if (numShaderResourceBinderEntries > 0)
+    {
+        shaderEntrySetSize += sizeof(shaderResourceBinderEntries[0]) * numShaderResourceBinderEntries;
+    }
+
+    shipUint32 numDescriptorSetEntryDeclarations = shaderEntrySet.descriptorSetEntryDeclarations.Size();
+
+    shaderEntrySetSize += sizeof(numDescriptorSetEntryDeclarations);
+
+    if (numDescriptorSetEntryDeclarations > 0)
+    {
+        shaderEntrySetSize += sizeof(shaderEntrySet.descriptorSetEntryDeclarations[0]) * numDescriptorSetEntryDeclarations;
+    }
+
+    return shaderEntrySetSize;
 }
 
 }

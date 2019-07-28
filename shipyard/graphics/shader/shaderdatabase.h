@@ -109,6 +109,8 @@ namespace Shipyard
         void WriteRootSignatureParameters(const Array<RootSignatureParameterEntry>& rootSignatureParameters);
         void ReadRootSignatureParameters(shipUint8*& databaseBuffer, Array<RootSignatureParameterEntry>& rootSignatureParameters) const;
 
+        size_t GetShaderEntrySetSize(const ShaderEntrySet& shaderEntrySet) const;
+
         StringT m_Filename;
         FileHandler m_FileHandler;
 

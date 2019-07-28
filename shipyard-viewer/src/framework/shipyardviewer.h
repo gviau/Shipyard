@@ -58,7 +58,6 @@ namespace Shipyard
         GFXVertexBufferHandle m_VertexBufferHandle;
         GFXIndexBufferHandle m_IndexBufferHandle;
         GFXTexture2DHandle m_TextureHandle;
-        GFXDescriptorSetHandle m_GfxDescriptorSetHandle;
         GFXTexture2DHandle m_TestTextureHandle;
         GFXRenderTargetHandle m_TestRenderTargetHandle;
 

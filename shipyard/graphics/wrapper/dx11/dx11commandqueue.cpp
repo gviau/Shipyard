@@ -166,8 +166,9 @@ size_t DX11CommandQueue::Draw(BaseRenderCommand* pCmd)
             drawCommand.gfxRenderTargetHandle,
             drawCommand.gfxDepthStencilRenderTargetHandle,
             drawCommand.gfxViewport,
+            drawCommand.gfxPipelineStateObjectHandle,
+            drawCommand.gfxRootSignatureHandle,
             drawCommand.gfxDescriptorSetHandle,
-            drawCommand.shaderKey,
             drawCommand.primitiveTopologyToUse,
             drawCommand.pRenderStateBlockStateOverride);
 
@@ -204,8 +205,9 @@ size_t DX11CommandQueue::DrawIndexed(BaseRenderCommand* pCmd)
             drawIndexedCommand.gfxRenderTargetHandle,
             drawIndexedCommand.gfxDepthStencilRenderTargetHandle,
             drawIndexedCommand.gfxViewport,
+            drawIndexedCommand.gfxPipelineStateObjectHandle,
+            drawIndexedCommand.gfxRootSignatureHandle,
             drawIndexedCommand.gfxDescriptorSetHandle,
-            drawIndexedCommand.shaderKey,
             drawIndexedCommand.primitiveTopologyToUse,
             drawIndexedCommand.pRenderStateBlockStateOverride);
 
@@ -288,18 +290,8 @@ size_t DX11CommandQueue::MapBuffer(BaseRenderCommand* pCmd)
 
 void DX11CommandQueue::PrepareNextDrawCalls(const DrawItem& drawItem, VertexFormatType vertexFormatType)
 {
-    ShaderHandler* pShaderHandler = GetShaderHandlerManager().GetShaderHandlerForShaderKey(drawItem.shaderKey);
-    SHIP_ASSERT(pShaderHandler != nullptr);
-
-    GFXRootSignature gfxRootSignature;
-    pShaderHandler->GetRootSignature(gfxRootSignature);
-
-    const GFXDescriptorSet& gfxDescriptorSet = m_RenderDevice.GetDescriptorSet(pShaderHandler->GetDescriptorSetHandle());
-
-    PipelineStateObjectCreationParameters pipelineStateObjectCreationParameters;
-    pipelineStateObjectCreationParameters.rootSignature = &gfxRootSignature;
-
-    pShaderHandler->ApplyShader(pipelineStateObjectCreationParameters);
+    GFXPipelineStateObject& gfxPipelineStateObject = m_RenderDevice.GetPipelineStateObject(drawItem.pipelineStateObjetHandle);
+    PipelineStateObjectCreationParameters pipelineStateObjectCreationParameters = gfxPipelineStateObject.GetCreationParameters();
 
     pipelineStateObjectCreationParameters.primitiveTopology = drawItem.primitiveTopology;
     pipelineStateObjectCreationParameters.vertexFormatType = vertexFormatType;
@@ -336,11 +328,14 @@ void DX11CommandQueue::PrepareNextDrawCalls(const DrawItem& drawItem, VertexForm
         drawItem.pRenderStateBlockStateOverride->ApplyOverridenValues(pipelineStateObjectCreationParameters.renderStateBlock);
     }
 
-    GFXPipelineStateObject gfxPipelineStateObject;
-    gfxPipelineStateObject.Create(pipelineStateObjectCreationParameters);
+    GFXPipelineStateObject tempGfxPipelineStateObject;
+    tempGfxPipelineStateObject.Create(pipelineStateObjectCreationParameters);
+
+    GFXRootSignature& gfxRootSignature = m_RenderDevice.GetRootSignature(drawItem.rootSignatureHandle);
+    GFXDescriptorSet& gfxDescriptorSet = m_RenderDevice.GetDescriptorSet(drawItem.descriptorSetHandle);
 
     m_RenderStateCache.BindRootSignature(gfxRootSignature);
-    m_RenderStateCache.BindPipelineStateObject(gfxPipelineStateObject);
+    m_RenderStateCache.BindPipelineStateObject(tempGfxPipelineStateObject);
     m_RenderStateCache.BindDescriptorSet(gfxDescriptorSet, gfxRootSignature);
 
     m_RenderStateCache.SetViewport(drawItem.viewport);

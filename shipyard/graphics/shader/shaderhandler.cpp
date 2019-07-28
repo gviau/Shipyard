@@ -18,19 +18,6 @@ ShaderHandler::~ShaderHandler()
 {
 }
 
-void ShaderHandler::ApplyShader(PipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters) const
-{
-    pipelineStateObjectCreationParameters.vertexShaderHandle = m_VertexShaderHandle;
-    pipelineStateObjectCreationParameters.pixelShaderHandle = m_PixelShaderHandle;
-
-    pipelineStateObjectCreationParameters.renderStateBlock = m_RenderStateBlock;
-}
-
-void ShaderHandler::GetRootSignature(GFXRootSignature& gfxRootSignature) const
-{
-    gfxRootSignature.Create(m_RootSignatureParameters);
-}
-
 void ShaderHandler::ApplyShaderInputProviders(
         GFXRenderDevice& gfxRenderDevice,
         GFXDirectRenderCommandList& gfxDirectRenderCommandList,
@@ -67,7 +54,11 @@ void ShaderHandler::ApplyShaderInputProviders(
         }
     }
 
-    m_ShaderResourceBinder.BindShaderInputProvders(gfxRenderDevice, gfxDirectRenderCommandList, shaderInputProviders, m_GfxDescriptorSetHandle);
+    m_ShaderResourceBinder.BindShaderInputProvders(
+            gfxRenderDevice,
+            gfxDirectRenderCommandList,
+            shaderInputProviders,
+            m_ShaderRenderElements.GfxDescriptorSetHandle);
 }
 
 }

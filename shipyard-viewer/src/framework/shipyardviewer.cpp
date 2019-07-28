@@ -119,6 +119,8 @@ shipBool ShipyardViewer::CreateApp(HWND windowHandle, shipUint32 windowWidth, sh
 
     GetGlobalAllocator().Create(allocatorInitEntries, 4);
 
+    GetShaderInputProviderManager().Initialize(*m_pGfxRenderDevice);
+
     m_pGraphicsSingletonStorer = SHIP_NEW(GraphicsSingletonStorer, 1);
 
     m_pGfxRenderDevice = SHIP_NEW(GFXRenderDevice, 1);
@@ -193,26 +195,10 @@ shipBool ShipyardViewer::CreateApp(HWND windowHandle, shipUint32 windowWidth, sh
     m_IndexBufferHandle = m_pGfxRenderDevice->CreateIndexBuffer(36, true, false, indices);
     m_TextureHandle = m_pGfxRenderDevice->CreateTexture2D(2, 2, GfxFormat::R8G8B8A8_UNORM, false, textureData, false);
 
-    InplaceArray<DescriptorSetEntryDeclaration, 2> descriptorSetEntryDeclarations;
-    DescriptorSetEntryDeclaration& unifiedBufferEntry = descriptorSetEntryDeclarations.Grow();
-    unifiedBufferEntry.rootIndex = 0;
-    unifiedBufferEntry.numResources = 1;
-    unifiedBufferEntry.descriptorRangeIndex = 0;
-
-    DescriptorSetEntryDeclaration& textureEntry = descriptorSetEntryDeclarations.Grow();
-    textureEntry.rootIndex = 0;
-    textureEntry.numResources = 1;
-    textureEntry.descriptorRangeIndex = 1;
-
-    m_GfxDescriptorSetHandle =
-        m_pGfxRenderDevice->CreateDescriptorSet(DescriptorSetType::ConstantBuffer_ShaderResource_UnorderedAccess_Views, descriptorSetEntryDeclarations);
-
     m_TestTextureHandle = m_pGfxRenderDevice->CreateTexture2D(windowWidth, windowHeight, GfxFormat::R8G8B8A8_UNORM, false, nullptr, false, TextureUsage::TextureUsage_RenderTarget);
 
     GFXTexture2DHandle renderTargetTextures[] = { m_TestTextureHandle };
     m_TestRenderTargetHandle = m_pGfxRenderDevice->CreateRenderTarget(&renderTargetTextures[0], 1);
-
-    GetShaderInputProviderManager().Initialize(*m_pGfxRenderDevice);
 
     m_pDataProvider = SHIP_NEW(SimpleConstantBufferProvider, 1);
 
@@ -222,12 +208,6 @@ shipBool ShipyardViewer::CreateApp(HWND windowHandle, shipUint32 windowWidth, sh
     m_pShaderDatabase->Load("ShipyardShaderDatabase.bin");
 
     GetShaderHandlerManager().Initialize(*m_pGfxRenderDevice, *m_pShaderDatabase);
-
-    ShaderKey shaderKey;
-    shaderKey.SetShaderFamily(ShaderFamily::Generic);
-    GetShaderHandlerManager().GetShaderHandlerForShaderKey(shaderKey);
-
-    Sleep(2000);
 
     return true;
 }
@@ -288,14 +268,17 @@ void ShipyardViewer::ComputeOneFrame()
 
     pShaderHandler->ApplyShaderInputProviders(*m_pGfxRenderDevice, *m_pGfxDirectRenderCommandList, shaderInputProviders);
 
+    const ShaderHandler::ShaderRenderElements& shaderRenderElements = pShaderHandler->GetShaderRenderElements();
+
     shipUint32 vertexBufferOffsets = 0;
 
     DrawIndexedCommand* pDrawIndexedCommand = m_pGfxDirectRenderCommandList->DrawIndexed();
     pDrawIndexedCommand->gfxViewport = gfxViewport;
-    pDrawIndexedCommand->shaderKey = shaderKey;
     pDrawIndexedCommand->gfxRenderTargetHandle = gfxRenderTargetHandle;
     pDrawIndexedCommand->gfxDepthStencilRenderTargetHandle = m_GfxDepthStencilRenderTargetHandle;
-    pDrawIndexedCommand->gfxDescriptorSetHandle = m_GfxDescriptorSetHandle;
+    pDrawIndexedCommand->gfxPipelineStateObjectHandle = shaderRenderElements.GfxPipelineStateObjectHandle;
+    pDrawIndexedCommand->gfxRootSignatureHandle = shaderRenderElements.GfxRootSignatureHandle;
+    pDrawIndexedCommand->gfxDescriptorSetHandle = shaderRenderElements.GfxDescriptorSetHandle;
     pDrawIndexedCommand->primitiveTopologyToUse = PrimitiveTopology::TriangleList;
     pDrawIndexedCommand->pRenderStateBlockStateOverride = nullptr;
     pDrawIndexedCommand->pGfxVertexBufferHandles = &m_VertexBufferHandle;

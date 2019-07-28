@@ -58,14 +58,29 @@ void ShaderHandlerManager::Destroy()
     {
         ShaderHandler* shaderHandler = keyValue.second;
 
-        if (shaderHandler->m_VertexShaderHandle.handle != InvalidGfxHandle)
+        if (shaderHandler->m_GfxVertexShaderHandle.handle != InvalidGfxHandle)
         {
-            m_RenderDevice->DestroyVertexShader(shaderHandler->m_VertexShaderHandle);
+            m_RenderDevice->DestroyVertexShader(shaderHandler->m_GfxVertexShaderHandle);
         }
 
-        if (shaderHandler->m_PixelShaderHandle.handle != InvalidGfxHandle)
+        if (shaderHandler->m_GfxPixelShaderHandle.handle != InvalidGfxHandle)
         {
-            m_RenderDevice->DestroyPixelShader(shaderHandler->m_PixelShaderHandle);
+            m_RenderDevice->DestroyPixelShader(shaderHandler->m_GfxPixelShaderHandle);
+        }
+
+        if (shaderHandler->m_ShaderRenderElements.GfxPipelineStateObjectHandle.handle != InvalidGfxHandle)
+        {
+            m_RenderDevice->DestroyPipelineStateObject(shaderHandler->m_ShaderRenderElements.GfxPipelineStateObjectHandle);
+        }
+
+        if (shaderHandler->m_ShaderRenderElements.GfxRootSignatureHandle.handle != InvalidGfxHandle)
+        {
+            m_RenderDevice->DestroyRootSignature(shaderHandler->m_ShaderRenderElements.GfxRootSignatureHandle);
+        }
+
+        if (shaderHandler->m_ShaderRenderElements.GfxDescriptorSetHandle.handle != InvalidGfxHandle)
+        {
+            m_RenderDevice->DestroyDescriptorSet(shaderHandler->m_ShaderRenderElements.GfxDescriptorSetHandle);
         }
 
         SHIP_DELETE(shaderHandler);
@@ -151,38 +166,58 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
 
     if (createShaders)
     {
-        if (shaderHandler->m_VertexShaderHandle.handle != InvalidGfxHandle)
+        if (shaderHandler->m_GfxVertexShaderHandle.handle != InvalidGfxHandle)
         {
-            m_RenderDevice->DestroyVertexShader(shaderHandler->m_VertexShaderHandle);
-            shaderHandler->m_VertexShaderHandle.handle = InvalidGfxHandle;
+            m_RenderDevice->DestroyVertexShader(shaderHandler->m_GfxVertexShaderHandle);
+            shaderHandler->m_GfxVertexShaderHandle.handle = InvalidGfxHandle;
         }
 
-        if (shaderHandler->m_PixelShaderHandle.handle != InvalidGfxHandle)
+        if (shaderHandler->m_GfxPixelShaderHandle.handle != InvalidGfxHandle)
         {
-            m_RenderDevice->DestroyPixelShader(shaderHandler->m_PixelShaderHandle);
-            shaderHandler->m_PixelShaderHandle.handle = InvalidGfxHandle;
+            m_RenderDevice->DestroyPixelShader(shaderHandler->m_GfxPixelShaderHandle);
+            shaderHandler->m_GfxPixelShaderHandle.handle = InvalidGfxHandle;
         }
 
         if (compiledShaderEntrySet.rawVertexShaderSize > 0)
         {
-            shaderHandler->m_VertexShaderHandle = m_RenderDevice->CreateVertexShader(compiledShaderEntrySet.rawVertexShader, compiledShaderEntrySet.rawVertexShaderSize);
+            shaderHandler->m_GfxVertexShaderHandle = m_RenderDevice->CreateVertexShader(compiledShaderEntrySet.rawVertexShader, compiledShaderEntrySet.rawVertexShaderSize);
         }
 
         if (compiledShaderEntrySet.rawPixelShaderSize > 0)
         {
-            shaderHandler->m_PixelShaderHandle = m_RenderDevice->CreatePixelShader(compiledShaderEntrySet.rawPixelShader, compiledShaderEntrySet.rawPixelShaderSize);
+            shaderHandler->m_GfxPixelShaderHandle = m_RenderDevice->CreatePixelShader(compiledShaderEntrySet.rawPixelShader, compiledShaderEntrySet.rawPixelShaderSize);
         }
 
-        shaderHandler->m_RenderStateBlock = compiledShaderEntrySet.renderStateBlock;
-        shaderHandler->m_RootSignatureParameters = compiledShaderEntrySet.rootSignatureParameters;
-        shaderHandler->m_ShaderResourceBinder = compiledShaderEntrySet.shaderResourceBinder;
-
-        if (shaderHandler->m_GfxDescriptorSetHandle.handle != InvalidGfxHandle)
+        if (shaderHandler->m_ShaderRenderElements.GfxPipelineStateObjectHandle.handle != InvalidGfxHandle)
         {
-            m_RenderDevice->DestroyDescriptorSet(shaderHandler->m_GfxDescriptorSetHandle);
+            m_RenderDevice->DestroyPipelineStateObject(shaderHandler->m_ShaderRenderElements.GfxPipelineStateObjectHandle);
+            shaderHandler->m_ShaderRenderElements.GfxPipelineStateObjectHandle.handle = InvalidGfxHandle;
         }
 
-        shaderHandler->m_GfxDescriptorSetHandle = m_RenderDevice->CreateDescriptorSet(DescriptorSetType::ConstantBuffer_ShaderResource_UnorderedAccess_Views, compiledShaderEntrySet.descriptorSetEntryDeclarations);
+        PipelineStateObjectCreationParameters pipelineStateObjectCreationParameters;
+        pipelineStateObjectCreationParameters.renderStateBlock = compiledShaderEntrySet.renderStateBlock;
+        pipelineStateObjectCreationParameters.vertexShaderHandle = shaderHandler->m_GfxVertexShaderHandle;
+        pipelineStateObjectCreationParameters.pixelShaderHandle = shaderHandler->m_GfxPixelShaderHandle;
+
+        shaderHandler->m_ShaderRenderElements.GfxPipelineStateObjectHandle = m_RenderDevice->CreatePipelineStateObject(pipelineStateObjectCreationParameters);
+
+        if (shaderHandler->m_ShaderRenderElements.GfxRootSignatureHandle.handle != InvalidGfxHandle)
+        {
+            m_RenderDevice->DestroyRootSignature(shaderHandler->m_ShaderRenderElements.GfxRootSignatureHandle);
+            shaderHandler->m_ShaderRenderElements.GfxRootSignatureHandle.handle = InvalidGfxHandle;
+        }
+
+        shaderHandler->m_ShaderRenderElements.GfxRootSignatureHandle = m_RenderDevice->CreateRootSignature(compiledShaderEntrySet.rootSignatureParameters);
+
+        if (shaderHandler->m_ShaderRenderElements.GfxDescriptorSetHandle.handle != InvalidGfxHandle)
+        {
+            m_RenderDevice->DestroyDescriptorSet(shaderHandler->m_ShaderRenderElements.GfxDescriptorSetHandle);
+            shaderHandler->m_ShaderRenderElements.GfxDescriptorSetHandle.handle = InvalidGfxHandle;
+        }
+
+        shaderHandler->m_ShaderRenderElements.GfxDescriptorSetHandle = m_RenderDevice->CreateDescriptorSet(DescriptorSetType::ConstantBuffer_ShaderResource_UnorderedAccess_Views, compiledShaderEntrySet.descriptorSetEntryDeclarations);
+
+        shaderHandler->m_ShaderResourceBinder = compiledShaderEntrySet.shaderResourceBinder;
     }
 
     return shaderHandler;

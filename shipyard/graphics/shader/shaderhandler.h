@@ -27,11 +27,16 @@ namespace Shipyard
         friend class ShaderHandlerManager;
 
     public:
+        struct ShaderRenderElements
+        {
+            GFXPipelineStateObjectHandle GfxPipelineStateObjectHandle;
+            GFXRootSignatureHandle GfxRootSignatureHandle;
+            GFXDescriptorSetHandle GfxDescriptorSetHandle;
+        };
+
+    public:
         ShaderHandler(ShaderKey shaderKey);
         ~ShaderHandler();
-
-        void ApplyShader(PipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters) const;
-        void GetRootSignature(GFXRootSignature& gfxRootSignature) const;
 
         void ApplyShaderInputProviders(
                 GFXRenderDevice& gfxRenderDevice,
@@ -39,17 +44,15 @@ namespace Shipyard
                 const Array<ShaderInputProvider*>& shaderInputProviders);
 
         const ShaderKey& GetShaderKey() const { return m_ShaderKey; }
-        GFXDescriptorSetHandle GetDescriptorSetHandle() const { return m_GfxDescriptorSetHandle; }
+        const ShaderRenderElements& GetShaderRenderElements() const { return m_ShaderRenderElements; }
 
     private:
         ShaderKey m_ShaderKey;
 
-        GFXVertexShaderHandle m_VertexShaderHandle;
-        GFXPixelShaderHandle m_PixelShaderHandle;
+        GFXVertexShaderHandle m_GfxVertexShaderHandle;
+        GFXPixelShaderHandle m_GfxPixelShaderHandle;
 
-        RenderStateBlock m_RenderStateBlock;
-        Array<RootSignatureParameterEntry> m_RootSignatureParameters;
+        ShaderRenderElements m_ShaderRenderElements;
         ShaderResourceBinder m_ShaderResourceBinder;
-        GFXDescriptorSetHandle m_GfxDescriptorSetHandle;
     };
 }

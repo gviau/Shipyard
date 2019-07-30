@@ -86,7 +86,8 @@ namespace Shipyard
                 }
             }
 
-            *outValue = IntegerType(strtol(hexadecimalValue.GetBuffer(), nullptr, 16));
+            unsigned long long interpretedValue = strtoull(hexadecimalValue.GetBuffer(), nullptr, 16);
+            *outValue = IntegerType(interpretedValue);
 
             if (isNegative)
             {
@@ -108,7 +109,8 @@ namespace Shipyard
                 }
             }
 
-            *outValue = IntegerType(strtol(binaryValue.GetBuffer(), nullptr, 2));
+            unsigned long long interpretedValue = strtoull(binaryValue.GetBuffer(), nullptr, 2);
+            *outValue = IntegerType(interpretedValue);
 
             if (isNegative)
             {
@@ -129,7 +131,8 @@ namespace Shipyard
             }
 
             // Negative values are properly handled here since we hand over the whole string.
-            *outValue = IntegerType(strtol(value.GetBuffer(), nullptr, 10));
+            unsigned long long interpretedValue = strtoull(value.GetBuffer(), nullptr, 10);
+            *outValue = IntegerType(interpretedValue);
         }
 
         return true;

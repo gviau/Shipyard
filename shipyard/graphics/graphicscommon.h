@@ -455,7 +455,27 @@ namespace Shipyard
         shipFloat MaxLod = 100.0f;
 
         // If set to true, the 3 sampling filter methods specified in this struct will be ignored.
-        shipBool UseAnisotropicFilter = false;
+        shipBool UseAnisotropicFiltering = false;
+
+        shipBool operator== (const SamplerState &rhs) const
+        {
+            return (MinificationFiltering == rhs.MinificationFiltering &&
+                    MagnificationFiltering == rhs.MagnificationFiltering &&
+                    MipmapFiltering == rhs.MipmapFiltering &&
+                    AddressModeU == rhs.AddressModeU &&
+                    AddressModeV == rhs.AddressModeV &&
+                    AddressModeW == rhs.AddressModeW &&
+                    ComparisonFunction == rhs.ComparisonFunction &&
+                    IsAlmostEqual(MipLodBias, rhs.MipLodBias) &&
+                    UseAnisotropicFiltering == rhs.UseAnisotropicFiltering &&
+                    (UseAnisotropicFiltering == false || MaxAnisotropy == rhs.MaxAnisotropy) &&
+                    IsAlmostEqual(BorderRGBA[0], rhs.BorderRGBA[0]) &&
+                    IsAlmostEqual(BorderRGBA[1], rhs.BorderRGBA[1]) &&
+                    IsAlmostEqual(BorderRGBA[2], rhs.BorderRGBA[2]) &&
+                    IsAlmostEqual(BorderRGBA[3], rhs.BorderRGBA[3]) &&
+                    IsAlmostEqual(MinLod, rhs.MinLod) &&
+                    IsAlmostEqual(MaxLod, rhs.MaxLod));
+        }
     };
 
     enum class RootSignatureParameterType

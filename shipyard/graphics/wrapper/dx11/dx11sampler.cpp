@@ -27,7 +27,7 @@ shipBool DX11Sampler::Create(ID3D11Device& device, const SamplerState& samplerSt
             samplerState.MinificationFiltering,
             samplerState.MagnificationFiltering,
             samplerState.MipmapFiltering,
-            samplerState.UseAnisotropicFilter,
+            samplerState.UseAnisotropicFiltering,
             (samplerState.ComparisonFunction != ComparisonFunc::Never));
     samplerDesc.AddressU = ConvertShipyardTextureAddressModeToDX11(samplerState.AddressModeU);
     samplerDesc.AddressV = ConvertShipyardTextureAddressModeToDX11(samplerState.AddressModeV);

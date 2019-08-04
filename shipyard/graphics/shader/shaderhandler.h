@@ -17,10 +17,6 @@ namespace Shipyard
     class ShaderHandlerManager;
     class ShaderInputProvider;
 
-    struct RenderStateBlock;
-
-    struct PipelineStateObjectCreationParameters;
-
     class SHIPYARD_API ShaderHandler
     {
         friend class ShaderDatabase;
@@ -54,5 +50,7 @@ namespace Shipyard
 
         ShaderRenderElements m_ShaderRenderElements;
         ShaderResourceBinder m_ShaderResourceBinder;
+
+        Array<GFXSamplerHandle> m_SamplerStateHandles;
     };
 }

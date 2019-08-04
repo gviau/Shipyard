@@ -26,6 +26,7 @@ namespace Shipyard
 
     public:
         static const shipChar* RenderStateBlockName;
+        static const shipChar* SamplerStateBlockName;
 
     public:
         ShaderCompiler();
@@ -41,6 +42,13 @@ namespace Shipyard
 
         void SetShaderDirectoryName(const StringT& shaderDirectoryName);
         const StringT& GetShaderDirectoryName() const { return m_ShaderDirectoryName; }
+
+    public:
+        struct SamplerStateToBeCompiled
+        {
+            StringA Name;
+            StringA SamplerStateSource;
+        };
 
     private:
         struct CompiledShaderKeyEntry
@@ -62,6 +70,8 @@ namespace Shipyard
             ShaderResourceBinder m_ShaderResourceBinder;
 
             InplaceArray<DescriptorSetEntryDeclaration, 8> m_DescriptorSetEntryDeclarations;
+
+            InplaceArray<SamplerState, 4> m_SamplerStates;
         };
 
         struct ShaderInputReflectionData
@@ -84,6 +94,12 @@ namespace Shipyard
             ShaderVisibility SamplersShaderVisibility = ShaderVisibility::ShaderVisibility_None;
         };
 
+        struct CompiledSamplerState
+        {
+            StringA Name;
+            SamplerState State;
+        };
+
     private:
         void ShaderCompilerThreadFunction();
 
@@ -96,6 +112,7 @@ namespace Shipyard
                 const StringT& sourceFilename,
                 const StringA& shaderSource,
                 const StringA& renderStateBlockSource,
+                const Array<SamplerStateToBeCompiled>& samplerStatesToBeCompiled,
                 const Array<ShaderInputProviderDeclaration*>& includedShaderInputProviders);
 
         ID3D10Blob* CompileVertexShaderForShaderKey(const StringT& sourceFilename, const StringA& source, _D3D_SHADER_MACRO* shaderOptionDefines);
@@ -121,6 +138,7 @@ namespace Shipyard
                 const ShaderReflectionData& shaderReflectionData,
                 const Array<RootSignatureParameterEntry>& rootSignatureParameters,
                 const Array<ShaderInputProviderDeclaration*>& includedShaderInputProviders,
+                const Array<CompiledSamplerState>& compiledSamplerStates,
                 shipUint16 rootIndexPerDescriptorRangeTypePerShaderStage[][shipUint32(ShaderStage::ShaderStage_Count)],
                 ShaderResourceBinder& shaderResourceBinder);
 

@@ -49,6 +49,13 @@ namespace Shipyard
                 ShaderInputType shaderInputType,
                 ShaderVisibility shaderStageToBindTo);
 
+        void AddShaderResourceBinderEntryForSamplerToDescriptorTable(
+                const SamplerState& samplerState,
+                shipUint16 rootIndexToBindTo,
+                shipUint16 descriptorRangeIndexToBind,
+                shipUint16 descriptorRangeEntryIndexToBind,
+                ShaderVisibility shaderStageToBindTo);
+
         void AddShaderResourceBinderEntryForGlobalBufferToDescriptor(
                 ShaderInputProviderUsage shaderInputProviderUsage,
                 shipUint16 rootIndexToBindTo,
@@ -67,6 +74,11 @@ namespace Shipyard
                 const Array<ShaderInputProvider*>& shaderInputProviders,
                 GFXDescriptorSetHandle gfxDescriptorSetHandle) const;
 
+        void BindSamplerStates(
+                GFXRenderDevice& gfxRenderDevice,
+                const Array<GFXSamplerHandle>& gfxSamplerHandles,
+                GFXDescriptorSetHandle gfxDescriptorSetHandle) const;
+
     public:
         struct ShaderResourceBinderEntry
         {
@@ -80,10 +92,13 @@ namespace Shipyard
             ShaderInputProviderUsage GlobalBufferUsage;
             ShaderVisibility ShaderStageToBindTo = ShaderVisibility::ShaderVisibility_None;
 
+            SamplerState Sampler;
+
             shipBool BindDescriptorTable = false;
             shipBool BindConstantBuffer = false;
             shipBool BindDescriptor = false;
             shipBool BindGlobalBuffer = false;
+            shipBool BindSamplerState = false;
         };
 
     public:

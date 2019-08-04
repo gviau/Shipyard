@@ -5,6 +5,7 @@
 #include <graphics/shader/shaderoptions.h>
 
 #include <graphics/shadercompiler/renderstateblockcompiler.h>
+#include <graphics/shadercompiler/samplerstatecompiler.h>
 
 #include <math/mathutilities.h>
 
@@ -20,6 +21,7 @@ namespace Shipyard
 {;
 
 const shipChar* ShaderCompiler::RenderStateBlockName = "RenderState";
+const shipChar* ShaderCompiler::SamplerStateBlockName = "SamplerState";
 
 volatile shipBool ShaderCompiler::m_RunShaderCompilerThread = true;
 
@@ -146,6 +148,7 @@ shipBool ShaderCompiler::GetRawShadersForShaderKey(ShaderKey shaderKey, ShaderDa
             compiledShaderEntrySet.rootSignatureParameters = shaderKeyEntry.m_RootSignatureParameters;
             compiledShaderEntrySet.shaderResourceBinder = shaderKeyEntry.m_ShaderResourceBinder;
             compiledShaderEntrySet.descriptorSetEntryDeclarations = shaderKeyEntry.m_DescriptorSetEntryDeclarations;
+            compiledShaderEntrySet.samplerStates = shaderKeyEntry.m_SamplerStates;
 
             gotRecompiledSinceLastAccess = shaderKeyEntry.m_GotRecompiledSinceLastAccess;
 
@@ -273,12 +276,173 @@ shipBool SplitShaderSourceAndRenderStateBlock(StringA& shaderSource, StringA& re
     return true;
 }
 
-// Reads a shader file and separates it into the shader source and, if any entry available, the render state pipeline source.
+shipBool SplitShaderSourceAndOneSamplerStateBlock(
+        StringA& shaderSource,
+        StringA& samplerStateBlockSource,
+        StringA& samplerStateName,
+        shipUint32 startIndex,
+        shipUint32& samplerStateIndex)
+{
+    size_t samplerStateBlockStartIndex = shaderSource.FindIndexOfFirstCaseInsensitive(ShaderCompiler::SamplerStateBlockName, startIndex);
+    if (samplerStateBlockStartIndex == shaderSource.InvalidIndex)
+    {
+        return false;
+    }
+
+    size_t newlineIndex = shaderSource.FindIndexOfFirst('\n', samplerStateBlockStartIndex);
+    if (newlineIndex == shaderSource.InvalidIndex)
+    {
+        return false;
+    }
+
+    size_t firstSpaceIndex = shaderSource.FindIndexOfFirst(' ', samplerStateBlockStartIndex);
+    if (firstSpaceIndex == shaderSource.InvalidIndex)
+    {
+        return false;
+    }
+
+    if (firstSpaceIndex > newlineIndex)
+    {
+        return true;
+    }
+
+    // Name must begin by a letter, and only be composed of letters and digits.
+    shipBool beginning = true;
+    for (size_t i = firstSpaceIndex; i < newlineIndex; i++)
+    {
+        shipChar c = shaderSource[i];
+        if (beginning)
+        {
+            if (isalpha(c))
+            {
+                samplerStateName += c;
+                beginning = false;
+            }
+            else if (c != ' ' && c != '\t')
+            {
+                return true;
+            }
+        }
+        else
+        {
+            if (!isalpha(c) && !isdigit(c))
+            {
+                break;
+            }
+
+            if (c == ' ' || c == '\t')
+            {
+                break;
+            }
+
+            samplerStateName += c;
+        }
+    }
+
+    // Make sure it's not in comments
+    size_t inlineCommentBeforeSamplerStateBlockStartIndex = shaderSource.FindIndexOfFirstReverse("//", samplerStateBlockStartIndex);
+    shipBool isSamplerStateBlockInComment = (inlineCommentBeforeSamplerStateBlockStartIndex != shaderSource.InvalidIndex);
+
+    if (isSamplerStateBlockInComment)
+    {
+        size_t newlineAfterInlineCommentIndex = shaderSource.FindIndexOfFirst('\n', inlineCommentBeforeSamplerStateBlockStartIndex);
+        if (newlineAfterInlineCommentIndex == shaderSource.InvalidIndex || newlineAfterInlineCommentIndex < samplerStateBlockStartIndex)
+        {
+            isSamplerStateBlockInComment = false;
+        }
+    }
+    else
+    {
+        size_t blockCommentBeforeRenderStateBlockStartIndex = shaderSource.FindIndexOfFirstReverse("/*", samplerStateBlockStartIndex);
+        if (blockCommentBeforeRenderStateBlockStartIndex != shaderSource.InvalidIndex)
+        {
+            size_t blockCommentEndIndex = shaderSource.FindIndexOfFirst("*/", blockCommentBeforeRenderStateBlockStartIndex);
+            if (blockCommentEndIndex != shaderSource.InvalidIndex && blockCommentEndIndex > samplerStateBlockStartIndex)
+            {
+                isSamplerStateBlockInComment = true;
+            }
+        }
+    }
+
+    if (isSamplerStateBlockInComment)
+    {
+        return true;
+    }
+
+    size_t openingBracketIndex = shaderSource.FindIndexOfFirst('{', samplerStateBlockStartIndex);
+    if (openingBracketIndex == shaderSource.InvalidIndex)
+    {
+        return true;
+    }
+
+    shipUint32 bracketCount = 1;
+    size_t endingBracketIndex = 0;
+
+    for (endingBracketIndex = openingBracketIndex + 1; (bracketCount > 0 && endingBracketIndex < shaderSource.Size()); endingBracketIndex++)
+    {
+        if (shaderSource[endingBracketIndex] == '{')
+        {
+            bracketCount += 1;
+        }
+        else if (shaderSource[endingBracketIndex] == '}')
+        {
+            bracketCount -= 1;
+        }
+    }
+
+    if (shaderSource[endingBracketIndex] != ';')
+    {
+        return false;
+    }
+
+    samplerStateBlockSource = shaderSource.Substring(openingBracketIndex + 1, (endingBracketIndex - openingBracketIndex - 2));
+    shaderSource.Erase(samplerStateBlockStartIndex, (endingBracketIndex - samplerStateBlockStartIndex + 1));
+
+    samplerStateIndex = shipUint32(samplerStateBlockStartIndex);
+
+    return true;
+}
+
+shipBool SplitShaderSourceAndSamplerStateBlocks(StringA& shaderSource, Array<ShaderCompiler::SamplerStateToBeCompiled>& samplerStatesToBeCompiled)
+{
+    shipUint32 startIndex = 0;
+    shipBool continueParsing = true;
+    while (continueParsing)
+    {
+        StringA samplerStateBlockSource;
+        StringA samplerStateName;
+        shipUint32 samplerStateIndex = 0;
+        continueParsing = SplitShaderSourceAndOneSamplerStateBlock(shaderSource, samplerStateBlockSource, samplerStateName, startIndex, samplerStateIndex);
+
+        if (samplerStateBlockSource.IsEmpty())
+        {
+            if (continueParsing)
+            {
+                startIndex += 1;
+            }
+        }
+        else
+        {
+            ShaderCompiler::SamplerStateToBeCompiled& samplerStateToBeCompiled = samplerStatesToBeCompiled.Grow();
+            samplerStateToBeCompiled.Name = samplerStateName;
+            samplerStateToBeCompiled.SamplerStateSource = samplerStateBlockSource;
+            
+            // So that shader reflection can pick up the sampler, add it back as a simple sampler declaration.
+            shaderSource.Insert(samplerStateIndex, StringFormat("SamplerState %s;\n", samplerStateName.GetBuffer()));
+            startIndex = samplerStateIndex + 1;
+        }
+    }
+
+    return true;
+}
+
+// Reads a shader file and separates it into the shader source and, if any entry available, the render state pipeline source & sampler state sources.
 // Also returns the included shader input providers.
 shipBool ReadShaderFile(
         const StringT& sourceFilename,
         StringA& shaderSource,
         StringA& renderStateBlockSource,
+        Array<ShaderCompiler::SamplerStateToBeCompiled>& samplerStatesToBeCompiled,
         Array<ShaderInputProviderDeclaration*>& includedShaderInputProviders)
 {
     // This is kind of ugly: if a file is saved inside of Visual Studio with the AutoRecover feature enabled, it will
@@ -354,6 +518,7 @@ shipBool ReadShaderFile(
     } while (true);
 
     SplitShaderSourceAndRenderStateBlock(shaderSource, renderStateBlockSource);
+    SplitShaderSourceAndSamplerStateBlocks(shaderSource, samplerStatesToBeCompiled);
 
     return true;
 }
@@ -365,9 +530,15 @@ void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
 
     StringA shaderSource;
     LargeInplaceStringA renderStateBlockSource;
+    Array<SamplerStateToBeCompiled> samplerStatesToBeCompiled;
     InplaceArray<ShaderInputProviderDeclaration*, 8> includedShaderInputProviders;
 
-    shipBool couldReadShaderFile = ReadShaderFile(sourceFilename, shaderSource, renderStateBlockSource, includedShaderInputProviders);
+    shipBool couldReadShaderFile = ReadShaderFile(
+            sourceFilename,
+            shaderSource,
+            renderStateBlockSource,
+            samplerStatesToBeCompiled,
+            includedShaderInputProviders);
     if (!couldReadShaderFile)
     {
         return;
@@ -405,6 +576,7 @@ void ShaderCompiler::CompileShaderFamily(ShaderFamily shaderFamily)
                 sourceFilename,
                 shaderSource,
                 renderStateBlockSource,
+                samplerStatesToBeCompiled,
                 includedShaderInputProviders);
 
         shaderOptionAsInt -= 1;
@@ -418,9 +590,15 @@ void ShaderCompiler::CompileShaderKey(const ShaderKey& shaderKeyToCompile)
 
     StringA shaderSource;
     LargeInplaceStringA renderStateBlockSource;
+    Array<SamplerStateToBeCompiled> samplerStatesToBeCompiled;
     InplaceArray<ShaderInputProviderDeclaration*, 8> includedShaderInputProviders;
 
-    shipBool couldReadShaderFile = ReadShaderFile(sourceFilename, shaderSource, renderStateBlockSource, includedShaderInputProviders);
+    shipBool couldReadShaderFile = ReadShaderFile(
+            sourceFilename,
+            shaderSource,
+            renderStateBlockSource,
+            samplerStatesToBeCompiled,
+            includedShaderInputProviders);
     if (!couldReadShaderFile)
     {
         return;
@@ -435,6 +613,7 @@ void ShaderCompiler::CompileShaderKey(const ShaderKey& shaderKeyToCompile)
             sourceFilename,
             shaderSource,
             renderStateBlockSource,
+            samplerStatesToBeCompiled,
             includedShaderInputProviders);
 }
 
@@ -444,6 +623,7 @@ void ShaderCompiler::CompileShaderKey(
         const StringT& sourceFilename,
         const StringA& shaderSource,
         const StringA& renderStateBlockSource,
+        const Array<SamplerStateToBeCompiled>& samplerStatesToBeCompiled,
         const Array<ShaderInputProviderDeclaration*>& includedShaderInputProviders)
 {
     m_ShaderCompilationRequestLock.lock();
@@ -533,10 +713,36 @@ void ShaderCompiler::CompileShaderKey(
 
         compiledShaderKeyEntry.m_RootSignatureParameters = rootSignatureParameters;
 
+        Array<CompiledSamplerState> compiledSamplerStates;
+        if (samplerStatesToBeCompiled.Size() > 0)
+        {
+            compiledSamplerStates.Reserve(samplerStatesToBeCompiled.Size());
+
+            for (const SamplerStateToBeCompiled& samplerStateToBeCompiled : samplerStatesToBeCompiled)
+            {
+                SamplerState samplerState;
+                SamplerStateCompilerError samplerStateCompilationError = CompileSamplerStateBlock(
+                    shaderKeyToCompile,
+                    everyPossibleShaderOptionForShaderKey,
+                    samplerStateToBeCompiled.SamplerStateSource,
+                    samplerState);
+
+                if (samplerStateCompilationError == SamplerStateCompilerError::NoError)
+                {
+                    compiledShaderKeyEntry.m_SamplerStates.Add(samplerState);
+
+                    CompiledSamplerState& compiledSamplerState = compiledSamplerStates.Grow();
+                    compiledSamplerState.Name = samplerStateToBeCompiled.Name;
+                    compiledSamplerState.State = samplerState;
+                }
+            }
+        }
+
         CreateShaderResourceBinder(
                 shaderReflectionData,
                 rootSignatureParameters,
                 includedShaderInputProviders,
+                compiledSamplerStates,
                 rootIndexPerDescriptorRangeTypePerShaderStage,
                 compiledShaderKeyEntry.m_ShaderResourceBinder);
 
@@ -549,10 +755,6 @@ void ShaderCompiler::CompileShaderKey(
                 for (shipUint32 descriptorRangeIndex = 0; descriptorRangeIndex < rootSignatureParameterEntry.descriptorTable.descriptorRanges.Size(); descriptorRangeIndex++)
                 {
                     const DescriptorRange& descriptorRange = rootSignatureParameterEntry.descriptorTable.descriptorRanges[descriptorRangeIndex];
-                    if (descriptorRange.descriptorRangeType == DescriptorRangeType::Sampler)
-                    {
-                        continue;
-                    }
 
                     DescriptorSetEntryDeclaration& descriptorSetEntryDeclaration = compiledShaderKeyEntry.m_DescriptorSetEntryDeclarations.Grow();
                     descriptorSetEntryDeclaration.rootIndex = shipUint16(rootIndex);
@@ -831,6 +1033,7 @@ void ShaderCompiler::CreateShaderResourceBinder(
         const ShaderReflectionData& shaderReflectionData,
         const Array<RootSignatureParameterEntry>& rootSignatureParameters,
         const Array<ShaderInputProviderDeclaration*>& includedShaderInputProviders,
+        const Array<CompiledSamplerState>& compiledSamplerStates,
         shipUint16 rootIndexPerDescriptorRangeTypePerShaderStage[][shipUint32(ShaderStage::ShaderStage_Count)],
         ShaderResourceBinder& shaderResourceBinder)
 {
@@ -891,6 +1094,45 @@ void ShaderCompiler::CreateShaderResourceBinder(
             rootIndexPerDescriptorRangeTypePerShaderStage,
             DescriptorRangeType::UnorderedAccessView,
             shaderResourceBinder);
+
+    for (const ShaderInputReflectionData& shaderInputReflectionData : shaderReflectionData.SamplerReflctionDatas)
+    {
+        for (shipUint32 i = 0; i < shipUint32(ShaderStage::ShaderStage_Count); i++)
+        {
+            ShaderStage shaderStage = ShaderStage(i);
+
+            ShaderVisibility shaderVisibility = GetShaderVisibilityForShaderStage(shaderStage);
+
+            if ((shaderInputReflectionData.shaderVisibility & shaderVisibility) == 0)
+            {
+                continue;
+            }
+
+            shipUint32 samplerStateIndex = 0;
+            for (; samplerStateIndex < compiledSamplerStates.Size(); samplerStateIndex++)
+            {
+                if (compiledSamplerStates[samplerStateIndex].Name == shaderInputReflectionData.Name)
+                {
+                    break;
+                }
+            }
+
+            if (samplerStateIndex == compiledSamplerStates.Size())
+            {
+                continue;
+            }
+
+            shipUint16 descriptorRangeEntryIndex = GetDescriptorRangeEntryIndex(shaderInputReflectionData, rootSignatureParameters, DescriptorRangeType::Sampler);
+
+            constexpr shipUint32 descriptorRangeIndex = 0;
+            shaderResourceBinder.AddShaderResourceBinderEntryForSamplerToDescriptorTable(
+                    compiledSamplerStates[samplerStateIndex].State,
+                    rootIndexPerDescriptorRangeTypePerShaderStage[shipUint32(DescriptorRangeType::Sampler)][i],
+                    descriptorRangeIndex,
+                    descriptorRangeEntryIndex,
+                    shaderInputReflectionData.shaderVisibility);
+        }
+    }
 
     SHIP_STATIC_ASSERT_MSG(shipUint32(ShaderInputProviderUsage::Count) == 2, "Need to update code below this assert.");
 
@@ -1055,6 +1297,7 @@ void ShaderCompiler::CompiledShaderKeyEntry::Reset()
     m_RootSignatureParameters.Clear();
     m_ShaderResourceBinder = ShaderResourceBinder();
     m_DescriptorSetEntryDeclarations.Clear();
+    m_SamplerStates.Clear();
 }
 
 }

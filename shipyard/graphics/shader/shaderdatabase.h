@@ -81,6 +81,8 @@ namespace Shipyard
             ShaderResourceBinder shaderResourceBinder;
 
             InplaceArray<DescriptorSetEntryDeclaration, 8> descriptorSetEntryDeclarations;
+
+            InplaceArray<SamplerState, 4> samplerStates;
         };
 
     public:

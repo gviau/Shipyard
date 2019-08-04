@@ -95,6 +95,24 @@ void ShaderResourceBinder::AddShaderResourceBinderEntryForDescriptorToDescriptor
     shaderResourceBinderEntry.ShaderStageToBindTo = shaderStageToBindTo;
 }
 
+void ShaderResourceBinder::AddShaderResourceBinderEntryForSamplerToDescriptorTable(
+        const SamplerState& samplerState,
+        shipUint16 rootIndexToBindTo,
+        shipUint16 descriptorRangeIndexToBind,
+        shipUint16 descriptorRangeEntryIndexToBind,
+        ShaderVisibility shaderStageToBindTo)
+{
+    ShaderResourceBinderEntry& shaderResourceBinderEntry = m_ShaderResourceBinderEntries.Grow();
+    shaderResourceBinderEntry.RootIndexToBindTo = rootIndexToBindTo;
+    shaderResourceBinderEntry.DescriptorRangeIndexToBindTo = descriptorRangeIndexToBind;
+    shaderResourceBinderEntry.DescriptorRangeEntryIndexToBind = descriptorRangeEntryIndexToBind;
+
+    shaderResourceBinderEntry.ShaderStageToBindTo = shaderStageToBindTo;
+
+    shaderResourceBinderEntry.Sampler = samplerState;
+    shaderResourceBinderEntry.BindSamplerState = true;
+}
+
 void ShaderResourceBinder::AddShaderResourceBinderEntryForGlobalBufferToDescriptor(
         ShaderInputProviderUsage shaderInputProviderUsage,
         shipUint16 rootIndexToBindTo,
@@ -145,6 +163,11 @@ void ShaderResourceBinder::BindShaderInputProvders(
 
     for (const ShaderResourceBinderEntry& shaderResourceBinderEntry : m_ShaderResourceBinderEntries)
     {
+        if (shaderResourceBinderEntry.BindSamplerState)
+        {
+            continue;
+        }
+
         if (shaderResourceBinderEntry.BindGlobalBuffer)
         {
             BindShaderGlobalBuffer(shaderResourceBinderEntry, gfxRenderDevice, gfxDirectRenderCommandList, gfxDescriptorSet);
@@ -153,9 +176,9 @@ void ShaderResourceBinder::BindShaderInputProvders(
         {
             ShaderInputProvider* shaderInputProvider = shaderInputProviderManager.GetShaderInputProviderForDeclaration(shaderInputProviders, shaderResourceBinderEntry.Declaration);
             SHIP_ASSERT_MSG(
-                shaderInputProvider != nullptr,
-                "ShaderInputProvider %s is not present, things will break, most likely result in a GPU hang!",
-                shaderResourceBinderEntry.Declaration->GetShaderInputProviderName());
+                    shaderInputProvider != nullptr,
+                    "ShaderInputProvider %s is not present, things will break, most likely result in a GPU hang!",
+                    shaderResourceBinderEntry.Declaration->GetShaderInputProviderName());
 
             if (shaderResourceBinderEntry.BindDescriptor)
             {
@@ -168,6 +191,35 @@ void ShaderResourceBinder::BindShaderInputProvders(
             else
             {
                 SHIP_ASSERT(!"Should not happen.");
+            }
+        }
+    }
+}
+
+void ShaderResourceBinder::BindSamplerStates(
+        GFXRenderDevice& gfxRenderDevice,
+        const Array<GFXSamplerHandle>& gfxSamplerHandles,
+        GFXDescriptorSetHandle gfxDescriptorSetHandle) const
+{
+    GFXDescriptorSet& gfxDescriptorSet = gfxRenderDevice.GetDescriptorSet(gfxDescriptorSetHandle);
+
+    for (const ShaderResourceBinderEntry& shaderResourceBinderEntry : m_ShaderResourceBinderEntries)
+    {
+        if (!shaderResourceBinderEntry.BindSamplerState)
+        {
+            continue;
+        }
+
+        for (const GFXSamplerHandle& gfxSamplerHandle : gfxSamplerHandles)
+        {
+            GFXSampler* gfxSamplerToBind = gfxRenderDevice.GetSamplerPtr(gfxSamplerHandle);
+            if (gfxSamplerToBind->GetSamplerState() == shaderResourceBinderEntry.Sampler)
+            {
+                gfxDescriptorSet.SetDescriptorTableEntryForRootIndex(
+                        shaderResourceBinderEntry.RootIndexToBindTo,
+                        shaderResourceBinderEntry.DescriptorRangeIndexToBindTo,
+                        shaderResourceBinderEntry.DescriptorRangeEntryIndexToBind,
+                        *gfxSamplerToBind);
             }
         }
     }

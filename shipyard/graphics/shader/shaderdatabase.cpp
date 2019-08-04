@@ -246,6 +246,7 @@ void ShaderDatabase::AppendShadersForShaderKey(const ShaderKey& shaderKey, Shade
     stolenShaderEntrySet.rootSignatureParameters = shaderEntrySet.rootSignatureParameters;
     stolenShaderEntrySet.shaderResourceBinder = shaderEntrySet.shaderResourceBinder;
     stolenShaderEntrySet.descriptorSetEntryDeclarations = shaderEntrySet.descriptorSetEntryDeclarations;
+    stolenShaderEntrySet.samplerStates = shaderEntrySet.samplerStates;
 
     StealShaderMemory(shaderEntrySet.rawVertexShader, shaderEntrySet.rawVertexShaderSize, stolenShaderEntrySet.rawVertexShader, stolenShaderEntrySet.rawVertexShaderSize);
     StealShaderMemory(shaderEntrySet.rawPixelShader, shaderEntrySet.rawPixelShaderSize, stolenShaderEntrySet.rawPixelShader, stolenShaderEntrySet.rawPixelShaderSize);
@@ -337,6 +338,14 @@ void ShaderDatabase::AppendShadersForShaderKey(const ShaderKey& shaderKey, Shade
     {
         m_FileHandler.AppendChars((const shipChar*)&shaderEntrySet.descriptorSetEntryDeclarations[0], sizeof(shaderEntrySet.descriptorSetEntryDeclarations[0]) * numDescriptorSetEntryDeclarations, flush);
     }
+
+    shipUint32 numSamplerStates = shaderEntrySet.samplerStates.Size();
+    m_FileHandler.AppendChars((const shipChar*)&numSamplerStates, sizeof(numSamplerStates), flush);
+
+    if (numSamplerStates > 0)
+    {
+        m_FileHandler.AppendChars((const shipChar*)&shaderEntrySet.samplerStates[0], sizeof(shaderEntrySet.samplerStates[0]) * numSamplerStates, flush);
+    }
 }
 
 void ShaderDatabase::LoadNextShaderEntry(shipUint8*& databaseBuffer, BigArray<ShaderEntryKey>& shaderEntryKeys, BigArray<ShaderEntrySet>& shaderEntrySets) const
@@ -392,6 +401,17 @@ void ShaderDatabase::LoadNextShaderEntry(shipUint8*& databaseBuffer, BigArray<Sh
 
         memcpy(&newShaderEntrySet.descriptorSetEntryDeclarations[0], databaseBuffer, sizeof(newShaderEntrySet.descriptorSetEntryDeclarations[0]) * numDescriptorSetEntryDeclarations);
         databaseBuffer += sizeof(newShaderEntrySet.descriptorSetEntryDeclarations[0]) * numDescriptorSetEntryDeclarations;
+    }
+
+    shipUint32 numSamplerStates = *(const shipUint32*)databaseBuffer;
+    databaseBuffer += sizeof(shipUint32);
+
+    if (numSamplerStates > 0)
+    {
+        newShaderEntrySet.samplerStates.Resize(numSamplerStates);
+
+        memcpy(&newShaderEntrySet.samplerStates[0], databaseBuffer, sizeof(newShaderEntrySet.samplerStates[0]) * numSamplerStates);
+        databaseBuffer += sizeof(newShaderEntrySet.samplerStates[0]) * numSamplerStates;
     }
 }
 
@@ -511,6 +531,15 @@ size_t ShaderDatabase::GetShaderEntrySetSize(const ShaderEntrySet& shaderEntrySe
     if (numDescriptorSetEntryDeclarations > 0)
     {
         shaderEntrySetSize += sizeof(shaderEntrySet.descriptorSetEntryDeclarations[0]) * numDescriptorSetEntryDeclarations;
+    }
+
+    shipUint32 numSamplerStates = shaderEntrySet.samplerStates.Size();
+
+    shaderEntrySetSize += sizeof(numSamplerStates);
+
+    if (numSamplerStates > 0)
+    {
+        shaderEntrySetSize += sizeof(shaderEntrySet.samplerStates[0]) * numSamplerStates;
     }
 
     return shaderEntrySetSize;

@@ -218,6 +218,21 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
         shaderHandler->m_ShaderRenderElements.GfxDescriptorSetHandle = m_RenderDevice->CreateDescriptorSet(DescriptorSetType::ConstantBuffer_ShaderResource_UnorderedAccess_Views, compiledShaderEntrySet.descriptorSetEntryDeclarations);
 
         shaderHandler->m_ShaderResourceBinder = compiledShaderEntrySet.shaderResourceBinder;
+
+        for (GFXSamplerHandle gfxSamplerStateHandle : shaderHandler->m_SamplerStateHandles)
+        {
+            if (gfxSamplerStateHandle.handle != InvalidGfxHandle)
+            {
+                m_RenderDevice->DestroySampler(gfxSamplerStateHandle);
+            }
+        }
+        shaderHandler->m_SamplerStateHandles.Clear();
+
+        for (const SamplerState& samplerState : compiledShaderEntrySet.samplerStates)
+        {
+            GFXSamplerHandle gfxSamplerHandle = m_RenderDevice->CreateSampler(samplerState);
+            shaderHandler->m_SamplerStateHandles.Add(gfxSamplerHandle);
+        }
     }
 
     return shaderHandler;

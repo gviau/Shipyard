@@ -59,6 +59,11 @@ void ShaderHandler::ApplyShaderInputProviders(
             gfxDirectRenderCommandList,
             shaderInputProviders,
             m_ShaderRenderElements.GfxDescriptorSetHandle);
+
+    m_ShaderResourceBinder.BindSamplerStates(
+            gfxRenderDevice,
+            m_SamplerStateHandles,
+            m_ShaderRenderElements.GfxDescriptorSetHandle);
 }
 
 }

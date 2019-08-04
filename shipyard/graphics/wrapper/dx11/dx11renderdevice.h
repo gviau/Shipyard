@@ -72,6 +72,8 @@ namespace Shipyard
         void DestroySampler(GFXSamplerHandle gfxSamplerHandle);
         GFXSampler& GetSampler(GFXSamplerHandle gfxSamplerHandle);
         const GFXSampler& GetSampler(GFXSamplerHandle gfxSamplerHandle) const;
+        GFXSampler* GetSamplerPtr(GFXSamplerHandle gfxSamplerHandle);
+        const GFXSampler* GetSamplerPtr(GFXSamplerHandle gfxSamplerHandle) const;
 
         GFXRenderTargetHandle CreateRenderTarget(GFXTexture2DHandle* texturesToAttach, shipUint32 numTexturesToAttach);
         void DestroyRenderTarget(GFXRenderTargetHandle gfxRenderTargetHandle);
@@ -133,5 +135,9 @@ namespace Shipyard
         DataPool<GFXRootSignature, SHIP_MAX_ROOT_SIGNATURES> m_RootSignaturePool;
         DataPool<GFXPipelineStateObject, SHIP_MAX_RENDER_PIPELINE_STATE_OBJECTS> m_PipelineStateObjectPool;
         DataPool<GFXDescriptorSet, SHIP_MAX_DESCRIPTOR_SETS> m_DescriptorSetPool;
+
+        // Ref counts for particular type of objects, of which there can be a limited number. Therefore,
+        // with each creation, we can return an already allocated handle.
+        shipUint32 m_SamplerHandleRefCounts[SHIP_MAX_SAMPLERS];
     };
 }

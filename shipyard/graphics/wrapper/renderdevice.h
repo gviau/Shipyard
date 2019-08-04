@@ -58,6 +58,8 @@ namespace Shipyard
         virtual void DestroySampler(GFXSamplerHandle gfxSamplerHandle) = 0;
         virtual GFXSampler& GetSampler(GFXSamplerHandle gfxSamplerHandle) = 0;
         virtual const GFXSampler& GetSampler(GFXSamplerHandle gfxSamplerHandle) const = 0;
+        virtual GFXSampler* GetSamplerPtr(GFXSamplerHandle gfxSamplerHandle) = 0;
+        virtual const GFXSampler* GetSamplerPtr(GFXSamplerHandle gfxSamplerHandle) const = 0;
 
         virtual GFXRenderTargetHandle CreateRenderTarget(GFXTexture2DHandle* texturesToAttach, shipUint32 numTexturesToAttach) = 0;
         virtual void DestroyRenderTarget(GFXRenderTargetHandle gfxRenderTargetHandle) = 0;

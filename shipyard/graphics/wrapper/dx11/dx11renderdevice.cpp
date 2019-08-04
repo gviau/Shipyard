@@ -30,6 +30,10 @@ DX11RenderDevice::DX11RenderDevice()
     : m_Device(nullptr)
     , m_ImmediateDeviceContext(nullptr)
 {
+    for (shipUint32 i = 0; i < SHIP_MAX_SAMPLERS; i++)
+    {
+        m_SamplerHandleRefCounts[i] = 0;
+    }
 }
 
 DX11RenderDevice::~DX11RenderDevice()
@@ -452,8 +456,33 @@ const GFXTexture2D* DX11RenderDevice::GetTexture2DPtr(GFXTexture2DHandle gfxText
     return m_Texture2dPool.GetItemPtr(gfxTexture2dHandle.handle);
 }
 
+shipUint32 GetSamplerIndexFromSamplerState(const DataPool<GFXSampler, SHIP_MAX_SAMPLERS>& samplerPool, const SamplerState& samplerState)
+{
+    shipUint32 allocatedSamplerIndex = 0;
+    if (samplerPool.GetFirstAllocatedIndex(&allocatedSamplerIndex))
+    {
+        do
+        {
+            if (samplerPool.GetItem(allocatedSamplerIndex).GetSamplerState() == samplerState)
+            {
+                return allocatedSamplerIndex;
+            }
+        } while (samplerPool.GetNextAllocatedIndex(allocatedSamplerIndex, &allocatedSamplerIndex));
+    }
+
+    return InvalidGfxHandle;
+}
+
 GFXSamplerHandle DX11RenderDevice::CreateSampler(const SamplerState& samplerState)
 {
+    shipUint32 samplerIndex = GetSamplerIndexFromSamplerState(m_SamplerPool, samplerState);
+    if (samplerIndex != InvalidGfxHandle)
+    {
+        m_SamplerHandleRefCounts[samplerIndex] += 1;
+
+        return GFXSamplerHandle(samplerIndex);
+    }
+
     GFXSamplerHandle gfxSamplerHandle;
     gfxSamplerHandle.handle = m_SamplerPool.GetNewItemIndex();
 
@@ -462,16 +491,24 @@ GFXSamplerHandle DX11RenderDevice::CreateSampler(const SamplerState& samplerStat
 
     SHIP_ASSERT(isValid);
 
+    m_SamplerHandleRefCounts[gfxSamplerHandle.handle] += 1;
+
     return gfxSamplerHandle;
 }
 
 void DX11RenderDevice::DestroySampler(GFXSamplerHandle gfxSamplerHandle)
 {
-    GFXSampler& gfxSampler = m_SamplerPool.GetItem(gfxSamplerHandle.handle);
-    gfxSampler.Destroy();
+    SHIP_ASSERT(m_SamplerHandleRefCounts[gfxSamplerHandle.handle] > 0);
+    m_SamplerHandleRefCounts[gfxSamplerHandle.handle] -= 1;
 
-    m_SamplerPool.ReleaseItem(gfxSamplerHandle.handle);
-    gfxSamplerHandle.handle = InvalidGfxHandle;
+    if (m_SamplerHandleRefCounts[gfxSamplerHandle.handle] == 0)
+    {
+        GFXSampler& gfxSampler = m_SamplerPool.GetItem(gfxSamplerHandle.handle);
+        gfxSampler.Destroy();
+
+        m_SamplerPool.ReleaseItem(gfxSamplerHandle.handle);
+        gfxSamplerHandle.handle = InvalidGfxHandle;
+    }
 }
 
 GFXSampler& DX11RenderDevice::GetSampler(GFXSamplerHandle gfxSamplerHandle)
@@ -482,6 +519,16 @@ GFXSampler& DX11RenderDevice::GetSampler(GFXSamplerHandle gfxSamplerHandle)
 const GFXSampler& DX11RenderDevice::GetSampler(GFXSamplerHandle gfxSamplerHandle) const
 {
     return m_SamplerPool.GetItem(gfxSamplerHandle.handle);
+}
+
+GFXSampler* DX11RenderDevice::GetSamplerPtr(GFXSamplerHandle gfxSamplerHandle)
+{
+    return m_SamplerPool.GetItemPtr(gfxSamplerHandle.handle);
+}
+
+const GFXSampler* DX11RenderDevice::GetSamplerPtr(GFXSamplerHandle gfxSamplerHandle) const
+{
+    return m_SamplerPool.GetItemPtr(gfxSamplerHandle.handle);
 }
 
 GFXRenderTargetHandle DX11RenderDevice::CreateRenderTarget(GFXTexture2DHandle* texturesToAttach, shipUint32 numTexturesToAttach)

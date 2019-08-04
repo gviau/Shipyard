@@ -470,6 +470,10 @@ void DX11RenderStateCache::BindDescriptorTableFromDescriptorSet(
             BindResourceAsShaderResourceView(descriptorResource, rootSignatureParameter.shaderVisibility, shaderBindingSlot);
             break;
 
+        case DescriptorRangeType::Sampler:
+            BindResourceAsSampler(descriptorResource, rootSignatureParameter.shaderVisibility, shaderBindingSlot);
+            break;
+
         default:
             SHIP_ASSERT(!"DescriptorTable range type not implemented yet");
             break;
@@ -567,6 +571,35 @@ void DX11RenderStateCache::BindResourceAsShaderResourceView(GfxResource* descrip
     }
 }
 
+void DX11RenderStateCache::BindResourceAsSampler(GfxResource* descriptorResource, ShaderVisibility shaderVisibility, shipUint32 shaderBindingSlot)
+{
+    GfxResourceType resourceType = descriptorResource->GetResourceType();
+    SHIP_ASSERT(resourceType == GfxResourceType::Sampler);
+
+    GFXSampler* gfxSampler = static_cast<GFXSampler*>(descriptorResource);
+
+    ID3D11SamplerState* nativeSamplerState = gfxSampler->GetNativeSamplerState();
+
+    for (shipUint32 i = 0; i < ShaderStage::ShaderStage_Count; i++)
+    {
+        ShaderStage shaderStage = ShaderStage(i);
+
+        if ((shaderVisibility & GetShaderVisibilityForShaderStage(shaderStage)) == 0)
+        {
+            continue;
+        }
+
+        if (m_NativeSamplers[i][shaderBindingSlot] != nativeSamplerState)
+        {
+            m_NativeSamplers[i][shaderBindingSlot] = nativeSamplerState;
+
+            MarkBindingSlotAsDirty(m_DirtySlotSamplersPerShaderStage, shaderVisibility, shaderBindingSlot);
+
+            m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Samplers);
+        }
+    }
+}
+
 namespace
 {
     // Create lookup tables for shader resource setting method, to avoid super larger if blocks
@@ -574,6 +607,8 @@ namespace
             (UINT firstBindingSlots, UINT numBindingSlotsToSet, ID3D11Buffer* const* constantBufferViewsToBind);
     typedef void (STDMETHODCALLTYPE ID3D11DeviceContext::*ShaderResourceViewsSetterFunctionPtr)
             (UINT firstBindingSlots, UINT numBindingSlotsToSet, ID3D11ShaderResourceView* const* shaderResourceViewsToBind);
+    typedef void (STDMETHODCALLTYPE ID3D11DeviceContext::*SamplerSetterFunctionPtr)
+            (UINT firstBindingSlots, UINT numBindingSlotsToSet, ID3D11SamplerState* const* samplersToBind);
 
     ConstantBufferViewsSetterFunctionPtr g_ConstantBufferViewsSetterTable[] =
     {
@@ -593,6 +628,16 @@ namespace
         &ID3D11DeviceContext::DSSetShaderResources,
         &ID3D11DeviceContext::GSSetShaderResources,
         &ID3D11DeviceContext::CSSetShaderResources
+    };
+
+    SamplerSetterFunctionPtr g_SamplersSetterTable[] =
+    {
+        &ID3D11DeviceContext::VSSetSamplers,
+        &ID3D11DeviceContext::PSSetSamplers,
+        &ID3D11DeviceContext::HSSetSamplers,
+        &ID3D11DeviceContext::DSSetSamplers,
+        &ID3D11DeviceContext::GSSetSamplers,
+        &ID3D11DeviceContext::CSSetSamplers,
     };
 }
 
@@ -779,6 +824,30 @@ void DX11RenderStateCache::CommitStateChangesForGraphics(GFXRenderDevice& gfxRen
 
     if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Samplers))
     {
+        for (shipUint32 shaderStage = 0; shaderStage < ShaderStage::ShaderStage_Count; shaderStage++)
+        {
+            if (m_DirtySlotSamplersPerShaderStage[shaderStage].IsClear())
+            {
+                continue;
+            }
+
+            shipUint32 startingBindingSlot = 0;
+            shipUint32 firstBindingSlot = 0;
+
+            SamplerSetterFunctionPtr samplersSetterForShaderStage = g_SamplersSetterTable[shaderStage];
+
+            while (m_DirtySlotSamplersPerShaderStage[shaderStage].GetFirstBitSet(startingBindingSlot, firstBindingSlot))
+            {
+                shipUint32 numBindingSlotsToSet = m_DirtySlotSamplersPerShaderStage[shaderStage].GetLongestRangeWithBitsSet(firstBindingSlot);
+
+                (m_DeviceContext->*samplersSetterForShaderStage)(firstBindingSlot, numBindingSlotsToSet, &m_NativeSamplers[shaderStage][firstBindingSlot]);
+
+                startingBindingSlot = firstBindingSlot + numBindingSlotsToSet;
+            }
+
+            m_DirtySlotSamplersPerShaderStage[shaderStage].Clear();
+        }
+
         m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Samplers);
     }
 

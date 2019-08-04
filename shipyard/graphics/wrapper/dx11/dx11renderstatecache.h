@@ -51,6 +51,7 @@ namespace Shipyard
 
         void BindResourceAsConstantBuffer(GfxResource* descriptorResource, ShaderVisibility shaderVisibility, shipUint32 shaderBindingSlot);
         void BindResourceAsShaderResourceView(GfxResource* descriptorResource, ShaderVisibility shaderVisibility, shipUint32 shaderBindingSlot);
+        void BindResourceAsSampler(GfxResource* descriptorResource, ShaderVisibility shaderVisibility, shipUint32 shaderBindingSlot);
 
         template <shipUint32 NumBits>
         void MarkBindingSlotAsDirty(InplaceBitfield<NumBits>* dirtyBindingSlots, ShaderVisibility shaderVisibility, shipUint32 bindingSlot)

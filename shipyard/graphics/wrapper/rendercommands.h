@@ -59,8 +59,6 @@ namespace Shipyard
         GFXRootSignatureHandle gfxRootSignatureHandle = { InvalidGfxHandle };
         GFXDescriptorSetHandle gfxDescriptorSetHandle = { InvalidGfxHandle };
 
-        PrimitiveTopology primitiveTopologyToUse = PrimitiveTopology::TriangleList;
-        RenderStateBlockStateOverride* pRenderStateBlockStateOverride = nullptr;
         GFXVertexBufferHandle* pGfxVertexBufferHandles = nullptr;
         shipUint32 startSlot = 0;
         shipUint32 numVertexBuffers = 0;
@@ -79,8 +77,6 @@ namespace Shipyard
         GFXRootSignatureHandle gfxRootSignatureHandle = { InvalidGfxHandle };
         GFXDescriptorSetHandle gfxDescriptorSetHandle = { InvalidGfxHandle };
 
-        PrimitiveTopology primitiveTopologyToUse = PrimitiveTopology::TriangleList;
-        RenderStateBlockStateOverride* pRenderStateBlockStateOverride = nullptr;
         GFXVertexBufferHandle* pGfxVertexBufferHandles = nullptr;
         GFXIndexBufferHandle gfxIndexBufferHandle = { InvalidGfxHandle };
         shipUint32 startSlot = 0;

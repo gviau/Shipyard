@@ -13,7 +13,6 @@
 
 namespace Shipyard
 {
-
     class DepthStencilRenderTarget;
     class DescriptorSet;
     class PixelShader;
@@ -590,28 +589,47 @@ namespace Shipyard
         RasterizerState rasterizerState;
         DepthStencilState depthStencilState;
         BlendState blendState;
+
+        shipBool operator== (const RenderStateBlock& rhs) const
+        {
+            return (rasterizerState == rhs.rasterizerState &&
+                    depthStencilState == rhs.depthStencilState &&
+                    blendState == rhs.blendState);
+        }
     };
 
     struct PipelineStateObjectCreationParameters
     {
-        PipelineStateObjectCreationParameters()
-            : rootSignature(nullptr)
-            , numRenderTargets(0)
+        GFXRootSignatureHandle GfxRootSignatureHandle = { InvalidGfxHandle };
+
+        GFXVertexShaderHandle GfxVertexShaderHandle = { InvalidGfxHandle };
+        GFXPixelShaderHandle GfxPixelShaderHandle = { InvalidGfxHandle };
+
+        RenderStateBlock RenderStateBlockToUse;
+        VertexFormatType VertexFormatTypeToUse;
+        PrimitiveTopology PrimitiveTopologyToUse;
+
+        shipUint32 NumRenderTargets = 0;
+        GfxFormat RenderTargetsFormat[GfxConstants::GfxConstants_MaxRenderTargetsBound];
+        GfxFormat DepthStencilFormat = GfxFormat::Unknown;
+
+        shipBool operator== (const PipelineStateObjectCreationParameters& rhs) const
         {
+            return (GfxRootSignatureHandle == rhs.GfxRootSignatureHandle &&
+                    GfxVertexShaderHandle == rhs.GfxVertexShaderHandle &&
+                    GfxPixelShaderHandle == rhs.GfxPixelShaderHandle &&
+                    RenderStateBlockToUse == rhs.RenderStateBlockToUse &&
+                    VertexFormatTypeToUse == rhs.VertexFormatTypeToUse &&
+                    PrimitiveTopologyToUse == rhs.PrimitiveTopologyToUse &&
+                    NumRenderTargets == rhs.NumRenderTargets &&
+                    (NumRenderTargets == 0 || memcmp(&RenderTargetsFormat[0], &rhs.RenderTargetsFormat[0], sizeof(RenderTargetsFormat[0]) * NumRenderTargets) == 0) &&
+                    DepthStencilFormat == rhs.DepthStencilFormat);
         }
 
-        const RootSignature* rootSignature;
-
-        GFXVertexShaderHandle vertexShaderHandle;
-        GFXPixelShaderHandle pixelShaderHandle;
-
-        RenderStateBlock renderStateBlock;
-        VertexFormatType vertexFormatType;
-        PrimitiveTopology primitiveTopology;
-
-        shipUint32 numRenderTargets;
-        GfxFormat renderTargetsFormat[GfxConstants::GfxConstants_MaxRenderTargetsBound];
-        GfxFormat depthStencilFormat;
+        shipBool operator!= (const PipelineStateObjectCreationParameters& rhs) const
+        {
+            return !(*this == rhs);
+        }
     };
 
     enum class DescriptorSetType

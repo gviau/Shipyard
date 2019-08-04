@@ -168,12 +168,9 @@ size_t DX11CommandQueue::Draw(BaseRenderCommand* pCmd)
             drawCommand.gfxViewport,
             drawCommand.gfxPipelineStateObjectHandle,
             drawCommand.gfxRootSignatureHandle,
-            drawCommand.gfxDescriptorSetHandle,
-            drawCommand.primitiveTopologyToUse,
-            drawCommand.pRenderStateBlockStateOverride);
+            drawCommand.gfxDescriptorSetHandle);
 
-    VertexFormatType vertexFormatType = ((drawCommand.numVertexBuffers > 0) ? m_RenderDevice.GetVertexBuffer(drawCommand.pGfxVertexBufferHandles[drawCommand.startSlot]).GetVertexFormatType() : VertexFormatType::VertexFormatType_Count);
-    PrepareNextDrawCalls(drawItem, vertexFormatType);
+    PrepareNextDrawCalls(drawItem);
 
     SHIP_ASSERT(drawCommand.numVertexBuffers < GfxConstants_MaxVertexBuffers);
     GFXVertexBuffer* gfxVertexBuffers[GfxConstants_MaxVertexBuffers];
@@ -207,12 +204,9 @@ size_t DX11CommandQueue::DrawIndexed(BaseRenderCommand* pCmd)
             drawIndexedCommand.gfxViewport,
             drawIndexedCommand.gfxPipelineStateObjectHandle,
             drawIndexedCommand.gfxRootSignatureHandle,
-            drawIndexedCommand.gfxDescriptorSetHandle,
-            drawIndexedCommand.primitiveTopologyToUse,
-            drawIndexedCommand.pRenderStateBlockStateOverride);
+            drawIndexedCommand.gfxDescriptorSetHandle);
 
-    VertexFormatType vertexFormatType = ((drawIndexedCommand.numVertexBuffers > 0) ? m_RenderDevice.GetVertexBuffer(drawIndexedCommand.pGfxVertexBufferHandles[drawIndexedCommand.startSlot]).GetVertexFormatType() : VertexFormatType::VertexFormatType_Count);
-    PrepareNextDrawCalls(drawItem, vertexFormatType);
+    PrepareNextDrawCalls(drawItem);
 
     SHIP_ASSERT(drawIndexedCommand.numVertexBuffers < GfxConstants_MaxVertexBuffers);
     GFXVertexBuffer* gfxVertexBuffers[GfxConstants_MaxVertexBuffers];
@@ -288,27 +282,11 @@ size_t DX11CommandQueue::MapBuffer(BaseRenderCommand* pCmd)
     return sizeof(MapBufferCommand);
 }
 
-void DX11CommandQueue::PrepareNextDrawCalls(const DrawItem& drawItem, VertexFormatType vertexFormatType)
+void DX11CommandQueue::PrepareNextDrawCalls(const DrawItem& drawItem)
 {
-    GFXPipelineStateObject& gfxPipelineStateObject = m_RenderDevice.GetPipelineStateObject(drawItem.pipelineStateObjetHandle);
-    PipelineStateObjectCreationParameters pipelineStateObjectCreationParameters = gfxPipelineStateObject.GetCreationParameters();
-
-    pipelineStateObjectCreationParameters.primitiveTopology = drawItem.primitiveTopology;
-    pipelineStateObjectCreationParameters.vertexFormatType = vertexFormatType;
-
-    if (drawItem.renderTargetHandle.handle == InvalidGfxHandle)
-    {
-        pipelineStateObjectCreationParameters.numRenderTargets = 0;
-    }
-    else
+    if (drawItem.renderTargetHandle.handle != InvalidGfxHandle)
     {
         const GFXRenderTarget& gfxRenderTarget = m_RenderDevice.GetRenderTarget(drawItem.renderTargetHandle);
-
-        pipelineStateObjectCreationParameters.numRenderTargets = gfxRenderTarget.GetNumRenderTargetsAttached();
-
-        GfxFormat const * renderTargetFormats = gfxRenderTarget.GetRenderTargetFormats();
-
-        memcpy(&pipelineStateObjectCreationParameters.renderTargetsFormat[0], &renderTargetFormats[0], pipelineStateObjectCreationParameters.numRenderTargets);
 
         m_RenderStateCache.BindRenderTarget(gfxRenderTarget);
     }
@@ -317,25 +295,15 @@ void DX11CommandQueue::PrepareNextDrawCalls(const DrawItem& drawItem, VertexForm
     {
         const GFXDepthStencilRenderTarget& gfxDepthStencilRenderTarget = m_RenderDevice.GetDepthStencilRenderTarget(drawItem.depthStencilRenderTargetHandle);
 
-        pipelineStateObjectCreationParameters.depthStencilFormat = gfxDepthStencilRenderTarget.GetDepthStencilFormat();
-
         m_RenderStateCache.BindDepthStencilRenderTarget(gfxDepthStencilRenderTarget);
     }
 
-    // Apply override, if any.
-    if (drawItem.pRenderStateBlockStateOverride != nullptr)
-    {
-        drawItem.pRenderStateBlockStateOverride->ApplyOverridenValues(pipelineStateObjectCreationParameters.renderStateBlock);
-    }
-
-    GFXPipelineStateObject tempGfxPipelineStateObject;
-    tempGfxPipelineStateObject.Create(pipelineStateObjectCreationParameters);
-
+    GFXPipelineStateObject& gfxPipelineStateObject = m_RenderDevice.GetPipelineStateObject(drawItem.pipelineStateObjetHandle);
     GFXRootSignature& gfxRootSignature = m_RenderDevice.GetRootSignature(drawItem.rootSignatureHandle);
     GFXDescriptorSet& gfxDescriptorSet = m_RenderDevice.GetDescriptorSet(drawItem.descriptorSetHandle);
 
     m_RenderStateCache.BindRootSignature(gfxRootSignature);
-    m_RenderStateCache.BindPipelineStateObject(tempGfxPipelineStateObject);
+    m_RenderStateCache.BindPipelineStateObject(gfxPipelineStateObject);
     m_RenderStateCache.BindDescriptorSet(gfxDescriptorSet, gfxRootSignature);
 
     m_RenderStateCache.SetViewport(drawItem.viewport);

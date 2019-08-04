@@ -35,17 +35,13 @@ namespace Shipyard
                     const GfxViewport& gfxViewport,
                     GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle,
                     GFXRootSignatureHandle gfxRootSignatureHandle,
-                    GFXDescriptorSetHandle gfxDescriptorSetHandle,
-                    PrimitiveTopology primitiveTopologyToUse,
-                    const RenderStateBlockStateOverride* pRenderStateBlockStateOverrideToUse)
+                    GFXDescriptorSetHandle gfxDescriptorSetHandle)
                 : renderTargetHandle(gfxRenderTargetHandle)
                 , depthStencilRenderTargetHandle(gfxDepthStencilRenderTargetHandle)
                 , viewport(gfxViewport)
                 , pipelineStateObjetHandle(gfxPipelineStateObjectHandle)
                 , rootSignatureHandle(gfxRootSignatureHandle)
                 , descriptorSetHandle(gfxDescriptorSetHandle)
-                , primitiveTopology(primitiveTopologyToUse)
-                , pRenderStateBlockStateOverride(pRenderStateBlockStateOverrideToUse)
             {}
 
             GFXRenderTargetHandle renderTargetHandle;
@@ -56,10 +52,6 @@ namespace Shipyard
             GFXPipelineStateObjectHandle pipelineStateObjetHandle;
             GFXRootSignatureHandle rootSignatureHandle;
             GFXDescriptorSetHandle descriptorSetHandle;
-
-            PrimitiveTopology primitiveTopology;
-
-            const RenderStateBlockStateOverride* pRenderStateBlockStateOverride = nullptr;
         };
 
     private:
@@ -72,7 +64,7 @@ namespace Shipyard
 
         size_t MapBuffer(BaseRenderCommand* pCmd);
 
-        void PrepareNextDrawCalls(const DrawItem& drawItem, VertexFormatType vertexFormatType);
+        void PrepareNextDrawCalls(const DrawItem& drawItem);
 
         ID3D11Device* m_Device;
         ID3D11DeviceContext* m_DeviceContext;

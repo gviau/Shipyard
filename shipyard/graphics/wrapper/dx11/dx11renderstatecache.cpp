@@ -199,56 +199,56 @@ void DX11RenderStateCache::BindPipelineStateObject(const GFXPipelineStateObject&
 {
     const PipelineStateObjectCreationParameters& pipelineStateObjectParameters = pipelineStateObject.GetCreationParameters();
 
-    if (pipelineStateObjectParameters.renderStateBlock.rasterizerState != m_RasterizerState)
+    if (pipelineStateObjectParameters.RenderStateBlockToUse.rasterizerState != m_RasterizerState)
     {
-        m_RasterizerState = pipelineStateObjectParameters.renderStateBlock.rasterizerState;
+        m_RasterizerState = pipelineStateObjectParameters.RenderStateBlockToUse.rasterizerState;
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_RasterizerState);
     }
 
-    if (pipelineStateObjectParameters.renderStateBlock.depthStencilState != m_DepthStencilState)
+    if (pipelineStateObjectParameters.RenderStateBlockToUse.depthStencilState != m_DepthStencilState)
     {
-        m_DepthStencilState = pipelineStateObjectParameters.renderStateBlock.depthStencilState;
+        m_DepthStencilState = pipelineStateObjectParameters.RenderStateBlockToUse.depthStencilState;
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_DepthStencilState);
     }
 
-    if (pipelineStateObjectParameters.renderStateBlock.blendState != m_BlendState)
+    if (pipelineStateObjectParameters.RenderStateBlockToUse.blendState != m_BlendState)
     {
-        m_BlendState = pipelineStateObjectParameters.renderStateBlock.blendState;
+        m_BlendState = pipelineStateObjectParameters.RenderStateBlockToUse.blendState;
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_BlendState);
     }
 
-    if (pipelineStateObjectParameters.vertexShaderHandle.handle != m_VertexShaderHandle.handle)
+    if (pipelineStateObjectParameters.GfxVertexShaderHandle.handle != m_VertexShaderHandle.handle)
     {
-        SHIP_ASSERT(pipelineStateObjectParameters.vertexShaderHandle.handle != InvalidGfxHandle);
+        SHIP_ASSERT(pipelineStateObjectParameters.GfxVertexShaderHandle.handle != InvalidGfxHandle);
 
-        m_VertexShaderHandle = pipelineStateObjectParameters.vertexShaderHandle;
+        m_VertexShaderHandle = pipelineStateObjectParameters.GfxVertexShaderHandle;
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexShader);
     }
 
-    if (pipelineStateObjectParameters.pixelShaderHandle.handle != m_PixelShaderHandle.handle)
+    if (pipelineStateObjectParameters.GfxPixelShaderHandle.handle != m_PixelShaderHandle.handle)
     {
         // Null pixel shader is actually okay (for example, depth rendering only).
-        if (pipelineStateObjectParameters.pixelShaderHandle.handle == InvalidGfxHandle)
+        if (pipelineStateObjectParameters.GfxPixelShaderHandle.handle == InvalidGfxHandle)
         {
             m_PixelShaderHandle.handle = InvalidGfxHandle;
         }
         else
         {
-            m_PixelShaderHandle = pipelineStateObjectParameters.pixelShaderHandle;
+            m_PixelShaderHandle = pipelineStateObjectParameters.GfxPixelShaderHandle;
         }
 
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_PixelShader);
     }
 
-    if (pipelineStateObjectParameters.primitiveTopology != m_PrimitiveTopology)
+    if (pipelineStateObjectParameters.PrimitiveTopologyToUse != m_PrimitiveTopology)
     {
-        m_PrimitiveTopology = pipelineStateObjectParameters.primitiveTopology;
+        m_PrimitiveTopology = pipelineStateObjectParameters.PrimitiveTopologyToUse;
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_PrimitiveTopology);
     }
 
-    if (pipelineStateObjectParameters.vertexFormatType != m_VertexFormatType)
+    if (pipelineStateObjectParameters.VertexFormatTypeToUse != m_VertexFormatType)
     {
-        m_VertexFormatType = pipelineStateObjectParameters.vertexFormatType;
+        m_VertexFormatType = pipelineStateObjectParameters.VertexFormatTypeToUse;
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexFormatType);
     }
 }

@@ -139,5 +139,6 @@ namespace Shipyard
         // Ref counts for particular type of objects, of which there can be a limited number. Therefore,
         // with each creation, we can return an already allocated handle.
         shipUint32 m_SamplerHandleRefCounts[SHIP_MAX_SAMPLERS];
+        shipUint32 m_PipelineStateObjectHandleRefCounts[SHIP_MAX_RENDER_PIPELINE_STATE_OBJECTS];
     };
 }

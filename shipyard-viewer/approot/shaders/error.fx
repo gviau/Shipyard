@@ -1,14 +1,5 @@
 #include "shaderinputproviders/SimpleConstantBufferProvider.hlsl"
 
-SamplerState testSampler
-{
-	Filter = MIN_MAG_MIP_POINT;
-	AddressU = Wrap;
-	AddressV = Wrap;
-};
-
-Texture2D tex : register(t0);
-
 struct vs_input
 {
 	float3 pos : POSITION;

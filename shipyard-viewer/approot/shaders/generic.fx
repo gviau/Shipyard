@@ -5,9 +5,10 @@
 
 SamplerState testSampler
 {
-	Filter = MIN_MAG_MIP_POINT;
-	AddressU = Wrap;
-	AddressV = Wrap;
+	MinificationFiltering = Linear;
+	MagnificationFiltering = Linear;
+	AddressModeU = Clamp;
+	AddressModeV = Clamp;
 };
 
 struct vs_input

@@ -268,7 +268,14 @@ void ShipyardViewer::ComputeOneFrame()
 
     pShaderHandler->ApplyShaderInputProviders(*m_pGfxRenderDevice, *m_pGfxDirectRenderCommandList, shaderInputProviders);
 
-    const ShaderHandler::ShaderRenderElements& shaderRenderElements = pShaderHandler->GetShaderRenderElements();
+    ShaderHandler::RenderState renderState;
+    renderState.GfxRenderTargetHandle = gfxRenderTargetHandle;
+    renderState.GfxDepthStencilRenderTargetHandle = m_GfxDepthStencilRenderTargetHandle;
+    renderState.PrimitiveTopologyToRender = PrimitiveTopology::TriangleList;
+    renderState.VertexFormatTypeToRender = m_pGfxRenderDevice->GetVertexBuffer(m_VertexBufferHandle).GetVertexFormatType();
+    renderState.OptionalRenderStateBlockStateOverride = nullptr;
+
+    const ShaderHandler::ShaderRenderElements& shaderRenderElements = pShaderHandler->GetShaderRenderElements(*m_pGfxRenderDevice, renderState);
 
     shipUint32 vertexBufferOffsets = 0;
 
@@ -279,8 +286,6 @@ void ShipyardViewer::ComputeOneFrame()
     pDrawIndexedCommand->gfxPipelineStateObjectHandle = shaderRenderElements.GfxPipelineStateObjectHandle;
     pDrawIndexedCommand->gfxRootSignatureHandle = shaderRenderElements.GfxRootSignatureHandle;
     pDrawIndexedCommand->gfxDescriptorSetHandle = shaderRenderElements.GfxDescriptorSetHandle;
-    pDrawIndexedCommand->primitiveTopologyToUse = PrimitiveTopology::TriangleList;
-    pDrawIndexedCommand->pRenderStateBlockStateOverride = nullptr;
     pDrawIndexedCommand->pGfxVertexBufferHandles = &m_VertexBufferHandle;
     pDrawIndexedCommand->gfxIndexBufferHandle = m_IndexBufferHandle;
     pDrawIndexedCommand->startSlot = 0;

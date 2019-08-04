@@ -58,7 +58,8 @@ namespace Shipyard
         Pos_Normal,
         Pos_UV_Normal,
 
-        VertexFormatType_Count
+        VertexFormatType_Count,
+        Invalid = VertexFormatType_Count
     };
 
     class VertexFormat

@@ -23,6 +23,17 @@ namespace Shipyard
         friend class ShaderHandlerManager;
 
     public:
+        struct RenderState
+        {
+            GFXRenderTargetHandle GfxRenderTargetHandle = { InvalidGfxHandle };
+            GFXDepthStencilRenderTargetHandle GfxDepthStencilRenderTargetHandle = { InvalidGfxHandle };
+
+            PrimitiveTopology PrimitiveTopologyToRender = PrimitiveTopology::TriangleList;
+            VertexFormatType VertexFormatTypeToRender = VertexFormatType::VertexFormatType_Count;
+
+            RenderStateBlockStateOverride* OptionalRenderStateBlockStateOverride = nullptr;
+        };
+
         struct ShaderRenderElements
         {
             GFXPipelineStateObjectHandle GfxPipelineStateObjectHandle;
@@ -40,13 +51,15 @@ namespace Shipyard
                 const Array<ShaderInputProvider*>& shaderInputProviders);
 
         const ShaderKey& GetShaderKey() const { return m_ShaderKey; }
-        const ShaderRenderElements& GetShaderRenderElements() const { return m_ShaderRenderElements; }
+        ShaderRenderElements GetShaderRenderElements(GFXRenderDevice& gfxRenderDevice, const RenderState& renderState);
 
     private:
         ShaderKey m_ShaderKey;
 
         GFXVertexShaderHandle m_GfxVertexShaderHandle;
         GFXPixelShaderHandle m_GfxPixelShaderHandle;
+
+        GFXPipelineStateObjectHandle m_GfxEffectivePipelineStateObjectHandle;
 
         ShaderRenderElements m_ShaderRenderElements;
         ShaderResourceBinder m_ShaderResourceBinder;

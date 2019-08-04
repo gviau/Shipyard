@@ -3,6 +3,7 @@
 #include <graphics/material/materialunifiedconstantbuffer.h>
 
 #include <graphics/shader/shaderhandlermanager.h>
+#include <graphics/shader/shadervertexformatgenerator.h>
 
 #include <graphics/shadercompiler/shadercompiler.h>
 #include <graphics/shadercompiler/shaderwatcher.h>
@@ -14,6 +15,9 @@ namespace Shipyard
 
 GraphicsSingletonStorer::GraphicsSingletonStorer()
 {
+    // Make sure the vertex format shader files are written before any shader compilation can happen.
+    WriteVertexFormatShaderFile();
+
     ShaderHandlerManager::CreateInstance();
     ShaderCompiler::CreateInstance();
     ShaderWatcher::CreateInstance();

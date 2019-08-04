@@ -1,15 +1,10 @@
 #include "shaderinputproviders/SimpleConstantBufferProvider.hlsl"
 
-struct vs_input
-{
-	float3 pos : POSITION;
-	float2 uv : TEXCOORD;
-};
+#include "vertexformatutils.hlsl"
 
 struct vs_output
 {
 	float4 pos : SV_POSITION;
-	float2 uv: TEXCOORD;
 };
 
 struct ps_output
@@ -17,13 +12,15 @@ struct ps_output
 	float4 color : SV_TARGET;
 };
 
-vs_output VS_Main(vs_input input, uint instanceId : SV_InstanceID)
+vs_output VS_Main(vs_input vertexInput, uint instanceId : SV_InstanceID)
 {
+	VertexData vertexData;
+	UnpackVertexInput(vertexInput, vertexData);
+
 	LoadSimpleConstantBufferProviderConstantsForInstance(instanceId);
 	
 	vs_output output;
-	output.pos = mul(Test, float4(input.pos.xyz, 1.0));
-	output.uv = input.uv;
+	output.pos = mul(Test, float4(vertexData.position.xyz, 1.0));
 	
 	return output;
 }

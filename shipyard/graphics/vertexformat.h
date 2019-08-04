@@ -22,7 +22,7 @@ namespace Shipyard
     struct Vertex_Pos_Color
     {
         vec3 m_Position;
-        vec3 m_Color;
+        vec4 m_Color;
     };
 
     struct Vertex_Pos_UV
@@ -119,4 +119,7 @@ namespace Shipyard
     shipBool VertexFormatTypeContainsColor(VertexFormatType type);
     shipBool VertexFormatTypeContainsUV(VertexFormatType type);
     shipBool VertexFormatTypeContainsNormals(VertexFormatType type);
+
+    const shipChar* GetVertexShaderInputName(SemanticName semanticName);
+    const shipChar* GetVertexSemanticName(SemanticName semanticName);
 }

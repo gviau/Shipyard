@@ -18,6 +18,175 @@ shipBool IsDepthStencilFormat(GfxFormat format)
     }
 }
 
+BaseFormatType GetBaseFormatType(GfxFormat format)
+{
+    switch (format)
+    {
+    case Shipyard::GfxFormat::R32G32B32A32_FLOAT:
+    case Shipyard::GfxFormat::R32G32B32_FLOAT:
+    case Shipyard::GfxFormat::R16G16B16A16_FLOAT:
+    case Shipyard::GfxFormat::R32G32_FLOAT:
+    case Shipyard::GfxFormat::R11G11B10_FLOAT:
+    case Shipyard::GfxFormat::R16G16_FLOAT:
+    case Shipyard::GfxFormat::R32_FLOAT:
+    case Shipyard::GfxFormat::R16_FLOAT:
+    case Shipyard::GfxFormat::D32_FLOAT:
+    case Shipyard::GfxFormat::D32_FLOAT_S8X24_UINT:
+        return BaseFormatType::Float;
+
+    case Shipyard::GfxFormat::R32G32B32A32_UINT:
+    case Shipyard::GfxFormat::R32G32B32_UINT:
+    case Shipyard::GfxFormat::R16G16B16A16_UINT:
+    case Shipyard::GfxFormat::R32G32_UINT:
+    case Shipyard::GfxFormat::R10G10B10A2_UINT:
+    case Shipyard::GfxFormat::R8G8B8A8_UINT:
+    case Shipyard::GfxFormat::R16G16_UINT:
+    case Shipyard::GfxFormat::R32_UINT:
+    case Shipyard::GfxFormat::R8G8B8_UINT:
+    case Shipyard::GfxFormat::R8G8_UINT:
+    case Shipyard::GfxFormat::R16_UINT:
+    case Shipyard::GfxFormat::R8_UINT:
+        return BaseFormatType::Uint;
+
+    case Shipyard::GfxFormat::R32G32B32A32_SINT:
+    case Shipyard::GfxFormat::R32G32B32_SINT:
+    case Shipyard::GfxFormat::R16G16B16A16_SINT:
+    case Shipyard::GfxFormat::R32G32_SINT:
+    case Shipyard::GfxFormat::R8G8B8A8_SINT:
+    case Shipyard::GfxFormat::R16G16_SINT:
+    case Shipyard::GfxFormat::R32_SINT:
+    case Shipyard::GfxFormat::R8G8B8_SINT:
+    case Shipyard::GfxFormat::R8G8_SINT:
+    case Shipyard::GfxFormat::R16_SINT:
+    case Shipyard::GfxFormat::R8_SINT:
+        return BaseFormatType::Sint;
+
+    case Shipyard::GfxFormat::R16G16B16A16_UNORM:
+    case Shipyard::GfxFormat::R10G10B10A2_UNORM:
+    case Shipyard::GfxFormat::R8G8B8A8_UNORM:
+    case Shipyard::GfxFormat::R8G8B8A8_UNORM_SRGB:
+    case Shipyard::GfxFormat::R16G16_UNORM:
+    case Shipyard::GfxFormat::R8G8B8_UNORM:
+    case Shipyard::GfxFormat::R8G8_UNORM:
+    case Shipyard::GfxFormat::R16_UNORM:
+    case Shipyard::GfxFormat::R8_UNORM:
+    case Shipyard::GfxFormat::D16_UNORM:
+    case Shipyard::GfxFormat::D24_UNORM_S8_UINT:
+        return BaseFormatType::Unorm;
+
+    case Shipyard::GfxFormat::R16G16B16A16_SNORM:
+    case Shipyard::GfxFormat::R8G8B8A8_SNORM:
+    case Shipyard::GfxFormat::R16G16_SNORM:
+    case Shipyard::GfxFormat::R8G8B8_SNORM:
+    case Shipyard::GfxFormat::R8G8_SNORM:
+    case Shipyard::GfxFormat::R16_SNORM:
+    case Shipyard::GfxFormat::R8_SNORM:
+        return BaseFormatType::Snorm;
+
+    case Shipyard::GfxFormat::Unknown:
+        SHIP_ASSERT(!"GfxFormat::Unknown doesn't have any base type.");
+        break;
+
+    default:
+        SHIP_ASSERT(!"Shouldn't happen");
+        break;
+    }
+
+    return BaseFormatType::Uint;
+}
+
+shipUint32 GetFormatNumComponents(GfxFormat format)
+{
+    switch (format)
+    {
+    case Shipyard::GfxFormat::R32G32B32A32_FLOAT:
+    case Shipyard::GfxFormat::R32G32B32A32_UINT:
+    case Shipyard::GfxFormat::R32G32B32A32_SINT:
+    case Shipyard::GfxFormat::R16G16B16A16_FLOAT:
+    case Shipyard::GfxFormat::R16G16B16A16_UNORM:
+    case Shipyard::GfxFormat::R16G16B16A16_UINT:
+    case Shipyard::GfxFormat::R16G16B16A16_SNORM:
+    case Shipyard::GfxFormat::R16G16B16A16_SINT:
+    case Shipyard::GfxFormat::R8G8B8A8_UNORM:
+    case Shipyard::GfxFormat::R8G8B8A8_UNORM_SRGB:
+    case Shipyard::GfxFormat::R8G8B8A8_UINT:
+    case Shipyard::GfxFormat::R8G8B8A8_SNORM:
+    case Shipyard::GfxFormat::R8G8B8A8_SINT:
+    case Shipyard::GfxFormat::R10G10B10A2_UNORM:
+    case Shipyard::GfxFormat::R10G10B10A2_UINT:
+        return 4;
+
+    case Shipyard::GfxFormat::R32G32B32_FLOAT:
+    case Shipyard::GfxFormat::R32G32B32_UINT:
+    case Shipyard::GfxFormat::R32G32B32_SINT:
+    case Shipyard::GfxFormat::R11G11B10_FLOAT:
+    case Shipyard::GfxFormat::R8G8B8_UNORM:
+    case Shipyard::GfxFormat::R8G8B8_SNORM:
+    case Shipyard::GfxFormat::R8G8B8_UINT:
+    case Shipyard::GfxFormat::R8G8B8_SINT:
+        return 3;
+
+    case Shipyard::GfxFormat::R32G32_FLOAT:
+    case Shipyard::GfxFormat::R32G32_UINT:
+    case Shipyard::GfxFormat::R32G32_SINT:
+    case Shipyard::GfxFormat::R16G16_FLOAT:
+    case Shipyard::GfxFormat::R16G16_UNORM:
+    case Shipyard::GfxFormat::R16G16_UINT:
+    case Shipyard::GfxFormat::R16G16_SNORM:
+    case Shipyard::GfxFormat::R16G16_SINT:
+    case Shipyard::GfxFormat::R8G8_UNORM:
+    case Shipyard::GfxFormat::R8G8_UINT:
+    case Shipyard::GfxFormat::R8G8_SNORM:
+    case Shipyard::GfxFormat::R8G8_SINT:
+    case Shipyard::GfxFormat::D24_UNORM_S8_UINT:
+    case Shipyard::GfxFormat::D32_FLOAT_S8X24_UINT:
+        return 2;
+
+    case Shipyard::GfxFormat::R32_FLOAT:
+    case Shipyard::GfxFormat::R32_UINT:
+    case Shipyard::GfxFormat::R32_SINT:
+    case Shipyard::GfxFormat::R16_FLOAT:
+    case Shipyard::GfxFormat::R16_UNORM:
+    case Shipyard::GfxFormat::R16_UINT:
+    case Shipyard::GfxFormat::R16_SNORM:
+    case Shipyard::GfxFormat::R16_SINT:
+    case Shipyard::GfxFormat::R8_UNORM:
+    case Shipyard::GfxFormat::R8_UINT:
+    case Shipyard::GfxFormat::R8_SNORM:
+    case Shipyard::GfxFormat::R8_SINT:
+    case Shipyard::GfxFormat::D16_UNORM:
+    case Shipyard::GfxFormat::D32_FLOAT:
+        return 1;
+
+    case Shipyard::GfxFormat::Unknown:
+        SHIP_ASSERT(!"GfxFormat::Unknown doesn't have any components.");
+        break;
+
+    default:
+        SHIP_ASSERT(!"Shouldn't happen");
+        break;
+    }
+
+    return 0;
+}
+
+const shipChar* GetBaseFormatTypeName(BaseFormatType baseFormatType)
+{
+    switch (baseFormatType)
+    {
+    case BaseFormatType::Float:     return "float";
+    case BaseFormatType::Sint:      return "int";
+    case BaseFormatType::Snorm:     return "int";
+    case BaseFormatType::Uint:      return "uint";
+    case BaseFormatType::Unorm:     return "uint";
+
+    default:
+        SHIP_ASSERT(!"Shouldn't happen");
+    }
+
+    return "INVALID_BASE_FORMAT_TYPE";
+}
+
 enum RenderStateBlockState : shipUint8
 {
     RenderStateBlockState_DepthBias,

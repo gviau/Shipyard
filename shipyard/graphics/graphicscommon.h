@@ -126,7 +126,20 @@ namespace Shipyard
         Unknown
     };
 
+    enum class BaseFormatType : shipUint8
+    {
+        Float,
+        Uint,
+        Sint,
+        Snorm,
+        Unorm,
+    };
+
     shipBool IsDepthStencilFormat(GfxFormat format);
+    BaseFormatType GetBaseFormatType(GfxFormat format);
+    shipUint32 GetFormatNumComponents(GfxFormat format);
+
+    const shipChar* GetBaseFormatTypeName(BaseFormatType baseFormatType);
 
     enum class FillMode : shipUint8
     {
@@ -291,7 +304,9 @@ namespace Shipyard
         Position,
         Tangent,
         TexCoord,
-        Weights
+        Weights,
+
+        Count
     };
 
     struct InputLayout

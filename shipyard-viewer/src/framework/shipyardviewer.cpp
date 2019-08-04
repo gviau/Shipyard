@@ -262,7 +262,10 @@ void ShipyardViewer::ComputeOneFrame()
 
     static volatile shipUint32 value = 0;
 
+    VertexFormatType vertexFormatType = m_pGfxRenderDevice->GetVertexBuffer(m_VertexBufferHandle).GetVertexFormatType();
+
     SET_SHADER_OPTION(shaderKey, Test2Bits, value);
+    SET_SHADER_OPTION(shaderKey, VERTEX_FORMAT_TYPE, shipUint32(vertexFormatType));
 
     ShaderHandler* pShaderHandler = GetShaderHandlerManager().GetShaderHandlerForShaderKey(shaderKey);
 
@@ -272,7 +275,7 @@ void ShipyardViewer::ComputeOneFrame()
     renderState.GfxRenderTargetHandle = gfxRenderTargetHandle;
     renderState.GfxDepthStencilRenderTargetHandle = m_GfxDepthStencilRenderTargetHandle;
     renderState.PrimitiveTopologyToRender = PrimitiveTopology::TriangleList;
-    renderState.VertexFormatTypeToRender = m_pGfxRenderDevice->GetVertexBuffer(m_VertexBufferHandle).GetVertexFormatType();
+    renderState.VertexFormatTypeToRender = vertexFormatType;
     renderState.OptionalRenderStateBlockStateOverride = nullptr;
 
     const ShaderHandler::ShaderRenderElements& shaderRenderElements = pShaderHandler->GetShaderRenderElements(*m_pGfxRenderDevice, renderState);

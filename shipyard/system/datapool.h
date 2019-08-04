@@ -118,13 +118,9 @@ namespace Shipyard
             return &m_Datas[index];
         }
 
-        shipBool GetFirstAllocatedIndex(shipUint32* firstAllocatedIndex)
+        shipBool GetFirstAllocatedIndex(shipUint32* firstAllocatedIndex) const
         {
-            shipUint32 idx = 0;
-            while (idx < MaxElementsInPool && m_FreePoolIndices.IsBitSet(idx))
-            {
-                idx += 1;
-            }
+            shipUint32 idx = m_FreePoolIndices.GetLongestRangeWithBitsSet(0);
 
             if (idx == MaxElementsInPool)
             {
@@ -136,24 +132,16 @@ namespace Shipyard
             return true;
         }
 
-        shipBool GetNextAllocatedIndex(shipUint32 currentIndex, shipUint32* nextAllocatedIndex)
+        shipBool GetNextAllocatedIndex(shipUint32 currentIndex, shipUint32* nextAllocatedIndex) const
         {
-            if (currentIndex == MaxElementsInPool)
+            shipUint32 nextIndex = currentIndex + 1;
+
+            if (nextIndex == MaxElementsInPool)
             {
                 return false;
             }
 
-            shipUint32 nextIndex = currentIndex;
-
-            if (m_FreePoolIndices.IsBitSet(currentIndex))
-            {
-                nextIndex = currentIndex + m_FreePoolIndices.GetLongestRangeWithBitsSet(currentIndex);
-
-            }
-            else
-            {
-                nextIndex = currentIndex + 1;
-            }
+            nextIndex += m_FreePoolIndices.GetLongestRangeWithBitsSet(nextIndex);
 
             if (nextIndex == MaxElementsInPool)
             {

@@ -641,7 +641,7 @@ void String<CharType>::Insert(size_t pos, const CharType* str, size_t numChars)
             {
                 size_t endSrcPos = pos + numCharsToMove;
                 size_t endDestPos = endInsertIdx + numCharsToMove - 1;
-                for (size_t i = endSrcPos; i > 0; i--)
+                for (size_t i = endSrcPos; i > pos; i--)
                 {
                     size_t idx = i - 1;
                     m_Buffer[endDestPos--] = m_Buffer[idx];

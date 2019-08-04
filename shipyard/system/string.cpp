@@ -25,11 +25,13 @@ const shipChar* StringFormat(const shipChar* fmt, ...)
 
     int numChars = vsnprintf_s(pBuffer, maxCount, maxCount - 1, fmt, argsPtr);
 
-    g_StringFormatThreadLocalBufferOffset += numChars;
+    g_StringFormatThreadLocalBufferOffset += numChars + 1;
     if (g_StringFormatThreadLocalBufferOffset > STRING_FORMAT_THREAD_LOCAL_BUFFER_SIZE)
     {
         g_StringFormatThreadLocalBufferOffset = 0;
     }
+
+    pBuffer[numChars] = '\0';
     
     va_end(argsPtr);
 

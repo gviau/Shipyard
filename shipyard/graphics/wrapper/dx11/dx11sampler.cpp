@@ -49,6 +49,8 @@ shipBool DX11Sampler::Create(ID3D11Device& device, const SamplerState& samplerSt
         return false;
     }
 
+    m_SamplerState = samplerState;
+
     return true;
 }
 

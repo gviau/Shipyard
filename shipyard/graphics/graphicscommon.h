@@ -469,10 +469,11 @@ namespace Shipyard
                     IsAlmostEqual(MipLodBias, rhs.MipLodBias) &&
                     UseAnisotropicFiltering == rhs.UseAnisotropicFiltering &&
                     (UseAnisotropicFiltering == false || MaxAnisotropy == rhs.MaxAnisotropy) &&
-                    IsAlmostEqual(BorderRGBA[0], rhs.BorderRGBA[0]) &&
-                    IsAlmostEqual(BorderRGBA[1], rhs.BorderRGBA[1]) &&
-                    IsAlmostEqual(BorderRGBA[2], rhs.BorderRGBA[2]) &&
-                    IsAlmostEqual(BorderRGBA[3], rhs.BorderRGBA[3]) &&
+                    ((AddressModeU != TextureAddressMode::Border && AddressModeV != TextureAddressMode::Border && AddressModeW != TextureAddressMode::Border) ||
+                        IsAlmostEqual(BorderRGBA[0], rhs.BorderRGBA[0]) &&
+                        IsAlmostEqual(BorderRGBA[1], rhs.BorderRGBA[1]) &&
+                        IsAlmostEqual(BorderRGBA[2], rhs.BorderRGBA[2]) &&
+                        IsAlmostEqual(BorderRGBA[3], rhs.BorderRGBA[3])) &&
                     IsAlmostEqual(MinLod, rhs.MinLod) &&
                     IsAlmostEqual(MaxLod, rhs.MaxLod));
         }
@@ -706,6 +707,7 @@ namespace Shipyard
         ConstantBuffer,
         ByteBuffer,
         Texture,
+        Sampler,
 
         Unknown
     };

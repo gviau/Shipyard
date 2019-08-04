@@ -1,3 +1,4 @@
 *.bin
 *.log
 shaders/shaderinputproviders/
+shaders/vertexformats/

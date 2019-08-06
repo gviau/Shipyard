@@ -176,9 +176,9 @@ const shipChar* GetBaseFormatTypeName(BaseFormatType baseFormatType)
     {
     case BaseFormatType::Float:     return "float";
     case BaseFormatType::Sint:      return "int";
-    case BaseFormatType::Snorm:     return "int";
+    case BaseFormatType::Snorm:     return "float";
     case BaseFormatType::Uint:      return "uint";
-    case BaseFormatType::Unorm:     return "uint";
+    case BaseFormatType::Unorm:     return "float";
 
     default:
         SHIP_ASSERT(!"Shouldn't happen");

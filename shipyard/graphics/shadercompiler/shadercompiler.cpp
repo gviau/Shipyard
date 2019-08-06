@@ -9,6 +9,8 @@
 
 #include <math/mathutilities.h>
 
+#include <system/logger.h>
+
 #pragma warning( disable : 4005 )
 
 #include <d3dcommon.h>
@@ -847,7 +849,7 @@ ID3D10Blob* ShaderCompiler::CompileShader(const StringT& shaderSourceFilename, c
         if (preprocessError != nullptr)
         {
             shipChar* errorMsg = (shipChar*)preprocessError->GetBufferPointer();
-            OutputDebugString(errorMsg);
+            SHIP_LOG_ERROR(errorMsg);
         }
     }
 
@@ -857,10 +859,10 @@ ID3D10Blob* ShaderCompiler::CompileShader(const StringT& shaderSourceFilename, c
         if (error != nullptr)
         {
             shipChar* errorMsg = (shipChar*)error->GetBufferPointer();
-            OutputDebugString(errorMsg);
+            SHIP_LOG_ERROR(errorMsg);
 
             shipChar* data = (shipChar*)preprocessedBlob->GetBufferPointer();
-            OutputDebugString(data);
+            SHIP_LOG_ERROR(data);
         }
 
         return nullptr;

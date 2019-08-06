@@ -30,7 +30,7 @@ namespace Shipyard
 
         void Flip();
 
-        GFXRenderTargetHandle GetBackBufferRenderTargetHandle() { return m_BackBufferRenderTargetHandle; }
+        GFXRenderTargetHandle GetBackBufferRenderTargetHandle() const { return m_BackBufferRenderTargetHandle; }
 
     private:
         GFXRenderDevice* m_RenderDevice;

@@ -19,6 +19,10 @@ namespace Shipyard
         { \
             return handle == rhs.handle; \
         } \
+        shipBool IsValid() const \
+        { \
+            return handle != InvalidGfxHandle; \
+        } \
         shipUint32 handle; \
     }
 

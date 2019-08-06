@@ -9,6 +9,10 @@
 #define SHIP_COMMAND_LIST_GROWABLE_HEAP
 #endif // #ifndef SHIP_MASTER
 
+// Comment this define to stop calling each draw commands' default constructor. This is
+// used to have sensible default values in the returned commands.
+#define SHIP_USE_DRAW_COMMANDS_DEFAULT_CONSTRUCTOR
+
 struct ID3D11DeviceContext;
 
 namespace Shipyard

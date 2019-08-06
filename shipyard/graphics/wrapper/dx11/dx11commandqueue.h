@@ -33,12 +33,14 @@ namespace Shipyard
                     GFXRenderTargetHandle gfxRenderTargetHandle,
                     GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle,
                     const GfxViewport& gfxViewport,
+                    const GfxRect& gfxScissor,
                     GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle,
                     GFXRootSignatureHandle gfxRootSignatureHandle,
                     GFXDescriptorSetHandle gfxDescriptorSetHandle)
                 : renderTargetHandle(gfxRenderTargetHandle)
                 , depthStencilRenderTargetHandle(gfxDepthStencilRenderTargetHandle)
                 , viewport(gfxViewport)
+                , scissor(gfxScissor)
                 , pipelineStateObjetHandle(gfxPipelineStateObjectHandle)
                 , rootSignatureHandle(gfxRootSignatureHandle)
                 , descriptorSetHandle(gfxDescriptorSetHandle)
@@ -48,6 +50,7 @@ namespace Shipyard
             GFXDepthStencilRenderTargetHandle depthStencilRenderTargetHandle;
 
             const GfxViewport& viewport;
+            const GfxRect& scissor;
 
             GFXPipelineStateObjectHandle pipelineStateObjetHandle;
             GFXRootSignatureHandle rootSignatureHandle;

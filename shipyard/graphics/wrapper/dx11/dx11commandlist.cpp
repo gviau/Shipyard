@@ -118,6 +118,57 @@ BaseRenderCommand* DX11BaseRenderCommandList::GetNewRenderCommand(RenderCommandT
 #endif // #ifdef SHIP_COMMAND_LIST_GROWABLE_HEAP
 
     BaseRenderCommand* pNewCommand = reinterpret_cast<BaseRenderCommand*>(size_t(m_pCommandListHeap) + m_CommandListHeapCurrentPointer);
+
+#ifdef SHIP_USE_DRAW_COMMANDS_DEFAULT_CONSTRUCTOR
+    switch (renderCommandType)
+    {
+    case RenderCommandType::ClearFullRenderTarget:
+        {
+            ClearFullRenderTargetCommand initRenderCommandData;
+            memcpy(pNewCommand, &initRenderCommandData, sizeof(initRenderCommandData));
+        }
+        break;
+
+    case RenderCommandType::ClearSingleRenderTarget:
+        {
+            ClearSingleRenderTargetCommand initRenderCommandData;
+            memcpy(pNewCommand, &initRenderCommandData, sizeof(initRenderCommandData));
+        }
+        break;
+
+    case RenderCommandType::ClearDepthStencilRenderTarget:
+        {
+            ClearDepthStencilRenderTargetCommand initRenderCommandData;
+            memcpy(pNewCommand, &initRenderCommandData, sizeof(initRenderCommandData));
+        }
+        break;
+
+    case RenderCommandType::Draw:
+        {
+            DrawCommand initRenderCommandData;
+            memcpy(pNewCommand, &initRenderCommandData, sizeof(initRenderCommandData));
+        }
+        break;
+
+    case RenderCommandType::DrawIndexed:
+        {
+            DrawIndexedCommand initRenderCommandData;
+            memcpy(pNewCommand, &initRenderCommandData, sizeof(initRenderCommandData));
+        }
+        break;
+
+    case RenderCommandType::MapBuffer:
+        {
+            MapBufferCommand initRenderCommandData;
+            memcpy(pNewCommand, &initRenderCommandData, sizeof(initRenderCommandData));
+        }
+        break;
+
+    default:
+        SHIP_ASSERT(!"DX11BaseRenderCommandList::GetNewRenderCommand --> unsupported render command type");
+    }
+#endif // #ifdef SHIP_USE_DRAW_COMMANDS_DEFAULT_CONSTRUCTOR
+
     pNewCommand->renderCommandType = renderCommandType;
 
     m_CommandListHeapCurrentPointer += renderCommandSize;

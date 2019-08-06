@@ -166,6 +166,7 @@ size_t DX11CommandQueue::Draw(BaseRenderCommand* pCmd)
             drawCommand.gfxRenderTargetHandle,
             drawCommand.gfxDepthStencilRenderTargetHandle,
             drawCommand.gfxViewport,
+            drawCommand.gfxScissorRect,
             drawCommand.gfxPipelineStateObjectHandle,
             drawCommand.gfxRootSignatureHandle,
             drawCommand.gfxDescriptorSetHandle);
@@ -174,16 +175,16 @@ size_t DX11CommandQueue::Draw(BaseRenderCommand* pCmd)
 
     SHIP_ASSERT(drawCommand.numVertexBuffers < GfxConstants_MaxVertexBuffers);
     GFXVertexBuffer* gfxVertexBuffers[GfxConstants_MaxVertexBuffers];
-    for (shipUint32 i = drawCommand.startSlot; i < (drawCommand.startSlot + drawCommand.numVertexBuffers); i++)
+    for (shipUint32 i = drawCommand.vertexBufferStartSlot; i < (drawCommand.vertexBufferStartSlot + drawCommand.numVertexBuffers); i++)
     {
         gfxVertexBuffers[i] = &m_RenderDevice.GetVertexBuffer(drawCommand.pGfxVertexBufferHandles[i]);
     }
 
-    m_RenderStateCache.SetVertexBuffers(gfxVertexBuffers, drawCommand.startSlot, drawCommand.numVertexBuffers, drawCommand.pVertexBufferOffsets);
+    m_RenderStateCache.SetVertexBuffers(gfxVertexBuffers, drawCommand.vertexBufferStartSlot, drawCommand.numVertexBuffers, drawCommand.pVertexBufferOffsets);
 
     m_RenderStateCache.CommitStateChangesForGraphics(m_RenderDevice);
 
-    shipUint32 numVertices = ((drawCommand.numVertexBuffers > 0) ? m_RenderDevice.GetVertexBuffer(drawCommand.pGfxVertexBufferHandles[drawCommand.startSlot]).GetNumVertices() : 1);
+    shipUint32 numVertices = ((drawCommand.numVertexBuffers > 0) ? m_RenderDevice.GetVertexBuffer(drawCommand.pGfxVertexBufferHandles[drawCommand.vertexBufferStartSlot]).GetNumVertices() : 1);
     m_DeviceContext->Draw(numVertices, drawCommand.startVertexLocation);
 
     return sizeof(DrawCommand);
@@ -202,6 +203,7 @@ size_t DX11CommandQueue::DrawIndexed(BaseRenderCommand* pCmd)
             drawIndexedCommand.gfxRenderTargetHandle,
             drawIndexedCommand.gfxDepthStencilRenderTargetHandle,
             drawIndexedCommand.gfxViewport,
+            drawIndexedCommand.gfxScissorRect,
             drawIndexedCommand.gfxPipelineStateObjectHandle,
             drawIndexedCommand.gfxRootSignatureHandle,
             drawIndexedCommand.gfxDescriptorSetHandle);
@@ -210,16 +212,17 @@ size_t DX11CommandQueue::DrawIndexed(BaseRenderCommand* pCmd)
 
     SHIP_ASSERT(drawIndexedCommand.numVertexBuffers < GfxConstants_MaxVertexBuffers);
     GFXVertexBuffer* gfxVertexBuffers[GfxConstants_MaxVertexBuffers];
-    for (shipUint32 i = drawIndexedCommand.startSlot; i < (drawIndexedCommand.startSlot + drawIndexedCommand.numVertexBuffers); i++)
+    for (shipUint32 i = drawIndexedCommand.vertexBufferStartSlot; i < (drawIndexedCommand.vertexBufferStartSlot + drawIndexedCommand.numVertexBuffers); i++)
     {
         gfxVertexBuffers[i] = &m_RenderDevice.GetVertexBuffer(drawIndexedCommand.pGfxVertexBufferHandles[i]);
     }
 
-    m_RenderStateCache.SetVertexBuffers(gfxVertexBuffers, drawIndexedCommand.startSlot, drawIndexedCommand.numVertexBuffers, drawIndexedCommand.pVertexBufferOffsets);
+    m_RenderStateCache.SetVertexBuffers(gfxVertexBuffers, drawIndexedCommand.vertexBufferStartSlot, drawIndexedCommand.numVertexBuffers, drawIndexedCommand.pVertexBufferOffsets);
 
     m_RenderStateCache.CommitStateChangesForGraphics(m_RenderDevice);
-
-    m_DeviceContext->DrawIndexed(gfxIndexBuffer.GetNumIndices(), drawIndexedCommand.startIndexLocation, drawIndexedCommand.startVertexLocation);
+    
+    shipUint32 indexCount = ((drawIndexedCommand.indexCount == UseIndexBufferSize) ? gfxIndexBuffer.GetNumIndices() : drawIndexedCommand.indexCount);
+    m_DeviceContext->DrawIndexed(indexCount, drawIndexedCommand.startIndexLocation, drawIndexedCommand.baseVertexLocation);
 
     return sizeof(DrawIndexedCommand);
 }
@@ -307,6 +310,7 @@ void DX11CommandQueue::PrepareNextDrawCalls(const DrawItem& drawItem)
     m_RenderStateCache.BindDescriptorSet(gfxDescriptorSet, gfxRootSignature);
 
     m_RenderStateCache.SetViewport(drawItem.viewport);
+    m_RenderStateCache.SetScissor(drawItem.scissor);
 }
 
 }

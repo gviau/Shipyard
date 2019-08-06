@@ -62,6 +62,7 @@ void DX11RenderStateCache::Reset()
     m_DepthStencilFormat = GfxFormat::R32_UINT;
 
     m_Viewport = GfxViewport();
+    m_Scissor = GfxRect();
 
     memset(m_NativeVertexBuffers, 0, sizeof(m_NativeVertexBuffers));
     m_VertexBufferStartSlot = 0;
@@ -317,6 +318,16 @@ void DX11RenderStateCache::SetViewport(const GfxViewport& gfxViewport)
         m_Viewport = gfxViewport;
 
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Viewport);
+    }
+}
+
+void DX11RenderStateCache::SetScissor(const GfxRect& gfxScissor)
+{
+    if (m_Scissor != gfxScissor)
+    {
+        m_Scissor = gfxScissor;
+
+        m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Scissor);
     }
 }
 
@@ -704,6 +715,19 @@ void DX11RenderStateCache::CommitStateChangesForGraphics(GFXRenderDevice& gfxRen
         m_DeviceContext->RSSetViewports(1, &nativeViewport);
 
         m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Viewport);
+    }
+
+    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Scissor))
+    {
+        D3D11_RECT nativeScissor;
+        nativeScissor.left = m_Scissor.Left;
+        nativeScissor.top = m_Scissor.Top;
+        nativeScissor.right = m_Scissor.Right;
+        nativeScissor.bottom = m_Scissor.Bottom;
+
+        m_DeviceContext->RSSetScissorRects(1, &nativeScissor);
+
+        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Scissor);
     }
 
     if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_RenderTargets) ||

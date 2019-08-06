@@ -37,6 +37,7 @@ namespace Shipyard
         void BindDepthStencilRenderTarget(const GFXDepthStencilRenderTarget& depthStencilRenderTarget);
 
         void SetViewport(const GfxViewport& gfxViewport);
+        void SetScissor(const GfxRect& gfxScissor);
 
         void SetVertexBuffers(GFXVertexBuffer* const * vertexBuffers, shipUint32 startSlot, shipUint32 numVertexBuffers, shipUint32* vertexBufferOffsets);
         void SetIndexBuffer(const GFXIndexBuffer& indexBuffer, shipUint32 indexBufferOffset);
@@ -98,6 +99,7 @@ namespace Shipyard
             RenderStateCacheDirtyFlag_DepthStencilState,
             RenderStateCacheDirtyFlag_BlendState,
             RenderStateCacheDirtyFlag_Viewport,
+            RenderStateCacheDirtyFlag_Scissor,
 
             RenderStateCacheDirtyFlag_VertexShader,
             RenderStateCacheDirtyFlag_PixelShader,
@@ -145,6 +147,7 @@ namespace Shipyard
         GfxFormat m_DepthStencilFormat;
 
         GfxViewport m_Viewport;
+        GfxRect m_Scissor;
 
         ID3D11Buffer* m_NativeVertexBuffers[GfxConstants::GfxConstants_MaxVertexBuffers];
         shipUint32 m_VertexBufferStartSlot;

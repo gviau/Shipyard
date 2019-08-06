@@ -6,6 +6,11 @@
 
 namespace Shipyard
 {
+    enum : shipUint32
+    {
+        UseIndexBufferSize = 0xffffffff
+    };
+
     enum class RenderCommandType : shipUint8
     {
         ClearFullRenderTarget,
@@ -51,6 +56,7 @@ namespace Shipyard
     struct DrawCommand : BaseRenderCommand
     {
         GfxViewport gfxViewport;
+        GfxRect gfxScissorRect;
         
         GFXRenderTargetHandle gfxRenderTargetHandle = { InvalidGfxHandle };
         GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle = { InvalidGfxHandle };
@@ -60,7 +66,7 @@ namespace Shipyard
         GFXDescriptorSetHandle gfxDescriptorSetHandle = { InvalidGfxHandle };
 
         GFXVertexBufferHandle* pGfxVertexBufferHandles = nullptr;
-        shipUint32 startSlot = 0;
+        shipUint32 vertexBufferStartSlot = 0;
         shipUint32 numVertexBuffers = 0;
         shipUint32 startVertexLocation = 0;
         shipUint32* pVertexBufferOffsets = nullptr;
@@ -69,6 +75,7 @@ namespace Shipyard
     struct DrawIndexedCommand : BaseRenderCommand
     {
         GfxViewport gfxViewport;
+        GfxRect gfxScissorRect;
         
         GFXRenderTargetHandle gfxRenderTargetHandle = { InvalidGfxHandle };
         GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle = { InvalidGfxHandle };
@@ -79,12 +86,13 @@ namespace Shipyard
 
         GFXVertexBufferHandle* pGfxVertexBufferHandles = nullptr;
         GFXIndexBufferHandle gfxIndexBufferHandle = { InvalidGfxHandle };
-        shipUint32 startSlot = 0;
+        shipUint32 vertexBufferStartSlot = 0;
         shipUint32 numVertexBuffers = 0;
-        shipUint32 startVertexLocation = 0;
         shipUint32* pVertexBufferOffsets = nullptr;
+        shipUint32 indexCount = UseIndexBufferSize;
         shipUint32 startIndexLocation = 0;
         shipUint32 indexBufferOffset = 0;
+        shipInt32 baseVertexLocation = 0;
     };
 
     enum class MapBufferType : shipUint8
@@ -104,7 +112,7 @@ namespace Shipyard
             GFXIndexBufferHandle gfxIndexBufferHandle;
             GFXConstantBufferHandle gfxConstantBufferHandle;
             GFXByteBufferHandle gfxByteBufferHandle;
-        } bufferHandle;
+        } bufferHandle = { InvalidGfxHandle };
 
         MapBufferType mapBufferType = MapBufferType::Constant;
         MapFlag mapFlag = MapFlag::Write_Discard;
@@ -112,6 +120,6 @@ namespace Shipyard
 
         // Depending on MapFlag, this pointer will either be for writing at the next ExecuteCommandLists or for immediate reading.
         // This pointer is not owned by the user, but by the command list.
-        void* pBuffer;
+        void* pBuffer = nullptr;
     };
 }

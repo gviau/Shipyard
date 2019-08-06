@@ -48,7 +48,7 @@ namespace ShipyardSharpmake
         public BaseShipyardGraphicsProject(ShipyardTarget shipyardTarget)
             : base("shipyard.graphics", @"..\shipyard\graphics\", shipyardTarget)
         {
-
+            AdditionalSourceRootPaths.Add(SourceRootPath + @"..\extern\imgui\");
         }
 
         protected override void ConfigureIncludePaths(Configuration configuration)
@@ -56,6 +56,7 @@ namespace ShipyardSharpmake
             base.ConfigureIncludePaths(configuration);
 
             configuration.IncludePaths.Add(SourceRootPath + @"..\extern\directx\");
+            configuration.IncludePaths.Add(SourceRootPath + @"..\extern\imgui\");
         }
 
         protected override void ConfigurePlatform(Configuration configuration, Platform platform)

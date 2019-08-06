@@ -291,13 +291,12 @@ void ShipyardViewer::ComputeOneFrame()
     pDrawIndexedCommand->gfxDescriptorSetHandle = shaderRenderElements.GfxDescriptorSetHandle;
     pDrawIndexedCommand->pGfxVertexBufferHandles = &m_VertexBufferHandle;
     pDrawIndexedCommand->gfxIndexBufferHandle = m_IndexBufferHandle;
-    pDrawIndexedCommand->startSlot = 0;
+    pDrawIndexedCommand->vertexBufferStartSlot = 0;
     pDrawIndexedCommand->numVertexBuffers = 1;
-    pDrawIndexedCommand->startVertexLocation = 0;
     pDrawIndexedCommand->pVertexBufferOffsets = &vertexBufferOffsets;
-    pDrawIndexedCommand->startVertexLocation = 0;
     pDrawIndexedCommand->startIndexLocation = 0;
     pDrawIndexedCommand->indexBufferOffset = 0;
+    pDrawIndexedCommand->baseVertexLocation = 0;
 
     m_pGfxDirectRenderCommandList->Close();
 

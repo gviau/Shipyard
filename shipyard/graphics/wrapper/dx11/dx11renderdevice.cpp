@@ -8,6 +8,8 @@
 #include <graphics/wrapper/dx11/dx11shader.h>
 #include <graphics/wrapper/dx11/dx11texture.h>
 
+#include <graphics/defaulttextures.h>
+
 #include <system/logger.h>
 #include <system/memory.h>
 
@@ -48,7 +50,7 @@ DX11RenderDevice::~DX11RenderDevice()
 
 shipBool DX11RenderDevice::Create()
 {
-    UINT flags = 0; // D3D11_CREATE_DEVICE_DEBUG;
+    UINT flags = D3D11_CREATE_DEVICE_DEBUG;
     HRESULT hr = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, NULL, flags, nullptr, 0, D3D11_SDK_VERSION, &m_Device, nullptr, &m_ImmediateDeviceContext);
     if (FAILED(hr))
     {
@@ -139,11 +141,15 @@ shipBool DX11RenderDevice::Create()
         return false;
     }
 
+    DefaultTextures::CreateDefaultTextures(*this);
+
     return true;
 }
 
 void DX11RenderDevice::Destroy()
 {
+    DefaultTextures::DestroyDefaultTextures(*this);
+
     for (shipUint32 i = 0; i < shipUint32(VertexFormatType::VertexFormatType_Count); i++)
     {
         if (g_RegisteredInputLayouts[i] != nullptr)
@@ -888,7 +894,7 @@ IDXGISwapChain* DX11RenderDevice::CreateSwapchain(shipUint32 width, shipUint32 h
 
 ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatType vertexFormatType)
 {
-    SHIP_STATIC_ASSERT_MSG(shipUint32(VertexFormatType::VertexFormatType_Count) == 5, "Update the RegisterVertexFormatType function if you add or remove vertex formats");
+    SHIP_STATIC_ASSERT_MSG(shipUint32(VertexFormatType::VertexFormatType_Count) == 6, "Update the RegisterVertexFormatType function if you add or remove vertex formats");
 
     shipUint32 idx = shipUint32(vertexFormatType);
     SHIP_ASSERT(g_RegisteredInputLayouts[idx] == nullptr);
@@ -942,7 +948,7 @@ ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatTy
         if (error != nullptr)
         {
             shipChar* errorMsg = (shipChar*)error->GetBufferPointer();
-            OutputDebugString(errorMsg);
+            SHIP_LOG_ERROR(errorMsg);
 
             error->Release();
         }

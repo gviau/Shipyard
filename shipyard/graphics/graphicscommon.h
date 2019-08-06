@@ -775,6 +775,22 @@ namespace Shipyard
         }
     };
 
+    struct GfxRect
+    {
+        shipInt32 Left = 0;
+        shipInt32 Top = 0;
+        shipInt32 Right = 0;
+        shipInt32 Bottom = 0;
+
+        shipBool operator!= (const GfxRect& rhs) const
+        {
+            return (Left != rhs.Left ||
+                    Top != rhs.Top ||
+                    Right != rhs.Right ||
+                    Bottom != rhs.Bottom);
+        }
+    };
+
     enum class CommandQueueType : shipUint8
     {
         Direct,

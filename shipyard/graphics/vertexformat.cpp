@@ -8,6 +8,7 @@ VertexFormat_Pos_Color g_VertexFormat_Pos_Color;
 VertexFormat_Pos_UV g_VertexFormat_Pos_UV;
 VertexFormat_Pos_Normal g_VertexFormat_Pos_Normal;
 VertexFormat_Pos_UV_Normal g_VertexFormat_Pos_UV_Normal;
+VertexFormat_ImGui g_VertexFormat_ImGui;
 
 VertexFormat_Pos::VertexFormat_Pos() 
 {
@@ -52,9 +53,20 @@ VertexFormat_Pos_UV_Normal::VertexFormat_Pos_UV_Normal()
     m_InputLayouts[m_NumInputLayouts++] = normal;
 }
 
+VertexFormat_ImGui::VertexFormat_ImGui()
+{
+    InputLayout position = NEW_INPUT_LAYOUT(SemanticName::Position, 0, GfxFormat::R32G32_FLOAT, 0, 0, false, 0);
+    InputLayout uv = NEW_INPUT_LAYOUT(SemanticName::TexCoord, 0, GfxFormat::R32G32_FLOAT, 0, 8, false, 0);
+    InputLayout color = NEW_INPUT_LAYOUT(SemanticName::Color, 0, GfxFormat::R8G8B8A8_UNORM, 0, 16, false, 0);
+
+    m_InputLayouts[m_NumInputLayouts++] = position;
+    m_InputLayouts[m_NumInputLayouts++] = uv;
+    m_InputLayouts[m_NumInputLayouts++] = color;
+}
+
 void GetVertexFormat(VertexFormatType vertexFormatType, VertexFormat*& vertexFormat)
 {
-    SHIP_STATIC_ASSERT_MSG(shipUint32(VertexFormatType::VertexFormatType_Count) == 5, "Update the GetVertexFormat function if you add or remove vertex formats");
+    SHIP_STATIC_ASSERT_MSG(shipUint32(VertexFormatType::VertexFormatType_Count) == 6, "Update the GetVertexFormat function if you add or remove vertex formats");
 
     switch (vertexFormatType)
     {
@@ -63,25 +75,34 @@ void GetVertexFormat(VertexFormatType vertexFormatType, VertexFormat*& vertexFor
     case VertexFormatType::Pos_UV:                            vertexFormat = &g_VertexFormat_Pos_UV; break;
     case VertexFormatType::Pos_Normal:                        vertexFormat = &g_VertexFormat_Pos_Normal; break;
     case VertexFormatType::Pos_UV_Normal:                     vertexFormat = &g_VertexFormat_Pos_UV_Normal; break;
+    case VertexFormatType::ImGui:                             vertexFormat = &g_VertexFormat_ImGui; break;
     }
 }
 
 
 shipBool VertexFormatTypeContainsColor(VertexFormatType type)
 {
-    SHIP_STATIC_ASSERT_MSG(shipUint32(VertexFormatType::VertexFormatType_Count) == 5, "Update the VertexFormatTypeContainsColor function if you add or remove vertex formats");
+    SHIP_STATIC_ASSERT_MSG(shipUint32(VertexFormatType::VertexFormatType_Count) == 6, "Update the VertexFormatTypeContainsColor function if you add or remove vertex formats");
 
-    return (type == VertexFormatType::Pos_Color);
+    switch (type)
+    {
+    case VertexFormatType::Pos_Color:
+    case VertexFormatType::ImGui:
+        return true;
+    }
+
+    return false;
 }
 
 shipBool VertexFormatTypeContainsUV(VertexFormatType type)
 {
-    SHIP_STATIC_ASSERT_MSG(shipUint32(VertexFormatType::VertexFormatType_Count) == 5, "Update the VertexFormatTypeContainsUV function if you add or remove vertex formats");
+    SHIP_STATIC_ASSERT_MSG(shipUint32(VertexFormatType::VertexFormatType_Count) == 6, "Update the VertexFormatTypeContainsUV function if you add or remove vertex formats");
 
     switch (type)
     {
     case VertexFormatType::Pos_UV:
     case VertexFormatType::Pos_UV_Normal:
+    case VertexFormatType::ImGui:
         return true;
     }
 
@@ -90,7 +111,7 @@ shipBool VertexFormatTypeContainsUV(VertexFormatType type)
 
 shipBool VertexFormatTypeContainsNormals(VertexFormatType type)
 {
-    SHIP_STATIC_ASSERT_MSG(shipUint32(VertexFormatType::VertexFormatType_Count) == 5, "Update the VertexFormatTypeContainsNormals function if you add or remove vertex formats");
+    SHIP_STATIC_ASSERT_MSG(shipUint32(VertexFormatType::VertexFormatType_Count) == 6, "Update the VertexFormatTypeContainsNormals function if you add or remove vertex formats");
 
     switch (type)
     {

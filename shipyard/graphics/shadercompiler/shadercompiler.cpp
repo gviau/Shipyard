@@ -168,6 +168,7 @@ void ShaderCompiler::SetShaderDirectoryName(const StringT& shaderDirectoryName)
 
     // Make sure the ShaderFamily error is compiled initialy
     CompileShaderFamily(ShaderFamily::Error);
+    CompileShaderFamily(ShaderFamily::ImGui);
 }
 
 void ShaderCompiler::ShaderCompilerThreadFunction()
@@ -179,6 +180,7 @@ void ShaderCompiler::ShaderCompilerThreadFunction()
 
     // Make sure the ShaderFamily error is compiled initially
     CompileShaderFamily(ShaderFamily::Error);
+    CompileShaderFamily(ShaderFamily::ImGui);
 
     while (m_RunShaderCompilerThread)
     {
@@ -634,7 +636,7 @@ void ShaderCompiler::CompileShaderKey(
     compiledShaderKeyEntry.Reset();
 
     Array<D3D_SHADER_MACRO> shaderOptionDefines;
-    shaderOptionDefines.Reserve(everyPossibleShaderOptionForShaderKey.Size());
+    shaderOptionDefines.Reserve(everyPossibleShaderOptionForShaderKey.Size() + 1);
 
     for (ShaderOption shaderOption : everyPossibleShaderOptionForShaderKey)
     {

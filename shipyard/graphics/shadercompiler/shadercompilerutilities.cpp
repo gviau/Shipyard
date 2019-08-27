@@ -23,7 +23,7 @@ void GetEffectiveSourceForShaderKey(
         StringA& effectiveSource)
 {
     Array<D3D_SHADER_MACRO> shaderOptionDefines;
-    shaderOptionDefines.Reserve(everyPossibleShaderOption.Size());
+    shaderOptionDefines.Reserve(everyPossibleShaderOption.Size() + 1);
 
     for (ShaderOption shaderOption : everyPossibleShaderOption)
     {

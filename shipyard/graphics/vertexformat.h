@@ -44,6 +44,13 @@ namespace Shipyard
         vec3 m_Normal;
     };
 
+    struct Vertex_ImGui
+    {
+        vec2 m_Position;
+        vec2 m_UV;
+        shipUint32 m_Color;
+    };
+
     ///////////////////////////////////////////////////////////////////////////////
     // VERTEX FORMATS
     ///////////////////////////////////////////////////////////////////////////////
@@ -57,6 +64,7 @@ namespace Shipyard
         Pos_UV,
         Pos_Normal,
         Pos_UV_Normal,
+        ImGui,
 
         VertexFormatType_Count,
         Invalid = VertexFormatType_Count
@@ -113,6 +121,13 @@ namespace Shipyard
     public:
         VertexFormat_Pos_UV_Normal();
         virtual shipUint32 GetSize() const override { return sizeof(Vertex_Pos_UV_Normal); }
+    };
+
+    class VertexFormat_ImGui : public VertexFormat
+    {
+    public:
+        VertexFormat_ImGui();
+        virtual shipUint32 GetSize() const override { return sizeof(Vertex_ImGui); }
     };
 
     void GetVertexFormat(VertexFormatType vertexFormatType, VertexFormat*& vertexFormat);

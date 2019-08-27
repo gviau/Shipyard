@@ -8,6 +8,7 @@ namespace Shipyard
     {
         Error,
         Generic,
+        ImGui,
 
         Count
     };

@@ -106,21 +106,6 @@ D3D11_CULL_MODE ConvertShipyardCullModeToDX11(CullMode cullMode)
     return D3D11_CULL_NONE;
 }
 
-const shipChar* ConvertShipyardSemanticNameToDX11(SemanticName semanticName)
-{
-    const shipChar* dx11SemanticName = "";
-
-    switch (semanticName)
-    {
-    case Shipyard::SemanticName::Color:     dx11SemanticName = "COLOR"; break;
-    case Shipyard::SemanticName::Normal:    dx11SemanticName = "NORMAL"; break;
-    case Shipyard::SemanticName::Position:  dx11SemanticName = "POSITION"; break;
-    case Shipyard::SemanticName::TexCoord:  dx11SemanticName = "TEXCOORD"; break;
-    }
-
-    return dx11SemanticName;
-}
-
 D3D11_COMPARISON_FUNC ConvertShipyardComparisonFuncToDX11(ComparisonFunc func)
 {
     D3D11_COMPARISON_FUNC comparisonFunc = D3D11_COMPARISON_ALWAYS;

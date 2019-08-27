@@ -16,7 +16,6 @@ namespace Shipyard
     DXGI_FORMAT ConvertShipyardFormatToDX11(GfxFormat format);
     D3D11_FILL_MODE ConvertShipyardFillModeToDX11(FillMode fillMode);
     D3D11_CULL_MODE ConvertShipyardCullModeToDX11(CullMode cullMode);
-    const shipChar* ConvertShipyardSemanticNameToDX11(SemanticName semanticName);
     D3D11_COMPARISON_FUNC ConvertShipyardComparisonFuncToDX11(ComparisonFunc func);
     D3D11_STENCIL_OP ConvertShipyardStencilOperationToDX11(StencilOperation operation);
     D3D11_BLEND ConvertShipyardBlendFactorToDX11(BlendFactor blendFactor);

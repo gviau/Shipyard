@@ -19,6 +19,7 @@
 namespace Shipyard
 {
     class GraphicsSingletonStorer;
+    class Renderer;
     class ShaderDatabase;
 
     struct SimpleConstantBufferProvider;
@@ -64,5 +65,6 @@ namespace Shipyard
         ShaderDatabase* m_pShaderDatabase = nullptr;
 
         SimpleConstantBufferProvider* m_pDataProvider = nullptr;
+        Renderer* m_pRenderer = nullptr;
     };
 }

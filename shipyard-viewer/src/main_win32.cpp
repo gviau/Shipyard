@@ -1,5 +1,7 @@
 #include "framework/shipyardviewer.h"
 
+#include <extern/imgui/imgui.h>
+
 #include <cinttypes>
 
 #include <windows.h>

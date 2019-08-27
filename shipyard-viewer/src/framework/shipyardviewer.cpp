@@ -4,6 +4,8 @@
 
 #include <graphics/material/materialunifiedconstantbuffer.h>
 
+#include <graphics/renderpass/imguirenderpass.h>
+
 #include <graphics/shadercompiler/shadercompiler.h>
 #include <graphics/shadercompiler/shaderwatcher.h>
 
@@ -17,6 +19,9 @@
 #include <graphics/shader/shaderoptions.h>
 
 #include <graphics/graphicssingletonstorer.h>
+#include <graphics/rendercontext.h>
+#include <graphics/renderer.h>
+#include <graphics/shipyardimgui.h>
 
 #include <system/logger.h>
 
@@ -41,6 +46,8 @@ SHIP_DECLARE_SHADER_INPUT_PROVIDER_END(SimpleConstantBufferProvider)
 
 ShipyardViewer::~ShipyardViewer()
 {
+    SHIP_DELETE(m_pRenderer);
+
     SHIP_DELETE(m_pDataProvider);
 
     SHIP_DELETE(m_pGraphicsSingletonStorer);
@@ -119,12 +126,12 @@ shipBool ShipyardViewer::CreateApp(HWND windowHandle, shipUint32 windowWidth, sh
 
     GetGlobalAllocator().Create(allocatorInitEntries, 4);
 
+    m_pGfxRenderDevice = SHIP_NEW(GFXRenderDevice, 1);
+    m_pGfxRenderDevice->Create();
+
     GetShaderInputProviderManager().Initialize(*m_pGfxRenderDevice);
 
     m_pGraphicsSingletonStorer = SHIP_NEW(GraphicsSingletonStorer, 1);
-
-    m_pGfxRenderDevice = SHIP_NEW(GFXRenderDevice, 1);
-    m_pGfxRenderDevice->Create();
 
     m_pGfxDirectRenderCommandList = SHIP_NEW(GFXDirectRenderCommandList, 1)(*m_pGfxRenderDevice);
     m_pGfxDirectRenderCommandList->Create();
@@ -209,11 +216,18 @@ shipBool ShipyardViewer::CreateApp(HWND windowHandle, shipUint32 windowWidth, sh
 
     GetShaderHandlerManager().Initialize(*m_pGfxRenderDevice, *m_pShaderDatabase);
 
+    InitializeImGui(windowHandle, *m_pGfxRenderDevice);
+
+    m_pRenderer = SHIP_NEW(Renderer, 1);
+    m_pRenderer->Initialize(*m_pGfxRenderDevice);
+
     return true;
 }
 
 void ShipyardViewer::ComputeOneFrame()
 {
+    StartNewImGuiFrame();
+
     GFXMaterialUnifiedConstantBuffer& gfxMaterialUnifiedConstantBuffer = GetGFXMaterialUnifiedConstantBuffer();
     gfxMaterialUnifiedConstantBuffer.PrepareForNextDrawCall();
 
@@ -297,6 +311,14 @@ void ShipyardViewer::ComputeOneFrame()
     pDrawIndexedCommand->startIndexLocation = 0;
     pDrawIndexedCommand->indexBufferOffset = 0;
     pDrawIndexedCommand->baseVertexLocation = 0;
+
+    RenderContext renderContext;
+    renderContext.SetRenderDevice(m_pGfxRenderDevice);
+    renderContext.SetRenderCommandList(m_pGfxDirectRenderCommandList);
+    renderContext.SetViewSurface(m_pGfxViewSurface);
+
+    m_pRenderer->PrepareRenderGraph();
+    m_pRenderer->ExecuteRenderGraph(renderContext);
 
     m_pGfxDirectRenderCommandList->Close();
 

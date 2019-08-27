@@ -1,5 +1,7 @@
 #include <graphics/wrapper/dx11/dx11renderdevice.h>
 
+#include <graphics/shader/shadervertexformatgenerator.h>
+
 #include <graphics/wrapper/dx11/dx11buffer.h>
 #include <graphics/wrapper/dx11/dx11descriptorset.h>
 #include <graphics/wrapper/dx11/dx11pipelinestateobject.h>
@@ -900,32 +902,16 @@ ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatTy
     SHIP_ASSERT(g_RegisteredInputLayouts[idx] == nullptr);
 
     // Create a dummy shader just to validate the input layout
-    StringA dummyShaderSource = "struct VS_INPUT {\nfloat3 position : POSITION;\n";
+    StringA dummyShaderSource = GetShaderVertexInputForVertexFormat(vertexFormatType);
 
-    if (VertexFormatTypeContainsUV(vertexFormatType))
-    {
-        dummyShaderSource += "float2 uv : TEXCOORD0;\n";
-    }
-
-    if (VertexFormatTypeContainsNormals(vertexFormatType))
-    {
-        dummyShaderSource += "float3 normal : NORMAL;\n";
-    }
-
-    if (VertexFormatTypeContainsColor(vertexFormatType))
-    {
-        dummyShaderSource += "float3 color : COLOR;\n";
-    }
-
-    dummyShaderSource += "};\n"
-
-        "struct VS_OUTPUT {\n"
+    dummyShaderSource +=
+        "struct vs_output {\n"
         "float4 position : SV_POSITION;\n"
         "};\n"
 
-        "VS_OUTPUT main(VS_INPUT input) {\n"
-        "VS_OUTPUT output = (VS_OUTPUT)0;\n"
-        "output.position = float4(input.position, 1.0);\n"
+        "vs_output main(vs_input input) {\n"
+        "vs_output output = (vs_output)0;\n"
+        "output.position = float4(input.position.x, 0.0, 0.0, 1.0);\n"
         "return output;\n"
         "}\n";
 
@@ -991,7 +977,7 @@ ID3D11InputLayout* RegisterVertexFormatType(ID3D11Device* device, VertexFormatTy
         const InputLayout& inputLayout = inputLayouts[i];
 
         D3D11_INPUT_ELEMENT_DESC inputElement;
-        inputElement.SemanticName = ConvertShipyardSemanticNameToDX11(inputLayout.m_SemanticName);
+        inputElement.SemanticName = GetVertexSemanticName(inputLayout.m_SemanticName);
         inputElement.SemanticIndex = inputLayout.m_SemanticIndex;
         inputElement.Format = ConvertShipyardFormatToDX11(inputLayout.m_Format);
         inputElement.InputSlot = inputLayout.m_InputSlot;

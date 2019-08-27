@@ -35,49 +35,7 @@ void WriteVertexFormatShaderFile()
 
         content += StringFormat("if VERTEX_FORMAT_TYPE == %d\n\n", i);
 
-        content += "struct vs_input\n";
-        content += "{\n";
-
-        VertexFormat* vertexFormat = nullptr;
-        GetVertexFormat(vertexFormatType, vertexFormat);
-        SHIP_ASSERT(vertexFormat != nullptr);
-
-        shipUint32 numInputLayouts = vertexFormat->GetNumInputLayouts();
-        const InputLayout* inputLayouts = vertexFormat->GetInputLayouts();
-
-        for (shipUint32 j = 0; j < numInputLayouts; j++)
-        {
-            const InputLayout& inputLayout = inputLayouts[j];
-
-            BaseFormatType shaderInputBaseFormatType = GetBaseFormatType(inputLayout.m_Format);
-            shipUint32 shaderInputNumComponents = GetFormatNumComponents(inputLayout.m_Format);
-
-            const shipChar* shaderInputBaseFormatTypeName = GetBaseFormatTypeName(shaderInputBaseFormatType);
-            
-            const shipChar* shaderInputType = StringFormat("%s%d", shaderInputBaseFormatTypeName, shaderInputNumComponents);
-
-            const shipChar* shaderInputName = GetVertexShaderInputName(inputLayout.m_SemanticName);
-            if (inputLayout.m_SemanticIndex > 0)
-            {
-                shaderInputName = StringFormat("%s%d", shaderInputName, inputLayout.m_SemanticIndex);
-            }
-
-            const shipChar* semanticName = GetVertexSemanticName(inputLayout.m_SemanticName);
-            if (inputLayout.m_SemanticIndex > 0)
-            {
-                semanticName = StringFormat("%s%d", semanticName, inputLayout.m_SemanticIndex);
-            }
-
-            content += "    ";
-            content += shaderInputType;
-            content += " ";
-            content += shaderInputName;
-            content += " : ";
-            content += semanticName;
-            content += ";\n";
-        }
-
-        content += "};\n\n";
+        content += GetShaderVertexInputForVertexFormat(vertexFormatType);
 
         if (VertexFormatTypeContainsColor(vertexFormatType))
         {
@@ -117,6 +75,57 @@ void WriteVertexFormatShaderFile()
     constexpr shipUint32 startingPosition = 0;
     constexpr shipBool flush = true;
     vertexFormatShaderFile.WriteChars(startingPosition, content.GetBuffer(), content.Size(), flush);
+}
+
+StringA GetShaderVertexInputForVertexFormat(VertexFormatType vertexFormatType)
+{
+    StringA shaderVertexInput;
+
+    shaderVertexInput += "struct vs_input\n";
+    shaderVertexInput += "{\n";
+
+    VertexFormat* vertexFormat = nullptr;
+    GetVertexFormat(vertexFormatType, vertexFormat);
+    SHIP_ASSERT(vertexFormat != nullptr);
+
+    shipUint32 numInputLayouts = vertexFormat->GetNumInputLayouts();
+    const InputLayout* inputLayouts = vertexFormat->GetInputLayouts();
+
+    for (shipUint32 j = 0; j < numInputLayouts; j++)
+    {
+        const InputLayout& inputLayout = inputLayouts[j];
+
+        BaseFormatType shaderInputBaseFormatType = GetBaseFormatType(inputLayout.m_Format);
+        shipUint32 shaderInputNumComponents = GetFormatNumComponents(inputLayout.m_Format);
+
+        const shipChar* shaderInputBaseFormatTypeName = GetBaseFormatTypeName(shaderInputBaseFormatType);
+
+        const shipChar* shaderInputType = StringFormat("%s%d", shaderInputBaseFormatTypeName, shaderInputNumComponents);
+
+        const shipChar* shaderInputName = GetVertexShaderInputName(inputLayout.m_SemanticName);
+        if (inputLayout.m_SemanticIndex > 0)
+        {
+            shaderInputName = StringFormat("%s%d", shaderInputName, inputLayout.m_SemanticIndex);
+        }
+
+        const shipChar* semanticName = GetVertexSemanticName(inputLayout.m_SemanticName);
+        if (inputLayout.m_SemanticIndex > 0)
+        {
+            semanticName = StringFormat("%s%d", semanticName, inputLayout.m_SemanticIndex);
+        }
+
+        shaderVertexInput += "    ";
+        shaderVertexInput += shaderInputType;
+        shaderVertexInput += " ";
+        shaderVertexInput += shaderInputName;
+        shaderVertexInput += " : ";
+        shaderVertexInput += semanticName;
+        shaderVertexInput += ";\n";
+    }
+
+    shaderVertexInput += "};\n\n";
+
+    return shaderVertexInput;
 }
 
 }

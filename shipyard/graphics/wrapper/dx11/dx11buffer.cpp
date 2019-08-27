@@ -63,7 +63,9 @@ shipBool DX11VertexBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& dev
     data.SysMemPitch = 0;
     data.SysMemSlicePitch = 0;
 
-    HRESULT hr = device.CreateBuffer(&desc, &data, &m_Buffer);
+    D3D11_SUBRESOURCE_DATA* pData = ((initialData == nullptr) ? nullptr : &data);
+
+    HRESULT hr = device.CreateBuffer(&desc, pData, &m_Buffer);
     if (FAILED(hr))
     {
         SHIP_LOG_ERROR("DX11VertexBuffer::Create() --> Couldn't create vertex buffer.");
@@ -97,7 +99,9 @@ shipBool DX11IndexBuffer::Create(ID3D11Device& device, ID3D11DeviceContext& devi
     data.SysMemPitch = 0;
     data.SysMemSlicePitch = 0;
 
-    HRESULT hr = device.CreateBuffer(&desc, &data, &m_Buffer);
+    D3D11_SUBRESOURCE_DATA* pData = ((initialData == nullptr) ? nullptr : &data);
+
+    HRESULT hr = device.CreateBuffer(&desc, pData, &m_Buffer);
     if (FAILED(hr))
     {
         SHIP_LOG_ERROR("DX11IndexBuffer::Create() --> Couldn't create index buffer.");

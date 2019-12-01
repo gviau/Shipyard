@@ -6,12 +6,13 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_API MswinFileHandler : public BaseFileHandler
+    class SHIPYARD_API MswinFileHandlerStream : public BaseFileHandler
     {
     public:
-        MswinFileHandler();
-        MswinFileHandler(const StringT& filename, FileHandlerOpenFlag openFlag);
-        MswinFileHandler(const shipChar* filename, FileHandlerOpenFlag openFlag);
+        MswinFileHandlerStream();
+        MswinFileHandlerStream(const StringT& filename, FileHandlerOpenFlag openFlag);
+        MswinFileHandlerStream(const shipChar* filename, FileHandlerOpenFlag openFlag);
+        ~MswinFileHandlerStream();
 
         shipBool Open(const StringT& filename, FileHandlerOpenFlag openFlag);
         shipBool Open(const shipChar* filename, FileHandlerOpenFlag openFlag);
@@ -34,9 +35,14 @@ namespace Shipyard
 
     private:
         int GetFileMode(FileHandlerOpenFlag openFlag) const;
+        void FlushInternalBuffer();
 
         std::fstream m_File;
         SmallInplaceStringT m_Filename;
         FileHandlerOpenFlag m_OpenFlag;
+
+        static const size_t ms_FileHandlerStreamBufferSize = 32768;
+        shipChar m_FileHandlerStreamBuffer[ms_FileHandlerStreamBufferSize];
+        size_t m_FileHandlerStreamBufferPos = 0;
     };
 }

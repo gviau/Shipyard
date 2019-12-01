@@ -39,6 +39,8 @@ namespace Shipyard
         virtual void AppendChars(const shipChar* chars, size_t numChars, shipBool flush = false) = 0;
         virtual void RemoveChars(size_t startingPosition, size_t numCharsToRemove) = 0;
 
+        virtual void Flush() = 0;
+
         virtual size_t Size() = 0;
 #endif // #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
     };

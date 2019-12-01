@@ -30,19 +30,46 @@ shipBool ShaderHandlerManager::Initialize(GFXRenderDevice& gfxRenderDevice, Shad
 
     m_ShaderDatabase = &shaderDatabase;
 
+    // Mandatory shader families for which we have to wait for to go on.
+    InplaceArray<ShaderFamily, 2> mandatoryShaderFamilies;
+    mandatoryShaderFamilies.Add(ShaderFamily::ImGui);
+
+    BigArray<ShaderKey> mandatoryShaderKeys;
+
+    for (ShaderFamily shaderFamily : mandatoryShaderFamilies)
+    {
+        ShaderKey::GetEveryShaderKeyForShaderFamily(shaderFamily, mandatoryShaderKeys);
+    }
+
     ShaderKey errorShaderKey;
     errorShaderKey.SetShaderFamily(ShaderFamily::Error);
 
-    ShaderDatabase::ShaderEntrySet compiledShaderEntrySet;
-    if (m_ShaderDatabase->RetrieveShadersForShaderKey(errorShaderKey, compiledShaderEntrySet))
+    for (shipUint32 i = 0; i < shipUint32(VertexFormatType::VertexFormatType_Count); i++)
     {
-        return false;
+        SET_SHADER_OPTION(errorShaderKey, VERTEX_FORMAT_TYPE, i);
+        mandatoryShaderKeys.Add(errorShaderKey);
     }
 
-    shipBool dummy = false;
-    ShaderCompiler::GetInstance().GetRawShadersForShaderKey(errorShaderKey, compiledShaderEntrySet, dummy);
+    for (ShaderKey shaderKey : mandatoryShaderKeys)
+    {
+        ShaderDatabase::ShaderEntrySet compiledShaderEntrySet;
+        if (m_ShaderDatabase->RetrieveShadersForShaderKey(shaderKey, compiledShaderEntrySet))
+        {
+            continue;
+        }
 
-    m_ShaderDatabase->AppendShadersForShaderKey(errorShaderKey, compiledShaderEntrySet);
+        ShaderCompiler::GetInstance().AddCompilationRequestForShaderKey(shaderKey);
+
+        shipBool isShaderCompiled = false;
+
+        do
+        {
+            shipBool dummy = false;
+            isShaderCompiled = ShaderCompiler::GetInstance().GetRawShadersForShaderKey(shaderKey, compiledShaderEntrySet, dummy);
+        } while (!isShaderCompiled);
+
+        m_ShaderDatabase->AppendShadersForShaderKey(shaderKey, compiledShaderEntrySet);
+    }
 
     return true;
 }

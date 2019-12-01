@@ -3,6 +3,8 @@
 #include <system/array.h>
 #include <system/platform.h>
 
+#include <graphics/shader/shaderoptions.h>
+
 namespace Shipyard
 {
     enum class ShaderFamily : shipUint8;
@@ -29,6 +31,7 @@ namespace Shipyard
         static void InitializeShaderKeyGroups();
 
         static void GetShaderKeyOptionsForShaderFamily(ShaderFamily shaderFamily, Array<ShaderOption>& shaderOptions);
+        static void GetEveryShaderKeyForShaderFamily(ShaderFamily shaderFamily, BigArray<ShaderKey>& everyShaderKeyForShaderFamily);
 
         // Required to be used in a map (ShaderHandlerManager)
         shipBool operator< (const ShaderKey& rhs) const { return m_RawShaderKey < rhs.m_RawShaderKey; }

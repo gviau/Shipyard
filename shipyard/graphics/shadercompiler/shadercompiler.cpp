@@ -165,23 +165,10 @@ shipBool ShaderCompiler::GetRawShadersForShaderKey(ShaderKey shaderKey, ShaderDa
 void ShaderCompiler::SetShaderDirectoryName(const StringT& shaderDirectoryName)
 {
     m_ShaderDirectoryName = shaderDirectoryName;
-
-    // Make sure the ShaderFamily error is compiled initialy
-    CompileShaderFamily(ShaderFamily::Error);
-    CompileShaderFamily(ShaderFamily::ImGui);
 }
 
 void ShaderCompiler::ShaderCompilerThreadFunction()
 {
-    // Small hack: we need to compile the error shader family at the start, but if we include any files, we'll rely
-    // on the include handler which will call ShaderCompiler::GetInstance().GetShaderDirectory, so we can't compile
-    // the shader family in the constructor, since we wouldn't have had a change yet to set the instance.
-    while (ms_Instance != nullptr);
-
-    // Make sure the ShaderFamily error is compiled initially
-    CompileShaderFamily(ShaderFamily::Error);
-    CompileShaderFamily(ShaderFamily::ImGui);
-
     while (m_RunShaderCompilerThread)
     {
         Sleep(100);

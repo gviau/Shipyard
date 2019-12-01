@@ -140,4 +140,38 @@ ShaderKey::RawShaderKeyType ShaderKey::GetRawShaderKey() const
     return m_RawShaderKey;
 }
 
+void ShaderKey::GetEveryShaderKeyForShaderFamily(ShaderFamily shaderFamily, BigArray<ShaderKey>& everyShaderKeyForShaderFamily)
+{
+    Array<ShaderOption> everyPossibleShaderOption;
+    ShaderKey::GetShaderKeyOptionsForShaderFamily(shaderFamily, everyPossibleShaderOption);
+
+    shipUint32 numBitsInShaderKey = 0;
+    for (ShaderOption shaderOption : everyPossibleShaderOption)
+    {
+        numBitsInShaderKey += shipUint32(g_NumBitsForShaderOption[shipUint32(shaderOption)]);
+    }
+
+    shipUint32 everyShaderOptionSet = ((1 << numBitsInShaderKey) - 1);
+
+    shipUint32 possibleNumberOfPermutations = everyShaderOptionSet + 1;
+
+    ShaderKey shaderKey;
+    shaderKey.SetShaderFamily(shaderFamily);
+
+    ShaderKey::RawShaderKeyType baseRawShaderKey = shaderKey.GetRawShaderKey();
+
+    // Go through every permutation of shader options
+    shipUint32 shaderOptionAsInt = everyShaderOptionSet;
+
+    everyShaderKeyForShaderFamily.Reserve(possibleNumberOfPermutations);
+
+    for (shipUint32 i = 0; i < possibleNumberOfPermutations; i++)
+    {
+        ShaderKey& currentShaderKeyPermutation = everyShaderKeyForShaderFamily.Grow();
+        currentShaderKeyPermutation.m_RawShaderKey = (baseRawShaderKey | (shaderOptionAsInt << ShaderKey::ms_ShaderOptionShift));
+
+        shaderOptionAsInt -= 1;
+    }
+}
+
 }

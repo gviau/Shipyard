@@ -16,7 +16,6 @@
 #include <graphics/shader/shaderinputprovider.h>
 #include <graphics/shader/shaderresourcebinder.h>
 #include <graphics/shader/shaderkey.h>
-#include <graphics/shader/shaderoptions.h>
 
 #include <graphics/graphicssingletonstorer.h>
 #include <graphics/rendercontext.h>

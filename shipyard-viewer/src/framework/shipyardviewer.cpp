@@ -81,8 +81,13 @@ shipBool ShipyardViewer::CreateApp(HWND windowHandle, shipUint32 windowWidth, sh
 {
     GetLogger().OpenLog("shipyard_viewer.log");
 
-    m_WindowWidth = windowWidth;
-    m_WindowHeight = windowHeight;
+    RECT rect;
+    ::GetClientRect(windowHandle, &rect);
+    m_WindowWidth = (rect.right - rect.left);
+    m_WindowHeight = (rect.bottom - rect.top);
+
+    windowWidth = m_WindowWidth;
+    windowHeight = m_WindowHeight;
 
     size_t heapSize = 256 * 1024 * 1024;
     m_pHeap = malloc(heapSize);
@@ -329,6 +334,11 @@ void ShipyardViewer::ComputeOneFrame()
     m_pGfxDirectCommandQueue->ExecuteCommandLists(ppRenderCommandLists, 1);
 
     m_pGfxViewSurface->Flip();
+}
+
+shipBool ShipyardViewer::OnWin32Msg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam, LRESULT* shipyardMsgHandlingResult)
+{
+    return ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam, shipyardMsgHandlingResult);
 }
 
 }

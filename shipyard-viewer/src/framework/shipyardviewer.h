@@ -32,6 +32,8 @@ namespace Shipyard
         shipBool CreateApp(HWND windowHandle, shipUint32 windowWidth, shipUint32 windowHeight);
         void ComputeOneFrame();
 
+        shipBool OnWin32Msg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam, LRESULT* shipyardMsgHandlingResult);
+
     private:
         shipUint32 m_WindowWidth = 0;
         shipUint32 m_WindowHeight = 0;

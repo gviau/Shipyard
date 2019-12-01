@@ -1,15 +1,20 @@
 #include "framework/shipyardviewer.h"
 
-#include <extern/imgui/imgui.h>
-
 #include <cinttypes>
 
 #include <windows.h>
 
 bool g_IsOpen = false;
+Shipyard::ShipyardViewer* g_ShipyardViewer = nullptr;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+    LRESULT shipyardMsgHandlingResult = 0;
+    if (g_ShipyardViewer != nullptr && g_ShipyardViewer->OnWin32Msg(hWnd, msg, wParam, lParam, &shipyardMsgHandlingResult))
+    {
+        return shipyardMsgHandlingResult;
+    }
+
     switch (msg)
     {
     case WM_CLOSE:
@@ -67,6 +72,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
     Shipyard::ShipyardViewer shipyardViewer;
     g_IsOpen = shipyardViewer.CreateApp(windowHandle, windowWidth, windowHeight);
+
+    g_ShipyardViewer = &shipyardViewer;
 
     MSG msg;
     while (g_IsOpen)

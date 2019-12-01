@@ -105,7 +105,12 @@ void ShaderDatabase::Close()
 
 shipBool ShaderDatabase::Invalidate()
 {
+    // Close clears the filename
+    StringT filename = m_Filename;
+
     Close();
+
+    m_Filename = filename;
 
     if (!m_FileHandler.Open(m_Filename, FileHandlerOpenFlag(FileHandlerOpenFlag_ReadWrite | FileHandlerOpenFlag_Binary | FileHandlerOpenFlag_Create)))
     {

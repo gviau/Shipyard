@@ -27,11 +27,13 @@ namespace Shipyard
         shipUint32 GetShaderOptionValue(ShaderOption shaderOption) const;
 
         RawShaderKeyType GetRawShaderKey() const;
+        RawShaderKeyType GetRawShaderKeyOptions() const;
 
         static void InitializeShaderKeyGroups();
 
         static void GetShaderKeyOptionsForShaderFamily(ShaderFamily shaderFamily, Array<ShaderOption>& shaderOptions);
         static void GetEveryShaderKeyForShaderFamily(ShaderFamily shaderFamily, BigArray<ShaderKey>& everyShaderKeyForShaderFamily);
+        static void GetEveryValidShaderKeyForShaderFamily(ShaderFamily shaderFamily, BigArray<ShaderKey>& everyShaderKeyForShaderFamily);
 
         // Required to be used in a map (ShaderHandlerManager)
         shipBool operator< (const ShaderKey& rhs) const { return m_RawShaderKey < rhs.m_RawShaderKey; }
@@ -46,6 +48,8 @@ namespace Shipyard
 
     private:
         RawShaderKeyType m_RawShaderKey;
+
+        static void GetEveryShaderKeyForShaderFamilyInternal(ShaderFamily shaderFamily, BigArray<ShaderKey>& everyShaderKeyForShaderFamily, shipBool onlyValidShaderKeys);
     };
 }
 

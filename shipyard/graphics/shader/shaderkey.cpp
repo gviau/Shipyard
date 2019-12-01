@@ -3,6 +3,8 @@
 #include <graphics/shader/shaderfamilies.h>
 #include <graphics/shader/shaderoptions.h>
 
+#include <graphics/shader/shadervariationsetmanager.h>
+
 #include <system/systemcommon.h>
 
 namespace Shipyard
@@ -54,8 +56,7 @@ struct ShaderKeyGroupBase
                 idx += 1; \
             } \
         } \
-    }; \
-    ShaderKeyGroup_##shaderFamily g_ShaderKeyGroup_##shaderFamily;
+    };
 
 #include <graphics/shader/shaderkeydefinitions.h>
 
@@ -76,7 +77,8 @@ void ShaderKey::InitializeShaderKeyGroups()
     }
     
 #define START_SHADER_KEY(shaderFamily) \
-    g_ShaderKeyGroups[shipUint32(ShaderFamily:: ##shaderFamily)] = &g_ShaderKeyGroup_##shaderFamily;
+    static ShaderKeyGroup_##shaderFamily s_ShaderKeyGroup_##shaderFamily; \
+    g_ShaderKeyGroups[shipUint32(ShaderFamily:: ##shaderFamily)] = &s_ShaderKeyGroup_##shaderFamily;
 
 #include <graphics/shader/shaderkeydefinitions.h>
 }
@@ -140,7 +142,24 @@ ShaderKey::RawShaderKeyType ShaderKey::GetRawShaderKey() const
     return m_RawShaderKey;
 }
 
+ShaderKey::RawShaderKeyType ShaderKey::GetRawShaderKeyOptions() const
+{
+    return (m_RawShaderKey & (ms_ShaderOptionMask << ms_ShaderOptionShift));
+}
+
 void ShaderKey::GetEveryShaderKeyForShaderFamily(ShaderFamily shaderFamily, BigArray<ShaderKey>& everyShaderKeyForShaderFamily)
+{
+    constexpr shipBool onlyValidShaderKeys = false;
+    GetEveryShaderKeyForShaderFamilyInternal(shaderFamily, everyShaderKeyForShaderFamily, onlyValidShaderKeys);
+}
+
+void ShaderKey::GetEveryValidShaderKeyForShaderFamily(ShaderFamily shaderFamily, BigArray<ShaderKey>& everyShaderKeyForShaderFamily)
+{
+    constexpr shipBool onlyValidShaderKeys = true;
+    GetEveryShaderKeyForShaderFamilyInternal(shaderFamily, everyShaderKeyForShaderFamily, onlyValidShaderKeys);
+}
+
+void ShaderKey::GetEveryShaderKeyForShaderFamilyInternal(ShaderFamily shaderFamily, BigArray<ShaderKey>& everyShaderKeyForShaderFamily, shipBool onlyValidShaderKeys)
 {
     Array<ShaderOption> everyPossibleShaderOption;
     ShaderKey::GetShaderKeyOptionsForShaderFamily(shaderFamily, everyPossibleShaderOption);
@@ -165,11 +184,19 @@ void ShaderKey::GetEveryShaderKeyForShaderFamily(ShaderFamily shaderFamily, BigA
 
     everyShaderKeyForShaderFamily.Reserve(possibleNumberOfPermutations);
 
+    ShaderVariationSetManager& shaderVariationSetManager = GetShaderVariationSetManager();
+
     for (shipUint32 i = 0; i < possibleNumberOfPermutations; i++)
     {
-        ShaderKey& currentShaderKeyPermutation = everyShaderKeyForShaderFamily.Grow();
+        ShaderKey currentShaderKeyPermutation;
         currentShaderKeyPermutation.m_RawShaderKey = (baseRawShaderKey | (shaderOptionAsInt << ShaderKey::ms_ShaderOptionShift));
 
+        shipBool addPermutation = (!onlyValidShaderKeys || shaderVariationSetManager.ValidateShaderKey(currentShaderKeyPermutation, ShaderVariationSetManager::ShaderKeyValidationOption::DontAssertOnError));
+        if (addPermutation)
+        {
+            everyShaderKeyForShaderFamily.Add(currentShaderKeyPermutation);
+        }
+        
         shaderOptionAsInt -= 1;
     }
 }

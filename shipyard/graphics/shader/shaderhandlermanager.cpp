@@ -3,6 +3,8 @@
 #include <graphics/shader/shaderdatabase.h>
 #include <graphics/shader/shaderfamilies.h>
 #include <graphics/shader/shaderhandler.h>
+#include <graphics/shader/shadervariationset.h>
+#include <graphics/shader/shadervariationsetmanager.h>
 
 #include <graphics/shadercompiler/shadercompiler.h>
 #include <graphics/shadercompiler/shaderwatcher.h>
@@ -11,6 +13,27 @@
 
 namespace Shipyard
 {;
+
+SHIP_DECLARE_SHADER_VARIATION_SET_BEGIN(Error)
+{
+    shaderVariationSetManager.SetShaderOptionValueRange(ShaderOption::ShaderOption_VERTEX_FORMAT_TYPE, 0, shipUint32(VertexFormatType::VertexFormatType_Count));
+}
+SHIP_DECLARE_SHADER_VARIATION_SET_END(Error)
+
+SHIP_DECLARE_SHADER_VARIATION_SET_BEGIN(Generic)
+{
+    shaderVariationSetManager.SetShaderOptionValueRange(ShaderOption::ShaderOption_VERTEX_FORMAT_TYPE, 0, shipUint32(VertexFormatType::Pos_UV_Normal));
+
+    {
+        ShaderKey invalidShaderKey;
+        invalidShaderKey.SetShaderFamily(ShaderFamily::Generic);
+        SET_SHADER_OPTION(invalidShaderKey, Test1Bit, 1);
+        SET_SHADER_OPTION(invalidShaderKey, Test2Bits, 1);
+
+        shaderVariationSetManager.SetInvalidPartialShaderKey(invalidShaderKey);
+    }
+}
+SHIP_DECLARE_SHADER_VARIATION_SET_END(Generic)
 
 ShaderHandlerManager::ShaderHandlerManager()
     : m_RenderDevice(nullptr)
@@ -32,22 +55,14 @@ shipBool ShaderHandlerManager::Initialize(GFXRenderDevice& gfxRenderDevice, Shad
 
     // Mandatory shader families for which we have to wait for to go on.
     InplaceArray<ShaderFamily, 2> mandatoryShaderFamilies;
+    mandatoryShaderFamilies.Add(ShaderFamily::Error);
     mandatoryShaderFamilies.Add(ShaderFamily::ImGui);
 
     BigArray<ShaderKey> mandatoryShaderKeys;
 
     for (ShaderFamily shaderFamily : mandatoryShaderFamilies)
     {
-        ShaderKey::GetEveryShaderKeyForShaderFamily(shaderFamily, mandatoryShaderKeys);
-    }
-
-    ShaderKey errorShaderKey;
-    errorShaderKey.SetShaderFamily(ShaderFamily::Error);
-
-    for (shipUint32 i = 0; i < shipUint32(VertexFormatType::VertexFormatType_Count); i++)
-    {
-        SET_SHADER_OPTION(errorShaderKey, VERTEX_FORMAT_TYPE, i);
-        mandatoryShaderKeys.Add(errorShaderKey);
+        ShaderKey::GetEveryValidShaderKeyForShaderFamily(shaderFamily, mandatoryShaderKeys);
     }
 
     for (ShaderKey shaderKey : mandatoryShaderKeys)
@@ -122,6 +137,12 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
 {
     SHIP_ASSERT(m_RenderDevice != nullptr);
     SHIP_ASSERT(m_ShaderDatabase != nullptr);
+
+    ShaderVariationSetManager& shaderVariationSetManager = GetShaderVariationSetManager();
+    if (!shaderVariationSetManager.ValidateShaderKey(shaderKey, ShaderVariationSetManager::ShaderKeyValidationOption::AssertOnError))
+    {
+        return nullptr;
+    }
 
     ShaderWatcher& shaderWatcher = ShaderWatcher::GetInstance();
     ShaderCompiler& shaderCompiler = ShaderCompiler::GetInstance();

@@ -1,5 +1,8 @@
 #include <graphics/shader/shaderdatabase.h>
 
+#include <graphics/shader/shaderinputprovider.h>
+#include <graphics/shader/shaderresourcebinder.h>
+
 #include <system/memory.h>
 
 namespace Shipyard
@@ -68,7 +71,13 @@ shipBool ShaderDatabase::Load(const StringT& filename)
 
     for (shipUint32 i = 0; i < shaderEntriesHeader.numShaderEntries; i++)
     {
-        LoadNextShaderEntry(databaseBuffer, m_ShaderEntryKeys, m_ShaderEntrySets);
+        shipBool continueLoadingShaderEntries = LoadNextShaderEntry(databaseBuffer, m_ShaderEntryKeys, m_ShaderEntrySets);
+
+        if (!continueLoadingShaderEntries)
+        {
+            Invalidate();
+            return false;
+        }
     }
 
     return true;
@@ -96,7 +105,7 @@ void ShaderDatabase::Close()
 
 shipBool ShaderDatabase::Invalidate()
 {
-    m_FileHandler.Close();
+    Close();
 
     if (!m_FileHandler.Open(m_Filename, FileHandlerOpenFlag(FileHandlerOpenFlag_ReadWrite | FileHandlerOpenFlag_Binary | FileHandlerOpenFlag_Create)))
     {
@@ -114,8 +123,7 @@ shipBool ShaderDatabase::Invalidate()
 
     m_FileHandler.AppendChars((const shipChar*)&databaseHeader, sizeof(databaseHeader));
 
-    constexpr shipBool flush = true;
-    m_FileHandler.AppendChars((const shipChar*)&shaderEntriesHeader, sizeof(shaderEntriesHeader), flush);
+    m_FileHandler.AppendChars((const shipChar*)&shaderEntriesHeader, sizeof(shaderEntriesHeader));
 
     return true;
 }
@@ -205,8 +213,9 @@ void ShaderDatabase::RemoveShadersForShaderKey(const ShaderKey& shaderKey)
 
     shaderEntriesHeader.numShaderEntries -= 1;
 
-    constexpr shipBool flush = true;
-    m_FileHandler.WriteChars(shaderEntriesHeaderPosition, (shipChar*)&shaderEntriesHeader, sizeof(shaderEntriesHeader), flush);
+    m_FileHandler.WriteChars(shaderEntriesHeaderPosition, (shipChar*)&shaderEntriesHeader, sizeof(shaderEntriesHeader));
+
+    m_FileHandler.Flush();
 }
 
 namespace
@@ -284,71 +293,65 @@ void ShaderDatabase::AppendShadersForShaderKey(const ShaderKey& shaderKey, Shade
 
     m_FileHandler.AppendChars((const shipChar*)&shaderEntryHeader, sizeof(shaderEntryHeader));
 
-    constexpr shipBool flush = true;
-
     if (shaderEntrySet.rawVertexShaderSize > 0)
     {
-        m_FileHandler.AppendChars((const shipChar*)shaderEntrySet.rawVertexShader, shaderEntrySet.rawVertexShaderSize, flush);
+        m_FileHandler.AppendChars((const shipChar*)shaderEntrySet.rawVertexShader, shaderEntrySet.rawVertexShaderSize);
     }
 
     if (shaderEntrySet.rawPixelShaderSize > 0)
     {
-        m_FileHandler.AppendChars((const shipChar*)shaderEntrySet.rawPixelShader, shaderEntrySet.rawPixelShaderSize, flush);
+        m_FileHandler.AppendChars((const shipChar*)shaderEntrySet.rawPixelShader, shaderEntrySet.rawPixelShaderSize);
     }
 
     if (shaderEntrySet.rawHullShaderSize > 0)
     {
-        m_FileHandler.AppendChars((const shipChar*)shaderEntrySet.rawHullShader, shaderEntrySet.rawHullShaderSize, flush);
+        m_FileHandler.AppendChars((const shipChar*)shaderEntrySet.rawHullShader, shaderEntrySet.rawHullShaderSize);
     }
 
     if (shaderEntrySet.rawDomainShaderSize > 0)
     {
-        m_FileHandler.AppendChars((const shipChar*)shaderEntrySet.rawDomainShader, shaderEntrySet.rawDomainShaderSize, flush);
+        m_FileHandler.AppendChars((const shipChar*)shaderEntrySet.rawDomainShader, shaderEntrySet.rawDomainShaderSize);
     }
 
     if (shaderEntrySet.rawGeometryShaderSize > 0)
     {
-        m_FileHandler.AppendChars((const shipChar*)shaderEntrySet.rawGeometryShader, shaderEntrySet.rawGeometryShaderSize, flush);
+        m_FileHandler.AppendChars((const shipChar*)shaderEntrySet.rawGeometryShader, shaderEntrySet.rawGeometryShaderSize);
     }
 
     if (shaderEntrySet.rawComputeShaderSize > 0)
     {
-        m_FileHandler.AppendChars((const shipChar*)shaderEntrySet.rawComputeShader, shaderEntrySet.rawComputeShaderSize, flush);
+        m_FileHandler.AppendChars((const shipChar*)shaderEntrySet.rawComputeShader, shaderEntrySet.rawComputeShaderSize);
     }
 
-    m_FileHandler.AppendChars((const shipChar*)&shaderEntrySet.renderStateBlock, sizeof(shaderEntrySet.renderStateBlock), flush);
+    m_FileHandler.AppendChars((const shipChar*)&shaderEntrySet.renderStateBlock, sizeof(shaderEntrySet.renderStateBlock));
 
     WriteRootSignatureParameters(shaderEntrySet.rootSignatureParameters);
 
     const Array<ShaderResourceBinder::ShaderResourceBinderEntry>& shaderResourceBinderEntries = shaderEntrySet.shaderResourceBinder.GetShaderResourceBinderEntries();
-    shipUint32 numShaderResourceBinderEntries = shaderResourceBinderEntries.Size();
-
-    m_FileHandler.AppendChars((const shipChar*)&numShaderResourceBinderEntries, sizeof(numShaderResourceBinderEntries), flush);
-
-    if (numShaderResourceBinderEntries > 0)
-    {
-        m_FileHandler.AppendChars((const shipChar*)&shaderResourceBinderEntries[0], sizeof(shaderResourceBinderEntries[0]) * numShaderResourceBinderEntries, flush);
-    }
+    
+    WriteShaderResourceBinderEntries(shaderResourceBinderEntries);
 
     shipUint32 numDescriptorSetEntryDeclarations = shaderEntrySet.descriptorSetEntryDeclarations.Size();
 
-    m_FileHandler.AppendChars((const shipChar*)&numDescriptorSetEntryDeclarations, sizeof(numDescriptorSetEntryDeclarations), flush);
+    m_FileHandler.AppendChars((const shipChar*)&numDescriptorSetEntryDeclarations, sizeof(numDescriptorSetEntryDeclarations));
 
     if (numDescriptorSetEntryDeclarations > 0)
     {
-        m_FileHandler.AppendChars((const shipChar*)&shaderEntrySet.descriptorSetEntryDeclarations[0], sizeof(shaderEntrySet.descriptorSetEntryDeclarations[0]) * numDescriptorSetEntryDeclarations, flush);
+        m_FileHandler.AppendChars((const shipChar*)&shaderEntrySet.descriptorSetEntryDeclarations[0], sizeof(shaderEntrySet.descriptorSetEntryDeclarations[0]) * numDescriptorSetEntryDeclarations);
     }
 
     shipUint32 numSamplerStates = shaderEntrySet.samplerStates.Size();
-    m_FileHandler.AppendChars((const shipChar*)&numSamplerStates, sizeof(numSamplerStates), flush);
+    m_FileHandler.AppendChars((const shipChar*)&numSamplerStates, sizeof(numSamplerStates));
 
     if (numSamplerStates > 0)
     {
-        m_FileHandler.AppendChars((const shipChar*)&shaderEntrySet.samplerStates[0], sizeof(shaderEntrySet.samplerStates[0]) * numSamplerStates, flush);
+        m_FileHandler.AppendChars((const shipChar*)&shaderEntrySet.samplerStates[0], sizeof(shaderEntrySet.samplerStates[0]) * numSamplerStates);
     }
+
+    m_FileHandler.Flush();
 }
 
-void ShaderDatabase::LoadNextShaderEntry(shipUint8*& databaseBuffer, BigArray<ShaderEntryKey>& shaderEntryKeys, BigArray<ShaderEntrySet>& shaderEntrySets) const
+shipBool ShaderDatabase::LoadNextShaderEntry(shipUint8*& databaseBuffer, BigArray<ShaderEntryKey>& shaderEntryKeys, BigArray<ShaderEntrySet>& shaderEntrySets) const
 {
     ShaderEntryHeader shaderEntryHeader = *(ShaderEntryHeader*)databaseBuffer;
 
@@ -380,16 +383,13 @@ void ShaderDatabase::LoadNextShaderEntry(shipUint8*& databaseBuffer, BigArray<Sh
 
     ReadRootSignatureParameters(databaseBuffer, newShaderEntrySet.rootSignatureParameters);
 
-    shipUint32 numShaderResourceBinderEntries = *(const shipUint32*)databaseBuffer;
-    databaseBuffer += sizeof(shipUint32);
+    shipBool noInvalidShaderInputProviderDeclaration = ReadShaderResourceBinderEntries(
+            databaseBuffer,
+            newShaderEntrySet.shaderResourceBinder.GetShaderResourceBinderEntries());
 
-    if (numShaderResourceBinderEntries > 0)
+    if (!noInvalidShaderInputProviderDeclaration)
     {
-        Array<ShaderResourceBinder::ShaderResourceBinderEntry>& shaderResourceBinderEntries = newShaderEntrySet.shaderResourceBinder.GetShaderResourceBinderEntries();
-        shaderResourceBinderEntries.Resize(numShaderResourceBinderEntries);
-
-        memcpy(&shaderResourceBinderEntries[0], databaseBuffer, sizeof(shaderResourceBinderEntries[0]) * numShaderResourceBinderEntries);
-        databaseBuffer += sizeof(shaderResourceBinderEntries[0]) * numShaderResourceBinderEntries;
+        return false;
     }
 
     shipUint32 numDescriptorSetEntryDeclarations = *(const shipUint32*)databaseBuffer;
@@ -413,36 +413,60 @@ void ShaderDatabase::LoadNextShaderEntry(shipUint8*& databaseBuffer, BigArray<Sh
         memcpy(&newShaderEntrySet.samplerStates[0], databaseBuffer, sizeof(newShaderEntrySet.samplerStates[0]) * numSamplerStates);
         databaseBuffer += sizeof(newShaderEntrySet.samplerStates[0]) * numSamplerStates;
     }
+
+    return true;
 }
 
 void ShaderDatabase::WriteRootSignatureParameters(const Array<RootSignatureParameterEntry>& rootSignatureParameters)
 {
-    constexpr shipBool flush = true;
-
     shipUint32 numRootSignatureParameters = rootSignatureParameters.Size();
     SHIP_ASSERT(numRootSignatureParameters < 8);
-    m_FileHandler.AppendChars((const shipChar*)&numRootSignatureParameters, sizeof(numRootSignatureParameters), flush);
+    m_FileHandler.AppendChars((const shipChar*)&numRootSignatureParameters, sizeof(numRootSignatureParameters));
 
     for (const RootSignatureParameterEntry& rootSignatureParameterEntry : rootSignatureParameters)
     {
-        m_FileHandler.AppendChars((const shipChar*)&rootSignatureParameterEntry.shaderVisibility, sizeof(rootSignatureParameterEntry.shaderVisibility), flush);
-        m_FileHandler.AppendChars((const shipChar*)&rootSignatureParameterEntry.parameterType, sizeof(rootSignatureParameterEntry.parameterType), flush);
+        m_FileHandler.AppendChars((const shipChar*)&rootSignatureParameterEntry.shaderVisibility, sizeof(rootSignatureParameterEntry.shaderVisibility));
+        m_FileHandler.AppendChars((const shipChar*)&rootSignatureParameterEntry.parameterType, sizeof(rootSignatureParameterEntry.parameterType));
 
         if (rootSignatureParameterEntry.parameterType == RootSignatureParameterType::DescriptorTable)
         {
             shipUint32 numDescriptorRanges = rootSignatureParameterEntry.descriptorTable.descriptorRanges.Size();
-            m_FileHandler.AppendChars((const shipChar*)&numDescriptorRanges, sizeof(numDescriptorRanges), flush);
+            m_FileHandler.AppendChars((const shipChar*)&numDescriptorRanges, sizeof(numDescriptorRanges));
 
             if (numDescriptorRanges > 0)
             {
                 const DescriptorRange* descriptorRange = &rootSignatureParameterEntry.descriptorTable.descriptorRanges[0];
-                m_FileHandler.AppendChars((const shipChar*)descriptorRange, sizeof(*descriptorRange) * numDescriptorRanges, flush);
+                m_FileHandler.AppendChars((const shipChar*)descriptorRange, sizeof(*descriptorRange) * numDescriptorRanges);
             }
         }
         else
         {
-            m_FileHandler.AppendChars((const shipChar*)&rootSignatureParameterEntry.descriptor, sizeof(rootSignatureParameterEntry.descriptor), flush);
+            m_FileHandler.AppendChars((const shipChar*)&rootSignatureParameterEntry.descriptor, sizeof(rootSignatureParameterEntry.descriptor));
         }
+    }
+}
+
+void ShaderDatabase::WriteShaderResourceBinderEntries(const Array<ShaderResourceBinder::ShaderResourceBinderEntry>& shaderResourceBinderEntries)
+{
+    shipUint32 numShaderResourceBinderEntries = shaderResourceBinderEntries.Size();
+
+    m_FileHandler.AppendChars((const shipChar*)&numShaderResourceBinderEntries, sizeof(numShaderResourceBinderEntries));
+
+    for (shipUint32 i = 0; i < numShaderResourceBinderEntries; i++)
+    {
+        const ShaderResourceBinder::ShaderResourceBinderEntry& shaderResourceBinderEntry = shaderResourceBinderEntries[i];
+
+        const shipChar* shaderInputProviderName = (shaderResourceBinderEntry.Declaration != nullptr) ? shaderResourceBinderEntry.Declaration->GetShaderInputProviderName() : nullptr;
+        shipUint32 nameLength = (shaderInputProviderName != nullptr) ? shipUint32(strlen(shaderInputProviderName)) : 0;
+
+        m_FileHandler.AppendChars((const shipChar*)&nameLength, sizeof(nameLength));
+        
+        if (nameLength > 0)
+        {
+            m_FileHandler.AppendChars(shaderInputProviderName, nameLength);
+        }
+
+        m_FileHandler.AppendChars((const shipChar*)&shaderResourceBinderEntry, sizeof(shaderResourceBinderEntry));
     }
 }
 
@@ -483,6 +507,50 @@ void ShaderDatabase::ReadRootSignatureParameters(shipUint8*& databaseBuffer, Arr
     }
 }
 
+shipBool ShaderDatabase::ReadShaderResourceBinderEntries(shipUint8*& databaseBuffer, Array<ShaderResourceBinder::ShaderResourceBinderEntry>& shaderResourceBinderEntries) const
+{
+    ShaderInputProviderManager& shaderInputProviderManager = GetShaderInputProviderManager();
+
+    shipUint32 numShaderResourceBinderEntries = *(const shipUint32*)databaseBuffer;
+    databaseBuffer += sizeof(shipUint32);
+
+    if (numShaderResourceBinderEntries > 0)
+    {
+        shaderResourceBinderEntries.Resize(numShaderResourceBinderEntries);
+
+        for (shipUint32 i = 0; i < numShaderResourceBinderEntries; i++)
+        {
+            shipUint32 shaderInputProviderNameLength = 0;
+            memcpy(&shaderInputProviderNameLength, databaseBuffer, sizeof(shaderInputProviderNameLength));
+            databaseBuffer += sizeof(shaderInputProviderNameLength);
+
+            ShaderInputProviderDeclaration* shaderInputProviderDeclaration = nullptr;
+
+            if (shaderInputProviderNameLength > 0)
+            {
+                shipChar shaderInputProviderName[1024];
+                memcpy(&shaderInputProviderName[0], databaseBuffer, shaderInputProviderNameLength);
+                databaseBuffer += shaderInputProviderNameLength;
+
+                shaderInputProviderName[shaderInputProviderNameLength] = '\0';
+
+                shaderInputProviderDeclaration = shaderInputProviderManager.FindShaderInputProviderDeclarationFromName(shaderInputProviderName);
+                if (shaderInputProviderDeclaration == nullptr)
+                {
+                    return false;
+                }
+            }
+
+            memcpy(&shaderResourceBinderEntries[i], databaseBuffer, sizeof(shaderResourceBinderEntries[i]));
+            databaseBuffer += sizeof(shaderResourceBinderEntries[i]);
+
+            shaderResourceBinderEntries[i].Declaration = shaderInputProviderDeclaration;
+        }
+    }
+
+    return true;
+}
+
 size_t ShaderDatabase::GetShaderEntrySetSize(const ShaderEntrySet& shaderEntrySet) const
 {
     size_t shaderEntrySetSize =
@@ -519,9 +587,15 @@ size_t ShaderDatabase::GetShaderEntrySetSize(const ShaderEntrySet& shaderEntrySe
 
     shaderEntrySetSize += sizeof(numShaderResourceBinderEntries);
 
-    if (numShaderResourceBinderEntries > 0)
+    for (const ShaderResourceBinder::ShaderResourceBinderEntry& shaderResourceBinderEntry : shaderResourceBinderEntries)
     {
-        shaderEntrySetSize += sizeof(shaderResourceBinderEntries[0]) * numShaderResourceBinderEntries;
+        const shipChar* shaderInputProviderName = (shaderResourceBinderEntry.Declaration != nullptr) ? shaderResourceBinderEntry.Declaration->GetShaderInputProviderName() : nullptr;
+        shipUint32 nameLength = (shaderInputProviderName != nullptr) ? shipUint32(strlen(shaderInputProviderName)) : 0;
+
+        shaderEntrySetSize += sizeof(nameLength);
+        shaderEntrySetSize += nameLength;
+
+        shaderEntrySetSize += sizeof(shaderResourceBinderEntry);
     }
 
     shipUint32 numDescriptorSetEntryDeclarations = shaderEntrySet.descriptorSetEntryDeclarations.Size();

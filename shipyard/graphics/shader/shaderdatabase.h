@@ -106,15 +106,18 @@ namespace Shipyard
         };
 
     private:
-        void LoadNextShaderEntry(shipUint8*& databaseBuffer, BigArray<ShaderEntryKey>& shaderEntryKeys, BigArray<ShaderEntrySet>& shaderEntrySets) const;
+        shipBool LoadNextShaderEntry(shipUint8*& databaseBuffer, BigArray<ShaderEntryKey>& shaderEntryKeys, BigArray<ShaderEntrySet>& shaderEntrySets) const;
 
         void WriteRootSignatureParameters(const Array<RootSignatureParameterEntry>& rootSignatureParameters);
+        void WriteShaderResourceBinderEntries(const Array<ShaderResourceBinder::ShaderResourceBinderEntry>& shaderResourceBinderEntries);
+
         void ReadRootSignatureParameters(shipUint8*& databaseBuffer, Array<RootSignatureParameterEntry>& rootSignatureParameters) const;
+        shipBool ReadShaderResourceBinderEntries(shipUint8*& databaseBuffer, Array<ShaderResourceBinder::ShaderResourceBinderEntry>& shaderResourceBinderEntries) const;
 
         size_t GetShaderEntrySetSize(const ShaderEntrySet& shaderEntrySet) const;
 
         StringT m_Filename;
-        FileHandler m_FileHandler;
+        FileHandlerStream m_FileHandler;
 
         BigArray<ShaderEntryKey> m_ShaderEntryKeys;
         BigArray<ShaderEntrySet> m_ShaderEntrySets;

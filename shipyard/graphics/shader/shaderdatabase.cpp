@@ -8,6 +8,46 @@
 namespace Shipyard
 {;
 
+enum : shipUint64
+{
+    // Increment version if changes were made to shaders or database that would render already existing databases
+    // incompatible.
+    Version = 1,
+
+    LowMagicConstant = 0x2b8e8a3b5f02ce78,
+    HighMagicConstant = 0xba927e7f8abc09d
+};
+
+struct DatabaseHeader
+{
+    // Used to identify a shader database, regardless of file extension.
+    shipUint64 lowMagic;
+    shipUint64 highMagic;
+
+    shipUint32 platform;
+
+    // Used to determine if database's content is compatible.
+    shipUint32 databaseVersionNumber;
+};
+
+struct ShaderEntriesHeader
+{
+    shipUint32 numShaderEntries = 0;
+};
+
+struct ShaderEntryHeader
+{
+    ShaderKey shaderKey;
+    shipUint64 lastModifiedTimestamp = 0;
+
+    size_t rawVertexShaderSize = 0;
+    size_t rawPixelShaderSize = 0;
+    size_t rawHullShaderSize = 0;
+    size_t rawDomainShaderSize = 0;
+    size_t rawGeometryShaderSize = 0;
+    size_t rawComputeShaderSize = 0;
+};
+
 ShaderDatabase::ShaderDatabase()
     : m_ShaderEntrySets(shipUint32(0))
     , m_ShaderEntryKeys(shipUint32(0))

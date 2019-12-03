@@ -139,7 +139,7 @@ void* GFXMaterialUnifiedConstantBuffer::MapBufferForShaderInputProvider(const Sh
     shipUint32 requiredSizeForProvider = m_ShaderInputProviderRequiredSizes[shaderInputProviderIndex];
     size_t& writeOffset = m_WriteOffsetsPerShaderInputProvider[shaderInputProviderIndex];
 
-    size_t writeOffsetToUse = AtomicOperations<size_t>::Add(writeOffset, size_t(requiredSizeForProvider));
+    size_t writeOffsetToUse = AtomicOperations::Add(writeOffset, size_t(requiredSizeForProvider));
 
 #ifdef SHIP_ENABLE_ASSERTS
     size_t maximumOffset = SHIP_MAX_BATCHED_DRAW_CALLS_PER_MATERIAL * requiredSizeForProvider;

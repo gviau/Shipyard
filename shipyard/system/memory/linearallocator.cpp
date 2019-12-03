@@ -67,7 +67,7 @@ void* LinearAllocator::Allocate(size_t size, size_t alignment
             return nullptr;
         }
 
-    } while (AtomicOperations<size_t>::CompareExchange(m_AllocationOffset, newAllocationOffset, allocationOffset) != allocationOffset);
+    } while (AtomicOperations::CompareExchange(m_AllocationOffset, newAllocationOffset, allocationOffset) != allocationOffset);
 
     void* allocatedPtr = reinterpret_cast<void*>(allocatedAddress);
 

@@ -178,6 +178,7 @@ namespace Shipyard
 
     SHIPYARD_API const shipChar* StringFormat(const shipChar* fmt, ...);
     SHIPYARD_API shipInt32 StringCompare(const shipChar* str1, const shipChar* str2);
+    SHIPYARD_API shipBool AreStringsEqual(const shipChar* str1, const shipChar* str2);
 }
 
 #include <system/string.inl>

@@ -62,4 +62,26 @@ shipInt32 StringCompare(const shipChar* str1, const shipChar* str2)
     }
 }
 
+shipBool AreStringsEqual(const shipChar* str1, const shipChar* str2)
+{
+    for (size_t idx = 0; true; idx++)
+    {
+        shipChar first = str1[idx];
+        shipChar second = str2[idx];
+
+        int diff = (int(first) - int(second));
+
+        if (diff != 0)
+        {
+            return false;
+        }
+        else if (first == '\0')
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 }

@@ -1,6 +1,5 @@
 #include <graphics/shader/shaderdatabase.h>
 
-#include <graphics/shader/shaderinputprovider.h>
 #include <graphics/shader/shaderresourcebinder.h>
 
 #include <system/memory.h>
@@ -28,6 +27,11 @@ struct DatabaseHeader
 
     // Used to determine if database's content is compatible.
     shipUint32 databaseVersionNumber;
+};
+
+struct ShaderInputProviderDeclarationEntriesHeader
+{
+    shipUint32 numShaderInputProviderEntries = 0;
 };
 
 struct ShaderEntriesHeader
@@ -103,6 +107,12 @@ shipBool ShaderDatabase::Load(const StringT& filename)
     
     databaseBuffer += sizeof(shaderEntriesHeader);
 
+    if (!ValidateShaderInputProviderDeclarations(databaseBuffer, m_ShaderInputProviderDeclarationEntries))
+    {
+        Invalidate();
+        return false;
+    }
+
     if (shaderEntriesHeader.numShaderEntries > 0)
     {
         m_ShaderEntryKeys.Reserve(shaderEntriesHeader.numShaderEntries);
@@ -128,6 +138,8 @@ void ShaderDatabase::Close()
     m_Filename.Clear();
 
     m_FileHandler.Close();
+
+    m_ShaderInputProviderDeclarationEntries.Clear();
 
     m_ShaderEntryKeys.Clear();
 
@@ -163,12 +175,31 @@ shipBool ShaderDatabase::Invalidate()
     databaseHeader.platform = PLATFORM;
     databaseHeader.databaseVersionNumber = Version;
 
+    m_FileHandler.AppendChars((const shipChar*)&databaseHeader, sizeof(databaseHeader));
+
     ShaderEntriesHeader shaderEntriesHeader;
     shaderEntriesHeader.numShaderEntries = 0;
 
-    m_FileHandler.AppendChars((const shipChar*)&databaseHeader, sizeof(databaseHeader));
-
     m_FileHandler.AppendChars((const shipChar*)&shaderEntriesHeader, sizeof(shaderEntriesHeader));
+
+    Array<ShaderInputProviderDeclaration*> shaderInputProviderDeclarations;
+    GetShaderInputProviderManager().GetShaderInputProviderDeclarations(shaderInputProviderDeclarations);
+
+    ShaderInputProviderDeclarationEntriesHeader shaderInputProviderDeclarationEntriesHeader;
+    shaderInputProviderDeclarationEntriesHeader.numShaderInputProviderEntries = shaderInputProviderDeclarations.Size();
+
+    m_FileHandler.AppendChars((const shipChar*)&shaderInputProviderDeclarationEntriesHeader, sizeof(shaderInputProviderDeclarationEntriesHeader));
+
+    for (ShaderInputProviderDeclaration* shaderInputProviderDeclaration : shaderInputProviderDeclarations)
+    {
+        const shipChar* shaderInputProviderDeclarationName = shaderInputProviderDeclaration->GetShaderInputProviderName();
+
+        ShaderInputProviderDeclarationEntry& shaderInputProviderDeclarationEntry = m_ShaderInputProviderDeclarationEntries.Grow();
+        shaderInputProviderDeclarationEntry.shaderInputProviderDeclarationNameLength = shipUint32(strlen(shaderInputProviderDeclarationName));
+        memcpy(shaderInputProviderDeclarationEntry.shaderInputProviderDeclarationName, shaderInputProviderDeclarationName, shaderInputProviderDeclarationEntry.shaderInputProviderDeclarationNameLength);
+
+        m_FileHandler.AppendChars((const shipChar*)&shaderInputProviderDeclarationEntry, sizeof(shaderInputProviderDeclarationEntry));
+    }
 
     return true;
 }
@@ -220,7 +251,7 @@ void ShaderDatabase::RemoveShadersForShaderKey(const ShaderKey& shaderKey)
         return;
     }
 
-    size_t positionToRemoveInFile = sizeof(DatabaseHeader) + sizeof(ShaderEntriesHeader);
+    size_t positionToRemoveInFile = GetShaderEntrySetStartPosition();
 
     for (shipUint32 i = 0; i < shaderSetIndexToRemove; i++)
     {
@@ -396,6 +427,40 @@ void ShaderDatabase::AppendShadersForShaderKey(const ShaderKey& shaderKey, Shade
     m_FileHandler.Flush();
 }
 
+shipBool ShaderDatabase::ValidateShaderInputProviderDeclarations(shipUint8*& databaseBuffer, Array<ShaderInputProviderDeclarationEntry>& shaderInputProviderDeclarationEntries) const
+{
+    ShaderInputProviderDeclarationEntriesHeader shaderInputProviderDeclarationEntriesHeader = *(ShaderInputProviderDeclarationEntriesHeader*)databaseBuffer;
+
+    databaseBuffer += sizeof(shaderInputProviderDeclarationEntriesHeader);
+
+    ShaderInputProviderManager& shaderInputProviderManager = GetShaderInputProviderManager();
+
+    Array<ShaderInputProviderDeclaration*> shaderInputProviderDeclarations;
+    shaderInputProviderManager.GetShaderInputProviderDeclarations(shaderInputProviderDeclarations);
+
+    if (shaderInputProviderDeclarations.Size() != shaderInputProviderDeclarationEntriesHeader.numShaderInputProviderEntries)
+    {
+        return false;
+    }
+
+    shaderInputProviderDeclarationEntries.Reserve(shaderInputProviderDeclarations.Size());
+
+    for (shipUint32 i = 0; i < shaderInputProviderDeclarations.Size(); i++)
+    {
+        ShaderInputProviderDeclarationEntry& newEntry = shaderInputProviderDeclarationEntries.Grow();
+
+        memcpy(&newEntry, databaseBuffer, sizeof(newEntry));
+        databaseBuffer += sizeof(newEntry);
+
+        if (shaderInputProviderManager.FindShaderInputProviderDeclarationFromName(newEntry.shaderInputProviderDeclarationName) == nullptr)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 shipBool ShaderDatabase::LoadNextShaderEntry(shipUint8*& databaseBuffer, BigArray<ShaderEntryKey>& shaderEntryKeys, BigArray<ShaderEntrySet>& shaderEntrySets) const
 {
     ShaderEntryHeader shaderEntryHeader = *(ShaderEntryHeader*)databaseBuffer;
@@ -501,15 +566,25 @@ void ShaderDatabase::WriteShaderResourceBinderEntries(const Array<ShaderResource
     {
         const ShaderResourceBinder::ShaderResourceBinderEntry& shaderResourceBinderEntry = shaderResourceBinderEntries[i];
 
-        const shipChar* shaderInputProviderName = (shaderResourceBinderEntry.Declaration != nullptr) ? shaderResourceBinderEntry.Declaration->GetShaderInputProviderName() : nullptr;
-        shipUint32 nameLength = (shaderInputProviderName != nullptr) ? shipUint32(strlen(shaderInputProviderName)) : 0;
+        shipUint32 shaderInputProviderNameIndex = 0xffffffff;
 
-        m_FileHandler.AppendChars((const shipChar*)&nameLength, sizeof(nameLength));
-        
-        if (nameLength > 0)
+        if (shaderResourceBinderEntry.Declaration != nullptr)
         {
-            m_FileHandler.AppendChars(shaderInputProviderName, nameLength);
+            const shipChar* shaderInputProviderName = shaderResourceBinderEntry.Declaration->GetShaderInputProviderName();
+
+            for (shaderInputProviderNameIndex = 0; shaderInputProviderNameIndex < m_ShaderInputProviderDeclarationEntries.Size(); shaderInputProviderNameIndex++)
+            {
+                const ShaderInputProviderDeclarationEntry& entry = m_ShaderInputProviderDeclarationEntries[shaderInputProviderNameIndex];
+                if (AreStringsEqual(shaderInputProviderName, entry.shaderInputProviderDeclarationName))
+                {
+                    break;
+                }
+            }
+
+            SHIP_ASSERT(shaderInputProviderNameIndex != m_ShaderInputProviderDeclarationEntries.Size());
         }
+
+        m_FileHandler.AppendChars((const shipChar*)&shaderInputProviderNameIndex, sizeof(shaderInputProviderNameIndex));
 
         m_FileHandler.AppendChars((const shipChar*)&shaderResourceBinderEntry, sizeof(shaderResourceBinderEntry));
     }
@@ -565,19 +640,15 @@ shipBool ShaderDatabase::ReadShaderResourceBinderEntries(shipUint8*& databaseBuf
 
         for (shipUint32 i = 0; i < numShaderResourceBinderEntries; i++)
         {
-            shipUint32 shaderInputProviderNameLength = 0;
-            memcpy(&shaderInputProviderNameLength, databaseBuffer, sizeof(shaderInputProviderNameLength));
-            databaseBuffer += sizeof(shaderInputProviderNameLength);
+            shipUint32 shaderInputProviderNameIndex = 0;
+            memcpy(&shaderInputProviderNameIndex, databaseBuffer, sizeof(shaderInputProviderNameIndex));
+            databaseBuffer += sizeof(shaderInputProviderNameIndex);
 
             ShaderInputProviderDeclaration* shaderInputProviderDeclaration = nullptr;
 
-            if (shaderInputProviderNameLength > 0)
+            if (shaderInputProviderNameIndex != 0xffffffff)
             {
-                shipChar shaderInputProviderName[1024];
-                memcpy(&shaderInputProviderName[0], databaseBuffer, shaderInputProviderNameLength);
-                databaseBuffer += shaderInputProviderNameLength;
-
-                shaderInputProviderName[shaderInputProviderNameLength] = '\0';
+                const shipChar* shaderInputProviderName = m_ShaderInputProviderDeclarationEntries[shaderInputProviderNameIndex].shaderInputProviderDeclarationName;
 
                 shaderInputProviderDeclaration = shaderInputProviderManager.FindShaderInputProviderDeclarationFromName(shaderInputProviderName);
                 if (shaderInputProviderDeclaration == nullptr)
@@ -594,6 +665,12 @@ shipBool ShaderDatabase::ReadShaderResourceBinderEntries(shipUint8*& databaseBuf
     }
 
     return true;
+}
+
+size_t ShaderDatabase::GetShaderEntrySetStartPosition() const
+{
+    return (sizeof(DatabaseHeader) + sizeof(ShaderEntriesHeader) + sizeof(ShaderInputProviderDeclarationEntriesHeader) +
+            sizeof(ShaderInputProviderDeclarationEntry) * m_ShaderInputProviderDeclarationEntries.Size());
 }
 
 size_t ShaderDatabase::GetShaderEntrySetSize(const ShaderEntrySet& shaderEntrySet) const
@@ -634,11 +711,7 @@ size_t ShaderDatabase::GetShaderEntrySetSize(const ShaderEntrySet& shaderEntrySe
 
     for (const ShaderResourceBinder::ShaderResourceBinderEntry& shaderResourceBinderEntry : shaderResourceBinderEntries)
     {
-        const shipChar* shaderInputProviderName = (shaderResourceBinderEntry.Declaration != nullptr) ? shaderResourceBinderEntry.Declaration->GetShaderInputProviderName() : nullptr;
-        shipUint32 nameLength = (shaderInputProviderName != nullptr) ? shipUint32(strlen(shaderInputProviderName)) : 0;
-
-        shaderEntrySetSize += sizeof(nameLength);
-        shaderEntrySetSize += nameLength;
+        shaderEntrySetSize += sizeof(shipUint32);
 
         shaderEntrySetSize += sizeof(shaderResourceBinderEntry);
     }

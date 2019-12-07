@@ -3,6 +3,7 @@
 #include <graphics/graphicscommon.h>
 
 #include <graphics/shader/shaderhandler.h>
+#include <graphics/shader/shaderinputprovider.h>
 #include <graphics/shader/shaderresourcebinder.h>
 
 #include <system/systemcommon.h>
@@ -59,12 +60,20 @@ namespace Shipyard
         void AppendShadersForShaderKey(const ShaderKey& shaderKey, ShaderEntrySet& shaderEntrySet);
 
     private:
+        struct ShaderInputProviderDeclarationEntry
+        {
+            shipUint32 shaderInputProviderDeclarationNameLength = 0;
+            shipChar shaderInputProviderDeclarationName[ShaderInputProviderDeclaration::MaxShaderInputProviderNameLength];
+        };
+
         struct ShaderEntryKey
         {
             ShaderKey shaderKey;
         };
 
     private:
+        shipBool ValidateShaderInputProviderDeclarations(shipUint8*& databaseBuffer, Array<ShaderInputProviderDeclarationEntry>& shaderInputProviderDeclarationEntries) const;
+
         shipBool LoadNextShaderEntry(shipUint8*& databaseBuffer, BigArray<ShaderEntryKey>& shaderEntryKeys, BigArray<ShaderEntrySet>& shaderEntrySets) const;
 
         void WriteRootSignatureParameters(const Array<RootSignatureParameterEntry>& rootSignatureParameters);
@@ -73,11 +82,13 @@ namespace Shipyard
         void ReadRootSignatureParameters(shipUint8*& databaseBuffer, Array<RootSignatureParameterEntry>& rootSignatureParameters) const;
         shipBool ReadShaderResourceBinderEntries(shipUint8*& databaseBuffer, Array<ShaderResourceBinder::ShaderResourceBinderEntry>& shaderResourceBinderEntries) const;
 
+        size_t GetShaderEntrySetStartPosition() const;
         size_t GetShaderEntrySetSize(const ShaderEntrySet& shaderEntrySet) const;
 
         StringT m_Filename;
         FileHandlerStream m_FileHandler;
 
+        Array<ShaderInputProviderDeclarationEntry> m_ShaderInputProviderDeclarationEntries;
         BigArray<ShaderEntryKey> m_ShaderEntryKeys;
         BigArray<ShaderEntrySet> m_ShaderEntrySets;
     };

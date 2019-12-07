@@ -158,6 +158,7 @@ namespace Shipyard
         enum
         {
             MaxShaderInputsPerProvider = 1024,
+            MaxShaderInputProviderNameLength = 256
         };
 
     public:
@@ -350,6 +351,7 @@ namespace Shipyard
     public: \
         shaderInputProviderTypeClassName() \
         { \
+            SHIP_ASSERT(strlen(#shaderInputProviderType) <= ShaderInputProviderDeclaration::MaxShaderInputProviderNameLength); \
             m_ShaderInputProviderName = #shaderInputProviderType; \
             m_ShaderInputProviderUsage = ShaderInputProviderUsage::##shaderInputProviderUsage; \
             shipInt32 offsetInBuffer = 0;

@@ -43,6 +43,10 @@ namespace Shipyard
 
         void* GrowCommandListHeap(size_t newCommandListHeapSize);
 #endif // #ifdef SHIP_COMMAND_LIST_GROWABLE_HEAP
+
+#ifdef SHIP_RENDER_COMMANDS_DEBUG_INFO
+        BaseRenderCommand* m_pLastAllocatedRenderCommand;
+#endif // #ifdef SHIP_RENDER_COMMANDS_DEBUG_INFO
     };
 
     class SHIPYARD_API DX11DirectRenderCommandList : public DX11BaseRenderCommandList, public DirectRenderCommandList
@@ -56,7 +60,9 @@ namespace Shipyard
         ClearDepthStencilRenderTargetCommand* ClearDepthStencilRenderTarget();
 
         DrawCommand* Draw();
+        DrawSeveralVertexBuffersCommand* DrawSeveralVertexBuffers();
         DrawIndexedCommand* DrawIndexed();
+        DrawIndexedSeveralVertexBuffersCommand* DrawIndexedSeveralVertexBuffers();
 
         void* MapVertexBuffer(GFXVertexBufferHandle gfxVertexBufferhandle, MapFlag mapFlag, size_t bufferOffset);
         void* MapIndexBuffer(GFXIndexBufferHandle gfxIndexBufferHandle, MapFlag mapFlag, size_t bufferOffset);

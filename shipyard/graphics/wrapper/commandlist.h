@@ -61,7 +61,9 @@ namespace Shipyard
         virtual ClearDepthStencilRenderTargetCommand* ClearDepthStencilRenderTarget() = 0;
 
         virtual DrawCommand* Draw() = 0;
+        virtual DrawSeveralVertexBuffersCommand* DrawSeveralVertexBuffers() = 0;
         virtual DrawIndexedCommand* DrawIndexed() = 0;
+        virtual DrawIndexedSeveralVertexBuffersCommand* DrawIndexedSeveralVertexBuffers() = 0;
 
         virtual void* MapVertexBuffer(GFXVertexBufferHandle gfxVertexBufferhandle, MapFlag mapFlag, size_t bufferOffset) = 0;
         virtual void* MapIndexBuffer(GFXIndexBufferHandle gfxIndexBufferHandle, MapFlag mapFlag, size_t bufferOffset) = 0;

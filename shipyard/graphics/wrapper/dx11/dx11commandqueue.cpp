@@ -75,8 +75,16 @@ void DX11CommandQueue::ExecuteCommandLists(GFXRenderCommandList** ppRenderComman
                 processedRenderCommandSize = Draw(pBaseRenderCommand);
                 break;
 
+            case RenderCommandType::DrawSeveralVertexBuffers:
+                processedRenderCommandSize = DrawSeveralVertexBuffers(pBaseRenderCommand);
+                break;
+
             case RenderCommandType::DrawIndexed:
                 processedRenderCommandSize = DrawIndexed(pBaseRenderCommand);
+                break;
+
+            case RenderCommandType::DrawIndexedSeveralVertexBuffers:
+                processedRenderCommandSize = DrawIndexedSeveralVertexBuffers(pBaseRenderCommand);
                 break;
 
             case RenderCommandType::MapBuffer:
@@ -173,21 +181,50 @@ size_t DX11CommandQueue::Draw(BaseRenderCommand* pCmd)
 
     PrepareNextDrawCalls(drawItem);
 
-    SHIP_ASSERT(drawCommand.numVertexBuffers < GfxConstants_MaxVertexBuffers);
-    GFXVertexBuffer* gfxVertexBuffers[GfxConstants_MaxVertexBuffers];
-    for (shipUint32 i = drawCommand.vertexBufferStartSlot; i < (drawCommand.vertexBufferStartSlot + drawCommand.numVertexBuffers); i++)
-    {
-        gfxVertexBuffers[i] = &m_RenderDevice.GetVertexBuffer(drawCommand.pGfxVertexBufferHandles[i]);
-    }
+    GFXVertexBuffer* gfxVertexBuffer = &m_RenderDevice.GetVertexBuffer(drawCommand.gfxVertexBufferHandle);
 
-    m_RenderStateCache.SetVertexBuffers(gfxVertexBuffers, drawCommand.vertexBufferStartSlot, drawCommand.numVertexBuffers, drawCommand.pVertexBufferOffsets);
+    constexpr shipUint32 vertexBufferStartSlot = 0;
+    constexpr shipUint32 numVertexBuffers = 1;
+    m_RenderStateCache.SetVertexBuffers(&gfxVertexBuffer, vertexBufferStartSlot, numVertexBuffers, &drawCommand.vertexBufferOffset);
 
     m_RenderStateCache.CommitStateChangesForGraphics(m_RenderDevice);
 
-    shipUint32 numVertices = ((drawCommand.numVertexBuffers > 0) ? m_RenderDevice.GetVertexBuffer(drawCommand.pGfxVertexBufferHandles[drawCommand.vertexBufferStartSlot]).GetNumVertices() : 1);
+    shipUint32 numVertices = gfxVertexBuffer->GetNumVertices();
     m_DeviceContext->Draw(numVertices, drawCommand.startVertexLocation);
 
     return sizeof(DrawCommand);
+}
+
+size_t DX11CommandQueue::DrawSeveralVertexBuffers(BaseRenderCommand* pCmd)
+{
+    DrawSeveralVertexBuffersCommand& drawSeveralVertexBuffersCommand = *static_cast<DrawSeveralVertexBuffersCommand*>(pCmd);
+
+    DrawItem drawItem(
+            drawSeveralVertexBuffersCommand.gfxRenderTargetHandle,
+            drawSeveralVertexBuffersCommand.gfxDepthStencilRenderTargetHandle,
+            drawSeveralVertexBuffersCommand.gfxViewport,
+            drawSeveralVertexBuffersCommand.gfxScissorRect,
+            drawSeveralVertexBuffersCommand.gfxPipelineStateObjectHandle,
+            drawSeveralVertexBuffersCommand.gfxRootSignatureHandle,
+            drawSeveralVertexBuffersCommand.gfxDescriptorSetHandle);
+
+    PrepareNextDrawCalls(drawItem);
+
+    SHIP_ASSERT(drawSeveralVertexBuffersCommand.numVertexBuffers < GfxConstants_MaxVertexBuffers);
+    GFXVertexBuffer* gfxVertexBuffers[GfxConstants_MaxVertexBuffers];
+    for (shipUint32 i = drawSeveralVertexBuffersCommand.vertexBufferStartSlot; i < (drawSeveralVertexBuffersCommand.vertexBufferStartSlot + drawSeveralVertexBuffersCommand.numVertexBuffers); i++)
+    {
+        gfxVertexBuffers[i] = &m_RenderDevice.GetVertexBuffer(drawSeveralVertexBuffersCommand.pGfxVertexBufferHandles[i]);
+    }
+
+    m_RenderStateCache.SetVertexBuffers(gfxVertexBuffers, drawSeveralVertexBuffersCommand.vertexBufferStartSlot, drawSeveralVertexBuffersCommand.numVertexBuffers, drawSeveralVertexBuffersCommand.pVertexBufferOffsets);
+
+    m_RenderStateCache.CommitStateChangesForGraphics(m_RenderDevice);
+
+    shipUint32 numVertices = ((drawSeveralVertexBuffersCommand.numVertexBuffers > 0) ? m_RenderDevice.GetVertexBuffer(drawSeveralVertexBuffersCommand.pGfxVertexBufferHandles[drawSeveralVertexBuffersCommand.vertexBufferStartSlot]).GetNumVertices() : 1);
+    m_DeviceContext->Draw(numVertices, drawSeveralVertexBuffersCommand.startVertexLocation);
+
+    return sizeof(DrawSeveralVertexBuffersCommand);
 }
 
 size_t DX11CommandQueue::DrawIndexed(BaseRenderCommand* pCmd)
@@ -210,14 +247,11 @@ size_t DX11CommandQueue::DrawIndexed(BaseRenderCommand* pCmd)
 
     PrepareNextDrawCalls(drawItem);
 
-    SHIP_ASSERT(drawIndexedCommand.numVertexBuffers < GfxConstants_MaxVertexBuffers);
-    GFXVertexBuffer* gfxVertexBuffers[GfxConstants_MaxVertexBuffers];
-    for (shipUint32 i = drawIndexedCommand.vertexBufferStartSlot; i < (drawIndexedCommand.vertexBufferStartSlot + drawIndexedCommand.numVertexBuffers); i++)
-    {
-        gfxVertexBuffers[i] = &m_RenderDevice.GetVertexBuffer(drawIndexedCommand.pGfxVertexBufferHandles[i]);
-    }
+    GFXVertexBuffer* gfxVertexBuffer = &m_RenderDevice.GetVertexBuffer(drawIndexedCommand.gfxVertexBufferHandle);
 
-    m_RenderStateCache.SetVertexBuffers(gfxVertexBuffers, drawIndexedCommand.vertexBufferStartSlot, drawIndexedCommand.numVertexBuffers, drawIndexedCommand.pVertexBufferOffsets);
+    constexpr shipUint32 vertexBufferStartSlot = 0;
+    constexpr shipUint32 numVertexBuffers = 1;
+    m_RenderStateCache.SetVertexBuffers(&gfxVertexBuffer, vertexBufferStartSlot, numVertexBuffers, &drawIndexedCommand.vertexBufferOffset);
 
     m_RenderStateCache.CommitStateChangesForGraphics(m_RenderDevice);
     
@@ -225,6 +259,43 @@ size_t DX11CommandQueue::DrawIndexed(BaseRenderCommand* pCmd)
     m_DeviceContext->DrawIndexed(indexCount, drawIndexedCommand.startIndexLocation, drawIndexedCommand.baseVertexLocation);
 
     return sizeof(DrawIndexedCommand);
+}
+
+size_t DX11CommandQueue::DrawIndexedSeveralVertexBuffers(BaseRenderCommand* pCmd)
+{
+    DrawIndexedSeveralVertexBuffersCommand& drawIndexedSeveralVertexBuffersCommand = *static_cast<DrawIndexedSeveralVertexBuffersCommand*>(pCmd);
+
+    SHIP_ASSERT(drawIndexedSeveralVertexBuffersCommand.gfxIndexBufferHandle.handle != InvalidGfxHandle);
+    const GFXIndexBuffer& gfxIndexBuffer = m_RenderDevice.GetIndexBuffer(drawIndexedSeveralVertexBuffersCommand.gfxIndexBufferHandle);
+
+    m_RenderStateCache.SetIndexBuffer(gfxIndexBuffer, drawIndexedSeveralVertexBuffersCommand.indexBufferOffset);
+
+    DrawItem drawItem(
+            drawIndexedSeveralVertexBuffersCommand.gfxRenderTargetHandle,
+            drawIndexedSeveralVertexBuffersCommand.gfxDepthStencilRenderTargetHandle,
+            drawIndexedSeveralVertexBuffersCommand.gfxViewport,
+            drawIndexedSeveralVertexBuffersCommand.gfxScissorRect,
+            drawIndexedSeveralVertexBuffersCommand.gfxPipelineStateObjectHandle,
+            drawIndexedSeveralVertexBuffersCommand.gfxRootSignatureHandle,
+            drawIndexedSeveralVertexBuffersCommand.gfxDescriptorSetHandle);
+
+    PrepareNextDrawCalls(drawItem);
+
+    SHIP_ASSERT(drawIndexedSeveralVertexBuffersCommand.numVertexBuffers < GfxConstants_MaxVertexBuffers);
+    GFXVertexBuffer* gfxVertexBuffers[GfxConstants_MaxVertexBuffers];
+    for (shipUint32 i = drawIndexedSeveralVertexBuffersCommand.vertexBufferStartSlot; i < (drawIndexedSeveralVertexBuffersCommand.vertexBufferStartSlot + drawIndexedSeveralVertexBuffersCommand.numVertexBuffers); i++)
+    {
+        gfxVertexBuffers[i] = &m_RenderDevice.GetVertexBuffer(drawIndexedSeveralVertexBuffersCommand.pGfxVertexBufferHandles[i]);
+    }
+
+    m_RenderStateCache.SetVertexBuffers(gfxVertexBuffers, drawIndexedSeveralVertexBuffersCommand.vertexBufferStartSlot, drawIndexedSeveralVertexBuffersCommand.numVertexBuffers, drawIndexedSeveralVertexBuffersCommand.pVertexBufferOffsets);
+
+    m_RenderStateCache.CommitStateChangesForGraphics(m_RenderDevice);
+    
+    shipUint32 indexCount = ((drawIndexedSeveralVertexBuffersCommand.indexCount == UseIndexBufferSize) ? gfxIndexBuffer.GetNumIndices() : drawIndexedSeveralVertexBuffersCommand.indexCount);
+    m_DeviceContext->DrawIndexed(indexCount, drawIndexedSeveralVertexBuffersCommand.startIndexLocation, drawIndexedSeveralVertexBuffersCommand.baseVertexLocation);
+
+    return sizeof(DrawIndexedSeveralVertexBuffersCommand);
 }
 
 size_t DX11CommandQueue::MapBuffer(BaseRenderCommand* pCmd)

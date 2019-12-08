@@ -304,8 +304,6 @@ void ShipyardViewer::ComputeOneFrame()
 
     const ShaderHandler::ShaderRenderElements& shaderRenderElements = pShaderHandler->GetShaderRenderElements(*m_pGfxRenderDevice, renderState);
 
-    shipUint32 vertexBufferOffsets = 0;
-
     DrawIndexedCommand* pDrawIndexedCommand = m_pGfxDirectRenderCommandList->DrawIndexed();
     pDrawIndexedCommand->gfxViewport = gfxViewport;
     pDrawIndexedCommand->gfxRenderTargetHandle = gfxRenderTargetHandle;
@@ -313,11 +311,9 @@ void ShipyardViewer::ComputeOneFrame()
     pDrawIndexedCommand->gfxPipelineStateObjectHandle = shaderRenderElements.GfxPipelineStateObjectHandle;
     pDrawIndexedCommand->gfxRootSignatureHandle = shaderRenderElements.GfxRootSignatureHandle;
     pDrawIndexedCommand->gfxDescriptorSetHandle = shaderRenderElements.GfxDescriptorSetHandle;
-    pDrawIndexedCommand->pGfxVertexBufferHandles = &m_VertexBufferHandle;
+    pDrawIndexedCommand->gfxVertexBufferHandle = m_VertexBufferHandle;
     pDrawIndexedCommand->gfxIndexBufferHandle = m_IndexBufferHandle;
-    pDrawIndexedCommand->vertexBufferStartSlot = 0;
-    pDrawIndexedCommand->numVertexBuffers = 1;
-    pDrawIndexedCommand->pVertexBufferOffsets = &vertexBufferOffsets;
+    pDrawIndexedCommand->vertexBufferOffset = 0;
     pDrawIndexedCommand->startIndexLocation = 0;
     pDrawIndexedCommand->indexBufferOffset = 0;
     pDrawIndexedCommand->baseVertexLocation = 0;

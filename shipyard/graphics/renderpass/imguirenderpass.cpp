@@ -169,11 +169,8 @@ void ImGuiRenderPass::Execute(RenderContext& renderContext)
                 drawIndexedCommand->gfxViewport = gfxViewport;
                 drawIndexedCommand->gfxScissorRect = scissorRect;
 
-                drawIndexedCommand->numVertexBuffers = 1;
-                drawIndexedCommand->pGfxVertexBufferHandles = &gfxVertexBufferHandle;
-
-                shipUint32 vertexBufferOffset = 0;
-                drawIndexedCommand->pVertexBufferOffsets = &vertexBufferOffset;
+                drawIndexedCommand->gfxVertexBufferHandle = gfxVertexBufferHandle;
+                drawIndexedCommand->vertexBufferOffset = 0;
 
                 drawIndexedCommand->gfxIndexBufferHandle = gfxIndexBufferHandle;
                 drawIndexedCommand->indexCount = pcmd->ElemCount;

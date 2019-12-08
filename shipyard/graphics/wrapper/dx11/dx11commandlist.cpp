@@ -18,6 +18,10 @@
 #include <system/logger.h>
 #include <system/systemcommon.h>
 
+#ifdef SHIP_RENDER_COMMANDS_DEBUG_INFO
+#include <system/atomicoperations.h>
+#endif // #ifdef SHIP_RENDER_COMMANDS_DEBUG_INFO
+
 #pragma warning( disable : 4005 )
 
 #include <d3d11.h>
@@ -34,6 +38,10 @@ DX11BaseRenderCommandList::DX11BaseRenderCommandList()
 #ifdef SHIP_COMMAND_LIST_GROWABLE_HEAP
     , m_CommandListHeapSize(SHIP_COMMAND_LIST_HEAP_SIZE)
 #endif // #ifdef SHIP_COMMAND_LIST_GROWABLE_HEAP
+
+#ifdef SHIP_RENDER_COMMANDS_DEBUG_INFO
+    , m_pLastAllocatedRenderCommand(nullptr)
+#endif // #ifdef SHIP_RENDER_COMMANDS_DEBUG_INFO
 {
 
 }
@@ -64,6 +72,10 @@ void DX11BaseRenderCommandList::Close()
 void DX11BaseRenderCommandList::Reset(GFXCommandListAllocator& gfxCommandListAllocator, GFXPipelineStateObject* pGfxPipelineStateObject)
 {
     m_CommandListHeapCurrentPointer = 0;
+
+#ifdef SHIP_RENDER_COMMANDS_DEBUG_INFO
+    m_pLastAllocatedRenderCommand = nullptr;
+#endif // #ifdef SHIP_RENDER_COMMANDS_DEBUG_INFO
 }
 
 BaseRenderCommand* DX11BaseRenderCommandList::GetNewRenderCommand(RenderCommandType renderCommandType)
@@ -88,8 +100,16 @@ BaseRenderCommand* DX11BaseRenderCommandList::GetNewRenderCommand(RenderCommandT
         renderCommandSize = sizeof(DrawCommand);
         break;
 
+    case RenderCommandType::DrawSeveralVertexBuffers:
+        renderCommandSize = sizeof(DrawSeveralVertexBuffersCommand);
+        break;
+
     case RenderCommandType::DrawIndexed:
         renderCommandSize = sizeof(DrawIndexedCommand);
+        break;
+
+    case RenderCommandType::DrawIndexedSeveralVertexBuffers:
+        renderCommandSize = sizeof(DrawIndexedSeveralVertexBuffersCommand);
         break;
 
     case RenderCommandType::MapBuffer:
@@ -149,10 +169,24 @@ BaseRenderCommand* DX11BaseRenderCommandList::GetNewRenderCommand(RenderCommandT
             memcpy(pNewCommand, &initRenderCommandData, sizeof(initRenderCommandData));
         }
         break;
+        
+    case RenderCommandType::DrawSeveralVertexBuffers:
+        {
+            DrawSeveralVertexBuffersCommand initRenderCommandData;
+            memcpy(pNewCommand, &initRenderCommandData, sizeof(initRenderCommandData));
+        }
+        break;
 
     case RenderCommandType::DrawIndexed:
         {
             DrawIndexedCommand initRenderCommandData;
+            memcpy(pNewCommand, &initRenderCommandData, sizeof(initRenderCommandData));
+        }
+        break;
+
+    case RenderCommandType::DrawIndexedSeveralVertexBuffers:
+        {
+            DrawIndexedSeveralVertexBuffersCommand initRenderCommandData;
             memcpy(pNewCommand, &initRenderCommandData, sizeof(initRenderCommandData));
         }
         break;
@@ -170,6 +204,17 @@ BaseRenderCommand* DX11BaseRenderCommandList::GetNewRenderCommand(RenderCommandT
 #endif // #ifdef SHIP_USE_DRAW_COMMANDS_DEFAULT_CONSTRUCTOR
 
     pNewCommand->renderCommandType = renderCommandType;
+
+#ifdef SHIP_RENDER_COMMANDS_DEBUG_INFO
+    pNewCommand->pPreviousRenderCommand = m_pLastAllocatedRenderCommand;
+
+    if (pNewCommand->pPreviousRenderCommand != nullptr)
+    {
+        pNewCommand->pPreviousRenderCommand->pNextRenderCommand = pNewCommand;
+    }
+
+    m_pLastAllocatedRenderCommand = pNewCommand;
+#endif // SHIP_RENDER_COMMANDS_DEBUG_INFO
 
     m_CommandListHeapCurrentPointer += renderCommandSize;
 
@@ -245,11 +290,25 @@ DrawCommand* DX11DirectRenderCommandList::Draw()
     return static_cast<DrawCommand*>(pCmd);
 }
 
+DrawSeveralVertexBuffersCommand* DX11DirectRenderCommandList::DrawSeveralVertexBuffers()
+{
+    BaseRenderCommand* pCmd = GetNewRenderCommand(RenderCommandType::DrawSeveralVertexBuffers);
+
+    return static_cast<DrawSeveralVertexBuffersCommand*>(pCmd);
+}
+
 DrawIndexedCommand* DX11DirectRenderCommandList::DrawIndexed()
 {
     BaseRenderCommand* pCmd = GetNewRenderCommand(RenderCommandType::DrawIndexed);
 
     return static_cast<DrawIndexedCommand*>(pCmd);
+}
+
+DrawIndexedSeveralVertexBuffersCommand* DX11DirectRenderCommandList::DrawIndexedSeveralVertexBuffers()
+{
+    BaseRenderCommand* pCmd = GetNewRenderCommand(RenderCommandType::DrawIndexedSeveralVertexBuffers);
+
+    return static_cast<DrawIndexedSeveralVertexBuffersCommand*>(pCmd);
 }
 
 void* GetMappedBuffer(DX11BaseBuffer& dx11BaseBuffer, MapFlag mapFlag, ID3D11DeviceContext* pDx11DeviceContext)

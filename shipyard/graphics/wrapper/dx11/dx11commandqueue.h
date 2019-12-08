@@ -63,7 +63,9 @@ namespace Shipyard
         size_t ClearDepthStencilRenderTarget(BaseRenderCommand* pCmd);
 
         size_t Draw(BaseRenderCommand* pCmd);
+        size_t DrawSeveralVertexBuffers(BaseRenderCommand* pCmd);
         size_t DrawIndexed(BaseRenderCommand* pCmd);
+        size_t DrawIndexedSeveralVertexBuffers(BaseRenderCommand* pCmd);
 
         size_t MapBuffer(BaseRenderCommand* pCmd);
 

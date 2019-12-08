@@ -4,6 +4,10 @@
 
 #include <graphics/shader/shaderkey.h>
 
+#ifndef SHIP_OPTIMIZED
+#define SHIP_RENDER_COMMANDS_DEBUG_INFO
+#endif // #ifndef SHIP_OPTIMIZED
+
 namespace Shipyard
 {
     enum : shipUint32
@@ -17,13 +21,20 @@ namespace Shipyard
         ClearSingleRenderTarget,
         ClearDepthStencilRenderTarget,
         Draw,
+        DrawSeveralVertexBuffers,
         DrawIndexed,
+        DrawIndexedSeveralVertexBuffers,
         MapBuffer,
     };
 
     struct BaseRenderCommand
     {
         RenderCommandType renderCommandType;
+
+#ifdef SHIP_RENDER_COMMANDS_DEBUG_INFO
+        BaseRenderCommand* pPreviousRenderCommand = nullptr;
+        BaseRenderCommand* pNextRenderCommand = nullptr;
+#endif // SHIP_RENDER_COMMANDS_DEBUG_INFO
     };
 
     struct ClearFullRenderTargetCommand : BaseRenderCommand
@@ -65,6 +76,23 @@ namespace Shipyard
         GFXRootSignatureHandle gfxRootSignatureHandle = { InvalidGfxHandle };
         GFXDescriptorSetHandle gfxDescriptorSetHandle = { InvalidGfxHandle };
 
+        GFXVertexBufferHandle gfxVertexBufferHandle = { InvalidGfxHandle };
+        shipUint32 startVertexLocation = 0;
+        shipUint32 vertexBufferOffset = 0;
+    };
+
+    struct DrawSeveralVertexBuffersCommand : BaseRenderCommand
+    {
+        GfxViewport gfxViewport;
+        GfxRect gfxScissorRect;
+
+        GFXRenderTargetHandle gfxRenderTargetHandle = { InvalidGfxHandle };
+        GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle = { InvalidGfxHandle };
+
+        GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle = { InvalidGfxHandle };
+        GFXRootSignatureHandle gfxRootSignatureHandle = { InvalidGfxHandle };
+        GFXDescriptorSetHandle gfxDescriptorSetHandle = { InvalidGfxHandle };
+
         GFXVertexBufferHandle* pGfxVertexBufferHandles = nullptr;
         shipUint32 vertexBufferStartSlot = 0;
         shipUint32 numVertexBuffers = 0;
@@ -76,6 +104,27 @@ namespace Shipyard
     {
         GfxViewport gfxViewport;
         GfxRect gfxScissorRect;
+
+        GFXRenderTargetHandle gfxRenderTargetHandle = { InvalidGfxHandle };
+        GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle = { InvalidGfxHandle };
+
+        GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle = { InvalidGfxHandle };
+        GFXRootSignatureHandle gfxRootSignatureHandle = { InvalidGfxHandle };
+        GFXDescriptorSetHandle gfxDescriptorSetHandle = { InvalidGfxHandle };
+
+        GFXVertexBufferHandle gfxVertexBufferHandle = { InvalidGfxHandle };
+        GFXIndexBufferHandle gfxIndexBufferHandle = { InvalidGfxHandle };
+        shipUint32 vertexBufferOffset = 0;
+        shipUint32 indexCount = UseIndexBufferSize;
+        shipUint32 startIndexLocation = 0;
+        shipUint32 indexBufferOffset = 0;
+        shipInt32 baseVertexLocation = 0;
+    };
+
+    struct DrawIndexedSeveralVertexBuffersCommand : BaseRenderCommand
+    {
+        GfxViewport gfxViewport;
+        GfxRect gfxScissorRect;
         
         GFXRenderTargetHandle gfxRenderTargetHandle = { InvalidGfxHandle };
         GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle = { InvalidGfxHandle };
@@ -84,7 +133,7 @@ namespace Shipyard
         GFXRootSignatureHandle gfxRootSignatureHandle = { InvalidGfxHandle };
         GFXDescriptorSetHandle gfxDescriptorSetHandle = { InvalidGfxHandle };
 
-        GFXVertexBufferHandle* pGfxVertexBufferHandles = nullptr;
+        GFXVertexBufferHandle pGfxVertexBufferHandles[GfxConstants::GfxConstants_MaxVertexBuffers];
         GFXIndexBufferHandle gfxIndexBufferHandle = { InvalidGfxHandle };
         shipUint32 vertexBufferStartSlot = 0;
         shipUint32 numVertexBuffers = 0;

@@ -77,8 +77,6 @@ void FullscreenHelper::DrawFullscreenQuad(GFXRenderDevice& gfxRenderDevice, GFXD
     gfxViewport.minDepth = 0.0f;
     gfxViewport.maxDepth = 1.0f;
 
-    shipUint32 vertexBufferOffsets = 0;
-
     DrawIndexedCommand* pDrawIndexedCommand = gfxRenderCommandList.DrawIndexed();
     pDrawIndexedCommand->gfxViewport = gfxViewport;
     pDrawIndexedCommand->gfxRenderTargetHandle = renderContext.gfxRenderTargetHandle;
@@ -86,11 +84,9 @@ void FullscreenHelper::DrawFullscreenQuad(GFXRenderDevice& gfxRenderDevice, GFXD
     pDrawIndexedCommand->gfxPipelineStateObjectHandle = shaderRenderElements.GfxPipelineStateObjectHandle;
     pDrawIndexedCommand->gfxRootSignatureHandle = shaderRenderElements.GfxRootSignatureHandle;
     pDrawIndexedCommand->gfxDescriptorSetHandle = shaderRenderElements.GfxDescriptorSetHandle;
-    pDrawIndexedCommand->pGfxVertexBufferHandles = &m_FullscreenQuadVertexBufferHandle;
+    pDrawIndexedCommand->gfxVertexBufferHandle = m_FullscreenQuadVertexBufferHandle;
     pDrawIndexedCommand->gfxIndexBufferHandle = m_FullscreenQuadIndexBufferHandle;
-    pDrawIndexedCommand->vertexBufferStartSlot = 0;
-    pDrawIndexedCommand->numVertexBuffers = 1;
-    pDrawIndexedCommand->pVertexBufferOffsets = &vertexBufferOffsets;
+    pDrawIndexedCommand->vertexBufferOffset = 0;
     pDrawIndexedCommand->startIndexLocation = 0;
     pDrawIndexedCommand->indexBufferOffset = 0;
     pDrawIndexedCommand->baseVertexLocation = 0;

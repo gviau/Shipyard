@@ -17,6 +17,7 @@ namespace ShipyardSharpmake
             base.ConfigureAll(configuration, target);
 
             configuration.AddProject<ShipyardViewerProject>(target);
+            configuration.AddProject<ShipyardToolsProject>(target);
         }
     }
 }

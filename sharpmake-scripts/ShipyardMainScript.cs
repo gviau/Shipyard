@@ -12,6 +12,7 @@
 [module: Sharpmake.Include("ShipyardProject.cs")]
 [module: Sharpmake.Include("ShipyardSolution.cs")]
 [module: Sharpmake.Include("ShipyardTarget.cs")]
+[module: Sharpmake.Include("ShipyardToolsProject.cs")]
 [module: Sharpmake.Include("ShipyardUnitTestProject.cs")]
 [module: Sharpmake.Include("ShipyardUnitTestSolution.cs")]
 [module: Sharpmake.Include("ShipyardViewerProject.cs")]

@@ -18,6 +18,8 @@ namespace ShipyardSharpmake
             configuration.AddPublicDependency<ShipyardSystemDllProject>(target, ShipyardUtils.DefaultDependencySettings);
             configuration.AddPublicDependency<ShipyardMathDllProject>(target, ShipyardUtils.DefaultDependencySettings);
             configuration.AddPublicDependency<ShipyardGraphicsDllProject>(target, ShipyardUtils.DefaultDependencySettings);
+
+            configuration.AddPublicDependency<ShipyardToolsProject>(target, ShipyardUtils.DefaultDependencySettings);
         }
     }
 

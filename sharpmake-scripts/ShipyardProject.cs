@@ -55,6 +55,7 @@ namespace ShipyardSharpmake
         {
             base.ConfigureIncludePaths(configuration);
 
+            configuration.IncludePaths.Add(SourceRootPath + @"..\extern\assimp\");
             configuration.IncludePaths.Add(SourceRootPath + @"..\extern\directx\");
             configuration.IncludePaths.Add(SourceRootPath + @"..\extern\imgui\");
         }
@@ -84,6 +85,14 @@ namespace ShipyardSharpmake
             configuration.LibraryFiles.Add("DxErr.lib");
             configuration.LibraryFiles.Add("dxguid.lib");
             configuration.LibraryFiles.Add("d3dcompiler.lib");
+
+            configuration.LibraryPaths.Add(SourceRootPath + @"..\extern\assimp\bin\");
+
+            configuration.LibraryFiles.Add(@"assimp-vc141-mt.lib");
+            configuration.LibraryFiles.Add(@"zlib.lib");
+
+            configuration.TargetCopyFiles.Add(SourceRootPath + @"..\extern\assimp\bin\assimp-vc141-mt.dll");
+            configuration.TargetCopyFiles.Add(SourceRootPath + @"..\extern\assimp\bin\zlib.dll");
         }
     }
 

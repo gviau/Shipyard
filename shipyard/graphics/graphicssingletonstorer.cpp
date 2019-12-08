@@ -8,6 +8,8 @@
 #include <graphics/shadercompiler/shadercompiler.h>
 #include <graphics/shadercompiler/shaderwatcher.h>
 
+#include <graphics/utils/fullscreenhelper.h>
+
 #include <system/logger.h>
 
 namespace Shipyard
@@ -23,10 +25,14 @@ GraphicsSingletonStorer::GraphicsSingletonStorer()
     ShaderWatcher::CreateInstance();
 
     GFXMaterialUnifiedConstantBuffer::CreateInstance();
+
+    FullscreenHelper::CreateInstance();
 }
 
 GraphicsSingletonStorer::~GraphicsSingletonStorer()
 {
+    FullscreenHelper::DestroyInstance();
+
     GFXMaterialUnifiedConstantBuffer::DestroyInstance();
 
     ShaderWatcher::DestroyInstance();

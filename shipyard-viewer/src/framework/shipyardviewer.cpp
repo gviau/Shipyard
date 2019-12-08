@@ -17,6 +17,8 @@
 #include <graphics/shader/shaderresourcebinder.h>
 #include <graphics/shader/shaderkey.h>
 
+#include <graphics/utils/fullscreenhelper.h>
+
 #include <graphics/graphicssingletonstorer.h>
 #include <graphics/rendercontext.h>
 #include <graphics/renderer.h>
@@ -48,6 +50,8 @@ ShipyardViewer::~ShipyardViewer()
     SHIP_DELETE(m_pRenderer);
 
     SHIP_DELETE(m_pDataProvider);
+
+    GetFullscreenHelper().DestroyResources(*m_pGfxRenderDevice);
 
     SHIP_DELETE(m_pGraphicsSingletonStorer);
 
@@ -136,6 +140,8 @@ shipBool ShipyardViewer::CreateApp(HWND windowHandle, shipUint32 windowWidth, sh
     GetShaderInputProviderManager().Initialize(*m_pGfxRenderDevice);
 
     m_pGraphicsSingletonStorer = SHIP_NEW(GraphicsSingletonStorer, 1);
+
+    GetFullscreenHelper().CreateResources(*m_pGfxRenderDevice);
 
     m_pGfxDirectRenderCommandList = SHIP_NEW(GFXDirectRenderCommandList, 1)(*m_pGfxRenderDevice);
     m_pGfxDirectRenderCommandList->Create();

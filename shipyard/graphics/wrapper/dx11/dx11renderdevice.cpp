@@ -302,7 +302,7 @@ GFXVertexBufferHandle DX11RenderDevice::CreateVertexBuffer(shipUint32 numVertice
     return gfxVertexBufferHandle;
 }
 
-void DX11RenderDevice::DestroyVertexBuffer(GFXVertexBufferHandle gfxVertexBufferHandle)
+void DX11RenderDevice::DestroyVertexBuffer(GFXVertexBufferHandle& gfxVertexBufferHandle)
 {
     GFXVertexBuffer& gfxVertexBuffer = m_VertexBufferPool.GetItem(gfxVertexBufferHandle.handle);
     gfxVertexBuffer.Destroy();
@@ -334,7 +334,7 @@ GFXIndexBufferHandle DX11RenderDevice::CreateIndexBuffer(shipUint32 numIndices, 
     return gfxIndexBufferHandle;
 }
 
-void DX11RenderDevice::DestroyIndexBuffer(GFXIndexBufferHandle gfxIndexBufferHandle)
+void DX11RenderDevice::DestroyIndexBuffer(GFXIndexBufferHandle& gfxIndexBufferHandle)
 {
     GFXIndexBuffer& gfxIndexBuffer = m_IndexBufferPool.GetItem(gfxIndexBufferHandle.handle);
     gfxIndexBuffer.Destroy();
@@ -366,7 +366,7 @@ GFXConstantBufferHandle DX11RenderDevice::CreateConstantBuffer(shipUint32 dataSi
     return gfxConstantBufferHandle;
 }
 
-void DX11RenderDevice::DestroyConstantBuffer(GFXConstantBufferHandle gfxConstantBufferHandle)
+void DX11RenderDevice::DestroyConstantBuffer(GFXConstantBufferHandle& gfxConstantBufferHandle)
 {
     GFXConstantBuffer& gfxConstantBuffer = m_ConstantBufferPool.GetItem(gfxConstantBufferHandle.handle);
     gfxConstantBuffer.Destroy();
@@ -398,7 +398,7 @@ GFXByteBufferHandle DX11RenderDevice::CreateByteBuffer(ByteBuffer::ByteBufferCre
     return gfxByteBufferHandle;
 }
 
-void DX11RenderDevice::DestroyByteBuffer(GFXByteBufferHandle gfxByteBufferHandle)
+void DX11RenderDevice::DestroyByteBuffer(GFXByteBufferHandle& gfxByteBufferHandle)
 {
     GFXByteBuffer& gfxByteBuffer = m_ByteBufferPool.GetItem(gfxByteBufferHandle.handle);
     gfxByteBuffer.Destroy();
@@ -440,7 +440,7 @@ GFXTexture2DHandle DX11RenderDevice::CreateTexture2D(shipUint32 width, shipUint3
     return gfxTexture2dHandle;
 }
 
-void DX11RenderDevice::DestroyTexture2D(GFXTexture2DHandle gfxTexture2dHandle)
+void DX11RenderDevice::DestroyTexture2D(GFXTexture2DHandle& gfxTexture2dHandle)
 {
     GFXTexture2D& gfxTexture2d = m_Texture2dPool.GetItem(gfxTexture2dHandle.handle);
     gfxTexture2d.Destroy();
@@ -509,7 +509,7 @@ GFXSamplerHandle DX11RenderDevice::CreateSampler(const SamplerState& samplerStat
     return gfxSamplerHandle;
 }
 
-void DX11RenderDevice::DestroySampler(GFXSamplerHandle gfxSamplerHandle)
+void DX11RenderDevice::DestroySampler(GFXSamplerHandle& gfxSamplerHandle)
 {
     SHIP_ASSERT(m_SamplerHandleRefCounts[gfxSamplerHandle.handle] > 0);
     m_SamplerHandleRefCounts[gfxSamplerHandle.handle] -= 1;
@@ -571,7 +571,7 @@ GFXRenderTargetHandle DX11RenderDevice::CreateRenderTarget(GFXTexture2DHandle* t
     return gfxRenderTargetHandle;
 }
 
-void DX11RenderDevice::DestroyRenderTarget(GFXRenderTargetHandle gfxRenderTargetHandle)
+void DX11RenderDevice::DestroyRenderTarget(GFXRenderTargetHandle& gfxRenderTargetHandle)
 {
     GFXRenderTarget& gfxRenderTarget = m_RenderTargetPool.GetItem(gfxRenderTargetHandle.handle);
     gfxRenderTarget.Destroy();
@@ -608,7 +608,7 @@ GFXDepthStencilRenderTargetHandle DX11RenderDevice::CreateDepthStencilRenderTarg
     return gfxDepthStencilRenderTargetHandle;
 }
 
-void DX11RenderDevice::DestroyDepthStencilRenderTarget(GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle)
+void DX11RenderDevice::DestroyDepthStencilRenderTarget(GFXDepthStencilRenderTargetHandle& gfxDepthStencilRenderTargetHandle)
 {
     GFXDepthStencilRenderTarget& gfxDepthStencilRenderTarget = m_DepthStencilRenderTargetPool.GetItem(gfxDepthStencilRenderTargetHandle.handle);
     gfxDepthStencilRenderTarget.Destroy();
@@ -640,7 +640,7 @@ GFXVertexShaderHandle DX11RenderDevice::CreateVertexShader(void* shaderData, shi
     return gfxVertexShaderHandle;
 }
 
-void DX11RenderDevice::DestroyVertexShader(GFXVertexShaderHandle gfxVertexShaderHandle)
+void DX11RenderDevice::DestroyVertexShader(GFXVertexShaderHandle& gfxVertexShaderHandle)
 {
     GFXVertexShader& gfxVertexShader = m_VertexShaderPool.GetItem(gfxVertexShaderHandle.handle);
     gfxVertexShader.Destroy();
@@ -672,7 +672,7 @@ GFXPixelShaderHandle DX11RenderDevice::CreatePixelShader(void* shaderData, shipU
     return gfxPixelShaderHandle;
 }
 
-void DX11RenderDevice::DestroyPixelShader(GFXPixelShaderHandle gfxPixelShaderHandle)
+void DX11RenderDevice::DestroyPixelShader(GFXPixelShaderHandle& gfxPixelShaderHandle)
 {
     GFXPixelShader& gfxPixelShader = m_PixelShaderPool.GetItem(gfxPixelShaderHandle.handle);
     gfxPixelShader.Destroy();
@@ -704,7 +704,7 @@ GFXRootSignatureHandle DX11RenderDevice::CreateRootSignature(const Array<RootSig
     return gfxRootSignatureHandle;
 }
 
-void DX11RenderDevice::DestroyRootSignature(GFXRootSignatureHandle gfxRootSignatureHandle)
+void DX11RenderDevice::DestroyRootSignature(GFXRootSignatureHandle& gfxRootSignatureHandle)
 {
     GFXRootSignature& gfxRootSignature = m_RootSignaturePool.GetItem(gfxRootSignatureHandle.handle);
     gfxRootSignature.Destroy();
@@ -775,7 +775,7 @@ GFXPipelineStateObjectHandle DX11RenderDevice::CreatePipelineStateObject(const P
     return gfxPipelineStateObjectHandle;
 }
 
-void DX11RenderDevice::DestroyPipelineStateObject(GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle)
+void DX11RenderDevice::DestroyPipelineStateObject(GFXPipelineStateObjectHandle& gfxPipelineStateObjectHandle)
 {
     SHIP_ASSERT(m_PipelineStateObjectHandleRefCounts[gfxPipelineStateObjectHandle.handle] > 0);
     m_PipelineStateObjectHandleRefCounts[gfxPipelineStateObjectHandle.handle] -= 1;
@@ -814,7 +814,7 @@ GFXDescriptorSetHandle DX11RenderDevice::CreateDescriptorSet(DescriptorSetType d
     return gfxDescriptorSetHandle;
 }
 
-void DX11RenderDevice::DestroyDescriptorSet(GFXDescriptorSetHandle gfxDescriptorSetHandle)
+void DX11RenderDevice::DestroyDescriptorSet(GFXDescriptorSetHandle& gfxDescriptorSetHandle)
 {
     GFXDescriptorSet& gfxDescriptorSet = m_DescriptorSetPool.GetItem(gfxDescriptorSetHandle.handle);
     gfxDescriptorSet.Destroy();

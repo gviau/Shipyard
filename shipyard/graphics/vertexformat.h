@@ -130,7 +130,7 @@ namespace Shipyard
         virtual shipUint32 GetSize() const override { return sizeof(Vertex_ImGui); }
     };
 
-    void GetVertexFormat(VertexFormatType vertexFormatType, VertexFormat*& vertexFormat);
+    SHIPYARD_API void GetVertexFormat(VertexFormatType vertexFormatType, VertexFormat*& vertexFormat);
     shipBool VertexFormatTypeContainsColor(VertexFormatType type);
     shipBool VertexFormatTypeContainsUV(VertexFormatType type);
     shipBool VertexFormatTypeContainsNormals(VertexFormatType type);

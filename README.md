@@ -1,6 +1,13 @@
 # Shipyard
 
-Shipyard is a PBR rendering engine, made as a learning project.
+Shipyard is a PBR rendering engine, made as a learning project. Quite imcomplete for now, I'm still in the process of implementing core functionality.
+
+# Dependencies
+You need the DirectX June 2010 SDK installed, with the DXSDK_DIR environment path properly setup to point to the SDK's root path.
+
+# How to build
+1. Run ./generate_projects.bat. This will run Sharpmake and generate all the project files under ./tmp/generated-projects/
+2. Open ./tmp/generated-projects/shipyard.viewer project file to compile the Shipyard-Viewer.
 
 # Acknowledgment
 This software uses the Assimp open source library. See http://www.assimp.org/ for details.
@@ -14,3 +21,6 @@ This software uses the OpenGL Mathematics (GLM) open source library. See https:/
 
 This software uses the Dear ImGui open source library. See https://github.com/ocornut/imgui for details.
 			ImGui is used under the MIT License.
+			
+This software uses the Sharpmake open source library. See https://github.com/ubisoftinc/Sharpmake for details.
+			Sharpmake is used under the Apache License 2.0.

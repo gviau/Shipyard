@@ -116,6 +116,14 @@ void* GlobalAllocator::Allocate(size_t size, size_t alignment
         }
     }
 
+#ifdef SHIP_DEBUG
+#ifdef SHIP_ALLOCATOR_DEBUG_INFO
+    SHIP_ASSERT_MSG(false, "Out of memory for allocation size %zu and alignment %zu, at %s:%u", size, alignment, pAllocationFilename, allocationLineNumber);
+#else
+    SHIP_ASSERT_MSG(false, "Out of memory for allocation size %zu and alignment %zu", size, alignment);
+#endif // #ifdef SHIP_ALLOCATOR_DEBUG_INFO
+#endif // #ifdef SHIP_DEBUG
+
     // If we're here, then we we're out of memory in this allocator.
     return nullptr;
 }

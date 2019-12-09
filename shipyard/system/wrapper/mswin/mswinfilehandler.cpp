@@ -1,5 +1,7 @@
 #include <system/wrapper/mswin/mswinfilehandler.h>
 
+#include <system/pathutils.h>
+
 #include <system/systemcommon.h>
 
 namespace Shipyard
@@ -29,6 +31,14 @@ shipBool MswinFileHandler::Open(const shipChar* filename, FileHandlerOpenFlag op
 {
     m_Filename = filename;
     m_OpenFlag = openFlag;
+
+    if ((openFlag & FileHandlerOpenFlag_Create) > 0)
+    {
+        StringT fileDirectory;
+        PathUtils::GetFileDirectory(filename, &fileDirectory);
+
+        PathUtils::CreateDirectories(fileDirectory.GetBuffer());
+    }
 
     int fileMode = GetFileMode(m_OpenFlag);
 

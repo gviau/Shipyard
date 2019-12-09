@@ -38,6 +38,37 @@ const shipChar* StringFormat(const shipChar* fmt, ...)
     return pBuffer;
 }
 
+void StringSplit(const shipChar* str, shipChar delimiter, Array<StringA>& stringParts)
+{
+    if (str == nullptr)
+    {
+        return;
+    }
+
+    StringA part;
+    while (*str != '\0')
+    {
+        shipChar c = *str;
+
+        if (c == delimiter)
+        {
+            stringParts.Add(part);
+            part = "";
+        }
+        else
+        {
+            part += c;
+        }
+
+        str++;
+    }
+
+    if (part.Size() > 0)
+    {
+        stringParts.Add(part);
+    }
+}
+
 shipInt32 StringCompare(const shipChar* str1, const shipChar* str2)
 {
     for (size_t idx = 0; true; idx++)

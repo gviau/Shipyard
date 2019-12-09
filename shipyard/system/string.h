@@ -1,5 +1,6 @@
 #pragma once
 
+#include <system/array.h>
 #include <system/memory.h>
 
 namespace Shipyard
@@ -177,6 +178,7 @@ namespace Shipyard
     using LargeInplaceStringT = InplaceStringT<gs_LargeStringSize>;
 
     SHIPYARD_API const shipChar* StringFormat(const shipChar* fmt, ...);
+    SHIPYARD_API void StringSplit(const shipChar* str, shipChar delimiter, Array<StringA>& stringParts);
     SHIPYARD_API shipInt32 StringCompare(const shipChar* str1, const shipChar* str2);
     SHIPYARD_API shipBool AreStringsEqual(const shipChar* str1, const shipChar* str2);
 }

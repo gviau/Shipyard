@@ -1,5 +1,6 @@
 #include <system/wrapper/mswin/mswinfilehandlerstream.h>
 
+#include <system/pathutils.h>
 #include <system/systemcommon.h>
 
 namespace Shipyard
@@ -34,6 +35,14 @@ shipBool MswinFileHandlerStream::Open(const shipChar* filename, FileHandlerOpenF
 {
     m_Filename = filename;
     m_OpenFlag = openFlag;
+
+    if ((openFlag & FileHandlerOpenFlag_Create) > 0)
+    {
+        StringT fileDirectory;
+        PathUtils::GetFileDirectory(filename, &fileDirectory);
+
+        PathUtils::CreateDirectories(fileDirectory.GetBuffer());
+    }
 
     int fileMode = GetFileMode(m_OpenFlag);
 
@@ -80,6 +89,11 @@ size_t MswinFileHandlerStream::ReadChars(size_t startingPosition, shipChar* cont
 
 size_t MswinFileHandlerStream::ReadChars(size_t startingPosition, StringA& content, size_t numChars)
 {
+    if (numChars == 0)
+    {
+        return 0;
+    }
+
     content.Resize(numChars);
 
     return ReadChars(startingPosition, &content[0], numChars);

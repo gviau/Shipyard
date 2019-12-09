@@ -151,11 +151,11 @@ shipBool CheckFileForHlslReference(const StringT& shaderDirectory, const StringT
 
     for (TinyInplaceStringT& includeDirective : includeDirectives)
     {
-        NormalizePath(includeDirective);
+        PathUtils::NormalizePath(includeDirective);
     }
 
     TinyInplaceStringT normalizedTouchedHlslFilename;
-    NormalizePath(touchedHlslFilename, &normalizedTouchedHlslFilename);
+    PathUtils::NormalizePath(touchedHlslFilename, &normalizedTouchedHlslFilename);
 
     shipBool immediateReference = includeDirectives.Exists(normalizedTouchedHlslFilename);
 

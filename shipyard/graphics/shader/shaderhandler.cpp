@@ -21,7 +21,7 @@ ShaderHandler::~ShaderHandler()
 void ShaderHandler::ApplyShaderInputProviders(
         GFXRenderDevice& gfxRenderDevice,
         GFXDirectRenderCommandList& gfxDirectRenderCommandList,
-        const Array<ShaderInputProvider*>& shaderInputProviders)
+        const Array<const ShaderInputProvider*>& shaderInputProviders)
 {
     if (shaderInputProviders.Empty())
     {
@@ -30,7 +30,7 @@ void ShaderHandler::ApplyShaderInputProviders(
 
     GFXMaterialUnifiedConstantBuffer& gfxMaterialUnifiedConstantBuffer = GetGFXMaterialUnifiedConstantBuffer();
 
-    for (ShaderInputProvider* shaderInputProvider : shaderInputProviders)
+    for (const ShaderInputProvider* shaderInputProvider : shaderInputProviders)
     {
         SHIP_ASSERT(shaderInputProvider != nullptr);
 

@@ -31,7 +31,7 @@ namespace Shipyard
         void PrepareForNextDrawCall();
 
         // Thread-safe
-        void ApplyShaderInputProviders(const Array<ShaderInputProvider*>& shaderInputProviders);
+        void ApplyShaderInputProviders(const Array<const ShaderInputProvider*>& shaderInputProviders);
         void ApplyShaderInputProvider(const ShaderInputProvider& shaderInputProvider);
 
         GFXByteBufferHandle BindMaterialUnfiedConstantBuffer(DirectRenderCommandList& directRenderCommandList);

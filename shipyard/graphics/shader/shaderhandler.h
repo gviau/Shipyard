@@ -48,7 +48,7 @@ namespace Shipyard
         void ApplyShaderInputProviders(
                 GFXRenderDevice& gfxRenderDevice,
                 GFXDirectRenderCommandList& gfxDirectRenderCommandList,
-                const Array<ShaderInputProvider*>& shaderInputProviders);
+                const Array<const ShaderInputProvider*>& shaderInputProviders);
 
         const ShaderKey& GetShaderKey() const { return m_ShaderKey; }
         ShaderRenderElements GetShaderRenderElements(GFXRenderDevice& gfxRenderDevice, const RenderState& renderState);

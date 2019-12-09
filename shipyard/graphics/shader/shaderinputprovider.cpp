@@ -1060,11 +1060,11 @@ ShaderInputProviderDeclaration* ShaderInputProviderManager::FindShaderInputProvi
     return nullptr;
 }
 
-ShaderInputProvider* ShaderInputProviderManager::GetShaderInputProviderForDeclaration(
-        const Array<ShaderInputProvider*>& shaderInputProviders,
+const ShaderInputProvider* ShaderInputProviderManager::GetShaderInputProviderForDeclaration(
+        const Array<const ShaderInputProvider*>& shaderInputProviders,
         const ShaderInputProviderDeclaration* shaderInputProviderDeclaration) const
 {
-    for (ShaderInputProvider* shaderInputProvider : shaderInputProviders)
+    for (const ShaderInputProvider* shaderInputProvider : shaderInputProviders)
     {
         if (shaderInputProvider->GetShaderInputProviderDeclaration() == shaderInputProviderDeclaration)
         {

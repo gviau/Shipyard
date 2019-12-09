@@ -264,7 +264,7 @@ void ShipyardViewer::ComputeOneFrame()
     m_pDataProvider->Matrix = glm::rotate(matrix, theta, shipVec3(0.0f, 1.0f, 0.0f));
     m_pDataProvider->TestTexture = m_TextureHandle;
 
-    InplaceArray<ShaderInputProvider*, 1> shaderInputProviders;
+    InplaceArray<const ShaderInputProvider*, 1> shaderInputProviders;
     shaderInputProviders.Add(m_pDataProvider);
 
     theta += 0.001f;

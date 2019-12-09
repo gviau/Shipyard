@@ -154,7 +154,7 @@ void ShaderResourceBinder::AddShaderResourceBinderEntryForGlobalBufferToDescript
 void ShaderResourceBinder::BindShaderInputProvders(
         GFXRenderDevice& gfxRenderDevice,
         GFXDirectRenderCommandList& gfxDirectRenderCommandList,
-        const Array<ShaderInputProvider*>& shaderInputProviders,
+        const Array<const ShaderInputProvider*>& shaderInputProviders,
         GFXDescriptorSetHandle gfxDescriptorSetHandle) const
 {
     ShaderInputProviderManager& shaderInputProviderManager = GetShaderInputProviderManager();
@@ -174,7 +174,7 @@ void ShaderResourceBinder::BindShaderInputProvders(
         }
         else
         {
-            ShaderInputProvider* shaderInputProvider = shaderInputProviderManager.GetShaderInputProviderForDeclaration(shaderInputProviders, shaderResourceBinderEntry.Declaration);
+            const ShaderInputProvider* shaderInputProvider = shaderInputProviderManager.GetShaderInputProviderForDeclaration(shaderInputProviders, shaderResourceBinderEntry.Declaration);
             SHIP_ASSERT_MSG(
                     shaderInputProvider != nullptr,
                     "ShaderInputProvider %s is not present, things will break, most likely result in a GPU hang!",
@@ -227,7 +227,7 @@ void ShaderResourceBinder::BindSamplerStates(
 
 void ShaderResourceBinder::BindShaderInputProviderDescriptor(
         const ShaderResourceBinderEntry& shaderResourceBinderEntry,
-        ShaderInputProvider* shaderInputProvider,
+        const ShaderInputProvider* shaderInputProvider,
         GFXRenderDevice& gfxRenderDevice,
         GFXDescriptorSet& gfxDescriptorSet) const
 {
@@ -277,7 +277,7 @@ void ShaderResourceBinder::BindShaderInputProviderDescriptor(
 
 void ShaderResourceBinder::BindShaderInputProviderConstantBuffer(
         const ShaderResourceBinderEntry& shaderResourceBinderEntry,
-        ShaderInputProvider* shaderInputProvider,
+        const ShaderInputProvider* shaderInputProvider,
         GFXRenderDevice& gfxRenderDevice,
         GFXDescriptorSet& gfxDescriptorSet) const
 {

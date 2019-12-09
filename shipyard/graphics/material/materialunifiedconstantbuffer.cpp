@@ -109,9 +109,9 @@ void GFXMaterialUnifiedConstantBuffer::PrepareForNextDrawCall()
     }
 }
 
-void GFXMaterialUnifiedConstantBuffer::ApplyShaderInputProviders(const Array<ShaderInputProvider*>& shaderInputProviders)
+void GFXMaterialUnifiedConstantBuffer::ApplyShaderInputProviders(const Array<const ShaderInputProvider*>& shaderInputProviders)
 {
-    for (ShaderInputProvider* shaderInputProvider : shaderInputProviders)
+    for (const ShaderInputProvider* shaderInputProvider : shaderInputProviders)
     {
         SHIP_ASSERT(shaderInputProvider != nullptr);
 

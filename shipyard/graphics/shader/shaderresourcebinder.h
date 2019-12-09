@@ -71,7 +71,7 @@ namespace Shipyard
         void BindShaderInputProvders(
                 GFXRenderDevice& gfxRenderDevice,
                 GFXDirectRenderCommandList& gfxDirectRenderCommandList,
-                const Array<ShaderInputProvider*>& shaderInputProviders,
+                const Array<const ShaderInputProvider*>& shaderInputProviders,
                 GFXDescriptorSetHandle gfxDescriptorSetHandle) const;
 
         void BindSamplerStates(
@@ -110,13 +110,13 @@ namespace Shipyard
 
         void BindShaderInputProviderDescriptor(
                 const ShaderResourceBinderEntry& shaderResourceBinderEntry,
-                ShaderInputProvider* shaderInputProvider,
+                const ShaderInputProvider* shaderInputProvider,
                 GFXRenderDevice& gfxRenderDevice,
                 GFXDescriptorSet& gfxDescriptorSet) const;
 
         void BindShaderInputProviderConstantBuffer(
                 const ShaderResourceBinderEntry& shaderResourceBinderEntry,
-                ShaderInputProvider* shaderInputProvider,
+                const ShaderInputProvider* shaderInputProvider,
                 GFXRenderDevice& gfxRenderDevice,
                 GFXDescriptorSet& gfxDescriptorSet) const;
 

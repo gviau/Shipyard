@@ -217,7 +217,7 @@ namespace Shipyard
 
         ShaderInputProviderDeclaration* FindShaderInputProviderDeclarationFromName(const StringA& shaderInputProviderDeclarationName) const;
 
-        ShaderInputProvider* GetShaderInputProviderForDeclaration(const Array<ShaderInputProvider*>& shaderInputProviders, const ShaderInputProviderDeclaration* shaderInputProviderDeclaration) const;
+        const ShaderInputProvider* GetShaderInputProviderForDeclaration(const Array<const ShaderInputProvider*>& shaderInputProviders, const ShaderInputProviderDeclaration* shaderInputProviderDeclaration) const;
         const shipChar* GetShaderInputNameFromProvider(const ShaderInputProviderDeclaration* shaderInputProviderDeclaration, shipInt32 dataOffsetInProvider) const;
         const shipChar* GetShaderInputProviderConstantBufferName(const ShaderInputProviderDeclaration* shaderInputProviderDeclaration) const;
 

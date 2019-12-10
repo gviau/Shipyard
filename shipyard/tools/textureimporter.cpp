@@ -122,6 +122,34 @@ ErrorCode LoadTextureFromFile(const shipChar* filename, ImportedTexture* importe
     return ErrorCode::None;
 }
 
+ErrorCode CreateGfxTextureFromFile(
+        const shipChar* filename,
+        GFXRenderDevice& gfxRenderDevice,
+        GfxTextureCreationFlags gfxTextureCreationFlags,
+        GFXTexture2DHandle* gfxTexture2DHandle)
+{
+    SHIP_ASSERT(gfxTexture2DHandle != nullptr);
+
+    ImportedTexture importedTexture;
+    ErrorCode errorCode = LoadTextureFromFile(filename, &importedTexture);
+
+    if (errorCode != ErrorCode::None)
+    {
+        return errorCode;
+    }
+
+    constexpr shipBool dynamic = false;
+    *gfxTexture2DHandle = gfxRenderDevice.CreateTexture2D(
+            importedTexture.Width,
+            importedTexture.Height,
+            importedTexture.PixelFormat,
+            dynamic,
+            &importedTexture.TextureData[0],
+            (gfxTextureCreationFlags == GfxTextureCreationFlags::GenerateMips));
+
+    return ErrorCode::None;
+}
+
 }
 
 }

@@ -339,6 +339,35 @@ namespace Shipyard
             m_ArraySizeAndCapacity += 1;
         }
 
+        // Returns true if the element is unique and could be added, false if the element was already in the array
+        shipBool AddUnique(const T& element)
+        {
+            shipUint32 currentSize = Size();
+            SHIP_ASSERT(currentSize < 16383);
+
+            for (shipUint32 i = 0; i < currentSize; i++)
+            {
+                if (m_Array[i] == element)
+                {
+                    return false;
+                }
+            }
+
+            shipUint32 currentCapacity = Capacity();
+
+            if ((currentSize + 1) > currentCapacity)
+            {
+                shipUint32 newCapacity = MIN(currentCapacity * 2, 16383);
+                Reserve(MAX(newCapacity, 4));
+            }
+
+            m_Array[currentSize] = element;
+
+            m_ArraySizeAndCapacity += 1;
+
+            return true;
+        }
+
         T& Grow()
         {
             Add(T());

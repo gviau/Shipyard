@@ -2,7 +2,7 @@
 
 #include <graphics/wrapper/wrapper.h>
 
-#include <graphics/material/materialunifiedconstantbuffer.h>
+#include <graphics/material/gfxmaterialunifiedconstantbuffer.h>
 
 #include <graphics/renderpass/imguirenderpass.h>
 

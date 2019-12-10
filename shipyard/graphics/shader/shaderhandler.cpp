@@ -1,6 +1,6 @@
 #include <graphics/shader/shaderhandler.h>
 
-#include <graphics/material/materialunifiedconstantbuffer.h>
+#include <graphics/material/gfxmaterialunifiedconstantbuffer.h>
 
 #include <graphics/shader/shaderinputprovider.h>
 

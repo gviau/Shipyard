@@ -1,6 +1,6 @@
 #include <graphics/graphicssingletonstorer.h>
 
-#include <graphics/material/materialunifiedconstantbuffer.h>
+#include <graphics/material/gfxmaterialunifiedconstantbuffer.h>
 
 #include <graphics/shader/shaderhandlermanager.h>
 #include <graphics/shader/shadervertexformatgenerator.h>

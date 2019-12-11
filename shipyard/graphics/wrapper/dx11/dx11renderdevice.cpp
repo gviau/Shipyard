@@ -356,6 +356,12 @@ const GFXIndexBuffer& DX11RenderDevice::GetIndexBuffer(GFXIndexBufferHandle gfxI
 GFXConstantBufferHandle DX11RenderDevice::CreateConstantBuffer(shipUint32 dataSizeInBytes, shipBool dynamic, void* initialData)
 {
     GFXConstantBufferHandle gfxConstantBufferHandle;
+
+    if (dataSizeInBytes == 0)
+    {
+        return gfxConstantBufferHandle;
+    }
+    
     gfxConstantBufferHandle.handle = m_ConstantBufferPool.GetNewItemIndex();
 
     GFXConstantBuffer& gfxConstantBuffer = m_ConstantBufferPool.GetItem(gfxConstantBufferHandle.handle);
@@ -388,6 +394,12 @@ const GFXConstantBuffer& DX11RenderDevice::GetConstantBuffer(GFXConstantBufferHa
 GFXByteBufferHandle DX11RenderDevice::CreateByteBuffer(ByteBuffer::ByteBufferCreationFlags byteBufferCreationFlags, shipUint32 dataSizeInBytes, shipBool dynamic, void* initialData)
 {
     GFXByteBufferHandle gfxByteBufferHandle;
+
+    if (dataSizeInBytes == 0)
+    {
+        return gfxByteBufferHandle;
+    }
+    
     gfxByteBufferHandle.handle = m_ByteBufferPool.GetNewItemIndex();
 
     GFXByteBuffer& gfxByteBuffer = m_ByteBufferPool.GetItem(gfxByteBufferHandle.handle);
@@ -430,6 +442,12 @@ const GFXByteBuffer* DX11RenderDevice::GetByteBufferPtr(GFXByteBufferHandle gfxB
 GFXTexture2DHandle DX11RenderDevice::CreateTexture2D(shipUint32 width, shipUint32 height, GfxFormat pixelFormat, shipBool dynamic, void* initialData, shipBool generateMips, TextureUsage textureUsage)
 {
     GFXTexture2DHandle gfxTexture2dHandle;
+
+    if (width == 0 && height == 0)
+    {
+        return gfxTexture2dHandle;
+    }
+
     gfxTexture2dHandle.handle = m_Texture2dPool.GetNewItemIndex();
 
     GFXTexture2D& gfxTexture2d = m_Texture2dPool.GetItem(gfxTexture2dHandle.handle);

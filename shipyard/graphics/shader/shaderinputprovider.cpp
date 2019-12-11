@@ -1010,6 +1010,11 @@ void ShaderInputProviderManager::CreateShaderInputProviderConstantBuffer(ShaderI
 
 void ShaderInputProviderManager::DestroyShaderInputProviderConstantBuffer(ShaderInputProvider* shaderInputProvider)
 {
+    if (shaderInputProvider->m_GfxConstantBufferHandle.handle == InvalidGfxHandle)
+    {
+        return;
+    }
+
     SHIP_ASSERT(m_GfxRenderDevice != nullptr);
     GFXRenderDevice* gfxRenderDevice = static_cast<GFXRenderDevice*>(m_GfxRenderDevice);
 

@@ -4,6 +4,8 @@
 
 #include <system/platform.h>
 
+#include <extern/imgui/imgui.h>
+
 namespace Shipyard
 {
     shipBool SHIPYARD_API InitializeImGui(void* windowHandle, GFXRenderDevice& gfxRenderDevice);

@@ -5,8 +5,6 @@
 #include <system/memory.h>
 #include <system/systemdebug.h>
 
-#include <extern/imgui/imgui.h>
-
 #include <windows.h>
 
 // From ImGui examples

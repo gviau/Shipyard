@@ -31,9 +31,6 @@ void ImGuiRenderPass::Execute(RenderContext& renderContext)
     static shipInt32 vertexBufferSize = 0;
     static shipInt32 indexBufferSize = 0;
 
-    static bool show_demo_window = true;
-    ImGui::ShowDemoWindow(&show_demo_window);
-
     ImGui::Render();
 
     GFXRenderDevice& gfxRenderDevice = *renderContext.GetRenderDevice();

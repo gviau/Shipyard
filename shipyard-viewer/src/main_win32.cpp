@@ -58,8 +58,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         return 1;
     }
 
-    uint32_t windowWidth = 800;
-    uint32_t windowHeight = 600;
+    uint32_t windowWidth = 1600;
+    uint32_t windowHeight = 900;
 
     HWND windowHandle = CreateWindowEx(NULL,"ShipyardViewer", "Shipyard Viewer", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, windowWidth, windowHeight, NULL, NULL, hInstance, NULL);
     if (windowHandle == NULL)

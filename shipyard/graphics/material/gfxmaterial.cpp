@@ -3,7 +3,7 @@
 namespace Shipyard
 {;
 
-SHIP_DECLARE_SHADER_INPUT_PROVIDER_BEGIN(GFXMaterialShaderInputProvider, PerInstance)
+SHIP_DECLARE_SHADER_INPUT_PROVIDER_BEGIN(GFXMaterialShaderInputProvider, Default)
 {
     SHIP_TEXTURE2D_SHADER_INPUT(ShaderInputScalarType::Float4, "AlbedoMap", AlbedoMapHandle);
     SHIP_TEXTURE2D_SHADER_INPUT(ShaderInputScalarType::Float4, "NormalMap", NormalMapHandle);

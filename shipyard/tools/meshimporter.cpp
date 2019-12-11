@@ -1,5 +1,9 @@
 #include <tools/meshimporter.h>
 
+#include <system/pathutils.h>
+
+#include <tools/textureimporter.h>
+
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -178,19 +182,94 @@ void ProcessSubMesh(aiMesh* mesh, const aiScene* scene, ImportedSubMesh* importe
     }
 }
 
-ErrorCode LoadMeshFromFile(const shipChar* filename, ImportedMesh* importedMesh)
+struct MaterialTextures
 {
-    SHIP_ASSERT(importedMesh != nullptr);
-
-    Assimp::Importer meshImporter;
-
-    const aiScene* assimpScene = meshImporter.ReadFile(filename, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_SortByPType);
-
-    if (assimpScene == nullptr)
+    enum : shipUint32
     {
-        return ErrorCode::FileNotFound;
+        NoTexture = 0xffffffff
+    };
+
+    MaterialTextures()
+    {
+        for (shipUint32 i = 0; i < shipUint32(GfxMaterialTextureType::Count); i++)
+        {
+            indexOfLoadedTextureForGfxMaterialTextureType[i] = NoTexture;
+        }
     }
 
+    shipUint32 indexOfLoadedTextureForGfxMaterialTextureType[shipUint32(GfxMaterialTextureType::Count)];
+};
+
+shipBool LoadMaterialTexture(aiMaterial* material, aiTextureType textureType, StringT* materialTexturePath)
+{
+    SHIP_ASSERT(materialTexturePath != nullptr);
+
+    if (material->GetTextureCount(textureType) == 0)
+    {
+        return false;
+    }
+
+    // For now, only get the first texture we find for that type. How to handle several textures of the same type?
+    aiString texturePath;
+    material->GetTexture(textureType, 0, &texturePath);
+
+    *materialTexturePath = texturePath.C_Str();
+
+    return true;
+}
+
+void AddMaterialTexture(const StringT& materialTexturePath, Array<StringT>& textureFilenamesToLoad, MaterialTextures& materialTextures, GfxMaterialTextureType gfxMaterialTextureType)
+{
+    if (textureFilenamesToLoad.AddUnique(materialTexturePath))
+    {
+        materialTextures.indexOfLoadedTextureForGfxMaterialTextureType[shipUint32(gfxMaterialTextureType)] = textureFilenamesToLoad.Size() - 1;
+    }
+    else
+    {
+        materialTextures.indexOfLoadedTextureForGfxMaterialTextureType[shipUint32(gfxMaterialTextureType)] = textureFilenamesToLoad.FindIndex(materialTexturePath);
+    }
+}
+
+void ProcessSubMeshMaterial(aiMaterial* material, Array<StringT>& textureFilenamesToLoad, Array<MaterialTextures>& materialTextures)
+{
+    MaterialTextures& newMaterialTextures = materialTextures.Grow();
+
+    StringT materialTexturePath;
+    if (LoadMaterialTexture(material, aiTextureType::aiTextureType_BASE_COLOR, &materialTexturePath))
+    {
+        AddMaterialTexture(materialTexturePath, textureFilenamesToLoad, newMaterialTextures, GfxMaterialTextureType::AlbedoMap);
+    }
+    else if (LoadMaterialTexture(material, aiTextureType_DIFFUSE, &materialTexturePath))
+    {
+        AddMaterialTexture(materialTexturePath, textureFilenamesToLoad, newMaterialTextures, GfxMaterialTextureType::AlbedoMap);
+    }
+
+    if (LoadMaterialTexture(material, aiTextureType::aiTextureType_NORMAL_CAMERA, &materialTexturePath))
+    {
+        AddMaterialTexture(materialTexturePath, textureFilenamesToLoad, newMaterialTextures, GfxMaterialTextureType::NormalMap);
+    }
+    else if (LoadMaterialTexture(material, aiTextureType_NORMALS, &materialTexturePath))
+    {
+        AddMaterialTexture(materialTexturePath, textureFilenamesToLoad, newMaterialTextures, GfxMaterialTextureType::NormalMap);
+    }
+
+    if (LoadMaterialTexture(material, aiTextureType::aiTextureType_METALNESS, &materialTexturePath))
+    {
+        AddMaterialTexture(materialTexturePath, textureFilenamesToLoad, newMaterialTextures, GfxMaterialTextureType::MetlanessMap);
+    }
+
+    if (LoadMaterialTexture(material, aiTextureType::aiTextureType_DIFFUSE_ROUGHNESS, &materialTexturePath))
+    {
+        AddMaterialTexture(materialTexturePath, textureFilenamesToLoad, newMaterialTextures, GfxMaterialTextureType::RoughnessMap);
+    }
+    else if (LoadMaterialTexture(material, aiTextureType::aiTextureType_LIGHTMAP, &materialTexturePath))
+    {
+        AddMaterialTexture(materialTexturePath, textureFilenamesToLoad, newMaterialTextures, GfxMaterialTextureType::RoughnessMap);
+    }
+}
+
+void LoadSubMeshGeometries(const aiScene* assimpScene, ImportedMesh& importedMesh, Array<shipUint32>& materialIndicesToLoad)
+{
     std::queue<aiNode*> nodesToProcess;
     nodesToProcess.push(assimpScene->mRootNode);
 
@@ -205,9 +284,11 @@ ErrorCode LoadMeshFromFile(const shipChar* filename, ImportedMesh* importedMesh)
 
             if ((mesh->mPrimitiveTypes & aiPrimitiveType_TRIANGLE) > 0)
             {
-                ImportedSubMesh& importedSubMesh = importedMesh->SubMeshes.Grow();
+                ImportedSubMesh& importedSubMesh = importedMesh.SubMeshes.Grow();
 
                 ProcessSubMesh(mesh, assimpScene, &importedSubMesh);
+
+                materialIndicesToLoad.AddUnique(mesh->mMaterialIndex);
             }
         }
 
@@ -217,6 +298,90 @@ ErrorCode LoadMeshFromFile(const shipChar* filename, ImportedMesh* importedMesh)
             nodesToProcess.push(childNode);
         }
     }
+}
+
+void LoadSubMeshMaterials(
+        const shipChar* filename,
+        GFXRenderDevice& gfxRenderDevice,
+        MeshImportFlags meshImportFlags,
+        const aiScene* assimpScene,
+        const Array<shipUint32>& materialIndicesToLoad,
+        ImportedMesh& importedMesh)
+{
+    InplaceArray<StringT, 64> textureFilenamesToLoad;
+
+    InplaceArray<MaterialTextures, 32> subMeshMaterials;
+    subMeshMaterials.Reserve(materialIndicesToLoad.Size());
+
+    for (shipUint32 materialIndex : materialIndicesToLoad)
+    {
+        aiMaterial* material = assimpScene->mMaterials[materialIndex];
+
+        ProcessSubMeshMaterial(material, textureFilenamesToLoad, subMeshMaterials);
+    }
+
+    InplaceArray<GFXTexture2DHandle, 64> loadedMeshTextures;
+    loadedMeshTextures.Reserve(textureFilenamesToLoad.Size());
+
+    InplaceStringT<256> fileDirectory;
+    PathUtils::GetFileDirectory(filename, &fileDirectory);
+
+    for (const StringT& textureFilename : textureFilenamesToLoad)
+    {
+        InplaceStringT<256> pathToTexture = fileDirectory + textureFilename;
+
+        GFXTexture2DHandle gfxTexture2DHandle;
+        TextureImporter::CreateGfxTextureFromFile(
+                pathToTexture.GetBuffer(),
+                gfxRenderDevice,
+                ((meshImportFlags & MeshImportFlags::GenerateMipsForMaterialTextures) > 0) ? TextureImporter::GfxTextureCreationFlags::GenerateMips : TextureImporter::GfxTextureCreationFlags::DontGenerateMips,
+                &gfxTexture2DHandle);
+
+        loadedMeshTextures.Add(gfxTexture2DHandle);
+    }
+
+    importedMesh.SubMeshMaterials.Reserve(subMeshMaterials.Size());
+
+    for (const MaterialTextures& materialTextures : subMeshMaterials)
+    {
+        ImportedSubMeshMaterial& importedSubMeshMaterial = importedMesh.SubMeshMaterials.Grow();
+
+        for (shipUint32 i = 0; i < shipUint32(GfxMaterialTextureType::Count); i++)
+        {
+            if (materialTextures.indexOfLoadedTextureForGfxMaterialTextureType[i] == MaterialTextures::NoTexture)
+            {
+                continue;
+            }
+
+            importedSubMeshMaterial.SubMeshMaterialTextures[i] = loadedMeshTextures[materialTextures.indexOfLoadedTextureForGfxMaterialTextureType[i]];
+        }
+    }
+
+    for (shipUint32 subMeshIndex = 0; subMeshIndex < materialIndicesToLoad.Size(); subMeshIndex++)
+    {
+        importedMesh.SubMeshes[subMeshIndex].ReferencedSubMeshMaterial = &importedMesh.SubMeshMaterials[materialIndicesToLoad[subMeshIndex]];
+    }
+}
+
+ErrorCode LoadMeshFromFile(const shipChar* filename, GFXRenderDevice& gfxRenderDevice, MeshImportFlags meshImportFlags, ImportedMesh* importedMesh)
+{
+    SHIP_ASSERT(importedMesh != nullptr);
+
+    Assimp::Importer meshImporter;
+
+    const aiScene* assimpScene = meshImporter.ReadFile(filename, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_SortByPType);
+
+    if (assimpScene == nullptr)
+    {
+        return ErrorCode::FileNotFound;
+    }
+
+    InplaceArray<shipUint32, 32> materialIndicesToLoad;
+    materialIndicesToLoad.Reserve(assimpScene->mNumMaterials);
+
+    LoadSubMeshGeometries(assimpScene, *importedMesh, materialIndicesToLoad);
+
+    LoadSubMeshMaterials(filename, gfxRenderDevice, meshImportFlags, assimpScene, materialIndicesToLoad, *importedMesh);
 
     return ErrorCode::None;
 }

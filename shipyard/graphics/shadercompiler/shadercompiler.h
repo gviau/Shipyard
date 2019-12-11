@@ -115,10 +115,10 @@ namespace Shipyard
                 const Array<SamplerStateToBeCompiled>& samplerStatesToBeCompiled,
                 const Array<ShaderInputProviderDeclaration*>& includedShaderInputProviders);
 
-        ID3D10Blob* CompileVertexShaderForShaderKey(const StringT& sourceFilename, const StringA& source, _D3D_SHADER_MACRO* shaderOptionDefines);
-        ID3D10Blob* CompilePixelShaderForShaderKey(const StringT& sourceFilename, const StringA& source, _D3D_SHADER_MACRO* shaderOptionDefines);
-        ID3D10Blob* CompileComputeShaderForShaderKey(const StringT& sourceFilename, const StringA& source, _D3D_SHADER_MACRO* shaderOptionDefines);
-        ID3D10Blob* CompileShader(const StringT& shaderSourceFilename, const StringA& shaderSource, const StringA& version, const StringA& mainName, _D3D_SHADER_MACRO* shaderOptionDefines);
+        ID3D10Blob* CompileVertexShaderForShaderKey(ShaderKey shaderKey, const StringT& sourceFilename, const StringA& source, _D3D_SHADER_MACRO* shaderOptionDefines);
+        ID3D10Blob* CompilePixelShaderForShaderKey(ShaderKey shaderKey, const StringT& sourceFilename, const StringA& source, _D3D_SHADER_MACRO* shaderOptionDefines);
+        ID3D10Blob* CompileComputeShaderForShaderKey(ShaderKey shaderKey, const StringT& sourceFilename, const StringA& source, _D3D_SHADER_MACRO* shaderOptionDefines);
+        ID3D10Blob* CompileShader(ShaderKey shaderKey, const StringT& shaderSourceFilename, const StringA& shaderSource, const StringA& version, const StringA& mainName, _D3D_SHADER_MACRO* shaderOptionDefines);
 
         void GetReflectionDataForShader(ID3D10Blob* shaderBlob, ShaderReflectionData& shaderReflectionData, ShaderVisibility shaderVisibility) const;
 

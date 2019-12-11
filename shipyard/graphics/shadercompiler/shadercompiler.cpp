@@ -19,6 +19,8 @@
 
 #pragma warning( default : 4005 )
 
+#include <set>
+
 namespace Shipyard
 {;
 
@@ -643,9 +645,9 @@ void ShaderCompiler::CompileShaderKey(
     D3D_SHADER_MACRO nullShaderDefine = { nullptr, nullptr };
     shaderOptionDefines.Add(nullShaderDefine);
 
-    ID3D10Blob* vertexShaderBlob = CompileVertexShaderForShaderKey(sourceFilename, shaderSource, &shaderOptionDefines[0]);
-    ID3D10Blob* pixelShaderBlob = CompilePixelShaderForShaderKey(sourceFilename, shaderSource, &shaderOptionDefines[0]);
-    ID3D10Blob* computeShaderBlob = CompileComputeShaderForShaderKey(sourceFilename, shaderSource, &shaderOptionDefines[0]);
+    ID3D10Blob* vertexShaderBlob = CompileVertexShaderForShaderKey(shaderKeyToCompile, sourceFilename, shaderSource, &shaderOptionDefines[0]);
+    ID3D10Blob* pixelShaderBlob = CompilePixelShaderForShaderKey(shaderKeyToCompile, sourceFilename, shaderSource, &shaderOptionDefines[0]);
+    ID3D10Blob* computeShaderBlob = CompileComputeShaderForShaderKey(shaderKeyToCompile, sourceFilename, shaderSource, &shaderOptionDefines[0]);
 
     for (D3D_SHADER_MACRO& shaderMacro : shaderOptionDefines)
     {
@@ -779,7 +781,7 @@ void ShaderCompiler::CompileShaderKey(
     m_ShaderCompilationRequestLock.unlock();
 }
 
-ID3D10Blob* ShaderCompiler::CompileVertexShaderForShaderKey(const StringT& sourceFilename, const StringA& source, D3D_SHADER_MACRO* shaderOptionDefines)
+ID3D10Blob* ShaderCompiler::CompileVertexShaderForShaderKey(ShaderKey shaderKey, const StringT& sourceFilename, const StringA& source, D3D_SHADER_MACRO* shaderOptionDefines)
 {
     static const shipChar* vertexShaderEntryPoint = "VS_Main";
 
@@ -788,10 +790,10 @@ ID3D10Blob* ShaderCompiler::CompileVertexShaderForShaderKey(const StringT& sourc
         return nullptr;
     }
 
-    return CompileShader(sourceFilename, source, "vs_5_0", vertexShaderEntryPoint, shaderOptionDefines);
+    return CompileShader(shaderKey, sourceFilename, source, "vs_5_0", vertexShaderEntryPoint, shaderOptionDefines);
 }
 
-ID3D10Blob* ShaderCompiler::CompilePixelShaderForShaderKey(const StringT& sourceFilename, const StringA& source, D3D_SHADER_MACRO* shaderOptionDefines)
+ID3D10Blob* ShaderCompiler::CompilePixelShaderForShaderKey(ShaderKey shaderKey, const StringT& sourceFilename, const StringA& source, D3D_SHADER_MACRO* shaderOptionDefines)
 {
     static const shipChar* pixelShaderEntryPoint = "PS_Main";
 
@@ -800,10 +802,10 @@ ID3D10Blob* ShaderCompiler::CompilePixelShaderForShaderKey(const StringT& source
         return nullptr;
     }
 
-    return CompileShader(sourceFilename, source, "ps_5_0", pixelShaderEntryPoint, shaderOptionDefines);
+    return CompileShader(shaderKey, sourceFilename, source, "ps_5_0", pixelShaderEntryPoint, shaderOptionDefines);
 }
 
-ID3D10Blob* ShaderCompiler::CompileComputeShaderForShaderKey(const StringT& sourceFilename, const StringA& source, D3D_SHADER_MACRO* shaderOptionDefines)
+ID3D10Blob* ShaderCompiler::CompileComputeShaderForShaderKey(ShaderKey shaderKey, const StringT& sourceFilename, const StringA& source, D3D_SHADER_MACRO* shaderOptionDefines)
 {
     static const shipChar* computeShaderEntryPoint = "CS_Main";
 
@@ -812,11 +814,14 @@ ID3D10Blob* ShaderCompiler::CompileComputeShaderForShaderKey(const StringT& sour
         return nullptr;
     }
 
-    return CompileShader(sourceFilename, source, "cs_5_0", computeShaderEntryPoint, shaderOptionDefines);
+    return CompileShader(shaderKey, sourceFilename, source, "cs_5_0", computeShaderEntryPoint, shaderOptionDefines);
 }
 
-ID3D10Blob* ShaderCompiler::CompileShader(const StringT& shaderSourceFilename, const StringA& shaderSource, const StringA& version, const StringA& mainName, D3D_SHADER_MACRO* shaderOptionDefines)
+ID3D10Blob* ShaderCompiler::CompileShader(ShaderKey shaderKey, const StringT& shaderSourceFilename, const StringA& shaderSource, const StringA& version, const StringA& mainName, D3D_SHADER_MACRO* shaderOptionDefines)
 {
+    static std::set<ShaderKey::RawShaderKeyType> logShaderKeyPreprocessError;
+    static std::set<ShaderKey::RawShaderKeyType> logShaderKeyCompilationError;
+
     ID3D10Blob* shaderBlob = nullptr;
     ID3D10Blob* error = nullptr;
 
@@ -835,26 +840,38 @@ ID3D10Blob* ShaderCompiler::CompileShader(const StringT& shaderSourceFilename, c
 
     if (FAILED(tmp))
     {
-        if (preprocessError != nullptr)
+        if (preprocessError != nullptr && (logShaderKeyPreprocessError.find(shaderKey.GetRawShaderKey()) == logShaderKeyPreprocessError.end()))
         {
             shipChar* errorMsg = (shipChar*)preprocessError->GetBufferPointer();
             SHIP_LOG_ERROR(errorMsg);
+
+            logShaderKeyPreprocessError.insert(shaderKey.GetRawShaderKey());
         }
+    }
+    else
+    {
+        logShaderKeyPreprocessError.erase(shaderKey.GetRawShaderKey());
     }
 
     HRESULT hr = D3DCompile(shaderSource.GetBuffer(), shaderSource.Size(), shaderSourceFilename.GetBuffer(), shaderOptionDefines, &shaderCompilerIncludeHandler, mainName.GetBuffer(), version.GetBuffer(), flags, 0, &shaderBlob, &error);
     if (FAILED(hr))
     {
-        if (error != nullptr)
+        if (error != nullptr && (logShaderKeyCompilationError.find(shaderKey.GetRawShaderKey()) == logShaderKeyCompilationError.end()))
         {
             shipChar* errorMsg = (shipChar*)error->GetBufferPointer();
             SHIP_LOG_ERROR(errorMsg);
 
             shipChar* data = (shipChar*)preprocessedBlob->GetBufferPointer();
             SHIP_LOG_ERROR(data);
+
+            logShaderKeyCompilationError.insert(shaderKey.GetRawShaderKey());
         }
 
         return nullptr;
+    }
+    else
+    {
+        logShaderKeyCompilationError.erase(shaderKey.GetRawShaderKey());
     }
 
     return shaderBlob;

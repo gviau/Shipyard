@@ -369,7 +369,7 @@ ErrorCode LoadMeshFromFile(const shipChar* filename, GFXRenderDevice& gfxRenderD
 
     Assimp::Importer meshImporter;
 
-    const aiScene* assimpScene = meshImporter.ReadFile(filename, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_SortByPType);
+    const aiScene* assimpScene = meshImporter.ReadFile(filename, aiProcess_Triangulate | aiProcess_MakeLeftHanded | aiProcess_FlipWindingOrder | aiProcess_SortByPType);
 
     if (assimpScene == nullptr)
     {

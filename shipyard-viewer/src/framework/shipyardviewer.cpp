@@ -4,8 +4,6 @@
 
 #include <graphics/material/gfxmaterialunifiedconstantbuffer.h>
 
-#include <graphics/renderpass/imguirenderpass.h>
-
 #include <graphics/shadercompiler/shadercompiler.h>
 #include <graphics/shadercompiler/shaderwatcher.h>
 

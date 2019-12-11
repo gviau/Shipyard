@@ -64,10 +64,10 @@ namespace Shipyard
     SHIPYARD_API Logger& GetLogger();
 }
 
-#define SHIP_LOG_DEBUG(msg, ...) Shipyard::Logger::GetInstance().LogDebug(msg, __VA_ARGS__)
-#define SHIP_LOG_INFO(msg, ...) Shipyard::Logger::GetInstance().LogInfo(msg, __VA_ARGS__)
-#define SHIP_LOG_WARNING(msg, ...) Shipyard::Logger::GetInstance().LogWarning(msg, __VA_ARGS__)
-#define SHIP_LOG_ERROR(msg, ...) Shipyard::Logger::GetInstance().LogError(msg, __VA_ARGS__)
+#define SHIP_LOG_DEBUG(msg, ...) Shipyard::GetLogger().LogDebug(msg, __VA_ARGS__)
+#define SHIP_LOG_INFO(msg, ...) Shipyard::GetLogger().LogInfo(msg, __VA_ARGS__)
+#define SHIP_LOG_WARNING(msg, ...) Shipyard::GetLogger().LogWarning(msg, __VA_ARGS__)
+#define SHIP_LOG_ERROR(msg, ...) Shipyard::GetLogger().LogError(msg, __VA_ARGS__)
 
 #else
 

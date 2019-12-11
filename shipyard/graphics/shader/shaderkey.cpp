@@ -11,6 +11,8 @@ namespace Shipyard
 {;
 
 extern shipUint8 g_NumBitsForShaderOption[shipUint32(ShaderOption::Count)];
+extern const shipChar* g_ShaderFamilyString[shipUint8(ShaderFamily::Count)];
+extern const shipChar* g_ShaderOptionString[shipUint32(ShaderOption::Count)];
 
 struct ShaderKeyGroupBase
 {
@@ -41,6 +43,11 @@ struct ShaderKeyGroupBase
                 rightShift += g_NumBitsForShaderOption[currentShaderOption]; \
                 idx += 1; \
             } \
+            SHIP_ASSERT_MSG( \
+                    currentShaderOption != 0xFFFFFFFF, \
+                    "ShaderOption %s is not part of the %s ShaderFamily. You need to add the option to the ShaderKey definition, between a START_SHADER_KEY & END_SHADER_KEY block, to be able to use it.", \
+                    g_ShaderOptionString[shipUint32(shaderOption)], \
+                    g_ShaderFamilyString[shipUint32(ShaderFamily::shaderFamily)]); \
             return rightShift; \
         } \
         virtual void GetShaderOptions(Array<ShaderOption>& shaderOptions) override \

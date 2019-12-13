@@ -865,8 +865,11 @@ ID3D10Blob* ShaderCompiler::CompileShader(ShaderKey shaderKey, const StringT& sh
             shipChar* errorMsg = (shipChar*)error->GetBufferPointer();
             SHIP_LOG_ERROR(errorMsg);
 
-            shipChar* data = (shipChar*)preprocessedBlob->GetBufferPointer();
-            SHIP_LOG_ERROR(data);
+            if (preprocessedBlob != nullptr)
+            {
+                shipChar* data = (shipChar*)preprocessedBlob->GetBufferPointer();
+                SHIP_LOG_ERROR(data);
+            }
 
             logShaderKeyCompilationError.insert(shaderKey.GetRawShaderKey());
         }

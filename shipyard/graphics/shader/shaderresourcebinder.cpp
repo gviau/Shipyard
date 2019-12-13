@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/shader/shaderresourcebinder.h>
 
 #include <graphics/material/gfxmaterialunifiedconstantbuffer.h>

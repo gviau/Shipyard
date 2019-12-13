@@ -1,3 +1,5 @@
+#include <system/systemprecomp.h>
+
 #include <system/memory/poolallocator.h>
 
 #include <system/logger.h>

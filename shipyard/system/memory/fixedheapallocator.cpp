@@ -1,3 +1,5 @@
+#include <system/systemprecomp.h>
+
 #include <system/memory/fixedheapallocator.h>
 
 #include <system/logger.h>

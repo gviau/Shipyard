@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/material/gfxmaterialunifiedconstantbuffer.h>
 
 #include <graphics/shader/shaderinputprovider.h>
@@ -10,6 +12,8 @@
 
 namespace Shipyard
 {;
+
+template SHIPYARD_GRAPHICS_API class GraphicsSingleton<GFXMaterialUnifiedConstantBuffer>;
 
 GFXMaterialUnifiedConstantBuffer::GFXMaterialUnifiedConstantBuffer()
     : m_pGfxRenderDevice(nullptr)
@@ -167,7 +171,7 @@ GFXByteBufferHandle GFXMaterialUnifiedConstantBuffer::GetUpdatedMaterialUnifiedC
     return m_MaterialUnifiedConstantBuffer;
 }
 
-SHIPYARD_API GFXMaterialUnifiedConstantBuffer& GetGFXMaterialUnifiedConstantBuffer()
+SHIPYARD_GRAPHICS_API GFXMaterialUnifiedConstantBuffer& GetGFXMaterialUnifiedConstantBuffer()
 {
     return GFXMaterialUnifiedConstantBuffer::GetInstance();
 }

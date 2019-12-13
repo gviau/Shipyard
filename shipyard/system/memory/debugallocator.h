@@ -4,8 +4,6 @@
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
 
-#include <system/singleton.h>
-
 #include <mutex>
 
 namespace Shipyard
@@ -13,7 +11,7 @@ namespace Shipyard
     // This allocator is not really an allocator, just a debugging class to log allocations. As such, it
     // doesn't have the same interface as the BaseAllocator, since we'd like to log the result of an other
     // allocation.
-    class SHIPYARD_API DebugAllocator
+    class SHIPYARD_SYSTEM_API DebugAllocator
     {
     public:
         struct MemoryBreaks

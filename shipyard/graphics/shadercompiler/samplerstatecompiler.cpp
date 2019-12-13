@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/shadercompiler/samplerstatecompiler.h>
 
 #include <graphics/shadercompiler/shadercompilerutilities.h>

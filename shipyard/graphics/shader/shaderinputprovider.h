@@ -23,7 +23,7 @@ namespace Shipyard
 
     class ShaderInputProviderDeclaration;
 
-    class SHIPYARD_API ShaderInputProvider
+    class SHIPYARD_GRAPHICS_API ShaderInputProvider
     {
         friend class ShaderHandler;
         friend class ShaderInputProviderManager;
@@ -43,10 +43,10 @@ namespace Shipyard
     };
 
     class ShaderInputProviderManager;
-    SHIPYARD_API ShaderInputProviderManager& GetShaderInputProviderManager();
+    SHIPYARD_GRAPHICS_API ShaderInputProviderManager& GetShaderInputProviderManager();
 
     template <typename DerivedType>
-    class SHIPYARD_API BaseShaderInputProvider : public ShaderInputProvider
+    class BaseShaderInputProvider : public ShaderInputProvider
     {
     public:
         BaseShaderInputProvider()
@@ -77,7 +77,7 @@ namespace Shipyard
         BaseShaderInputProvider(const BaseShaderInputProvider& src) = delete;
     };
 
-    template <typename DerivedType> SHIPYARD_API ShaderInputProviderDeclaration* BaseShaderInputProvider<DerivedType>::ms_ShaderInputProviderDeclaration = nullptr;
+    template <typename DerivedType> ShaderInputProviderDeclaration* BaseShaderInputProvider<DerivedType>::ms_ShaderInputProviderDeclaration = nullptr;
 
     enum class ShaderInputType : shipUint8
     {
@@ -133,7 +133,7 @@ namespace Shipyard
         Count = Unknown
     };
 
-    class SHIPYARD_API ShaderInputProviderDeclaration
+    class SHIPYARD_GRAPHICS_API ShaderInputProviderDeclaration
     {
         friend class ShaderInputProviderManager;
 
@@ -188,7 +188,7 @@ namespace Shipyard
 
     class BaseRenderDevice;
 
-    class SHIPYARD_API ShaderInputProviderManager
+    class SHIPYARD_GRAPHICS_API ShaderInputProviderManager
     {
     public:
         static ShaderInputProviderManager& GetInstance()
@@ -249,11 +249,11 @@ namespace Shipyard
 
     namespace ShaderInputProviderUtils
     {
-        shipBool SHIPYARD_API IsUsingConstantBuffer(ShaderInputProviderUsage shaderInputProviderUsage);
+        shipBool SHIPYARD_GRAPHICS_API IsUsingConstantBuffer(ShaderInputProviderUsage shaderInputProviderUsage);
         const shipChar* GetGlobalBufferNameFromProviderUsage(ShaderInputProviderUsage shaderInputProviderUsage);
 
         template <typename T>
-        void SHIPYARD_API VerifyTexture2DVariableType(const T& shaderInputData)
+        void VerifyTexture2DVariableType(const T& shaderInputData)
         {
             SHIP_STATIC_ASSERT_MSG((std::is_same<T, GFXTexture2DHandle>::value), "Texture2D shader inputs only support GFXTexture2DHandle as valid data input");
         }
@@ -304,39 +304,39 @@ namespace Shipyard
         sizeof(shipDouble) * 4 * 4, // Double4x4
     };
 
-    template <typename T> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const T& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipFloat& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipVec2& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipVec3& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipVec4& data);
+    template <typename T> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const T& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipFloat& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipVec2& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipVec3& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipVec4& data);
 
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipDouble& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipDVec2& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipDVec3& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipDVec4& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipDouble& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipDVec2& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipDVec3& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipDVec4& data);
 
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipInt32& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipIVec2& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipIVec3& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipIVec4& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipInt32& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipIVec2& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipIVec3& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipIVec4& data);
 
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipUint32& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipUVec2& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipUVec3& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipUVec4& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipUint32& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipUVec2& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipUVec3& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipUVec4& data);
 
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipBool& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipBVec2& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipBVec3& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipBVec4& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipBool& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipBVec2& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipBVec3& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipBVec4& data);
 
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipMat2x2& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipMat3x3& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipMat4x4& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipMat2x2& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipMat3x3& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipMat4x4& data);
 
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipDMat2x2& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipDMat3x3& data);
-    template <> SHIPYARD_API ShaderInputScalarType GetShaderInputScalarType(const shipDMat4x4& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipDMat2x2& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipDMat3x3& data);
+    template <> SHIPYARD_GRAPHICS_API ShaderInputScalarType GetShaderInputScalarType(const shipDMat4x4& data);
 
     // These macros shouldn't be used directly.
 #define SHIP_SHADER_INPUT_BASE(shaderInputScalarType, shaderInputName) \

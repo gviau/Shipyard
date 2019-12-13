@@ -6,7 +6,7 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_API ViewSurface
+    class SHIPYARD_GRAPHICS_API ViewSurface
     {
     public:
         ViewSurface();

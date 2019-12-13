@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/shadercompiler/renderstateblockcompiler.h>
 
 #include <graphics/shadercompiler/shadercompilerutilities.h>
@@ -474,7 +476,7 @@ shipBool InterpretStateBlockOption(
     return (renderStateBlockCompilationError == RenderStateBlockCompilationError::NoError);
 }
 
-SHIPYARD_API RenderStateBlockCompilationError CompileRenderStateBlock(
+SHIPYARD_GRAPHICS_API RenderStateBlockCompilationError CompileRenderStateBlock(
         const ShaderKey& shaderKey,
         const Array<ShaderOption>& everyPossibleShaderOption,
         const StringA& renderPipelineBlockSource,

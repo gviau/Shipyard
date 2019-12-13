@@ -9,7 +9,7 @@ struct ID3D11ShaderResourceView;
 
 namespace Shipyard
 {
-    class SHIPYARD_API DX11BaseBuffer : public BaseBuffer
+    class SHIPYARD_GRAPHICS_API DX11BaseBuffer : public BaseBuffer
     {
     public:
         DX11BaseBuffer();
@@ -29,25 +29,25 @@ namespace Shipyard
         size_t m_SizeInBytes;
     };
 
-    class SHIPYARD_API DX11VertexBuffer : public VertexBuffer, public DX11BaseBuffer
+    class SHIPYARD_GRAPHICS_API DX11VertexBuffer : public VertexBuffer, public DX11BaseBuffer
     {
     public:
         shipBool Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, shipUint32 numVertices, VertexFormatType vertexFormatType, shipBool dynamic, void* initialData);
     };
 
-    class SHIPYARD_API DX11IndexBuffer : public IndexBuffer, public DX11BaseBuffer
+    class SHIPYARD_GRAPHICS_API DX11IndexBuffer : public IndexBuffer, public DX11BaseBuffer
     {
     public:
         shipBool Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, shipUint32 numIndices, shipBool uses2BytesPerIndex, shipBool dynamic, void* initialData);
     };
 
-    class SHIPYARD_API DX11ConstantBuffer : public ConstantBuffer, public DX11BaseBuffer
+    class SHIPYARD_GRAPHICS_API DX11ConstantBuffer : public ConstantBuffer, public DX11BaseBuffer
     {
     public:
         shipBool Create(ID3D11Device& device, ID3D11DeviceContext& deviceContext, shipUint32 dataSizeInBytes, shipBool dynamic, void* initialData);
     };
 
-    class SHIPYARD_API DX11ByteBuffer : public ByteBuffer, public DX11BaseBuffer
+    class SHIPYARD_GRAPHICS_API DX11ByteBuffer : public ByteBuffer, public DX11BaseBuffer
     {
     public:
         shipBool Create(

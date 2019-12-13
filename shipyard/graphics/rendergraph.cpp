@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/rendergraph.h>
 
 #include <graphics/renderpass/renderpass.h>

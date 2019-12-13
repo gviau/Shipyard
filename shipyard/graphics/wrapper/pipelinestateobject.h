@@ -6,7 +6,7 @@ namespace Shipyard
 {
     class RootSignature;
     
-    class SHIPYARD_API PipelineStateObject
+    class SHIPYARD_GRAPHICS_API PipelineStateObject
     {
 
     };

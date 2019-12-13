@@ -6,7 +6,7 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_API RenderContext
+    class SHIPYARD_GRAPHICS_API RenderContext
     {
     public:
         void SetRenderDevice(GFXRenderDevice* gfxRenderDevice);

@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/wrapper/rootsignature.h>
 
 namespace Shipyard

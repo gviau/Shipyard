@@ -6,7 +6,7 @@ namespace Shipyard
 {
     class RenderCommandList;
 
-    class SHIPYARD_API CommandQueue
+    class SHIPYARD_GRAPHICS_API CommandQueue
     {
     public:
         CommandQueue(GFXRenderDevice& gfxRenderDevice, CommandQueueType commandQueueType);

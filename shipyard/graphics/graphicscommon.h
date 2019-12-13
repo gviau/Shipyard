@@ -670,7 +670,7 @@ namespace Shipyard
 
     // This class gives control to the programmer to override specific RenderStateBlock's state manually.
     // Those overridden states will have priority over every other way to set a state (inside of the shader for example).
-    class SHIPYARD_API RenderStateBlockStateOverride
+    class SHIPYARD_GRAPHICS_API RenderStateBlockStateOverride
     {
     public:
         void ApplyOverridenValues(RenderStateBlock& renderStateBlock) const;

@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/material/gfxmaterial.h>
 
 namespace Shipyard
@@ -14,6 +16,11 @@ SHIP_DECLARE_SHADER_INPUT_PROVIDER_END(GFXMaterialShaderInputProvider)
 
 GFXMaterial::GFXMaterial()
     : m_ShaderFamily(ShaderFamily::Error)
+{
+
+}
+
+GFXMaterial::~GFXMaterial()
 {
 
 }

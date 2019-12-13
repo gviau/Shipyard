@@ -6,9 +6,18 @@ namespace ShipyardSharpmake
     class ShipyardViewerLibProject : BaseLibProject
     {
         public ShipyardViewerLibProject()
-            : base("shipyard.viewer", @"..\shipyard-viewer\src\framework\", ShipyardUtils.DefaultShipyardTargetDll)
+            : base("shipyard.viewer", @"..\shipyard-viewer\framework\", ShipyardUtils.DefaultShipyardTargetDll)
         {
 
+        }
+
+        public override void ConfigureAll(Configuration configuration, ShipyardTarget target)
+        {
+            base.ConfigureAll(configuration, target);
+
+            configuration.ForcedIncludes.Add("shipyardviewerlibprecomp.h");
+            configuration.PrecompHeader = "shipyardviewerlibprecomp.h";
+            configuration.PrecompSource = "shipyardviewerlibprecomp.cpp";
         }
 
         protected override void ConfigureProjectDependencies(Configuration configuration, ShipyardTarget target)
@@ -20,6 +29,13 @@ namespace ShipyardSharpmake
             configuration.AddPublicDependency<ShipyardGraphicsDllProject>(target, ShipyardUtils.DefaultDependencySettings);
 
             configuration.AddPublicDependency<ShipyardToolsProject>(target, ShipyardUtils.DefaultDependencySettings);
+        }
+
+        protected override void ConfigureDefines(Configuration configuration, ShipyardTarget target)
+        {
+            base.ConfigureDefines(configuration, target);
+
+            configuration.Defines.Add("SHIPYARD_VIEWER_LIB_DLL");
         }
     }
 
@@ -39,6 +55,10 @@ namespace ShipyardSharpmake
 
             configuration.Options.Add(Sharpmake.Options.Vc.Linker.SubSystem.Application);
 
+            configuration.ForcedIncludes.Add("shipyardviewerprecomp.h");
+            configuration.PrecompHeader = "shipyardviewerprecomp.h";
+            configuration.PrecompSource = "shipyardviewerprecomp.cpp";
+
             Configuration.VcxprojUserFileSettings projectUserFileSettings = new Configuration.VcxprojUserFileSettings();
             projectUserFileSettings.LocalDebuggerWorkingDirectory = @"[project.SharpmakeCsPath]\..\shipyard-viewer\approot\";
             projectUserFileSettings.OverwriteExistingFile = true;
@@ -51,6 +71,8 @@ namespace ShipyardSharpmake
             base.ConfigureProjectDependencies(configuration, target);
 
             configuration.AddPublicDependency<ShipyardViewerLibProject>(target, ShipyardUtils.DefaultDependencySettings);
+
+            configuration.IncludePaths.Add(SourceRootPath + @"..\framework\");
         }
     }
 }

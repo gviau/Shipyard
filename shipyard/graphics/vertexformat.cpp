@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/vertexformat.h>
 
 namespace Shipyard

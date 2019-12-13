@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/shipyardimgui.h>
 
 #include <graphics/wrapper/wrapper.h>

@@ -4,7 +4,7 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_API DX11DescriptorSet : public DescriptorSet
+    class SHIPYARD_GRAPHICS_API DX11DescriptorSet : public DescriptorSet
     {
     public:
         shipBool Create(DescriptorSetType descriptorSetType, const Array<DescriptorSetEntryDeclaration>& descriptorSetEntryDeclarations);

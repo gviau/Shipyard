@@ -6,7 +6,7 @@ namespace Shipyard
 {
     // Allocator that allocates by always increasing linearly a pointer in its heap. Single deallocation is not possible,
     // only full allocator's deallocation is possible.
-    class SHIPYARD_API LinearAllocator : public BaseAllocator
+    class SHIPYARD_SYSTEM_API LinearAllocator : public BaseAllocator
     {
     public:
         LinearAllocator();

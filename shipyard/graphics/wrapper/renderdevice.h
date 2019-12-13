@@ -14,7 +14,7 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_API BaseRenderDevice
+    class SHIPYARD_GRAPHICS_API BaseRenderDevice
     {
     public:
 #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION

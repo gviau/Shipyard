@@ -9,7 +9,7 @@ namespace Shipyard
     class RenderContext;
     class RenderPass;
 
-    class SHIPYARD_API RenderGraph
+    class SHIPYARD_GRAPHICS_API RenderGraph
     {
         friend class RenderGraphRenderPassRegisterScope;
 

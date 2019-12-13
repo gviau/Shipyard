@@ -14,7 +14,7 @@ namespace Shipyard
         GFXTexture2DHandle ImGuiTexture;
     };
 
-    class SHIPYARD_API ImGuiRenderPass : public RenderPass
+    class SHIPYARD_GRAPHICS_API ImGuiRenderPass : public RenderPass
     {
     public:
         void Execute(RenderContext& renderContext) override;

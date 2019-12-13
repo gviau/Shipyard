@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/shadercompiler/shaderwatcher.h>
 
 #include <graphics/shadercompiler/shadercompiler.h>
@@ -13,6 +15,8 @@
 
 namespace Shipyard
 {;
+
+template SHIPYARD_GRAPHICS_API class GraphicsSingleton<ShaderWatcher>;
 
 volatile shipBool ShaderWatcher::m_RunShaderWatcherThread = true;
 extern const shipChar* g_ShaderFamilyFilenames[shipUint8(ShaderFamily::Count)];

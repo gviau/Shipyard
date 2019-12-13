@@ -4,7 +4,7 @@
 
 #include <graphics/wrapper/wrapper_common.h>
 
-#include <system/singleton.h>
+#include <graphics/graphicssingleton.h>
 
 #include <map>
 
@@ -13,9 +13,9 @@ namespace Shipyard
     class ShaderDatabase;
     class ShaderHandler;
 
-    class SHIPYARD_API ShaderHandlerManager : public Singleton<ShaderHandlerManager>
+    class SHIPYARD_GRAPHICS_API ShaderHandlerManager : public GraphicsSingleton<ShaderHandlerManager>
     {
-        friend class Singleton<ShaderHandlerManager>;
+        friend class GraphicsSingleton<ShaderHandlerManager>;
 
     public:
         ShaderHandlerManager();
@@ -32,5 +32,5 @@ namespace Shipyard
         ShaderDatabase* m_ShaderDatabase;
     };
 
-    SHIPYARD_API ShaderHandlerManager& GetShaderHandlerManager();
+    SHIPYARD_GRAPHICS_API ShaderHandlerManager& GetShaderHandlerManager();
 }

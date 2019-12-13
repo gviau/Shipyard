@@ -17,7 +17,7 @@ namespace Shipyard
         Cube
     };
 
-    class SHIPYARD_API DX11BaseTexture : public BaseTexture
+    class SHIPYARD_GRAPHICS_API DX11BaseTexture : public BaseTexture
     {
     public:
         DX11BaseTexture();
@@ -30,7 +30,7 @@ namespace Shipyard
         ID3D11ShaderResourceView* m_ShaderResourceView;
     };
 
-    class SHIPYARD_API DX11Texture2D : public Texture2D, public DX11BaseTexture
+    class SHIPYARD_GRAPHICS_API DX11Texture2D : public Texture2D, public DX11BaseTexture
     {
     public:
         DX11Texture2D();

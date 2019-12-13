@@ -386,6 +386,16 @@ ErrorCode LoadMeshFromFile(const shipChar* filename, GFXRenderDevice& gfxRenderD
     return ErrorCode::None;
 }
 
+shipBool IsFileExtensionSupportedForMeshImport(const shipChar* filename)
+{
+    InplaceArray<StringT, 2> stringParts;
+    StringSplit(filename, '.', stringParts);
+
+    Assimp::Importer meshImporter;
+
+    return meshImporter.IsExtensionSupported(stringParts.Back().GetBuffer());
+}
+
 }
 
 }

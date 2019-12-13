@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 // dear imgui, v1.72b
 // (main code and documentation)
 

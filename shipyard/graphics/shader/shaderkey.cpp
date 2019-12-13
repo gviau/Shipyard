@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/shader/shaderkey.h>
 
 #include <graphics/shader/shaderfamilies.h>

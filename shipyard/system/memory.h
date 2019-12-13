@@ -6,7 +6,7 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_API GlobalAllocator : public BaseAllocator
+    class SHIPYARD_SYSTEM_API GlobalAllocator : public BaseAllocator
     {
     public:
         static const shipUint32 ms_MaxNumAllocators = 32;
@@ -75,7 +75,7 @@ namespace Shipyard
 #endif // #ifdef SHIP_DEBUG
     };
 
-    SHIPYARD_API GlobalAllocator& GetGlobalAllocator();
+    SHIPYARD_SYSTEM_API GlobalAllocator& GetGlobalAllocator();
 }
 
 // Those macros use the GlobalAllocator instead of specifying one. Be sure not to mismatch allocators!

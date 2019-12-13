@@ -6,7 +6,7 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_API Sampler : public GfxResource
+    class SHIPYARD_GRAPHICS_API Sampler : public GfxResource
     {
     public:
         Sampler();

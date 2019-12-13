@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/shader/shaderinputprovider.h>
 
 #include <graphics/wrapper/wrapper.h>

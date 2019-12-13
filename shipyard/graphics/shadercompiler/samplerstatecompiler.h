@@ -19,7 +19,7 @@ namespace Shipyard
         MissingValueForOption,
     };
 
-    SHIPYARD_API SamplerStateCompilerError CompileSamplerStateBlock(
+    SHIPYARD_GRAPHICS_API SamplerStateCompilerError CompileSamplerStateBlock(
             const ShaderKey& shaderKey,
             const Array<ShaderOption>& everyPossibleShaderOption,
             const StringA& samplerStateBlockSource,

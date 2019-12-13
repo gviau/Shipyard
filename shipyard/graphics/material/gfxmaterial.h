@@ -28,10 +28,11 @@ namespace Shipyard
         GFXTexture2DHandle RoughnessMapHandle;
     };
 
-    class SHIPYARD_API GFXMaterial
+    class SHIPYARD_GRAPHICS_API GFXMaterial
     {
     public:
         GFXMaterial();
+        ~GFXMaterial();
 
         shipBool Create(ShaderFamily shaderFamily, GFXTexture2DHandle materialTextures[shipUint32(GfxMaterialTextureType::Count)]);
 

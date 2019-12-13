@@ -1,3 +1,5 @@
+#include <system/systemprecomp.h>
+
 #include "system/atomicoperations.h"
 
 #include <system/systemdebug.h>

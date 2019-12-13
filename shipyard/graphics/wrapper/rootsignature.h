@@ -6,7 +6,7 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_API RootSignature
+    class SHIPYARD_GRAPHICS_API RootSignature
     {
     public:
         const Array<RootSignatureParameterEntry>& GetRootSignatureParameters() const;

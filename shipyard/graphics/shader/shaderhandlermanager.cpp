@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/shader/shaderhandlermanager.h>
 
 #include <graphics/shader/shaderdatabase.h>
@@ -13,6 +15,8 @@
 
 namespace Shipyard
 {;
+
+template SHIPYARD_GRAPHICS_API class GraphicsSingleton<ShaderHandlerManager>;
 
 SHIP_DECLARE_SHADER_VARIATION_SET_BEGIN(Error)
 {
@@ -287,7 +291,7 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
     return shaderHandler;
 }
 
-SHIPYARD_API ShaderHandlerManager& GetShaderHandlerManager()
+SHIPYARD_GRAPHICS_API ShaderHandlerManager& GetShaderHandlerManager()
 {
     return ShaderHandlerManager::GetInstance();
 }

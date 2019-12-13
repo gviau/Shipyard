@@ -3,18 +3,18 @@
 #include <system/array.h>
 #include <system/platform.h>
 #include <system/string.h>
-#include <system/singleton.h>
-
 #include <graphics/shader/shaderkey.h>
+
+#include <graphics/graphicssingleton.h>
 
 #include <mutex>
 #include <thread>
 
 namespace Shipyard
 {
-    class SHIPYARD_API ShaderWatcher : public Singleton<ShaderWatcher>
+    class SHIPYARD_GRAPHICS_API ShaderWatcher : public GraphicsSingleton<ShaderWatcher>
     {
-        friend class Singleton<ShaderWatcher>;
+        friend class GraphicsSingleton<ShaderWatcher>;
 
     public:
         ShaderWatcher();

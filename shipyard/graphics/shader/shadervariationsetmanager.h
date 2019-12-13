@@ -8,7 +8,7 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_API ShaderVariationSetManager
+    class SHIPYARD_GRAPHICS_API ShaderVariationSetManager
     {
     public:
         static ShaderVariationSetManager& GetInstance()
@@ -54,5 +54,5 @@ namespace Shipyard
         ShaderKey m_InvalidPartialShaderKeysPerShaderFamily[shipUint32(ShaderFamily::Count)][ms_MaxInvalidPartialShaderKeys];
     };
 
-    SHIPYARD_API ShaderVariationSetManager& GetShaderVariationSetManager();
+    SHIPYARD_GRAPHICS_API ShaderVariationSetManager& GetShaderVariationSetManager();
 }

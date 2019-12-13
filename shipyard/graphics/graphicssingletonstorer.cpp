@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/graphicssingletonstorer.h>
 
 #include <graphics/material/gfxmaterialunifiedconstantbuffer.h>

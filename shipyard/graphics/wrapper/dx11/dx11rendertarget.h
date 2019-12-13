@@ -12,7 +12,7 @@ namespace Shipyard
 {
     class DX11Texture2D;
 
-    class SHIPYARD_API DX11RenderTarget : public RenderTarget
+    class SHIPYARD_GRAPHICS_API DX11RenderTarget : public RenderTarget
     {
     public:
         DX11RenderTarget();
@@ -35,7 +35,7 @@ namespace Shipyard
         shipBool m_IsValid;
     };
 
-    class SHIPYARD_API DX11DepthStencilRenderTarget : public DepthStencilRenderTarget
+    class SHIPYARD_GRAPHICS_API DX11DepthStencilRenderTarget : public DepthStencilRenderTarget
     {
     public:
         DX11DepthStencilRenderTarget();

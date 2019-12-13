@@ -487,7 +487,6 @@ namespace Shipyard
 
         void Reserve(shipUint32 newCapacity)
         {
-            SHIP_ASSERT(newCapacity > 0);
             SHIP_ASSERT(newCapacity <= 16383);
 
             if (newCapacity <= Capacity())
@@ -942,7 +941,6 @@ namespace Shipyard
 
         void Reserve(shipUint32 newCapacity)
         {
-            SHIP_ASSERT(newCapacity > 0);
             SHIP_ASSERT(newCapacity <= 0xFFFFFFFF);
 
             if (newCapacity <= m_Capacity)

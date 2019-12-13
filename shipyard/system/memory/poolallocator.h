@@ -9,7 +9,7 @@ namespace Shipyard
     // Use this class to allocate fixed sized chunk of memory.
     // The PoolAllocator does not take ownership of the memory. It is the responsability of the user to properly free it after
     // calling PoolAllocator::Destroy()
-    class SHIPYARD_API PoolAllocator : public BaseAllocator
+    class SHIPYARD_SYSTEM_API PoolAllocator : public BaseAllocator
     {
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         struct MemoryInfo;

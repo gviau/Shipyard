@@ -177,10 +177,10 @@ namespace Shipyard
     using MediumInplaceStringT = InplaceStringT<gs_MediumStringSize>;
     using LargeInplaceStringT = InplaceStringT<gs_LargeStringSize>;
 
-    SHIPYARD_API const shipChar* StringFormat(const shipChar* fmt, ...);
-    SHIPYARD_API void StringSplit(const shipChar* str, shipChar delimiter, Array<StringA>& stringParts);
-    SHIPYARD_API shipInt32 StringCompare(const shipChar* str1, const shipChar* str2);
-    SHIPYARD_API shipBool AreStringsEqual(const shipChar* str1, const shipChar* str2);
+    SHIPYARD_SYSTEM_API const shipChar* StringFormat(const shipChar* fmt, ...);
+    SHIPYARD_SYSTEM_API void StringSplit(const shipChar* str, shipChar delimiter, Array<StringA>& stringParts);
+    SHIPYARD_SYSTEM_API shipInt32 StringCompare(const shipChar* str1, const shipChar* str2);
+    SHIPYARD_SYSTEM_API shipBool AreStringsEqual(const shipChar* str1, const shipChar* str2);
 }
 
 #include <system/string.inl>

@@ -12,7 +12,7 @@ namespace Shipyard
 
     class ShaderCompiler;
 
-    class SHIPYARD_API ShaderKey
+    class SHIPYARD_GRAPHICS_API ShaderKey
     {
         friend class ShaderCompiler;
 

@@ -9,7 +9,7 @@ namespace Shipyard
     // Use this class to allocate variably sized chunk of memory from a fixed heap.
     // The FixedHeapAllocator does not take ownership of the memory. It is the responsability of the user to properly free it after
     // calling FixedHeapAllocator::Destroy()
-    class SHIPYARD_API FixedHeapAllocator : public BaseAllocator
+    class SHIPYARD_SYSTEM_API FixedHeapAllocator : public BaseAllocator
     {
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO
         struct MemoryInfo;

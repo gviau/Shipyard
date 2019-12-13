@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/rendercontext.h>
 
 namespace Shipyard

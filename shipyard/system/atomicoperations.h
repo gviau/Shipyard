@@ -4,19 +4,19 @@
 
 namespace Shipyard
 {
-    shipUint32 SHIPYARD_API InternalAtomicIncrement(volatile shipUint32& val);
-    shipUint32 SHIPYARD_API InternalAtomicDecrement(volatile shipUint32& val);
-    shipUint32 SHIPYARD_API InternalAtomicCompareExchange(volatile shipUint32& dest, shipUint32 exchangeValue, shipUint32 comperand);
-    shipUint32 SHIPYARD_API InternalAtomicExchange(volatile shipUint32& target, shipUint32 value);
-    shipUint32 SHIPYARD_API InternalAtomicAdd(volatile shipUint32& target, shipUint32 value);
-    shipUint32 SHIPYARD_API InternalAtomicSubtract(volatile shipUint32& target, shipUint32 value);
+    shipUint32 SHIPYARD_SYSTEM_API InternalAtomicIncrement(volatile shipUint32& val);
+    shipUint32 SHIPYARD_SYSTEM_API InternalAtomicDecrement(volatile shipUint32& val);
+    shipUint32 SHIPYARD_SYSTEM_API InternalAtomicCompareExchange(volatile shipUint32& dest, shipUint32 exchangeValue, shipUint32 comperand);
+    shipUint32 SHIPYARD_SYSTEM_API InternalAtomicExchange(volatile shipUint32& target, shipUint32 value);
+    shipUint32 SHIPYARD_SYSTEM_API InternalAtomicAdd(volatile shipUint32& target, shipUint32 value);
+    shipUint32 SHIPYARD_SYSTEM_API InternalAtomicSubtract(volatile shipUint32& target, shipUint32 value);
 
-    shipUint64 SHIPYARD_API InternalAtomicIncrement(volatile shipUint64& val);
-    shipUint64 SHIPYARD_API InternalAtomicDecrement(volatile shipUint64& val);
-    shipUint64 SHIPYARD_API InternalAtomicCompareExchange(volatile shipUint64& dest, shipUint64 exchangeValue, shipUint64 comperand);
-    shipUint64 SHIPYARD_API InternalAtomicExchange(volatile shipUint64& target, shipUint64 value);
-    shipUint64 SHIPYARD_API InternalAtomicAdd(volatile shipUint64& target, shipUint64 value);
-    shipUint64 SHIPYARD_API InternalAtomicSubtract(volatile shipUint64& target, shipUint64 value);
+    shipUint64 SHIPYARD_SYSTEM_API InternalAtomicIncrement(volatile shipUint64& val);
+    shipUint64 SHIPYARD_SYSTEM_API InternalAtomicDecrement(volatile shipUint64& val);
+    shipUint64 SHIPYARD_SYSTEM_API InternalAtomicCompareExchange(volatile shipUint64& dest, shipUint64 exchangeValue, shipUint64 comperand);
+    shipUint64 SHIPYARD_SYSTEM_API InternalAtomicExchange(volatile shipUint64& target, shipUint64 value);
+    shipUint64 SHIPYARD_SYSTEM_API InternalAtomicAdd(volatile shipUint64& target, shipUint64 value);
+    shipUint64 SHIPYARD_SYSTEM_API InternalAtomicSubtract(volatile shipUint64& target, shipUint64 value);
 
 #if PLATFORM == PLATFORM_WINDOWS
 

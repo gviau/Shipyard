@@ -1,6 +1,6 @@
-#include <system/platform.h>
+#include "mathprecomp.h"
 
-SHIPYARD_API void Dummy()
+SHIPYARD_MATH_API void Dummy()
 {
 
 }

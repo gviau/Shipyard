@@ -18,7 +18,7 @@ namespace Shipyard
     enum class ShaderInputType : shipUint8;
     enum class ShaderInputProviderUsage : shipUint8;
 
-    class SHIPYARD_API ShaderResourceBinder
+    class SHIPYARD_GRAPHICS_API ShaderResourceBinder
     {
     public:
         void AddShaderResourceBinderEntryForProviderToDescriptor(

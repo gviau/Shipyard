@@ -23,7 +23,16 @@ namespace ShipyardSharpmake
         public BaseShipyardSystemProject(ShipyardTarget shipyardTarget)
             : base("shipyard.system", @"..\shipyard\system\", shipyardTarget)
         {
+            
+        }
 
+        public override void ConfigureAll(Configuration configuration, ShipyardTarget target)
+        {
+            base.ConfigureAll(configuration, target);
+
+            configuration.ForcedIncludes.Add("systemprecomp.h");
+            configuration.PrecompHeader = "systemprecomp.h";
+            configuration.PrecompSource = "systemprecomp.cpp";
         }
     }
 
@@ -33,6 +42,15 @@ namespace ShipyardSharpmake
             : base("shipyard.math", @"..\shipyard\math\", shipyardTarget)
         {
 
+        }
+
+        public override void ConfigureAll(Configuration configuration, ShipyardTarget target)
+        {
+            base.ConfigureAll(configuration, target);
+
+            configuration.ForcedIncludes.Add("mathprecomp.h");
+            configuration.PrecompHeader = "mathprecomp.h";
+            configuration.PrecompSource = "mathprecomp.cpp";
         }
 
         protected override void ConfigureIncludePaths(Configuration configuration)
@@ -49,6 +67,15 @@ namespace ShipyardSharpmake
             : base("shipyard.graphics", @"..\shipyard\graphics\", shipyardTarget)
         {
             AdditionalSourceRootPaths.Add(SourceRootPath + @"..\extern\imgui\");
+        }
+
+        public override void ConfigureAll(Configuration configuration, ShipyardTarget target)
+        {
+            base.ConfigureAll(configuration, target);
+
+            configuration.ForcedIncludes.Add("graphicsprecomp.h");
+            configuration.PrecompHeader = "graphicsprecomp.h";
+            configuration.PrecompSource = "graphicsprecomp.cpp";
         }
 
         protected override void ConfigureIncludePaths(Configuration configuration)
@@ -104,6 +131,16 @@ namespace ShipyardSharpmake
         {
 
         }
+
+        public override void ConfigureAll(Configuration configuration, ShipyardTarget target)
+        {
+            base.ConfigureAll(configuration, target);
+        }
+
+        protected override void ConfigureDefines(Configuration configuration, ShipyardTarget target)
+        {
+            configuration.Defines.Add("SHIPYARD_SYSTEM_DLL");
+        }
     }
 
     [Generate]
@@ -130,6 +167,11 @@ namespace ShipyardSharpmake
             base.ConfigureProjectDependencies(configuration, target);
 
             configuration.AddPublicDependency<ShipyardSystemDllProject>(target, ShipyardUtils.DefaultDependencySettings);
+        }
+
+        protected override void ConfigureDefines(Configuration configuration, ShipyardTarget target)
+        {
+            configuration.Defines.Add("SHIPYARD_MATH_DLL");
         }
     }
 
@@ -165,6 +207,11 @@ namespace ShipyardSharpmake
 
             configuration.AddPublicDependency<ShipyardSystemDllProject>(target, ShipyardUtils.DefaultDependencySettings);
             configuration.AddPublicDependency<ShipyardMathDllProject>(target, ShipyardUtils.DefaultDependencySettings);
+        }
+
+        protected override void ConfigureDefines(Configuration configuration, ShipyardTarget target)
+        {
+            configuration.Defines.Add("SHIPYARD_GRAPHICS_DLL");
         }
     }
 

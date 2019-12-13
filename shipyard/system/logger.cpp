@@ -1,3 +1,5 @@
+#include <system/systemprecomp.h>
+
 #include <system/logger.h>
 
 #ifdef SHIP_ENABLE_LOGGING
@@ -148,7 +150,7 @@ void Logger::LogError(const shipChar* pMessage, ...)
     m_LoggerLock.unlock();
 }
 
-SHIPYARD_API Logger& GetLogger()
+SHIPYARD_SYSTEM_API Logger& GetLogger()
 {
     return Logger::GetInstance();
 }

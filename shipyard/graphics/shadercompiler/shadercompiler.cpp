@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/shadercompiler/shadercompiler.h>
 
 #include <graphics/shader/shaderfamilies.h>
@@ -23,6 +25,8 @@
 
 namespace Shipyard
 {;
+
+template SHIPYARD_GRAPHICS_API class GraphicsSingleton<ShaderCompiler>;
 
 const shipChar* ShaderCompiler::RenderStateBlockName = "RenderState";
 const shipChar* ShaderCompiler::SamplerStateBlockName = "SamplerState";

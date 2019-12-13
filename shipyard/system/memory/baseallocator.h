@@ -18,7 +18,7 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_API BaseAllocator
+    class SHIPYARD_SYSTEM_API BaseAllocator
     {
     public:
         BaseAllocator()

@@ -15,7 +15,7 @@ namespace Shipyard
 {
     class DX11RenderDevice;
 
-    class SHIPYARD_API DX11ViewSurface : public ViewSurface
+    class SHIPYARD_GRAPHICS_API DX11ViewSurface : public ViewSurface
     {
     public:
         DX11ViewSurface();

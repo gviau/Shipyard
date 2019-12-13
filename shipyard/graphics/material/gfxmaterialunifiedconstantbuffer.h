@@ -2,8 +2,9 @@
 
 #include <graphics/graphicstypes.h>
 
+#include <graphics/graphicssingleton.h>
+
 #include <system/array.h>
-#include <system/singleton.h>
 
 namespace Shipyard
 {
@@ -15,7 +16,7 @@ namespace Shipyard
     class ShaderInputProvider;
 
     // Materials' constant buffers are managed as a single huge buffer.
-    class SHIPYARD_API GFXMaterialUnifiedConstantBuffer : public Singleton<GFXMaterialUnifiedConstantBuffer>
+    class SHIPYARD_GRAPHICS_API GFXMaterialUnifiedConstantBuffer : public GraphicsSingleton<GFXMaterialUnifiedConstantBuffer>
     {
     public:
         GFXMaterialUnifiedConstantBuffer();
@@ -55,5 +56,5 @@ namespace Shipyard
         GFXByteBufferHandle m_MaterialUnifiedConstantBuffer;
     };
 
-    SHIPYARD_API GFXMaterialUnifiedConstantBuffer& GetGFXMaterialUnifiedConstantBuffer();
+    SHIPYARD_GRAPHICS_API GFXMaterialUnifiedConstantBuffer& GetGFXMaterialUnifiedConstantBuffer();
 }

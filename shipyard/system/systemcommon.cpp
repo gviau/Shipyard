@@ -1,3 +1,5 @@
+#include <system/systemprecomp.h>
+
 #include <system/systemcommon.h>
 
 #if PLATFORM == PLATFORM_WINDOWS
@@ -12,7 +14,7 @@ namespace Shipyard
 #endif // #if COMPILER == COMPILER_MSVC
 
 // Returns the current time in a formatted output: year-month-day-hour-minutes-seconds-milliseconds.
-SHIPYARD_API void GetCurrentTimeFullyFormatted(StringA& formattedOutput)
+SHIPYARD_SYSTEM_API void GetCurrentTimeFullyFormatted(StringA& formattedOutput)
 {
 #if PLATFORM == PLATFORM_WINDOWS
 

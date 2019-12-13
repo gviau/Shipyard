@@ -53,6 +53,7 @@ namespace Shipyard
             GenerateMipsForMaterialTextures = 0x01
         };
 
-        SHIPYARD_API ErrorCode LoadMeshFromFile(const shipChar* filename, GFXRenderDevice& gfxRenderDevice, MeshImportFlags meshImportFlags, ImportedMesh* importedMesh);
+        SHIPYARD_TOOLS_API ErrorCode LoadMeshFromFile(const shipChar* filename, GFXRenderDevice& gfxRenderDevice, MeshImportFlags meshImportFlags, ImportedMesh* importedMesh);
+        SHIPYARD_TOOLS_API shipBool IsFileExtensionSupportedForMeshImport(const shipChar* filename);
     }
 }

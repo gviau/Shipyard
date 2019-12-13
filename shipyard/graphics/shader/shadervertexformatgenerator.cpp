@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/shader/shadervertexformatgenerator.h>
 
 #include <graphics/vertexformat.h>

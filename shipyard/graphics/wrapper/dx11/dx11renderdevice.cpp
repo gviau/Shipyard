@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/wrapper/dx11/dx11renderdevice.h>
 
 #include <graphics/shader/shadervertexformatgenerator.h>

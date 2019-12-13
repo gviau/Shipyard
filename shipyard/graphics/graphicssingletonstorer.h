@@ -4,7 +4,7 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_API GraphicsSingletonStorer
+    class SHIPYARD_GRAPHICS_API GraphicsSingletonStorer
     {
     public:
         GraphicsSingletonStorer();

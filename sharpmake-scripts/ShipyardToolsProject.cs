@@ -12,6 +12,15 @@ namespace ShipyardSharpmake
             
         }
 
+        public override void ConfigureAll(Configuration configuration, ShipyardTarget target)
+        {
+            base.ConfigureAll(configuration, target);
+
+            configuration.ForcedIncludes.Add("toolsprecomp.h");
+            configuration.PrecompHeader = "toolsprecomp.h";
+            configuration.PrecompSource = "toolsprecomp.cpp";
+        }
+
         protected override void ConfigureProjectDependencies(Configuration configuration, ShipyardTarget target)
         {
             base.ConfigureProjectDependencies(configuration, target);
@@ -56,6 +65,13 @@ namespace ShipyardSharpmake
             configuration.TargetCopyFiles.Add(SourceRootPath + @"..\extern\assimp\bin\zlib.dll");
 
             configuration.TargetCopyFiles.Add(SourceRootPath + @"..\extern\freeimage\bin\FreeImage.dll");
+        }
+
+        protected override void ConfigureDefines(Configuration configuration, ShipyardTarget target)
+        {
+            base.ConfigureDefines(configuration, target);
+
+            configuration.Defines.Add("SHIPYARD_TOOLS_DLL");
         }
     }
 }

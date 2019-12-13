@@ -27,7 +27,7 @@ namespace Shipyard
             UnsupportedImageFormat
         };
 
-        SHIPYARD_API ErrorCode LoadTextureFromFile(const shipChar* filename, ImportedTexture* importedTexture);
+        SHIPYARD_TOOLS_API ErrorCode LoadTextureFromFile(const shipChar* filename, ImportedTexture* importedTexture);
 
         enum class GfxTextureCreationFlags
         {
@@ -35,7 +35,7 @@ namespace Shipyard
             DontGenerateMips
         };
 
-        SHIPYARD_API ErrorCode CreateGfxTextureFromFile(
+        SHIPYARD_TOOLS_API ErrorCode CreateGfxTextureFromFile(
                 const shipChar* filename,
                 GFXRenderDevice& gfxRenderDevice,
                 GfxTextureCreationFlags gfxTextureCreationFlags,

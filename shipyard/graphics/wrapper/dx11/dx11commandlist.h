@@ -17,7 +17,7 @@ struct ID3D11DeviceContext;
 
 namespace Shipyard
 {
-    class SHIPYARD_API DX11BaseRenderCommandList : BaseRenderCommandList
+    class SHIPYARD_GRAPHICS_API DX11BaseRenderCommandList : BaseRenderCommandList
     {
     public:
         DX11BaseRenderCommandList();
@@ -49,7 +49,7 @@ namespace Shipyard
 #endif // #ifdef SHIP_RENDER_COMMANDS_DEBUG_INFO
     };
 
-    class SHIPYARD_API DX11DirectRenderCommandList : public DX11BaseRenderCommandList, public DirectRenderCommandList
+    class SHIPYARD_GRAPHICS_API DX11DirectRenderCommandList : public DX11BaseRenderCommandList, public DirectRenderCommandList
     {
     public:
         DX11DirectRenderCommandList(GFXRenderDevice& gfxRenderDevice);

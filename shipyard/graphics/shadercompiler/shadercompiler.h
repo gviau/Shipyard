@@ -4,9 +4,10 @@
 #include <graphics/shader/shaderkey.h>
 #include <graphics/shader/shaderresourcebinder.h>
 
+#include <graphics/graphicssingleton.h>
+
 #include <system/array.h>
 #include <system/platform.h>
-#include <system/singleton.h>
 #include <system/string.h>
 
 #include <mutex>
@@ -20,9 +21,9 @@ namespace Shipyard
     enum class ShaderFamily : shipUint8;
     enum class ShaderOption : shipUint32;
 
-    class SHIPYARD_API ShaderCompiler : public Singleton<ShaderCompiler>
+    class SHIPYARD_GRAPHICS_API ShaderCompiler : public GraphicsSingleton<ShaderCompiler>
     {
-        friend class Singleton<ShaderCompiler>;
+        friend class GraphicsSingleton<ShaderCompiler>;
 
     public:
         static const shipChar* RenderStateBlockName;

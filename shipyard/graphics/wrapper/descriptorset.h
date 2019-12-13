@@ -7,7 +7,7 @@ namespace Shipyard
     class GfxResource;
     class RootSignature;
 
-    class SHIPYARD_API DescriptorSet
+    class SHIPYARD_GRAPHICS_API DescriptorSet
     {
     public:
         struct DescriptorSetEntry

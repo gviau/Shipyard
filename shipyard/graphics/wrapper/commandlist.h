@@ -8,7 +8,7 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_API BaseRenderCommandListType
+    class SHIPYARD_GRAPHICS_API BaseRenderCommandListType
     {
     public:
         CommandQueueType GetCommandListType() const;
@@ -17,7 +17,7 @@ namespace Shipyard
         CommandQueueType m_CommandListType;
     };
 
-    class SHIPYARD_API BaseRenderCommandList
+    class SHIPYARD_GRAPHICS_API BaseRenderCommandList
     {
     public:
 #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
@@ -29,7 +29,7 @@ namespace Shipyard
 #endif // #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
     };
 
-    class SHIPYARD_API RenderCommandList : public BaseRenderCommandListType
+    class SHIPYARD_GRAPHICS_API RenderCommandList : public BaseRenderCommandListType
     {
     public:
         RenderCommandList(GFXRenderDevice& gfxRenderDevice);
@@ -38,19 +38,19 @@ namespace Shipyard
         GFXRenderDevice& m_RenderDevice;
     };
 
-    class SHIPYARD_API CopyRenderCommandList : public RenderCommandList
+    class SHIPYARD_GRAPHICS_API CopyRenderCommandList : public RenderCommandList
     {
     public:
         CopyRenderCommandList(GFXRenderDevice& gfxRenderDevice);
     };
 
-    class SHIPYARD_API ComputeRenderCommandList : public RenderCommandList
+    class SHIPYARD_GRAPHICS_API ComputeRenderCommandList : public RenderCommandList
     {
     public:
         ComputeRenderCommandList(GFXRenderDevice& gfxRenderDevice);
     };
 
-    class SHIPYARD_API DirectRenderCommandList : public RenderCommandList
+    class SHIPYARD_GRAPHICS_API DirectRenderCommandList : public RenderCommandList
     {
     public:
         DirectRenderCommandList(GFXRenderDevice& gfxRenderDevice);

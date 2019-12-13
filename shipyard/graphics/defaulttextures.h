@@ -8,8 +8,8 @@ namespace Shipyard
 {
     namespace DefaultTextures
     {
-        extern GFXTexture2DHandle WhiteTexture;
-        extern GFXTexture2DHandle BlackTexture;
+        extern SHIPYARD_GRAPHICS_API GFXTexture2DHandle WhiteTexture;
+        extern SHIPYARD_GRAPHICS_API GFXTexture2DHandle BlackTexture;
 
         void CreateDefaultTextures(GFXRenderDevice& gfxRenderDevice);
         void DestroyDefaultTextures(GFXRenderDevice& gfxRenderDevice);

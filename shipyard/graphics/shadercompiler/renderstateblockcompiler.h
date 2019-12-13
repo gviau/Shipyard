@@ -20,7 +20,7 @@ enum class RenderStateBlockCompilationError
     MissingValueForOption,
 };
 
-SHIPYARD_API RenderStateBlockCompilationError CompileRenderStateBlock(
+SHIPYARD_GRAPHICS_API RenderStateBlockCompilationError CompileRenderStateBlock(
         const ShaderKey& shaderKey,
         const Array<ShaderOption>& everyPossibleShaderOption,
         const StringA& renderPipelineBlockSource,

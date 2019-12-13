@@ -4,6 +4,8 @@
 
 #include <graphics/graphicstypes.h>
 
+#include <graphics/material/gfxmaterial.h>
+
 #include <graphics/wrapper/wrapper_common.h>
 
 #include <system/memory.h>
@@ -24,7 +26,7 @@ namespace Shipyard
 
     struct SimpleConstantBufferProvider;
 
-    class ShipyardViewer
+    class SHIPYARD_VIEWER_LIB_API ShipyardViewer
     {
     public:
         ~ShipyardViewer();
@@ -33,6 +35,15 @@ namespace Shipyard
         void ComputeOneFrame();
 
         shipBool OnWin32Msg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam, LRESULT* shipyardMsgHandlingResult);
+
+    private:
+        struct LoadedMeshData
+        {
+            Array<GFXVertexBufferHandle> m_SubMeshVertexBuffers;
+            Array<GFXIndexBufferHandle> m_SubMeshIndexBuffers;
+            Array<GFXMaterial*> m_LoadedMaterials;
+            Array<GFXMaterial*> m_UsedMaterialPerSubMesh;
+        };
 
     private:
         shipUint32 m_WindowWidth = 0;
@@ -68,5 +79,10 @@ namespace Shipyard
 
         SimpleConstantBufferProvider* m_pDataProvider = nullptr;
         Renderer* m_pRenderer = nullptr;
+
+        LoadedMeshData* m_pLoadedMeshData = nullptr;
+        GFXMaterial* m_pDefaultMaterial = nullptr;
+
+        void ClearViewerAndLoadMesh(const shipChar* filename);
     };
 }

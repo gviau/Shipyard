@@ -4,7 +4,7 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_API DX11RootSignature : public RootSignature
+    class SHIPYARD_GRAPHICS_API DX11RootSignature : public RootSignature
     {
     public:
         shipBool Create(const Array<RootSignatureParameterEntry>& rootSignatureParameters);

@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/shader/shadervariationsetmanager.h>
 
 #include <system/systemdebug.h>

@@ -15,7 +15,7 @@ namespace Shipyard
 {
     struct BaseRenderCommand;
 
-    class SHIPYARD_API DX11CommandQueue : public CommandQueue
+    class SHIPYARD_GRAPHICS_API DX11CommandQueue : public CommandQueue
     {
     public:
         DX11CommandQueue(GFXRenderDevice& gfxRenderDevice, CommandQueueType commandQueueType);

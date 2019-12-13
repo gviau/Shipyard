@@ -1,3 +1,5 @@
+#include <system/systemprecomp.h>
+
 #include <system/memory/debugallocator.h>
 
 #ifdef SHIP_ALLOCATOR_DEBUG_INFO

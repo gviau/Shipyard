@@ -1,3 +1,5 @@
+#include <system/systemprecomp.h>
+
 #include <system/pathutils.h>
 
 #if PLATFORM == PLATFORM_WINDOWS

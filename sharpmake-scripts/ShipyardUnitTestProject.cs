@@ -14,6 +14,10 @@ namespace ShipyardSharpmake
         public override void ConfigureAll(Configuration configuration, ShipyardTarget target)
         {
             base.ConfigureAll(configuration, target);
+
+            configuration.ForcedIncludes.Add("shipyardunittestprecomp.h");
+            configuration.PrecompHeader = "shipyardunittestprecomp.h";
+            configuration.PrecompSource = "shipyardunittestprecomp.cpp";
         }
 
         protected override void ConfigureProjectDependencies(Configuration configuration, ShipyardTarget target)

@@ -9,7 +9,7 @@
 namespace Shipyard
 {
     template <class T>
-    class SHIPYARD_API Singleton
+    class SHIPYARD_SYSTEM_API Singleton
     {
     public:
         static T& GetInstance()
@@ -42,5 +42,5 @@ namespace Shipyard
         Singleton& operator= (const Singleton&& rhs) = delete;
     };
 
-    template <class T> SHIPYARD_API T* Singleton<T>::ms_Instance = nullptr;
+    template <class T> SHIPYARD_SYSTEM_API T* Singleton<T>::ms_Instance = nullptr;
 }

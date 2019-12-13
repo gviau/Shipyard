@@ -26,7 +26,7 @@ namespace Shipyard
         LogLevel_FullLog = (LogLevel_Debug | LogLevel_Info | LogLevel_Warning | LogLevel_Error)
     };
 
-    class SHIPYARD_API Logger
+    class SHIPYARD_SYSTEM_API Logger
     {
     public:
         static Logger& GetInstance()
@@ -61,7 +61,7 @@ namespace Shipyard
         shipBool m_IsLogOpen;
     };
 
-    SHIPYARD_API Logger& GetLogger();
+    SHIPYARD_SYSTEM_API Logger& GetLogger();
 }
 
 #define SHIP_LOG_DEBUG(msg, ...) Shipyard::GetLogger().LogDebug(msg, __VA_ARGS__)

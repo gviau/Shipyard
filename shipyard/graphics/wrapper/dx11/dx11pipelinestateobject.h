@@ -6,7 +6,7 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_API DX11PipelineStateObject : public PipelineStateObject
+    class SHIPYARD_GRAPHICS_API DX11PipelineStateObject : public PipelineStateObject
     {
     public:
         shipBool Create(const PipelineStateObjectCreationParameters& creationParameters);

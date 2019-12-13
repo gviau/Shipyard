@@ -1,3 +1,5 @@
+#include <system/systemprecomp.h>
+
 #include <system/wrapper/mswin/mswinfilehandlerstream.h>
 
 #include <system/pathutils.h>

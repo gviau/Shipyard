@@ -4,7 +4,7 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_API GfxResource
+    class SHIPYARD_GRAPHICS_API GfxResource
     {
     public:
         GfxResource(GfxResourceType resourceType);

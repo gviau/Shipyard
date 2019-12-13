@@ -6,7 +6,7 @@ namespace Shipyard
 {
     class Texture2D;
 
-    class SHIPYARD_API BaseRenderTarget
+    class SHIPYARD_GRAPHICS_API BaseRenderTarget
     {
     public:
         BaseRenderTarget();
@@ -19,11 +19,11 @@ namespace Shipyard
         shipUint32 m_Height;
     };
 
-    class SHIPYARD_API RenderTarget : public BaseRenderTarget
+    class SHIPYARD_GRAPHICS_API RenderTarget : public BaseRenderTarget
     {
     };
 
-    class SHIPYARD_API DepthStencilRenderTarget : public BaseRenderTarget
+    class SHIPYARD_GRAPHICS_API DepthStencilRenderTarget : public BaseRenderTarget
     {
 
     };

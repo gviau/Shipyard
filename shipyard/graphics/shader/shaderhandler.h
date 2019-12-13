@@ -17,7 +17,7 @@ namespace Shipyard
     class ShaderHandlerManager;
     class ShaderInputProvider;
 
-    class SHIPYARD_API ShaderHandler
+    class SHIPYARD_GRAPHICS_API ShaderHandler
     {
         friend class ShaderDatabase;
         friend class ShaderHandlerManager;

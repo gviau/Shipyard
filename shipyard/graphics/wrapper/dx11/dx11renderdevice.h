@@ -23,7 +23,7 @@ struct IDXGISwapChain;
 
 namespace Shipyard
 {
-    class SHIPYARD_API DX11RenderDevice : public BaseRenderDevice
+    class SHIPYARD_GRAPHICS_API DX11RenderDevice : public BaseRenderDevice
     {
     public:
         DX11RenderDevice();

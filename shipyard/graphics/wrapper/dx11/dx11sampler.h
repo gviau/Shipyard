@@ -7,7 +7,7 @@ struct ID3D11SamplerState;
 
 namespace Shipyard
 {
-    class SHIPYARD_API DX11Sampler : public Sampler
+    class SHIPYARD_GRAPHICS_API DX11Sampler : public Sampler
     {
     public:
         DX11Sampler();

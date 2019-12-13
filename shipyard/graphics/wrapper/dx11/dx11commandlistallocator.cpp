@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/wrapper/dx11/dx11commandlistallocator.h>
 
 #include <system/memory.h>

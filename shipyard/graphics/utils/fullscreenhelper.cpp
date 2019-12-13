@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/utils/fullscreenhelper.h>
 
 #include <graphics/shader/shaderfamilies.h>
@@ -7,6 +9,8 @@
 
 namespace Shipyard
 {;
+
+template SHIPYARD_GRAPHICS_API class GraphicsSingleton<FullscreenHelper>;
 
 FullscreenHelper::~FullscreenHelper()
 {

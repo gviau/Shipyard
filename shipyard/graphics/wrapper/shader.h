@@ -4,17 +4,17 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_API BaseShader
+    class SHIPYARD_GRAPHICS_API BaseShader
     {
 
     };
 
-    class SHIPYARD_API VertexShader
+    class SHIPYARD_GRAPHICS_API VertexShader
     {
 
     };
 
-    class SHIPYARD_API PixelShader
+    class SHIPYARD_GRAPHICS_API PixelShader
     {
 
     };

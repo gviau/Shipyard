@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/defaulttextures.h>
 
 #include <graphics/wrapper/wrapper.h>
@@ -8,8 +10,8 @@ namespace Shipyard
 namespace DefaultTextures
 {;
 
-GFXTexture2DHandle WhiteTexture;
-GFXTexture2DHandle BlackTexture;
+SHIPYARD_GRAPHICS_API GFXTexture2DHandle WhiteTexture;
+SHIPYARD_GRAPHICS_API GFXTexture2DHandle BlackTexture;
 
 void CreateDefaultTextures(GFXRenderDevice& gfxRenderDevice)
 {

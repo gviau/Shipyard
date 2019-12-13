@@ -6,13 +6,13 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_API BaseBuffer : public GfxResource
+    class SHIPYARD_GRAPHICS_API BaseBuffer : public GfxResource
     {
     public:
         BaseBuffer();
     };
 
-    class SHIPYARD_API VertexBuffer
+    class SHIPYARD_GRAPHICS_API VertexBuffer
     {
     public:
         VertexBuffer();
@@ -25,7 +25,7 @@ namespace Shipyard
         VertexFormatType m_VertexFormatType;
     };
 
-    class SHIPYARD_API IndexBuffer
+    class SHIPYARD_GRAPHICS_API IndexBuffer
     {
     public:
         IndexBuffer();
@@ -38,7 +38,7 @@ namespace Shipyard
         shipBool m_Uses2BytesPerIndex;
     };
 
-    class SHIPYARD_API ConstantBuffer
+    class SHIPYARD_GRAPHICS_API ConstantBuffer
     {
 
     };
@@ -48,7 +48,7 @@ namespace Shipyard
 
     };
 
-    class SHIPYARD_API ByteBuffer
+    class SHIPYARD_GRAPHICS_API ByteBuffer
     {
     public:
         enum ByteBufferCreationFlags

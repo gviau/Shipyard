@@ -1,16 +1,16 @@
 #pragma once
 
-#include <system/singleton.h>
-
 #include <graphics/graphicstypes.h>
 
 #include <graphics/shader/shaderhandler.h>
 
 #include <graphics/wrapper/wrapper.h>
 
+#include <graphics/graphicssingleton.h>
+
 namespace Shipyard
 {
-    class SHIPYARD_API FullscreenHelper : public Singleton<FullscreenHelper>
+    class SHIPYARD_GRAPHICS_API FullscreenHelper : public GraphicsSingleton<FullscreenHelper>
     {
     public:
         struct FullscreenQuadRenderContext
@@ -40,5 +40,5 @@ namespace Shipyard
         GFXIndexBufferHandle m_FullscreenQuadIndexBufferHandle;
     };
 
-    SHIPYARD_API FullscreenHelper& GetFullscreenHelper();
+    SHIPYARD_GRAPHICS_API FullscreenHelper& GetFullscreenHelper();
 }

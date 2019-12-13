@@ -4,7 +4,7 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_API CommandListAllocator
+    class SHIPYARD_GRAPHICS_API CommandListAllocator
     {
     public:
         CommandListAllocator(GFXRenderDevice& gfxRenderDevice);

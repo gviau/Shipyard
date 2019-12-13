@@ -16,7 +16,7 @@ namespace Shipyard
         FileHandlerOpenFlag_ReadWrite = FileHandlerOpenFlag_Read | FileHandlerOpenFlag_Write
     };
 
-    class SHIPYARD_API BaseFileHandler
+    class SHIPYARD_SYSTEM_API BaseFileHandler
     {
     public:
         BaseFileHandler();

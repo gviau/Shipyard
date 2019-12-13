@@ -1,3 +1,5 @@
+#include <shipyardunittestprecomp.h>
+
 #include <extern/catch/catch.hpp>
 
 #include <utils/unittestutils.h>

@@ -1,4 +1,4 @@
-#include "framework/shipyardviewer.h"
+#include <shipyardviewer.h>
 
 #include <cinttypes>
 
@@ -61,7 +61,9 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     uint32_t windowWidth = 1600;
     uint32_t windowHeight = 900;
 
-    HWND windowHandle = CreateWindowEx(NULL,"ShipyardViewer", "Shipyard Viewer", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, windowWidth, windowHeight, NULL, NULL, hInstance, NULL);
+    DWORD extendedWindowStyle = WS_EX_ACCEPTFILES;
+
+    HWND windowHandle = CreateWindowEx(extendedWindowStyle, "ShipyardViewer", "Shipyard Viewer", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, windowWidth, windowHeight, NULL, NULL, hInstance, NULL);
     if (windowHandle == NULL)
     {
         MessageBox(NULL, "Couldn't create window", "Win32 error", MB_OK);

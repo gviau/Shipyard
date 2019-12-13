@@ -10,7 +10,7 @@ namespace Shipyard
 {
     class RenderGraph;
 
-    struct SHIPYARD_API RenderPassHandle
+    struct SHIPYARD_GRAPHICS_API RenderPassHandle
     {
         virtual void CreateRenderPassInstance(GFXRenderDevice& gfxRenderDevice) {}
         virtual void DestroyRenderPassInstance() {}

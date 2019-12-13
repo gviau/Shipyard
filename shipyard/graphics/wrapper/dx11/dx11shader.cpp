@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/wrapper/dx11/dx11shader.h>
 
 #include <graphics/wrapper/dx11/dx11_common.h>

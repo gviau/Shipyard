@@ -9,12 +9,12 @@ struct ID3D11VertexShader;
 
 namespace Shipyard
 {
-    class SHIPYARD_API DX11BaseShader : public BaseShader
+    class SHIPYARD_GRAPHICS_API DX11BaseShader : public BaseShader
     {
 
     };
 
-    class SHIPYARD_API DX11VertexShader : public VertexShader, public DX11BaseShader
+    class SHIPYARD_GRAPHICS_API DX11VertexShader : public VertexShader, public DX11BaseShader
     {
     public:
         DX11VertexShader();
@@ -28,7 +28,7 @@ namespace Shipyard
         ID3D11VertexShader* m_VertexShader;
     };
 
-    class SHIPYARD_API DX11PixelShader : public PixelShader, public DX11BaseShader
+    class SHIPYARD_GRAPHICS_API DX11PixelShader : public PixelShader, public DX11BaseShader
     {
     public:
         DX11PixelShader();

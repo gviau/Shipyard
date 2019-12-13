@@ -1,3 +1,5 @@
+#include <system/systemprecomp.h>
+
 #include <system/wrapper/filehandler.h>
 
 namespace Shipyard

@@ -6,7 +6,7 @@ namespace Shipyard
 {
     class RenderContext;
 
-    class SHIPYARD_API RenderPass
+    class SHIPYARD_GRAPHICS_API RenderPass
     {
     public:
         virtual void Execute(RenderContext& renderContext) = 0;
@@ -15,7 +15,7 @@ namespace Shipyard
 #define DEFINE_RENDER_PASS_HANDLE_TYPE(RenderPassHandleType) RenderPassHandleType
 
 #define DEFINE_RENDER_PASS_HANDLE(RenderPassType) \
-    struct SHIPYARD_API DEFINE_RENDER_PASS_HANDLE_TYPE(##RenderPassType) ##Handle : public RenderPassHandle \
+    struct SHIPYARD_GRAPHICS_API DEFINE_RENDER_PASS_HANDLE_TYPE(##RenderPassType) ##Handle : public RenderPassHandle \
     { \
         void CreateRenderPassInstance(GFXRenderDevice& gfxRenderDevice) override \
         { \

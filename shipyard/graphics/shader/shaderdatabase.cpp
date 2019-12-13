@@ -1,3 +1,5 @@
+#include <graphics/graphicsprecomp.h>
+
 #include <graphics/shader/shaderdatabase.h>
 
 #include <graphics/shader/shaderresourcebinder.h>

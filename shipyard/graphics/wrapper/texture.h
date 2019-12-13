@@ -8,7 +8,7 @@ namespace Shipyard
     shipUint32 GetRowPitch(shipUint32 width, GfxFormat pixelFormat);
     shipUint32 Get2DSlicePitch(shipUint32 width, shipUint32 height, GfxFormat pixelFormat);
 
-    class SHIPYARD_API BaseTexture : public GfxResource
+    class SHIPYARD_GRAPHICS_API BaseTexture : public GfxResource
     {
     public:
         BaseTexture();
@@ -25,7 +25,7 @@ namespace Shipyard
         TextureUsage m_TextureUsage;
     };
 
-    class SHIPYARD_API Texture2D
+    class SHIPYARD_GRAPHICS_API Texture2D
     {
 
     };

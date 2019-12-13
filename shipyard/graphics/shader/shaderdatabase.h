@@ -13,7 +13,7 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_API ShaderDatabase
+    class SHIPYARD_GRAPHICS_API ShaderDatabase
     {
     public:
         struct ShaderEntrySet

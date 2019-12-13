@@ -1,3 +1,5 @@
+#include "shipyardviewerlibprecomp.h"
+
 #include "shipyardviewer.h"
 
 #include <graphics/wrapper/wrapper.h>
@@ -17,12 +19,15 @@
 
 #include <graphics/utils/fullscreenhelper.h>
 
+#include <graphics/defaulttextures.h>
 #include <graphics/graphicssingletonstorer.h>
 #include <graphics/rendercontext.h>
 #include <graphics/renderer.h>
 #include <graphics/shipyardimgui.h>
 
 #include <system/logger.h>
+
+#include <tools/meshimporter.h>
 
 #include <extern/glm/gtc/matrix_transform.hpp>
 #include <extern/glm/gtc/type_ptr.hpp>
@@ -45,6 +50,9 @@ SHIP_DECLARE_SHADER_INPUT_PROVIDER_END(SimpleConstantBufferProvider)
 
 ShipyardViewer::~ShipyardViewer()
 {
+    SHIP_DELETE(m_pDefaultMaterial);
+    SHIP_DELETE(m_pLoadedMeshData);
+
     SHIP_DELETE(m_pRenderer);
 
     SHIP_DELETE(m_pDataProvider);
@@ -229,6 +237,18 @@ shipBool ShipyardViewer::CreateApp(HWND windowHandle, shipUint32 windowWidth, sh
     m_pRenderer = SHIP_NEW(Renderer, 1);
     m_pRenderer->Initialize(*m_pGfxRenderDevice);
 
+    m_pDefaultMaterial = SHIP_NEW(GFXMaterial, 1);
+
+    GFXTexture2DHandle defaultMaterialTextures[shipUint32(GfxMaterialTextureType::Count)] =
+    {
+        DefaultTextures::WhiteTexture,
+        DefaultTextures::BlackTexture,
+        DefaultTextures::BlackTexture,
+        DefaultTextures::BlackTexture
+    };
+
+    m_pDefaultMaterial->Create(ShaderFamily::Error, defaultMaterialTextures);
+
     return true;
 }
 
@@ -249,9 +269,6 @@ void ShipyardViewer::ComputeOneFrame()
     gfxViewport.minDepth = 0.0f;
     gfxViewport.maxDepth = 1.0f;
 
-    static ShaderKey shaderKey;
-    shaderKey.SetShaderFamily(ShaderFamily::Generic);
-
     m_pGfxDirectRenderCommandList->Reset(*m_pGfxCommandListAllocator, nullptr);
 
     glm::mat4 matrix(1.0f, 0.0f, 0.0f, 0.0f,
@@ -261,9 +278,6 @@ void ShipyardViewer::ComputeOneFrame()
 
     m_pDataProvider->Matrix = glm::rotate(matrix, theta, shipVec3(0.0f, 1.0f, 0.0f));
     m_pDataProvider->TestTexture = m_TextureHandle;
-
-    InplaceArray<const ShaderInputProvider*, 1> shaderInputProviders;
-    shaderInputProviders.Add(m_pDataProvider);
 
     theta += 0.001f;
 
@@ -282,39 +296,53 @@ void ShipyardViewer::ComputeOneFrame()
     pClearDepthStencilRenderTargetCommand->depthValue = 1.0f;
     pClearDepthStencilRenderTargetCommand->stencilValue = 0;
 
-    static volatile shipUint32 value = 0;
+    if (m_pLoadedMeshData != nullptr)
+    {
+        for (shipUint32 i = 0; i < m_pLoadedMeshData->m_SubMeshVertexBuffers.Size(); i++)
+        {
+            GFXVertexBufferHandle gfxVertexBufferHandle = m_pLoadedMeshData->m_SubMeshVertexBuffers[i];
+            GFXIndexBufferHandle gfxIndexBufferHandle = m_pLoadedMeshData->m_SubMeshIndexBuffers[i];
+            GFXMaterial* gfxMaterial = m_pLoadedMeshData->m_UsedMaterialPerSubMesh[i];
 
-    VertexFormatType vertexFormatType = m_pGfxRenderDevice->GetVertexBuffer(m_VertexBufferHandle).GetVertexFormatType();
+            VertexFormatType vertexFormatType = m_pGfxRenderDevice->GetVertexBuffer(gfxVertexBufferHandle).GetVertexFormatType();
 
-    SET_SHADER_OPTION(shaderKey, Test2Bits, value);
-    SET_SHADER_OPTION(shaderKey, VERTEX_FORMAT_TYPE, shipUint32(vertexFormatType));
+            ShaderKey shaderKey;
+            shaderKey.SetShaderFamily(gfxMaterial->GetShaderFamily());
 
-    ShaderHandler* pShaderHandler = GetShaderHandlerManager().GetShaderHandlerForShaderKey(shaderKey);
+            SET_SHADER_OPTION(shaderKey, VERTEX_FORMAT_TYPE, shipUint32(vertexFormatType));
 
-    pShaderHandler->ApplyShaderInputProviders(*m_pGfxRenderDevice, *m_pGfxDirectRenderCommandList, shaderInputProviders);
+            ShaderHandler* pShaderHandler = GetShaderHandlerManager().GetShaderHandlerForShaderKey(shaderKey);
 
-    ShaderHandler::RenderState renderState;
-    renderState.GfxRenderTargetHandle = gfxRenderTargetHandle;
-    renderState.GfxDepthStencilRenderTargetHandle = m_GfxDepthStencilRenderTargetHandle;
-    renderState.PrimitiveTopologyToRender = PrimitiveTopology::TriangleList;
-    renderState.VertexFormatTypeToRender = vertexFormatType;
-    renderState.OptionalRenderStateBlockStateOverride = nullptr;
+            InplaceArray<const ShaderInputProvider*, 2> shaderInputProviders;
+            shaderInputProviders.Add(m_pDataProvider);
+            shaderInputProviders.Add(&gfxMaterial->GetGfxMaterialShaderInputProvider());
 
-    const ShaderHandler::ShaderRenderElements& shaderRenderElements = pShaderHandler->GetShaderRenderElements(*m_pGfxRenderDevice, renderState);
+            pShaderHandler->ApplyShaderInputProviders(*m_pGfxRenderDevice, *m_pGfxDirectRenderCommandList, shaderInputProviders);
 
-    DrawIndexedCommand* pDrawIndexedCommand = m_pGfxDirectRenderCommandList->DrawIndexed();
-    pDrawIndexedCommand->gfxViewport = gfxViewport;
-    pDrawIndexedCommand->gfxRenderTargetHandle = gfxRenderTargetHandle;
-    pDrawIndexedCommand->gfxDepthStencilRenderTargetHandle = m_GfxDepthStencilRenderTargetHandle;
-    pDrawIndexedCommand->gfxPipelineStateObjectHandle = shaderRenderElements.GfxPipelineStateObjectHandle;
-    pDrawIndexedCommand->gfxRootSignatureHandle = shaderRenderElements.GfxRootSignatureHandle;
-    pDrawIndexedCommand->gfxDescriptorSetHandle = shaderRenderElements.GfxDescriptorSetHandle;
-    pDrawIndexedCommand->gfxVertexBufferHandle = m_VertexBufferHandle;
-    pDrawIndexedCommand->gfxIndexBufferHandle = m_IndexBufferHandle;
-    pDrawIndexedCommand->vertexBufferOffset = 0;
-    pDrawIndexedCommand->startIndexLocation = 0;
-    pDrawIndexedCommand->indexBufferOffset = 0;
-    pDrawIndexedCommand->baseVertexLocation = 0;
+            ShaderHandler::RenderState renderState;
+            renderState.GfxRenderTargetHandle = gfxRenderTargetHandle;
+            renderState.GfxDepthStencilRenderTargetHandle = m_GfxDepthStencilRenderTargetHandle;
+            renderState.PrimitiveTopologyToRender = PrimitiveTopology::TriangleList;
+            renderState.VertexFormatTypeToRender = vertexFormatType;
+            renderState.OptionalRenderStateBlockStateOverride = nullptr;
+
+            const ShaderHandler::ShaderRenderElements& shaderRenderElements = pShaderHandler->GetShaderRenderElements(*m_pGfxRenderDevice, renderState);
+
+            DrawIndexedCommand* pDrawIndexedCommand = m_pGfxDirectRenderCommandList->DrawIndexed();
+            pDrawIndexedCommand->gfxViewport = gfxViewport;
+            pDrawIndexedCommand->gfxRenderTargetHandle = gfxRenderTargetHandle;
+            pDrawIndexedCommand->gfxDepthStencilRenderTargetHandle = m_GfxDepthStencilRenderTargetHandle;
+            pDrawIndexedCommand->gfxPipelineStateObjectHandle = shaderRenderElements.GfxPipelineStateObjectHandle;
+            pDrawIndexedCommand->gfxRootSignatureHandle = shaderRenderElements.GfxRootSignatureHandle;
+            pDrawIndexedCommand->gfxDescriptorSetHandle = shaderRenderElements.GfxDescriptorSetHandle;
+            pDrawIndexedCommand->gfxVertexBufferHandle = gfxVertexBufferHandle;
+            pDrawIndexedCommand->gfxIndexBufferHandle = gfxIndexBufferHandle;
+            pDrawIndexedCommand->vertexBufferOffset = 0;
+            pDrawIndexedCommand->startIndexLocation = 0;
+            pDrawIndexedCommand->indexBufferOffset = 0;
+            pDrawIndexedCommand->baseVertexLocation = 0;
+        }
+    }
 
     RenderContext renderContext;
     renderContext.SetRenderDevice(m_pGfxRenderDevice);
@@ -338,7 +366,111 @@ void ShipyardViewer::ComputeOneFrame()
 
 shipBool ShipyardViewer::OnWin32Msg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam, LRESULT* shipyardMsgHandlingResult)
 {
+    if (msg == WM_DROPFILES)
+    {
+        HDROP dropHandle = (HDROP)wParam;
+
+        constexpr UINT getNumberOfFilesDropped = 0xFFFFFFFF;
+        UINT numberOfFileDropped = DragQueryFile(dropHandle, getNumberOfFilesDropped, nullptr, 0);
+
+        for (UINT fileIndex = 0; fileIndex < numberOfFileDropped; fileIndex++)
+        {
+            constexpr shipUint32 maxFilenameLength = 1024;
+            shipChar droppedFilename[maxFilenameLength];
+            DragQueryFile(dropHandle, fileIndex, droppedFilename, maxFilenameLength);
+
+            if (!MeshImporter::IsFileExtensionSupportedForMeshImport(droppedFilename))
+            {
+                continue;
+            }
+
+            ClearViewerAndLoadMesh(droppedFilename);
+        }
+
+        DragFinish(dropHandle);
+
+        return true;
+    }
+
     return ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam, shipyardMsgHandlingResult);
+}
+
+void ShipyardViewer::ClearViewerAndLoadMesh(const shipChar* filename)
+{
+    if (m_pLoadedMeshData != nullptr)
+    {
+        for (shipUint32 i = 0; i < m_pLoadedMeshData->m_SubMeshVertexBuffers.Size(); i++)
+        {
+            m_pGfxRenderDevice->DestroyVertexBuffer(m_pLoadedMeshData->m_SubMeshVertexBuffers[i]);
+            m_pGfxRenderDevice->DestroyIndexBuffer(m_pLoadedMeshData->m_SubMeshIndexBuffers[i]);
+        }
+
+        for (shipUint32 i = 0; i < m_pLoadedMeshData->m_LoadedMaterials.Size(); i++)
+        {
+            SHIP_DELETE(m_pLoadedMeshData->m_LoadedMaterials[i]);
+        }
+    }
+
+    SHIP_DELETE(m_pLoadedMeshData);
+    m_pLoadedMeshData = nullptr;
+
+    MeshImporter::ImportedMesh importedMesh;
+    MeshImporter::LoadMeshFromFile(filename, *m_pGfxRenderDevice, MeshImporter::None, &importedMesh);
+
+    if (importedMesh.SubMeshes.Empty())
+    {
+        return;
+    }
+
+    m_pLoadedMeshData = SHIP_NEW(LoadedMeshData, 1);
+
+    for (shipUint32 i = 0; i < importedMesh.SubMeshMaterials.Size(); i++)
+    {
+        MeshImporter::ImportedSubMeshMaterial& importedSubMeshMaterial = importedMesh.SubMeshMaterials[i];
+
+        GFXMaterial*& gfxMaterial = m_pLoadedMeshData->m_LoadedMaterials.Grow();
+        gfxMaterial = SHIP_NEW(GFXMaterial, 1);
+        gfxMaterial->Create(ShaderFamily::Error, importedSubMeshMaterial.SubMeshMaterialTextures);
+    }
+
+    for (shipUint32 i = 0; i < importedMesh.SubMeshes.Size(); i++)
+    {
+        MeshImporter::ImportedSubMesh& importedSubMesh = importedMesh.SubMeshes[i];
+
+        constexpr shipBool dynamic = false;
+        GFXVertexBufferHandle gfxVertexBufferHandle = m_pGfxRenderDevice->CreateVertexBuffer(
+                importedSubMesh.GetSubMeshNumVertices(),
+                importedSubMesh.SubMeshVertexFormatType,
+                dynamic,
+                &importedSubMesh.SubMeshVertices[0]);
+
+        GFXIndexBufferHandle gfxIndexBufferHandle = m_pGfxRenderDevice->CreateIndexBuffer(
+                importedSubMesh.GetSubMeshNumIndices(),
+                importedSubMesh.GetSubMeshIndicesSize() == 2,
+                dynamic,
+                &importedSubMesh.SubMeshIndices[0]);
+
+        m_pLoadedMeshData->m_SubMeshVertexBuffers.Add(gfxVertexBufferHandle);
+        m_pLoadedMeshData->m_SubMeshIndexBuffers.Add(gfxIndexBufferHandle);
+
+        if (importedSubMesh.ReferencedSubMeshMaterial == nullptr)
+        {
+            m_pLoadedMeshData->m_UsedMaterialPerSubMesh.Add(m_pDefaultMaterial);
+        }
+        else
+        {
+            for (shipUint32 j = 0; j < importedMesh.SubMeshMaterials.Size(); j++)
+            {
+                MeshImporter::ImportedSubMeshMaterial& importedSubMeshMaterial = importedMesh.SubMeshMaterials[j];
+
+                if (&importedSubMeshMaterial == importedSubMesh.ReferencedSubMeshMaterial)
+                {
+                    m_pLoadedMeshData->m_UsedMaterialPerSubMesh.Add(m_pLoadedMeshData->m_LoadedMaterials[j]);
+                    break;
+                }
+            }
+        }
+    }
 }
 
 }

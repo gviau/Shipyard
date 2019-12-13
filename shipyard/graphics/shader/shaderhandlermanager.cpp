@@ -26,7 +26,7 @@ SHIP_DECLARE_SHADER_VARIATION_SET_END(Error)
 
 SHIP_DECLARE_SHADER_VARIATION_SET_BEGIN(Generic)
 {
-    shaderVariationSetManager.SetShaderOptionValueRange(ShaderOption::ShaderOption_VERTEX_FORMAT_TYPE, 0, shipUint32(VertexFormatType::Pos_UV_Normal));
+    shaderVariationSetManager.SetShaderOptionValueRange(ShaderOption::ShaderOption_VERTEX_FORMAT_TYPE, 0, shipUint32(VertexFormatType::Pos_UV_Normal_Tangent));
 
     {
         ShaderKey invalidShaderKey;

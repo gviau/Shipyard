@@ -159,7 +159,7 @@ size_t DX11CommandQueue::ClearDepthStencilRenderTarget(BaseRenderCommand* pCmd)
 
     ID3D11DepthStencilView* const depthStencilView = gfxDepthStencilRenderTarget.GetDepthStencilView();
 
-    uint clearFlag = ((clearDepthStencilRenderTargetCommand.depthStencilClearFlag == DepthStencilClearFlag::Depth) ? D3D11_CLEAR_DEPTH :
+    UINT clearFlag = ((clearDepthStencilRenderTargetCommand.depthStencilClearFlag == DepthStencilClearFlag::Depth) ? D3D11_CLEAR_DEPTH :
                       (clearDepthStencilRenderTargetCommand.depthStencilClearFlag == DepthStencilClearFlag::Stencil) ? D3D11_CLEAR_STENCIL :
                       (D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL));
 

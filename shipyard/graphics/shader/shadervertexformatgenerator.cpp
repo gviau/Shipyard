@@ -54,6 +54,11 @@ void WriteVertexFormatShaderFile()
             content += "#define VERTEX_FORMAT_HAS_NORMALS\n";
         }
 
+        if (VertexFormatTypeContainsTangents(vertexFormatType))
+        {
+            content += "#define VERTEX_FORMAT_HAS_TANGENTS\n";
+        }
+
         content += "\n";
 
         shipBool isLast = (i == shipUint16(VertexFormatType::VertexFormatType_Count) - 1);

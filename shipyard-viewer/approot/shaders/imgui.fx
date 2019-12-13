@@ -1,6 +1,6 @@
 #include "shaderinputproviders/ImGuiShaderInputProvider.hlsl"
 
-#define VERTEX_FORMAT_TYPE 5
+#define VERTEX_FORMAT_TYPE 6
 
 #include "vertexformatutils.hlsl"
 

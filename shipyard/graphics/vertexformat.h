@@ -4,10 +4,7 @@
 
 #include <system/array.h>
 
-#include <extern/glm/vec2.hpp>
-#include <extern/glm/vec3.hpp>
-#include <extern/glm/vec4.hpp>
-using namespace glm;
+#include <math/mathtypes.h>
 
 namespace Shipyard
 {
@@ -16,38 +13,46 @@ namespace Shipyard
     ///////////////////////////////////////////////////////////////////////////////
     struct Vertex_Pos
     {
-        vec3 m_Position;
+        shipVec3 m_Position;
     };
 
     struct Vertex_Pos_Color
     {
-        vec3 m_Position;
-        vec4 m_Color;
+        shipVec3 m_Position;
+        shipVec4 m_Color;
     };
 
     struct Vertex_Pos_UV
     {
-        vec3 m_Position;
-        vec2 m_UV;
+        shipVec3 m_Position;
+        shipVec2 m_UV;
     };
 
     struct Vertex_Pos_Normal
     {
-        vec3 m_Position;
-        vec3 m_Normal;
+        shipVec3 m_Position;
+        shipVec3 m_Normal;
     };
 
     struct Vertex_Pos_UV_Normal
     {
-        vec3 m_Position;
-        vec2 m_UV;
-        vec3 m_Normal;
+        shipVec3 m_Position;
+        shipVec2 m_UV;
+        shipVec3 m_Normal;
+    };
+
+    struct Vertex_Pos_UV_Normal_Tangent
+    {
+        shipVec3 m_Position;
+        shipVec2 m_UV;
+        shipVec3 m_Normal;
+        shipVec3 m_Tangent;
     };
 
     struct Vertex_ImGui
     {
-        vec2 m_Position;
-        vec2 m_UV;
+        shipVec2 m_Position;
+        shipVec2 m_UV;
         shipUint32 m_Color;
     };
 
@@ -64,6 +69,7 @@ namespace Shipyard
         Pos_UV,
         Pos_Normal,
         Pos_UV_Normal,
+        Pos_UV_Normal_Tangent,
         ImGui,
 
         VertexFormatType_Count,
@@ -123,6 +129,13 @@ namespace Shipyard
         virtual shipUint32 GetSize() const override { return sizeof(Vertex_Pos_UV_Normal); }
     };
 
+    class VertexFormat_Pos_UV_Normal_Tangent : public VertexFormat
+    {
+    public:
+        VertexFormat_Pos_UV_Normal_Tangent();
+        virtual shipUint32 GetSize() const override { return sizeof(Vertex_Pos_UV_Normal_Tangent); }
+    };
+
     class VertexFormat_ImGui : public VertexFormat
     {
     public:
@@ -134,6 +147,7 @@ namespace Shipyard
     shipBool VertexFormatTypeContainsColor(VertexFormatType type);
     shipBool VertexFormatTypeContainsUV(VertexFormatType type);
     shipBool VertexFormatTypeContainsNormals(VertexFormatType type);
+    shipBool VertexFormatTypeContainsTangents(VertexFormatType type);
 
     const shipChar* GetVertexShaderInputName(SemanticName semanticName);
     const shipChar* GetVertexSemanticName(SemanticName semanticName);

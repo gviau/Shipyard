@@ -42,7 +42,14 @@ VertexFormatType GetVertexFormatTypeFromAssimpMesh(aiMesh* mesh)
     {
         if (mesh->HasTextureCoords(0))
         {
-            return VertexFormatType::Pos_UV_Normal;
+            if (mesh->HasTangentsAndBitangents())
+            {
+                return VertexFormatType::Pos_UV_Normal_Tangent;
+            }
+            else
+            {
+                return VertexFormatType::Pos_UV_Normal;
+            }
         }
         else
         {
@@ -110,6 +117,24 @@ void ExtractVertexPosUVNormal(aiMesh* mesh, shipUint32 vertexIdx, shipUint8*& ve
     vertexData += sizeof(vertex);
 }
 
+void ExtractVertexPosUVNormalTangent(aiMesh* mesh, shipUint32 vertexIdx, shipUint8*& vertexData)
+{
+    Vertex_Pos_UV_Normal_Tangent& vertex = *(Vertex_Pos_UV_Normal_Tangent*)vertexData;
+    vertex.m_Position.x = mesh->mVertices[vertexIdx].x;
+    vertex.m_Position.y = mesh->mVertices[vertexIdx].y;
+    vertex.m_Position.z = mesh->mVertices[vertexIdx].z;
+    vertex.m_UV.x = mesh->mTextureCoords[0][vertexIdx].x;
+    vertex.m_UV.y = mesh->mTextureCoords[0][vertexIdx].y;
+    vertex.m_Normal.x = mesh->mNormals[vertexIdx].x;
+    vertex.m_Normal.y = mesh->mNormals[vertexIdx].y;
+    vertex.m_Normal.z = mesh->mNormals[vertexIdx].z;
+    vertex.m_Tangent.x = mesh->mTangents[vertexIdx].x;
+    vertex.m_Tangent.y = mesh->mTangents[vertexIdx].y;
+    vertex.m_Tangent.z = mesh->mTangents[vertexIdx].z;
+
+    vertexData += sizeof(vertex);
+}
+
 void ProcessSubMesh(aiMesh* mesh, const aiScene* scene, ImportedSubMesh* importedSubMesh)
 {
     SHIP_ASSERT(importedSubMesh != nullptr);
@@ -141,6 +166,10 @@ void ProcessSubMesh(aiMesh* mesh, const aiScene* scene, ImportedSubMesh* importe
 
         case VertexFormatType::Pos_UV_Normal:
             ExtractVertexPosUVNormal(mesh, vertexIdx, vertexData);
+            break;
+
+        case VertexFormatType::Pos_UV_Normal_Tangent:
+            ExtractVertexPosUVNormalTangent(mesh, vertexIdx, vertexData);
             break;
 
         default:

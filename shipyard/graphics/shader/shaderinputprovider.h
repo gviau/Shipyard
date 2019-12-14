@@ -82,7 +82,10 @@ namespace Shipyard
     enum class ShaderInputType : shipUint8
     {
         Scalar,
-        Texture2D
+        Texture2D,
+        Texture2DArray,
+        Texture3D,
+        TextureCube
     };
 
     enum class ShaderInputScalarType : shipUint8
@@ -257,6 +260,24 @@ namespace Shipyard
         {
             SHIP_STATIC_ASSERT_MSG((std::is_same<T, GFXTexture2DHandle>::value), "Texture2D shader inputs only support GFXTexture2DHandle as valid data input");
         }
+
+        template <typename T>
+        void VerifyTexture2DArrayVariableType(const T& shaderInputData)
+        {
+            SHIP_STATIC_ASSERT_MSG((std::is_same<T, GFXTexture2DArrayHandle>::value), "Texture2DArray shader inputs only support GFXTexture2DArrayHandle as valid data input");
+        }
+
+        template <typename T>
+        void VerifyTexture3DVariableType(const T& shaderInputData)
+        {
+            SHIP_STATIC_ASSERT_MSG((std::is_same<T, GFXTexture3DHandle>::value), "Texture3D shader inputs only support GFXTexture3DHandle as valid data input");
+        }
+
+        template <typename T>
+        void VerifyTextureCubeVariableType(const T& shaderInputData)
+        {
+            SHIP_STATIC_ASSERT_MSG((std::is_same<T, GFXTextureCubeHandle>::value), "TextureCube shader inputs only support GFXTextureCubeHandle as valid data input");
+        }
     };
 
     constexpr size_t gs_ShaderInputScalarTypeSizeInBytes[shipUint32(ShaderInputScalarType::Count)] =
@@ -395,6 +416,33 @@ namespace Shipyard
         ShaderInputProviderType* pBasePtr = (ShaderInputProviderType*)0x10000; \
         ShaderInputProviderUtils::VerifyTexture2DVariableType(pBasePtr->shaderInputData); \
         SHIP_SHADER_INPUT_INTERNAL(ShaderInputType::Texture2D, shaderInputScalarType, shaderInputName, shaderInputData) \
+    }
+
+#define SHIP_TEXTURE2D_ARRAY_SHADER_INPUT(shaderInputScalarType, shaderInputName, shaderInputData) \
+    { \
+        SHIP_SHADER_INPUT_BASE(shaderInputScalarType, shaderInputName) \
+        SHIP_STATIC_ASSERT_MSG(shaderInputScalarType != ShaderInputScalarType::Unknown, "ShaderInput type cannot be set to ShaderInputScalarType::Unknown!"); \
+        ShaderInputProviderType* pBasePtr = (ShaderInputProviderType*)0x10000; \
+        ShaderInputProviderUtils::VerifyTexture2DArrayVariableType(pBasePtr->shaderInputData); \
+        SHIP_SHADER_INPUT_INTERNAL(ShaderInputType::Texture2DArray, shaderInputScalarType, shaderInputName, shaderInputData) \
+    }
+
+#define SHIP_TEXTURE3D_SHADER_INPUT(shaderInputScalarType, shaderInputName, shaderInputData) \
+    { \
+        SHIP_SHADER_INPUT_BASE(shaderInputScalarType, shaderInputName) \
+        SHIP_STATIC_ASSERT_MSG(shaderInputScalarType != ShaderInputScalarType::Unknown, "ShaderInput type cannot be set to ShaderInputScalarType::Unknown!"); \
+        ShaderInputProviderType* pBasePtr = (ShaderInputProviderType*)0x10000; \
+        ShaderInputProviderUtils::VerifyTexture3DVariableType(pBasePtr->shaderInputData); \
+        SHIP_SHADER_INPUT_INTERNAL(ShaderInputType::Texture3D, shaderInputScalarType, shaderInputName, shaderInputData) \
+    }
+
+#define SHIP_TEXTURECUBE_SHADER_INPUT(shaderInputScalarType, shaderInputName, shaderInputData) \
+    { \
+        SHIP_SHADER_INPUT_BASE(shaderInputScalarType, shaderInputName) \
+        SHIP_STATIC_ASSERT_MSG(shaderInputScalarType != ShaderInputScalarType::Unknown, "ShaderInput type cannot be set to ShaderInputScalarType::Unknown!"); \
+        ShaderInputProviderType* pBasePtr = (ShaderInputProviderType*)0x10000; \
+        ShaderInputProviderUtils::VerifyTextureCubeVariableType(pBasePtr->shaderInputData); \
+        SHIP_SHADER_INPUT_INTERNAL(ShaderInputType::TextureCube, shaderInputScalarType, shaderInputName, shaderInputData) \
     }
 }
 

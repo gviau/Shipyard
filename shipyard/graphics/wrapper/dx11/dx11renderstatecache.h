@@ -103,10 +103,10 @@ namespace Shipyard
 
             RenderStateCacheDirtyFlag_VertexShader,
             RenderStateCacheDirtyFlag_PixelShader,
-            RenderStateCacheDirtyFlag_Hull,
-            RenderStateCacheDirtyFlag_Domain,
-            RenderStateCacheDirtyFlag_Geometry,
-            RenderStateCacheDirtyFlag_Compute,
+            RenderStateCacheDirtyFlag_HullShader,
+            RenderStateCacheDirtyFlag_DomainShader,
+            RenderStateCacheDirtyFlag_GeometryShader,
+            RenderStateCacheDirtyFlag_ComputeShader,
 
             RenderStateCacheDirtyFlag_ConstantBufferViews,
             RenderStateCacheDirtyFlag_ShaderResourceViews,
@@ -134,6 +134,7 @@ namespace Shipyard
 
         GFXVertexShaderHandle m_VertexShaderHandle;
         GFXPixelShaderHandle m_PixelShaderHandle;
+        GFXComputeShaderHandle m_ComputeShaderHandle;
 
         RasterizerState m_RasterizerState;
         DepthStencilState m_DepthStencilState;

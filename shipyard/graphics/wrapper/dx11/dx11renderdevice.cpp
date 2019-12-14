@@ -97,6 +97,24 @@ shipBool DX11RenderDevice::Create()
         return false;
     }
 
+    if (!m_Texture2dArrayPool.Create())
+    {
+        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create Texture2DArray pool.");
+        return false;
+    }
+
+    if (!m_Texture3dPool.Create())
+    {
+        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create Texture3D pool.");
+        return false;
+    }
+
+    if (!m_TextureCubePool.Create())
+    {
+        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create TextureCube pool.");
+        return false;
+    }
+
     if (!m_SamplerPool.Create())
     {
         SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create Sampler pool.");
@@ -124,6 +142,12 @@ shipBool DX11RenderDevice::Create()
     if (!m_PixelShaderPool.Create())
     {
         SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create PixelShader pool.");
+        return false;
+    }
+
+    if (!m_ComputeShaderPool.Create())
+    {
+        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create ComputeShader pool.");
         return false;
     }
 
@@ -208,6 +232,33 @@ void DX11RenderDevice::Destroy()
         } while (m_Texture2dPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
     }
 
+    if (m_Texture2dArrayPool.GetFirstAllocatedIndex(&indexToFree))
+    {
+        do
+        {
+            m_Texture2dArrayPool.GetItem(indexToFree).Destroy();
+            m_Texture2dArrayPool.ReleaseItem(indexToFree);
+        } while (m_Texture2dArrayPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+    }
+
+    if (m_Texture3dPool.GetFirstAllocatedIndex(&indexToFree))
+    {
+        do
+        {
+            m_Texture3dPool.GetItem(indexToFree).Destroy();
+            m_Texture3dPool.ReleaseItem(indexToFree);
+        } while (m_Texture3dPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+    }
+
+    if (m_TextureCubePool.GetFirstAllocatedIndex(&indexToFree))
+    {
+        do
+        {
+            m_TextureCubePool.GetItem(indexToFree).Destroy();
+            m_TextureCubePool.ReleaseItem(indexToFree);
+        } while (m_TextureCubePool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+    }
+
     if (m_SamplerPool.GetFirstAllocatedIndex(&indexToFree))
     {
         do
@@ -251,6 +302,15 @@ void DX11RenderDevice::Destroy()
             m_PixelShaderPool.GetItem(indexToFree).Destroy();
             m_PixelShaderPool.ReleaseItem(indexToFree);
         } while (m_PixelShaderPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+    }
+
+    if (m_ComputeShaderPool.GetFirstAllocatedIndex(&indexToFree))
+    {
+        do
+        {
+            m_ComputeShaderPool.GetItem(indexToFree).Destroy();
+            m_ComputeShaderPool.ReleaseItem(indexToFree);
+        } while (m_ComputeShaderPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
     }
 
     if (m_RootSignaturePool.GetFirstAllocatedIndex(&indexToFree))
@@ -489,6 +549,174 @@ const GFXTexture2D* DX11RenderDevice::GetTexture2DPtr(GFXTexture2DHandle gfxText
     return m_Texture2dPool.GetItemPtr(gfxTexture2dHandle.handle);
 }
 
+GFXTexture2DArrayHandle DX11RenderDevice::CreateTexture2DArray(
+        shipUint32 width,
+        shipUint32 height,
+        shipUint32 numSlices,
+        GfxFormat pixelFormat,
+        shipBool dynamic,
+        void* initialData,
+        shipBool generateMips,
+        TextureUsage textureUsage)
+{
+    GFXTexture2DArrayHandle gfxTexture2DArrayHandle;
+
+    if (width == 0 && height == 0 && numSlices == 0)
+    {
+        return gfxTexture2DArrayHandle;
+    }
+
+    gfxTexture2DArrayHandle.handle = m_Texture3dPool.GetNewItemIndex();
+
+    GFXTexture2DArray& gfxTexture2dArray = m_Texture2dArrayPool.GetItem(gfxTexture2DArrayHandle.handle);
+    shipBool isValid = gfxTexture2dArray.Create(*m_Device, width, height, numSlices, pixelFormat, dynamic, initialData, generateMips, textureUsage);
+
+    SHIP_ASSERT(isValid);
+
+    return gfxTexture2DArrayHandle;
+}
+
+void DX11RenderDevice::DestroyTexture2DArray(GFXTexture2DArrayHandle& gfxTexture2DArrayHandle)
+{
+    GFXTexture2DArray& gfxTexture2dArray = m_Texture2dArrayPool.GetItem(gfxTexture2DArrayHandle.handle);
+    gfxTexture2dArray.Destroy();
+
+    m_Texture2dArrayPool.ReleaseItem(gfxTexture2DArrayHandle.handle);
+    gfxTexture2DArrayHandle.handle = InvalidGfxHandle;
+}
+
+GFXTexture2DArray& DX11RenderDevice::GetTexture2DArray(GFXTexture2DArrayHandle gfxTexture2DArrayHandle)
+{
+    return m_Texture2dArrayPool.GetItem(gfxTexture2DArrayHandle.handle);
+}
+
+const GFXTexture2DArray& DX11RenderDevice::GetTexture2DArray(GFXTexture2DArrayHandle gfxTexture2DArrayHandle) const
+{
+    return m_Texture2dArrayPool.GetItem(gfxTexture2DArrayHandle.handle);
+}
+
+GFXTexture2DArray* DX11RenderDevice::GetTexture2DArrayPtr(GFXTexture2DArrayHandle gfxTexture2DArrayHandle)
+{
+    return m_Texture2dArrayPool.GetItemPtr(gfxTexture2DArrayHandle.handle);
+}
+
+const GFXTexture2DArray* DX11RenderDevice::GetTexture2DArrayPtr(GFXTexture2DArrayHandle gfxTexture2DArrayHandle) const
+{
+    return m_Texture2dArrayPool.GetItemPtr(gfxTexture2DArrayHandle.handle);
+}
+
+GFXTexture3DHandle DX11RenderDevice::CreateTexture3D(
+        shipUint32 width,
+        shipUint32 height,
+        shipUint32 depth,
+        GfxFormat pixelFormat,
+        shipBool dynamic,
+        void* initialData,
+        shipBool generateMips,
+        TextureUsage textureUsage)
+{
+    GFXTexture3DHandle gfxTexture3dHandle;
+
+    if (width == 0 && height == 0 && depth == 0)
+    {
+        return gfxTexture3dHandle;
+    }
+
+    gfxTexture3dHandle.handle = m_Texture3dPool.GetNewItemIndex();
+
+    GFXTexture3D& gfxTexture3d = m_Texture3dPool.GetItem(gfxTexture3dHandle.handle);
+    shipBool isValid = gfxTexture3d.Create(*m_Device, width, height, depth, pixelFormat, dynamic, initialData, generateMips, textureUsage);
+
+    SHIP_ASSERT(isValid);
+
+    return gfxTexture3dHandle;
+}
+
+void DX11RenderDevice::DestroyTexture3D(GFXTexture3DHandle& gfxTexture3DHandle)
+{
+    GFXTexture3D& gfxTexture3d = m_Texture3dPool.GetItem(gfxTexture3DHandle.handle);
+    gfxTexture3d.Destroy();
+
+    m_Texture3dPool.ReleaseItem(gfxTexture3DHandle.handle);
+    gfxTexture3DHandle.handle = InvalidGfxHandle;
+}
+
+GFXTexture3D& DX11RenderDevice::GetTexture3D(GFXTexture3DHandle gfxTexture3DHandle)
+{
+    return m_Texture3dPool.GetItem(gfxTexture3DHandle.handle);
+}
+
+const GFXTexture3D& DX11RenderDevice::GetTexture3D(GFXTexture3DHandle gfxTexture3DHandle) const
+{
+    return m_Texture3dPool.GetItem(gfxTexture3DHandle.handle);
+}
+
+GFXTexture3D* DX11RenderDevice::GetTexture3DPtr(GFXTexture3DHandle gfxTexture3DHandle)
+{
+    return m_Texture3dPool.GetItemPtr(gfxTexture3DHandle.handle);
+}
+
+const GFXTexture3D* DX11RenderDevice::GetTexture3DPtr(GFXTexture3DHandle gfxTexture3DHandle) const
+{
+    return m_Texture3dPool.GetItemPtr(gfxTexture3DHandle.handle);
+}
+
+
+GFXTextureCubeHandle DX11RenderDevice::CreateTextureCube(
+        shipUint32 width,
+        shipUint32 height,
+        GfxFormat pixelFormat,
+        shipBool dynamic,
+        void* initialData,
+        shipBool generateMips,
+        TextureUsage textureUsage)
+{
+    GFXTextureCubeHandle gfxTextureCubeHandle;
+
+    if (width == 0 && height == 0)
+    {
+        return gfxTextureCubeHandle;
+    }
+
+    gfxTextureCubeHandle.handle = m_TextureCubePool.GetNewItemIndex();
+
+    GFXTextureCube& gfxTextureCube = m_TextureCubePool.GetItem(gfxTextureCubeHandle.handle);
+    shipBool isValid = gfxTextureCube.Create(*m_Device, width, height, pixelFormat, dynamic, initialData, generateMips, textureUsage);
+
+    SHIP_ASSERT(isValid);
+
+    return gfxTextureCubeHandle;
+}
+
+void DX11RenderDevice::DestroyTextureCube(GFXTextureCubeHandle& gfxTextureCubeHandle)
+{
+    GFXTextureCube& gfxTextureCube = m_TextureCubePool.GetItem(gfxTextureCubeHandle.handle);
+    gfxTextureCube.Destroy();
+
+    m_TextureCubePool.ReleaseItem(gfxTextureCubeHandle.handle);
+    gfxTextureCubeHandle.handle = InvalidGfxHandle;
+}
+
+GFXTextureCube& DX11RenderDevice::GetTextureCube(GFXTextureCubeHandle gfxTextureCubeHandle)
+{
+    return m_TextureCubePool.GetItem(gfxTextureCubeHandle.handle);
+}
+
+const GFXTextureCube& DX11RenderDevice::GetTextureCube(GFXTextureCubeHandle gfxTextureCubeHandle) const
+{
+    return m_TextureCubePool.GetItem(gfxTextureCubeHandle.handle);
+}
+
+GFXTextureCube* DX11RenderDevice::GetTextureCubePtr(GFXTextureCubeHandle gfxTextureCubeHandle)
+{
+    return m_TextureCubePool.GetItemPtr(gfxTextureCubeHandle.handle);
+}
+
+const GFXTextureCube* DX11RenderDevice::GetTextureCubePtr(GFXTextureCubeHandle gfxTextureCubeHandle) const
+{
+    return m_TextureCubePool.GetItemPtr(gfxTextureCubeHandle.handle);
+}
+
 shipUint32 GetSamplerIndexFromSamplerState(const DataPool<GFXSampler, SHIP_MAX_SAMPLERS>& samplerPool, const SamplerState& samplerState)
 {
     shipUint32 allocatedSamplerIndex = 0;
@@ -709,6 +937,38 @@ GFXPixelShader& DX11RenderDevice::GetPixelShader(GFXPixelShaderHandle gfxPixelSh
 const GFXPixelShader& DX11RenderDevice::GetPixelShader(GFXPixelShaderHandle gfxPixelShaderHandle) const
 {
     return m_PixelShaderPool.GetItem(gfxPixelShaderHandle.handle);
+}
+
+GFXComputeShaderHandle DX11RenderDevice::CreateComputeShader(void* shaderData, shipUint64 shaderDataSize)
+{
+    GFXComputeShaderHandle gfxComputeShaderHandle;
+    gfxComputeShaderHandle.handle = m_ComputeShaderPool.GetNewItemIndex();
+
+    GFXComputeShader& gfxComputeShader = m_ComputeShaderPool.GetItem(gfxComputeShaderHandle.handle);
+    shipBool isValid = gfxComputeShader.Create(*m_Device, shaderData, shaderDataSize);
+
+    SHIP_ASSERT(isValid);
+
+    return gfxComputeShaderHandle;
+}
+
+void DX11RenderDevice::DestroyComputeShader(GFXComputeShaderHandle& gfxComputeShaderHandle)
+{
+    GFXComputeShader& gfxComputeShader = m_ComputeShaderPool.GetItem(gfxComputeShaderHandle.handle);
+    gfxComputeShader.Destroy();
+
+    m_ComputeShaderPool.ReleaseItem(gfxComputeShaderHandle.handle);
+    gfxComputeShaderHandle.handle = InvalidGfxHandle;
+}
+
+GFXComputeShader& DX11RenderDevice::GetComputeShader(GFXComputeShaderHandle gfxComputeShaderHandle)
+{
+    return m_ComputeShaderPool.GetItem(gfxComputeShaderHandle.handle);
+}
+
+const GFXComputeShader& DX11RenderDevice::GetComputeShader(GFXComputeShaderHandle gfxComputeShaderHandle) const
+{
+    return m_ComputeShaderPool.GetItem(gfxComputeShaderHandle.handle);
 }
 
 GFXRootSignatureHandle DX11RenderDevice::CreateRootSignature(const Array<RootSignatureParameterEntry>& rootSignatureParameters)

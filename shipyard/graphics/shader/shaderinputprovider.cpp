@@ -512,6 +512,18 @@ shipBool ShaderInputProviderManager::WriteSingleShaderInputOutsideOfStruct(const
         content += "Texture2D<";
         break;
 
+    case ShaderInputType::Texture2DArray:
+        content += "Texture2DArray<";
+        break;
+
+    case ShaderInputType::Texture3D:
+        content += "Texture3D<";
+        break;
+
+    case  ShaderInputType::TextureCube:
+        content += "TextureCube<";
+        break;
+
     default:
         SHIP_ASSERT(!"Unsupported shader input type!");
         break;

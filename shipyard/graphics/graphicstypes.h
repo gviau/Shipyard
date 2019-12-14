@@ -37,6 +37,10 @@ namespace Shipyard
     DEFINE_HANDLE_TYPE(GFXRootSignatureHandle);
     DEFINE_HANDLE_TYPE(GFXVertexShaderHandle);
     DEFINE_HANDLE_TYPE(GFXPixelShaderHandle);
+    DEFINE_HANDLE_TYPE(GFXComputeShaderHandle);
     DEFINE_HANDLE_TYPE(GFXTexture2DHandle);
+    DEFINE_HANDLE_TYPE(GFXTexture2DArrayHandle);
+    DEFINE_HANDLE_TYPE(GFXTexture3DHandle);
+    DEFINE_HANDLE_TYPE(GFXTextureCubeHandle);
     DEFINE_HANDLE_TYPE(GFXSamplerHandle);
 }

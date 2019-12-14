@@ -54,6 +54,50 @@ namespace Shipyard
         virtual GFXTexture2D* GetTexture2DPtr(GFXTexture2DHandle gfxTexture2dHandle) = 0;
         virtual const GFXTexture2D* GetTexture2DPtr(GFXTexture2DHandle gfxTexture2dHandle) const = 0;
 
+        virtual GFXTexture2DArrayHandle CreateTexture2DArray(
+                shipUint32 width,
+                shipUint32 height,
+                shipUint32 numSlices,
+                GfxFormat pixelFormat,
+                shipBool dynamic,
+                void* initialData,
+                shipBool generateMips,
+                TextureUsage textureUsage = TextureUsage::TextureUsage_Default) = 0;
+        virtual void DestroyTexture2DArray(GFXTexture2DArrayHandle& gfxTexture2DArrayHandle) = 0;
+        virtual GFXTexture2DArray& GetTexture2DArray(GFXTexture2DArrayHandle gfxTexture2DArrayHandle) = 0;
+        virtual const GFXTexture2DArray& GetTexture2DArray(GFXTexture2DArrayHandle gfxTexture2DArrayHandle) const = 0;
+        virtual GFXTexture2DArray* GetTexture2DArrayPtr(GFXTexture2DArrayHandle gfxTexture2DArrayHandle) = 0;
+        virtual const GFXTexture2DArray* GetTexture2DArrayPtr(GFXTexture2DArrayHandle gfxTexture2DArrayHandle) const = 0;
+
+        virtual GFXTexture3DHandle CreateTexture3D(
+                shipUint32 width,
+                shipUint32 height,
+                shipUint32 depth,
+                GfxFormat pixelFormat,
+                shipBool dynamic,
+                void* initialData,
+                shipBool generateMips,
+                TextureUsage textureUsage = TextureUsage::TextureUsage_Default) = 0;
+        virtual void DestroyTexture3D(GFXTexture3DHandle& gfxTexture3DHandle) = 0;
+        virtual GFXTexture3D& GetTexture3D(GFXTexture3DHandle gfxTexture3DHandle) = 0;
+        virtual const GFXTexture3D& GetTexture3D(GFXTexture3DHandle gfxTexture3DHandle) const = 0;
+        virtual GFXTexture3D* GetTexture3DPtr(GFXTexture3DHandle gfxTexture3DHandle) = 0;
+        virtual const GFXTexture3D* GetTexture3DPtr(GFXTexture3DHandle gfxTexture3DHandle) const = 0;
+
+        virtual GFXTextureCubeHandle CreateTextureCube(
+                shipUint32 width,
+                shipUint32 height,
+                GfxFormat pixelFormat,
+                shipBool dynamic,
+                void* initialData,
+                shipBool generateMips,
+                TextureUsage textureUsage = TextureUsage::TextureUsage_Default) = 0;
+        virtual void DestroyTextureCube(GFXTextureCubeHandle& gfxTextureCubeHandle) = 0;
+        virtual GFXTextureCube& GetTextureCube(GFXTextureCubeHandle gfxTextureCubeHandle) = 0;
+        virtual const GFXTextureCube& GetTextureCube(GFXTextureCubeHandle gfxTextureCubeHandle) const = 0;
+        virtual GFXTextureCube* GetTextureCubePtr(GFXTextureCubeHandle gfxTextureCubeHandle) = 0;
+        virtual const GFXTextureCube* GetTextureCubePtr(GFXTextureCubeHandle gfxTextureCubeHandle) const = 0;
+
         virtual GFXSamplerHandle CreateSampler(const SamplerState& samplerState) = 0;
         virtual void DestroySampler(GFXSamplerHandle& gfxSamplerHandle) = 0;
         virtual GFXSampler& GetSampler(GFXSamplerHandle gfxSamplerHandle) = 0;
@@ -80,6 +124,11 @@ namespace Shipyard
         virtual void DestroyPixelShader(GFXPixelShaderHandle& gfxPixelShaderHandle) = 0;
         virtual GFXPixelShader& GetPixelShader(GFXPixelShaderHandle gfxPixelShaderHandle) = 0;
         virtual const GFXPixelShader& GetPixelShader(GFXPixelShaderHandle gfxPixelShaderHandle) const = 0;
+
+        virtual GFXComputeShaderHandle CreateComputeShader(void* shaderData, shipUint64 shaderDataSize) = 0;
+        virtual void DestroyComputeShader(GFXComputeShaderHandle& gfxComputeShaderHandle) = 0;
+        virtual GFXComputeShader& GetComputeShader(GFXComputeShaderHandle gfxComputeShaderHandle) = 0;
+        virtual const GFXComputeShader& GetComputeShader(GFXComputeShaderHandle gfxComputeShaderHandle) const = 0;
 
         virtual GFXRootSignatureHandle CreateRootSignature(const Array<RootSignatureParameterEntry>& rootSignatureParameters) = 0;
         virtual void DestroyRootSignature(GFXRootSignatureHandle& gfxRootSignatureHandle) = 0;

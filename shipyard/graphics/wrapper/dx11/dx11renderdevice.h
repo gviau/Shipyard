@@ -68,6 +68,50 @@ namespace Shipyard
         GFXTexture2D* GetTexture2DPtr(GFXTexture2DHandle gfxTexture2dHandle);
         const GFXTexture2D* GetTexture2DPtr(GFXTexture2DHandle gfxTexture2dHandle) const;
 
+        GFXTexture2DArrayHandle CreateTexture2DArray(
+                shipUint32 width,
+                shipUint32 height,
+                shipUint32 numSlices,
+                GfxFormat pixelFormat,
+                shipBool dynamic,
+                void* initialData,
+                shipBool generateMips,
+                TextureUsage textureUsage = TextureUsage::TextureUsage_Default);
+        void DestroyTexture2DArray(GFXTexture2DArrayHandle& gfxTexture2DArrayHandle);
+        GFXTexture2DArray& GetTexture2DArray(GFXTexture2DArrayHandle gfxTexture2DArrayHandle);
+        const GFXTexture2DArray& GetTexture2DArray(GFXTexture2DArrayHandle gfxTexture2DArrayHandle) const;
+        GFXTexture2DArray* GetTexture2DArrayPtr(GFXTexture2DArrayHandle gfxTexture2DArrayHandle);
+        const GFXTexture2DArray* GetTexture2DArrayPtr(GFXTexture2DArrayHandle gfxTexture2DArrayHandle) const;
+
+        GFXTexture3DHandle CreateTexture3D(
+                shipUint32 width,
+                shipUint32 height,
+                shipUint32 depth,
+                GfxFormat pixelFormat,
+                shipBool dynamic,
+                void* initialData,
+                shipBool generateMips,
+                TextureUsage textureUsage = TextureUsage::TextureUsage_Default);
+        void DestroyTexture3D(GFXTexture3DHandle& gfxTexture3DHandle);
+        GFXTexture3D& GetTexture3D(GFXTexture3DHandle gfxTexture3DHandle);
+        const GFXTexture3D& GetTexture3D(GFXTexture3DHandle gfxTexture3DHandle) const;
+        GFXTexture3D* GetTexture3DPtr(GFXTexture3DHandle gfxTexture3DHandle);
+        const GFXTexture3D* GetTexture3DPtr(GFXTexture3DHandle gfxTexture3DHandle) const;
+
+        GFXTextureCubeHandle CreateTextureCube(
+                shipUint32 width,
+                shipUint32 height,
+                GfxFormat pixelFormat,
+                shipBool dynamic,
+                void* initialData,
+                shipBool generateMips,
+                TextureUsage textureUsage = TextureUsage::TextureUsage_Default);
+        void DestroyTextureCube(GFXTextureCubeHandle& gfxTextureCubeHandle);
+        GFXTextureCube& GetTextureCube(GFXTextureCubeHandle gfxTextureCubeHandle);
+        const GFXTextureCube& GetTextureCube(GFXTextureCubeHandle gfxTextureCubeHandle) const;
+        GFXTextureCube* GetTextureCubePtr(GFXTextureCubeHandle gfxTextureCubeHandle);
+        const GFXTextureCube* GetTextureCubePtr(GFXTextureCubeHandle gfxTextureCubeHandle) const;
+
         GFXSamplerHandle CreateSampler(const SamplerState& samplerState);
         void DestroySampler(GFXSamplerHandle& gfxSamplerHandle);
         GFXSampler& GetSampler(GFXSamplerHandle gfxSamplerHandle);
@@ -94,6 +138,11 @@ namespace Shipyard
         void DestroyPixelShader(GFXPixelShaderHandle& gfxPixelShaderHandle);
         GFXPixelShader& GetPixelShader(GFXPixelShaderHandle gfxPixelShaderHandle);
         const GFXPixelShader& GetPixelShader(GFXPixelShaderHandle gfxPixelShaderHandle) const;
+
+        GFXComputeShaderHandle CreateComputeShader(void* shaderData, shipUint64 shaderDataSize);
+        void DestroyComputeShader(GFXComputeShaderHandle& gfxComputeShaderHandle);
+        GFXComputeShader& GetComputeShader(GFXComputeShaderHandle gfxComputeShaderHandle);
+        const GFXComputeShader& GetComputeShader(GFXComputeShaderHandle gfxComputeShaderHandle) const;
 
         GFXRootSignatureHandle CreateRootSignature(const Array<RootSignatureParameterEntry>& rootSignatureParameters);
         void DestroyRootSignature(GFXRootSignatureHandle& gfxRootSignatureHandle);
@@ -127,11 +176,15 @@ namespace Shipyard
         DataPool<GFXConstantBuffer, SHIP_MAX_CONSTANT_BUFFERS> m_ConstantBufferPool;
         DataPool<GFXByteBuffer, SHIP_MAX_BYTE_BUFFERS> m_ByteBufferPool;
         DataPool<GFXTexture2D, SHIP_MAX_2D_TEXTURES> m_Texture2dPool;
+        DataPool<GFXTexture2DArray, SHIP_MAX_2D_ARRAY_TEXTURES> m_Texture2dArrayPool;
+        DataPool<GFXTexture3D, SHIP_MAX_3D_TEXTURES> m_Texture3dPool;
+        DataPool<GFXTextureCube, SHIP_MAX_CUBE_TEXTURES> m_TextureCubePool;
         DataPool<GFXSampler, SHIP_MAX_SAMPLERS> m_SamplerPool;
         DataPool<GFXRenderTarget, SHIP_MAX_RENDER_TARGETS> m_RenderTargetPool;
         DataPool<GFXDepthStencilRenderTarget, SHIP_MAX_DEPTH_STENCIL_RENDER_TARGETS> m_DepthStencilRenderTargetPool;
         DataPool<GFXVertexShader, SHIP_MAX_VERTEX_SHADERS> m_VertexShaderPool;
         DataPool<GFXPixelShader, SHIP_MAX_PIXEL_SHADERS> m_PixelShaderPool;
+        DataPool<GFXComputeShader, SHIP_MAX_COMPUTE_SHADERS> m_ComputeShaderPool;
         DataPool<GFXRootSignature, SHIP_MAX_ROOT_SIGNATURES> m_RootSignaturePool;
         DataPool<GFXPipelineStateObject, SHIP_MAX_RENDER_PIPELINE_STATE_OBJECTS> m_PipelineStateObjectPool;
         DataPool<GFXDescriptorSet, SHIP_MAX_DESCRIPTOR_SETS> m_DescriptorSetPool;

@@ -18,4 +18,9 @@ namespace Shipyard
     {
 
     };
+
+    class SHIPYARD_GRAPHICS_API ComputeShader
+    {
+
+    };
 }

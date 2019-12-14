@@ -58,6 +58,7 @@ namespace Shipyard
 
         GFXVertexShaderHandle m_GfxVertexShaderHandle;
         GFXPixelShaderHandle m_GfxPixelShaderHandle;
+        GFXComputeShaderHandle m_GfxComputeShaderHander;
 
         GFXPipelineStateObjectHandle m_GfxEffectivePipelineStateObjectHandle;
 

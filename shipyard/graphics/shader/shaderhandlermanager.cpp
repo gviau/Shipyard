@@ -221,13 +221,16 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
         if (shaderHandler->m_GfxVertexShaderHandle.handle != InvalidGfxHandle)
         {
             m_RenderDevice->DestroyVertexShader(shaderHandler->m_GfxVertexShaderHandle);
-            shaderHandler->m_GfxVertexShaderHandle.handle = InvalidGfxHandle;
         }
 
         if (shaderHandler->m_GfxPixelShaderHandle.handle != InvalidGfxHandle)
         {
             m_RenderDevice->DestroyPixelShader(shaderHandler->m_GfxPixelShaderHandle);
-            shaderHandler->m_GfxPixelShaderHandle.handle = InvalidGfxHandle;
+        }
+
+        if (shaderHandler->m_GfxComputeShaderHander.handle != InvalidGfxHandle)
+        {
+            m_RenderDevice->DestroyComputeShader(shaderHandler->m_GfxComputeShaderHander);
         }
 
         if (compiledShaderEntrySet.rawVertexShaderSize > 0)
@@ -238,6 +241,11 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
         if (compiledShaderEntrySet.rawPixelShaderSize > 0)
         {
             shaderHandler->m_GfxPixelShaderHandle = m_RenderDevice->CreatePixelShader(compiledShaderEntrySet.rawPixelShader, compiledShaderEntrySet.rawPixelShaderSize);
+        }
+
+        if (compiledShaderEntrySet.rawComputeShaderSize > 0)
+        {
+            shaderHandler->m_GfxComputeShaderHander = m_RenderDevice->CreateComputeShader(compiledShaderEntrySet.rawComputeShader, compiledShaderEntrySet.rawComputeShaderSize);
         }
 
         if (shaderHandler->m_ShaderRenderElements.GfxRootSignatureHandle.handle != InvalidGfxHandle)

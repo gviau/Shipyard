@@ -40,6 +40,14 @@ DX11RenderStateCache::DX11RenderStateCache(ID3D11Device* device, ID3D11DeviceCon
     // Make sure all states are set the first time: otherwise, state with the same value will not bet set the
     // first time.
     m_RenderStateCacheDirtyFlags.SetAllBits();
+
+    // Unset shader bits to not set them needlessly
+    m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexShader);
+    m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_PixelShader);
+    m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_HullShader);
+    m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_DomainShader);
+    m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_GeometryShader);
+    m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ComputeShader);
 }
 
 DX11RenderStateCache::~DX11RenderStateCache()
@@ -95,6 +103,7 @@ void DX11RenderStateCache::Reset()
 
     m_VertexShaderHandle.handle = InvalidGfxHandle;
     m_PixelShaderHandle.handle = InvalidGfxHandle;
+    m_ComputeShaderHandle.handle = InvalidGfxHandle;
 
     memset(m_NativeRenderTargets, 0, sizeof(m_NativeRenderTargets));
     m_NativeDepthStencilView = nullptr;
@@ -220,9 +229,15 @@ void DX11RenderStateCache::BindPipelineStateObject(const GFXPipelineStateObject&
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_BlendState);
     }
 
+    if (pipelineStateObjectParameters.GfxComputeShaderHandle.handle != m_ComputeShaderHandle.handle)
+    {
+        m_ComputeShaderHandle = pipelineStateObjectParameters.GfxComputeShaderHandle;
+        m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ComputeShader);
+    }
+
     if (pipelineStateObjectParameters.GfxVertexShaderHandle.handle != m_VertexShaderHandle.handle)
     {
-        SHIP_ASSERT(pipelineStateObjectParameters.GfxVertexShaderHandle.handle != InvalidGfxHandle);
+        SHIP_ASSERT(m_ComputeShaderHandle.handle != InvalidGfxHandle || pipelineStateObjectParameters.GfxVertexShaderHandle.handle != InvalidGfxHandle);
 
         m_VertexShaderHandle = pipelineStateObjectParameters.GfxVertexShaderHandle;
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexShader);
@@ -765,24 +780,27 @@ void DX11RenderStateCache::CommitStateChangesForGraphics(GFXRenderDevice& gfxRen
         m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_PixelShader);
     }
 
-    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Hull))
+    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_HullShader))
     {
-        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Hull);
+        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_HullShader);
     }
 
-    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Domain))
+    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_DomainShader))
     {
-        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Domain);
+        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_DomainShader);
     }
 
-    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Geometry))
+    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_GeometryShader))
     {
-        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Geometry);
+        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_GeometryShader);
     }
 
-    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Compute))
+    if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ComputeShader))
     {
-        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_Compute);
+        GFXComputeShader& gfxComputeShader = gfxRenderDevice.GetComputeShader(m_ComputeShaderHandle);
+        m_DeviceContext->CSSetShader(gfxComputeShader.GetShader(), nullptr, 0);
+
+        m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ComputeShader);
     }
 
     if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ConstantBufferViews))

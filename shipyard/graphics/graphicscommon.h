@@ -619,6 +619,7 @@ namespace Shipyard
 
         GFXVertexShaderHandle GfxVertexShaderHandle = { InvalidGfxHandle };
         GFXPixelShaderHandle GfxPixelShaderHandle = { InvalidGfxHandle };
+        GFXComputeShaderHandle GfxComputeShaderHandle = { InvalidGfxHandle };
 
         RenderStateBlock RenderStateBlockToUse;
         VertexFormatType VertexFormatTypeToUse;
@@ -633,6 +634,7 @@ namespace Shipyard
             return (GfxRootSignatureHandle == rhs.GfxRootSignatureHandle &&
                     GfxVertexShaderHandle == rhs.GfxVertexShaderHandle &&
                     GfxPixelShaderHandle == rhs.GfxPixelShaderHandle &&
+                    GfxComputeShaderHandle == rhs.GfxComputeShaderHandle &&
                     RenderStateBlockToUse == rhs.RenderStateBlockToUse &&
                     VertexFormatTypeToUse == rhs.VertexFormatTypeToUse &&
                     PrimitiveTopologyToUse == rhs.PrimitiveTopologyToUse &&

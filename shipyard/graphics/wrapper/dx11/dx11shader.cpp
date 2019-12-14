@@ -68,4 +68,30 @@ void DX11PixelShader::Destroy()
     m_PixelShader = nullptr;
 }
 
+DX11ComputeShader::DX11ComputeShader()
+    : m_ComputeShader(nullptr)
+{
+
+}
+
+shipBool DX11ComputeShader::Create(ID3D11Device& device, void* shaderData, shipUint64 shaderDataSize)
+{
+    HRESULT hr = device.CreateComputeShader(shaderData, SIZE_T(shaderDataSize), nullptr, &m_ComputeShader);
+    if (FAILED(hr))
+    {
+        SHIP_LOG_ERROR("DX11ComputeShader::DX11ComputeShader() --> Couldn't create compute shader");
+        return false;
+    }
+
+    return true;
+}
+
+void DX11ComputeShader::Destroy()
+{
+    SHIP_ASSERT_MSG(m_ComputeShader != nullptr, "Can't call Destroy on an invalid compute shader 0x%p", this);
+
+    m_ComputeShader->Release();
+    m_ComputeShader = nullptr;
+}
+
 }

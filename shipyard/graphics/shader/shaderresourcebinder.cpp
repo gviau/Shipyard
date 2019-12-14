@@ -247,12 +247,69 @@ void ShaderResourceBinder::BindShaderInputProviderDescriptor(
             ShaderInputProviderDeclaration* shaderInputProviderDeclaration = shaderInputProvider->GetShaderInputProviderDeclaration();
             SHIP_ASSERT_MSG(
                     gfxTexture2DHandle.handle != InvalidGfxHandle,
-                    "Texture %s in ShaderInputProvider %s is not valid!",
+                    "Texture2D %s in ShaderInputProvider %s is not valid!",
                     GetShaderInputProviderManager().GetShaderInputNameFromProvider(shaderInputProviderDeclaration, shaderResourceBinderEntry.DataOffsetInProvider),
                     shaderInputProviderDeclaration->GetShaderInputProviderName());
 #endif // #ifdef VALIDATE_SHADER_INPUT_PROVIDER_BINDING
 
             gfxResourceToBind = gfxRenderDevice.GetTexture2DPtr(gfxTexture2DHandle);
+        }
+        break;
+
+    case ShaderInputType::Texture2DArray:
+        {
+            size_t shaderInputProviderAddress = reinterpret_cast<size_t>(shaderInputProvider);
+            size_t textureHandleAddress = shaderInputProviderAddress + shaderResourceBinderEntry.DataOffsetInProvider;
+            GFXTexture2DArrayHandle gfxTexture2DArrayHandle = *reinterpret_cast<GFXTexture2DArrayHandle*>(textureHandleAddress);
+
+#ifdef VALIDATE_SHADER_INPUT_PROVIDER_BINDING
+            ShaderInputProviderDeclaration* shaderInputProviderDeclaration = shaderInputProvider->GetShaderInputProviderDeclaration();
+            SHIP_ASSERT_MSG(
+                    gfxTexture2DArrayHandle.handle != InvalidGfxHandle,
+                    "Texture2DArray %s in ShaderInputProvider %s is not valid!",
+                    GetShaderInputProviderManager().GetShaderInputNameFromProvider(shaderInputProviderDeclaration, shaderResourceBinderEntry.DataOffsetInProvider),
+                    shaderInputProviderDeclaration->GetShaderInputProviderName());
+#endif // #ifdef VALIDATE_SHADER_INPUT_PROVIDER_BINDING
+
+            gfxResourceToBind = gfxRenderDevice.GetTexture2DArrayPtr(gfxTexture2DArrayHandle);
+        }
+        break;
+
+    case ShaderInputType::Texture3D:
+        {
+            size_t shaderInputProviderAddress = reinterpret_cast<size_t>(shaderInputProvider);
+            size_t textureHandleAddress = shaderInputProviderAddress + shaderResourceBinderEntry.DataOffsetInProvider;
+            GFXTexture3DHandle gfxTexture3DHandle = *reinterpret_cast<GFXTexture3DHandle*>(textureHandleAddress);
+
+#ifdef VALIDATE_SHADER_INPUT_PROVIDER_BINDING
+            ShaderInputProviderDeclaration* shaderInputProviderDeclaration = shaderInputProvider->GetShaderInputProviderDeclaration();
+            SHIP_ASSERT_MSG(
+                    gfxTexture3DHandle.handle != InvalidGfxHandle,
+                    "Texture3D %s in ShaderInputProvider %s is not valid!",
+                    GetShaderInputProviderManager().GetShaderInputNameFromProvider(shaderInputProviderDeclaration, shaderResourceBinderEntry.DataOffsetInProvider),
+                    shaderInputProviderDeclaration->GetShaderInputProviderName());
+#endif // #ifdef VALIDATE_SHADER_INPUT_PROVIDER_BINDING
+
+            gfxResourceToBind = gfxRenderDevice.GetTexture3DPtr(gfxTexture3DHandle);
+        }
+        break;
+
+    case ShaderInputType::TextureCube:
+        {
+            size_t shaderInputProviderAddress = reinterpret_cast<size_t>(shaderInputProvider);
+            size_t textureHandleAddress = shaderInputProviderAddress + shaderResourceBinderEntry.DataOffsetInProvider;
+            GFXTextureCubeHandle gfxTextureCubeHandle = *reinterpret_cast<GFXTextureCubeHandle*>(textureHandleAddress);
+
+#ifdef VALIDATE_SHADER_INPUT_PROVIDER_BINDING
+            ShaderInputProviderDeclaration* shaderInputProviderDeclaration = shaderInputProvider->GetShaderInputProviderDeclaration();
+            SHIP_ASSERT_MSG(
+                    gfxTextureCubeHandle.handle != InvalidGfxHandle,
+                    "TextureCube %s in ShaderInputProvider %s is not valid!",
+                    GetShaderInputProviderManager().GetShaderInputNameFromProvider(shaderInputProviderDeclaration, shaderResourceBinderEntry.DataOffsetInProvider),
+                    shaderInputProviderDeclaration->GetShaderInputProviderName());
+#endif // #ifdef VALIDATE_SHADER_INPUT_PROVIDER_BINDING
+
+            gfxResourceToBind = gfxRenderDevice.GetTextureCubePtr(gfxTextureCubeHandle);
         }
         break;
 

@@ -4,6 +4,7 @@
 
 struct ID3D10Blob;
 struct ID3D11Device;
+struct ID3D11ComputeShader;
 struct ID3D11PixelShader;
 struct ID3D11VertexShader;
 
@@ -40,5 +41,19 @@ namespace Shipyard
 
     private:
         ID3D11PixelShader* m_PixelShader;
+    };
+
+    class SHIPYARD_GRAPHICS_API DX11ComputeShader : public ComputeShader, public DX11BaseShader
+    {
+    public:
+        DX11ComputeShader();
+
+        shipBool Create(ID3D11Device& device, void* shaderData, shipUint64 shaderDataSize);
+        void Destroy();
+
+        ID3D11ComputeShader* GetShader() const { return m_ComputeShader; }
+            
+    private:
+        ID3D11ComputeShader* m_ComputeShader;
     };
 }

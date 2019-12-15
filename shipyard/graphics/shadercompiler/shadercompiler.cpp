@@ -671,7 +671,7 @@ void ShaderCompiler::CompileShaderKey(
 
         GetReflectionDataForShader(vertexShaderBlob, shaderReflectionData, ShaderVisibility::ShaderVisibility_Vertex);
         GetReflectionDataForShader(pixelShaderBlob, shaderReflectionData, ShaderVisibility::ShaderVisibility_Pixel);
-        GetReflectionDataForShader(pixelShaderBlob, shaderReflectionData, ShaderVisibility::ShaderVisibility_Compute);
+        GetReflectionDataForShader(computeShaderBlob, shaderReflectionData, ShaderVisibility::ShaderVisibility_Compute);
 
         constexpr shipUint32 expectedNumRootEntries = 8;
         InplaceArray<RootSignatureParameterEntry, expectedNumRootEntries> rootSignatureParameters;
@@ -890,6 +890,11 @@ void ShaderCompiler::GetReflectionDataForShader(
         ShaderReflectionData& shaderReflectionData,
         ShaderVisibility shaderVisibility) const
 {
+    if (shaderBlob == nullptr)
+    {
+        return;
+    }
+
     ID3D11ShaderReflection* pReflection = nullptr;
     HRESULT hResult = D3DReflect(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), IID_ID3D11ShaderReflection, (void**)&pReflection);
     if (FAILED(hResult))

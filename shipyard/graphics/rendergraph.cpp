@@ -49,12 +49,12 @@ void RenderGraph::ClearRenderGraph()
     m_OrderedRenderPassesToExecute.Resize(0);
 }
 
-void RenderGraph::AddRenderPassHandle(RenderPassHandle& renderPassHandle)
+void RenderGraph::AddRenderPassHandleForScheduling(RenderPassHandle& renderPassHandle)
 {
     renderPassHandle.AddRenderPassToRenderGraph(*this);
 }
 
-void RenderGraph::AddRenderPass(RenderPass* renderPass)
+void RenderGraph::AddRenderPassToRenderGraph(RenderPass* renderPass)
 {
 #ifdef SHIP_ENABLE_ASSERTS
     for (shipUint32 i = 0; i < m_OrderedRenderPassesToExecute.Size(); i++)

@@ -23,5 +23,5 @@ namespace Shipyard
         ImGuiShaderInputProvider m_ImGuiShaderInputProvider;
     };
 
-    DEFINE_RENDER_PASS_HANDLE(ImGuiRenderPass);
+    DEFINE_RENDER_PASS_HANDLE(ImGuiRenderPass, SHIPYARD_GRAPHICS_API);
 }

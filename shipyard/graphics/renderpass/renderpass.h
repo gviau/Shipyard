@@ -14,8 +14,8 @@ namespace Shipyard
 
 #define DEFINE_RENDER_PASS_HANDLE_TYPE(RenderPassHandleType) RenderPassHandleType
 
-#define DEFINE_RENDER_PASS_HANDLE(RenderPassType) \
-    struct SHIPYARD_GRAPHICS_API DEFINE_RENDER_PASS_HANDLE_TYPE(##RenderPassType) ##Handle : public RenderPassHandle \
+#define DEFINE_RENDER_PASS_HANDLE(RenderPassType, DLL_API) \
+    struct DLL_API DEFINE_RENDER_PASS_HANDLE_TYPE(##RenderPassType) ##Handle : public RenderPassHandle \
     { \
         void CreateRenderPassInstance(GFXRenderDevice& gfxRenderDevice) override \
         { \
@@ -28,7 +28,7 @@ namespace Shipyard
         void AddRenderPassToRenderGraph(RenderGraph& renderGraph) override \
         { \
             SHIP_ASSERT_MSG(RenderPassInstance != nullptr, "RenderPassHandle of type %s was never registered to a RenderGraph! It can't be added to a RenderGraph before being registered.", #RenderPassType); \
-            renderGraph.AddRenderPass(RenderPassInstance); \
+            renderGraph.AddRenderPassToRenderGraph(RenderPassInstance); \
         } \
         RenderPassType* RenderPassInstance = nullptr; \
     }

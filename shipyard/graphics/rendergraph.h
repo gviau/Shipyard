@@ -14,7 +14,7 @@ namespace Shipyard
         friend class RenderGraphRenderPassRegisterScope;
 
     public:
-        class RenderGraphRenderPassRegisterScope
+        class SHIPYARD_GRAPHICS_API RenderGraphRenderPassRegisterScope
         {
         public:
             RenderGraphRenderPassRegisterScope(RenderGraph& renderGraph, GFXRenderDevice& gfxRenderDevice);
@@ -32,8 +32,10 @@ namespace Shipyard
         void UnregisterAllRenderPassHandles();
 
         void ClearRenderGraph();
-        void AddRenderPassHandle(RenderPassHandle& renderPassHandle);
-        void AddRenderPass(RenderPass* renderPass);
+
+        void AddRenderPassHandleForScheduling(RenderPassHandle& renderPassHandle);
+
+        void AddRenderPassToRenderGraph(RenderPass* renderPass);
 
         // Returns true if the render graph could be properly built and can be executed next.
         shipBool BuildRenderGraph();

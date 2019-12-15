@@ -1179,6 +1179,20 @@ shipBool ShaderInputProviderDeclaration::HasShaderInput(const shipChar* shaderIn
     return false;
 }
 
+ShaderInputProviderDeclaration::ShaderInputDeclaration const * const ShaderInputProviderDeclaration::GetShaderInput(const shipChar* shaderInputName, shipInt32& offsetInProvider) const
+{
+    for (shipUint32 i = 0; i < m_NumShaderInputDeclarations; i++)
+    {
+        if (StringCompare(m_ShaderInputDeclarations[i].Name, shaderInputName) == 0)
+        {
+            offsetInProvider = m_ShaderInputDeclarations[i].DataOffsetInProvider;
+            return &m_ShaderInputDeclarations[i];
+        }
+    }
+
+    return nullptr;
+}
+
 // template <typename T> ShaderInputScalarType GetShaderInputScalarType(const T& data) { return ShaderInputScalarType::Unknown; }
 template <> ShaderInputScalarType GetShaderInputScalarType(const shipFloat& data) { return ShaderInputScalarType::Float; }
 template <> ShaderInputScalarType GetShaderInputScalarType(const shipVec2& data) { return ShaderInputScalarType::Float2; }

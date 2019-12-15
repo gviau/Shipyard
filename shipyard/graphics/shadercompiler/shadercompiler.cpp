@@ -671,6 +671,7 @@ void ShaderCompiler::CompileShaderKey(
 
         GetReflectionDataForShader(vertexShaderBlob, shaderReflectionData, ShaderVisibility::ShaderVisibility_Vertex);
         GetReflectionDataForShader(pixelShaderBlob, shaderReflectionData, ShaderVisibility::ShaderVisibility_Pixel);
+        GetReflectionDataForShader(pixelShaderBlob, shaderReflectionData, ShaderVisibility::ShaderVisibility_Compute);
 
         constexpr shipUint32 expectedNumRootEntries = 8;
         InplaceArray<RootSignatureParameterEntry, expectedNumRootEntries> rootSignatureParameters;
@@ -1206,19 +1207,25 @@ void ShaderCompiler::CreateShaderResourceBinderForDescriptorRangeType(
             for (const ShaderInputProviderDeclaration* shaderInputProviderDeclaration : includedShaderInputProviders)
             {
                 shipInt32 dataOffsetInProvider;
-                if (shaderInputProviderDeclaration->HasShaderInput(shaderInputReflectionData.Name.GetBuffer(), dataOffsetInProvider))
+                ShaderInputProviderDeclaration::ShaderInputDeclaration const * const shaderInputDeclaration = shaderInputProviderDeclaration->GetShaderInput(
+                        shaderInputReflectionData.Name.GetBuffer(),
+                        dataOffsetInProvider);
+
+                if (shaderInputDeclaration != nullptr)
                 {
+                    SHIP_ASSERT(shaderInputDeclaration->Type != ShaderInputType::Scalar);
+
                     shipUint16 descriptorRangeEntryIndex = GetDescriptorRangeEntryIndex(shaderInputReflectionData, rootSignatureParameters, descriptorRangeType);
 
                     constexpr shipUint32 descriptorRangeIndex = 0;
                     shaderResourceBinder.AddShaderResourceBinderEntryForDescriptorToDescriptorTable(
-                        shaderInputProviderDeclaration,
-                        rootIndexPerDescriptorRangeTypePerShaderStage[shipUint32(descriptorRangeType)][i],
-                        descriptorRangeIndex,
-                        descriptorRangeEntryIndex,
-                        dataOffsetInProvider,
-                        ShaderInputType::Texture2D,
-                        shaderInputReflectionData.shaderVisibility);
+                            shaderInputProviderDeclaration,
+                            rootIndexPerDescriptorRangeTypePerShaderStage[shipUint32(descriptorRangeType)][i],
+                            descriptorRangeIndex,
+                            descriptorRangeEntryIndex,
+                            dataOffsetInProvider,
+                            shaderInputDeclaration->Type,
+                            shaderInputReflectionData.shaderVisibility);
 
                     break;
                 }

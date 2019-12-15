@@ -184,6 +184,7 @@ namespace Shipyard
 
         const shipChar* GetShaderInputProviderName() const;
         shipBool HasShaderInput(const shipChar* shaderInputName, shipInt32& offsetInProvider) const;
+        ShaderInputDeclaration const * const GetShaderInput(const shipChar* shaderInputName, shipInt32& offsetInProvider) const;
 
     protected:
         const shipChar* m_ShaderInputProviderName;

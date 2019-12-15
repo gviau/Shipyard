@@ -613,13 +613,12 @@ namespace Shipyard
         }
     };
 
-    struct PipelineStateObjectCreationParameters
+    struct GraphicsPipelineStateObjectCreationParameters
     {
         GFXRootSignatureHandle GfxRootSignatureHandle = { InvalidGfxHandle };
 
         GFXVertexShaderHandle GfxVertexShaderHandle = { InvalidGfxHandle };
         GFXPixelShaderHandle GfxPixelShaderHandle = { InvalidGfxHandle };
-        GFXComputeShaderHandle GfxComputeShaderHandle = { InvalidGfxHandle };
 
         RenderStateBlock RenderStateBlockToUse;
         VertexFormatType VertexFormatTypeToUse;
@@ -629,12 +628,11 @@ namespace Shipyard
         GfxFormat RenderTargetsFormat[GfxConstants::GfxConstants_MaxRenderTargetsBound];
         GfxFormat DepthStencilFormat = GfxFormat::Unknown;
 
-        shipBool operator== (const PipelineStateObjectCreationParameters& rhs) const
+        shipBool operator== (const GraphicsPipelineStateObjectCreationParameters& rhs) const
         {
             return (GfxRootSignatureHandle == rhs.GfxRootSignatureHandle &&
                     GfxVertexShaderHandle == rhs.GfxVertexShaderHandle &&
                     GfxPixelShaderHandle == rhs.GfxPixelShaderHandle &&
-                    GfxComputeShaderHandle == rhs.GfxComputeShaderHandle &&
                     RenderStateBlockToUse == rhs.RenderStateBlockToUse &&
                     VertexFormatTypeToUse == rhs.VertexFormatTypeToUse &&
                     PrimitiveTopologyToUse == rhs.PrimitiveTopologyToUse &&
@@ -643,7 +641,24 @@ namespace Shipyard
                     DepthStencilFormat == rhs.DepthStencilFormat);
         }
 
-        shipBool operator!= (const PipelineStateObjectCreationParameters& rhs) const
+        shipBool operator!= (const GraphicsPipelineStateObjectCreationParameters& rhs) const
+        {
+            return !(*this == rhs);
+        }
+    };
+
+    struct ComputePipelineStateObjectCreationParameters
+    {
+        GFXRootSignatureHandle GfxRootSignatureHandle = { InvalidGfxHandle };
+        GFXComputeShaderHandle GfxComputeShaderHandle = { InvalidGfxHandle };
+
+        shipBool operator== (const ComputePipelineStateObjectCreationParameters& rhs) const
+        {
+            return (GfxRootSignatureHandle == rhs.GfxRootSignatureHandle &&
+                    GfxComputeShaderHandle == rhs.GfxComputeShaderHandle);
+        }
+
+        shipBool operator!= (const ComputePipelineStateObjectCreationParameters& rhs) const
         {
             return !(*this == rhs);
         }

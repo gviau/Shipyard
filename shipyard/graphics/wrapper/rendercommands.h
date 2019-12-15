@@ -25,6 +25,7 @@ namespace Shipyard
         DrawIndexed,
         DrawIndexedSeveralVertexBuffers,
         MapBuffer,
+        Dispatch,
     };
 
     struct BaseRenderCommand
@@ -72,7 +73,7 @@ namespace Shipyard
         GFXRenderTargetHandle gfxRenderTargetHandle = { InvalidGfxHandle };
         GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle = { InvalidGfxHandle };
 
-        GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle = { InvalidGfxHandle };
+        GFXGraphicsPipelineStateObjectHandle gfxPipelineStateObjectHandle = { InvalidGfxHandle };
         GFXRootSignatureHandle gfxRootSignatureHandle = { InvalidGfxHandle };
         GFXDescriptorSetHandle gfxDescriptorSetHandle = { InvalidGfxHandle };
 
@@ -89,7 +90,7 @@ namespace Shipyard
         GFXRenderTargetHandle gfxRenderTargetHandle = { InvalidGfxHandle };
         GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle = { InvalidGfxHandle };
 
-        GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle = { InvalidGfxHandle };
+        GFXGraphicsPipelineStateObjectHandle gfxPipelineStateObjectHandle = { InvalidGfxHandle };
         GFXRootSignatureHandle gfxRootSignatureHandle = { InvalidGfxHandle };
         GFXDescriptorSetHandle gfxDescriptorSetHandle = { InvalidGfxHandle };
 
@@ -108,7 +109,7 @@ namespace Shipyard
         GFXRenderTargetHandle gfxRenderTargetHandle = { InvalidGfxHandle };
         GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle = { InvalidGfxHandle };
 
-        GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle = { InvalidGfxHandle };
+        GFXGraphicsPipelineStateObjectHandle gfxPipelineStateObjectHandle = { InvalidGfxHandle };
         GFXRootSignatureHandle gfxRootSignatureHandle = { InvalidGfxHandle };
         GFXDescriptorSetHandle gfxDescriptorSetHandle = { InvalidGfxHandle };
 
@@ -129,7 +130,7 @@ namespace Shipyard
         GFXRenderTargetHandle gfxRenderTargetHandle = { InvalidGfxHandle };
         GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle = { InvalidGfxHandle };
 
-        GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle = { InvalidGfxHandle };
+        GFXGraphicsPipelineStateObjectHandle gfxPipelineStateObjectHandle = { InvalidGfxHandle };
         GFXRootSignatureHandle gfxRootSignatureHandle = { InvalidGfxHandle };
         GFXDescriptorSetHandle gfxDescriptorSetHandle = { InvalidGfxHandle };
 
@@ -170,5 +171,16 @@ namespace Shipyard
         // Depending on MapFlag, this pointer will either be for writing at the next ExecuteCommandLists or for immediate reading.
         // This pointer is not owned by the user, but by the command list.
         void* pBuffer = nullptr;
+    };
+
+    struct DispatchCommand : BaseRenderCommand
+    {
+        GFXComputePipelineStateObjectHandle gfxPipelineStateObjectHandle = { InvalidGfxHandle };
+        GFXRootSignatureHandle gfxRootSignatureHandle = { InvalidGfxHandle };
+        GFXDescriptorSetHandle gfxDescriptorSetHandle = { InvalidGfxHandle };
+
+        shipUint32 threadGroupCountX = 1;
+        shipUint32 threadGroupCountY = 1;
+        shipUint32 threadGroupCountZ = 1;
     };
 }

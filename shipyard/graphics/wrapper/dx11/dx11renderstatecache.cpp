@@ -207,9 +207,9 @@ void DX11RenderStateCache::BindRootSignature(const GFXRootSignature& rootSignatu
     }
 }
 
-void DX11RenderStateCache::BindPipelineStateObject(const GFXPipelineStateObject& pipelineStateObject)
+void DX11RenderStateCache::BindGraphicsPipelineStateObject(const GFXGraphicsPipelineStateObject& pipelineStateObject)
 {
-    const PipelineStateObjectCreationParameters& pipelineStateObjectParameters = pipelineStateObject.GetCreationParameters();
+    const GraphicsPipelineStateObjectCreationParameters& pipelineStateObjectParameters = pipelineStateObject.GetCreationParameters();
 
     if (pipelineStateObjectParameters.RenderStateBlockToUse.rasterizerState != m_RasterizerState)
     {
@@ -227,12 +227,6 @@ void DX11RenderStateCache::BindPipelineStateObject(const GFXPipelineStateObject&
     {
         m_BlendState = pipelineStateObjectParameters.RenderStateBlockToUse.blendState;
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_BlendState);
-    }
-
-    if (pipelineStateObjectParameters.GfxComputeShaderHandle.handle != m_ComputeShaderHandle.handle)
-    {
-        m_ComputeShaderHandle = pipelineStateObjectParameters.GfxComputeShaderHandle;
-        m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ComputeShader);
     }
 
     if (pipelineStateObjectParameters.GfxVertexShaderHandle.handle != m_VertexShaderHandle.handle)
@@ -268,6 +262,17 @@ void DX11RenderStateCache::BindPipelineStateObject(const GFXPipelineStateObject&
     {
         m_VertexFormatType = pipelineStateObjectParameters.VertexFormatTypeToUse;
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexFormatType);
+    }
+}
+
+void DX11RenderStateCache::BindComputePipelineStateObject(const GFXComputePipelineStateObject& pipelineStateObject)
+{
+    const ComputePipelineStateObjectCreationParameters& pipelineStateObjectParameters = pipelineStateObject.GetCreationParameters();
+
+    if (pipelineStateObjectParameters.GfxComputeShaderHandle.handle != m_ComputeShaderHandle.handle)
+    {
+        m_ComputeShaderHandle = pipelineStateObjectParameters.GfxComputeShaderHandle;
+        m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ComputeShader);
     }
 }
 
@@ -974,11 +979,11 @@ void DX11RenderStateCache::CommitStateChangesForGraphics(GFXRenderDevice& gfxRen
     if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexFormatType))
     {
         VertexFormatType vertexFormatType = m_VertexFormatType;
-        VertexFormat* vertexFormat = nullptr;
-
-        GetVertexFormat(vertexFormatType, vertexFormat);
-
-        m_DeviceContext->IASetInputLayout(g_RegisteredInputLayouts[shipUint32(vertexFormatType)]);
+        
+        if (vertexFormatType != VertexFormatType::Invalid)
+        {
+            m_DeviceContext->IASetInputLayout(g_RegisteredInputLayouts[shipUint32(vertexFormatType)]);
+        }
 
         m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexFormatType);
     }

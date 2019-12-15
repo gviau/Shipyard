@@ -30,7 +30,8 @@ namespace Shipyard
         void Reset();
 
         void BindRootSignature(const GFXRootSignature& rootSignature);
-        void BindPipelineStateObject(const GFXPipelineStateObject& pipelineStateObject);
+        void BindGraphicsPipelineStateObject(const GFXGraphicsPipelineStateObject& pipelineStateObject);
+        void BindComputePipelineStateObject(const GFXComputePipelineStateObject& pipelineStateObject);
         void BindDescriptorSet(const GFXDescriptorSet& descriptorSet, const GFXRootSignature& rootSignature);
 
         void BindRenderTarget(const GFXRenderTarget& renderTarget);

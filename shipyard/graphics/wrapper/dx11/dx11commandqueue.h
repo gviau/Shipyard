@@ -14,6 +14,7 @@ struct ID3D11RenderTargetView;
 namespace Shipyard
 {
     struct BaseRenderCommand;
+    struct DrawItem;
 
     class SHIPYARD_GRAPHICS_API DX11CommandQueue : public CommandQueue
     {
@@ -27,37 +28,6 @@ namespace Shipyard
         void ExecuteCommandLists(GFXRenderCommandList** ppRenderCommandLists, shipUint32 numRenderCommandLists);
 
     private:
-        struct DrawItem
-        {
-            DrawItem(
-                    GFXRenderTargetHandle gfxRenderTargetHandle,
-                    GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle,
-                    const GfxViewport& gfxViewport,
-                    const GfxRect& gfxScissor,
-                    GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle,
-                    GFXRootSignatureHandle gfxRootSignatureHandle,
-                    GFXDescriptorSetHandle gfxDescriptorSetHandle)
-                : renderTargetHandle(gfxRenderTargetHandle)
-                , depthStencilRenderTargetHandle(gfxDepthStencilRenderTargetHandle)
-                , viewport(gfxViewport)
-                , scissor(gfxScissor)
-                , pipelineStateObjetHandle(gfxPipelineStateObjectHandle)
-                , rootSignatureHandle(gfxRootSignatureHandle)
-                , descriptorSetHandle(gfxDescriptorSetHandle)
-            {}
-
-            GFXRenderTargetHandle renderTargetHandle;
-            GFXDepthStencilRenderTargetHandle depthStencilRenderTargetHandle;
-
-            const GfxViewport& viewport;
-            const GfxRect& scissor;
-
-            GFXPipelineStateObjectHandle pipelineStateObjetHandle;
-            GFXRootSignatureHandle rootSignatureHandle;
-            GFXDescriptorSetHandle descriptorSetHandle;
-        };
-
-    private:
         size_t ClearFullRenderTarget(BaseRenderCommand* pCmd);
         size_t ClearSingleRenderTarget(BaseRenderCommand* pCmd);
         size_t ClearDepthStencilRenderTarget(BaseRenderCommand* pCmd);
@@ -67,10 +37,12 @@ namespace Shipyard
         size_t DrawIndexed(BaseRenderCommand* pCmd);
         size_t DrawIndexedSeveralVertexBuffers(BaseRenderCommand* pCmd);
 
+        size_t Dispatch(BaseRenderCommand* pCmd);
+
         size_t MapBuffer(BaseRenderCommand* pCmd);
 
         void PrepareNextDrawCalls(const DrawItem& drawItem);
-
+        
         ID3D11Device* m_Device;
         ID3D11DeviceContext* m_DeviceContext;
 

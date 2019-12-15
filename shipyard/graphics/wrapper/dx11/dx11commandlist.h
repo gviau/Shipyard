@@ -27,7 +27,7 @@ namespace Shipyard
         void Destroy();
 
         void Close();
-        void Reset(GFXCommandListAllocator& gfxCommandListAllocator, GFXPipelineStateObject* pGfxPipelineStateObject);
+        void Reset(GFXCommandListAllocator& gfxCommandListAllocator, PipelineStateObject* pPipelineStateObject);
 
         BaseRenderCommand* GetNewRenderCommand(RenderCommandType renderCommandType);
 
@@ -63,6 +63,8 @@ namespace Shipyard
         DrawSeveralVertexBuffersCommand* DrawSeveralVertexBuffers();
         DrawIndexedCommand* DrawIndexed();
         DrawIndexedSeveralVertexBuffersCommand* DrawIndexedSeveralVertexBuffers();
+
+        DispatchCommand* Dispatch();
 
         void* MapVertexBuffer(GFXVertexBufferHandle gfxVertexBufferhandle, MapFlag mapFlag, size_t bufferOffset);
         void* MapIndexBuffer(GFXIndexBufferHandle gfxIndexBufferHandle, MapFlag mapFlag, size_t bufferOffset);

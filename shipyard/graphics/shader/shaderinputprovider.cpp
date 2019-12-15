@@ -506,6 +506,11 @@ shipBool ShaderInputProviderManager::WriteSingleShaderInputOutsideOfStruct(const
 {
     SHIP_STATIC_ASSERT_MSG(shipUint32(ShaderInputScalarType::Count) == 33, "ShaderInputScalarType size changed, need to update this switch case!");
 
+    if (shaderInputDeclaration.Usage == ShaderInputUsage::UnorderedAccessView)
+    {
+        content += "RW";
+    }
+
     switch (shaderInputDeclaration.Type)
     {
     case ShaderInputType::Texture2D:

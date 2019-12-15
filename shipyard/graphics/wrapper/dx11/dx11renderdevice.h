@@ -151,10 +151,15 @@ namespace Shipyard
         GFXRootSignature* GetRootSignaturePtr(GFXRootSignatureHandle gfxRootSignatureHandle);
         const GFXRootSignature* GetRootSignaturePtr(GFXRootSignatureHandle gfxRootSignatureHandle) const;
 
-        GFXPipelineStateObjectHandle CreatePipelineStateObject(const PipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters);
-        void DestroyPipelineStateObject(GFXPipelineStateObjectHandle& gfxPipelineStateObjectHandle);
-        GFXPipelineStateObject& GetPipelineStateObject(GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle);
-        const GFXPipelineStateObject& GetPipelineStateObject(GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle) const;
+        GFXGraphicsPipelineStateObjectHandle CreateGraphicsPipelineStateObject(const GraphicsPipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters);
+        void DestroyGraphicsPipelineStateObject(GFXGraphicsPipelineStateObjectHandle& gfxPipelineStateObjectHandle);
+        GFXGraphicsPipelineStateObject& GetGraphicsPipelineStateObject(GFXGraphicsPipelineStateObjectHandle gfxPipelineStateObjectHandle);
+        const GFXGraphicsPipelineStateObject& GetGraphicsPipelineStateObject(GFXGraphicsPipelineStateObjectHandle gfxPipelineStateObjectHandle) const;
+
+        GFXComputePipelineStateObjectHandle CreateComputePipelineStateObject(const ComputePipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters);
+        void DestroyComputePipelineStateObject(GFXComputePipelineStateObjectHandle& gfxPipelineStateObjectHandle);
+        GFXComputePipelineStateObject& GetComputePipelineStateObject(GFXComputePipelineStateObjectHandle gfxPipelineStateObjectHandle);
+        const GFXComputePipelineStateObject& GetComputePipelineStateObject(GFXComputePipelineStateObjectHandle gfxPipelineStateObjectHandle) const;
 
         GFXDescriptorSetHandle CreateDescriptorSet(DescriptorSetType descriptorSetType, const Array<DescriptorSetEntryDeclaration>& descriptorSetEntryDeclarations);
         void DestroyDescriptorSet(GFXDescriptorSetHandle& gfxDescriptorSetHandle);
@@ -186,12 +191,14 @@ namespace Shipyard
         DataPool<GFXPixelShader, SHIP_MAX_PIXEL_SHADERS> m_PixelShaderPool;
         DataPool<GFXComputeShader, SHIP_MAX_COMPUTE_SHADERS> m_ComputeShaderPool;
         DataPool<GFXRootSignature, SHIP_MAX_ROOT_SIGNATURES> m_RootSignaturePool;
-        DataPool<GFXPipelineStateObject, SHIP_MAX_RENDER_PIPELINE_STATE_OBJECTS> m_PipelineStateObjectPool;
+        DataPool<GFXGraphicsPipelineStateObject, SHIP_MAX_GRAPHICS_PIPELINE_STATE_OBJECTS> m_GraphicsPipelineStateObjectPool;
+        DataPool<GFXComputePipelineStateObject, SHIP_MAX_COMPUTE_PIPELINE_STATE_OBJECTS> m_ComputePipelineStateObjectPool;
         DataPool<GFXDescriptorSet, SHIP_MAX_DESCRIPTOR_SETS> m_DescriptorSetPool;
 
         // Ref counts for particular type of objects, of which there can be a limited number. Therefore,
         // with each creation, we can return an already allocated handle.
         shipUint32 m_SamplerHandleRefCounts[SHIP_MAX_SAMPLERS];
-        shipUint32 m_PipelineStateObjectHandleRefCounts[SHIP_MAX_RENDER_PIPELINE_STATE_OBJECTS];
+        shipUint32 m_GraphicsPipelineStateObjectHandleRefCounts[SHIP_MAX_GRAPHICS_PIPELINE_STATE_OBJECTS];
+        shipUint32 m_ComputePipelineStateObjectHandleRefCounts[SHIP_MAX_COMPUTE_PIPELINE_STATE_OBJECTS];
     };
 }

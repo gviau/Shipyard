@@ -6,15 +6,27 @@
 
 namespace Shipyard
 {
-    class SHIPYARD_GRAPHICS_API DX11PipelineStateObject : public PipelineStateObject
+    class SHIPYARD_GRAPHICS_API DX11GraphicsPipelineStateObject : public GraphicsPipelineStateObject
     {
     public:
-        shipBool Create(const PipelineStateObjectCreationParameters& creationParameters);
+        shipBool Create(const GraphicsPipelineStateObjectCreationParameters& creationParameters);
         void Destroy();
 
-        const PipelineStateObjectCreationParameters& GetCreationParameters() const;
+        const GraphicsPipelineStateObjectCreationParameters& GetCreationParameters() const;
 
     private:
-        PipelineStateObjectCreationParameters m_CreationParameters;
+        GraphicsPipelineStateObjectCreationParameters m_CreationParameters;
+    };
+
+    class SHIPYARD_GRAPHICS_API DX11ComputePipelineStateObject : public ComputePipelineStateObject
+    {
+    public:
+        shipBool Create(const ComputePipelineStateObjectCreationParameters& creationParameters);
+        void Destroy();
+
+        const ComputePipelineStateObjectCreationParameters& GetCreationParameters() const;
+
+    private:
+        ComputePipelineStateObjectCreationParameters m_CreationParameters;
     };
 }

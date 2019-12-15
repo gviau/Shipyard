@@ -13,6 +13,36 @@
 namespace Shipyard
 {;
 
+struct DrawItem
+{
+    DrawItem(
+        GFXRenderTargetHandle gfxRenderTargetHandle,
+        GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle,
+        const GfxViewport& gfxViewport,
+        const GfxRect& gfxScissor,
+        GFXGraphicsPipelineStateObjectHandle gfxPipelineStateObjectHandle,
+        GFXRootSignatureHandle gfxRootSignatureHandle,
+        GFXDescriptorSetHandle gfxDescriptorSetHandle)
+        : renderTargetHandle(gfxRenderTargetHandle)
+        , depthStencilRenderTargetHandle(gfxDepthStencilRenderTargetHandle)
+        , viewport(gfxViewport)
+        , scissor(gfxScissor)
+        , pipelineStateObjetHandle(gfxPipelineStateObjectHandle)
+        , rootSignatureHandle(gfxRootSignatureHandle)
+        , descriptorSetHandle(gfxDescriptorSetHandle)
+    {}
+
+    GFXRenderTargetHandle renderTargetHandle;
+    GFXDepthStencilRenderTargetHandle depthStencilRenderTargetHandle;
+
+    const GfxViewport& viewport;
+    const GfxRect& scissor;
+
+    GFXGraphicsPipelineStateObjectHandle pipelineStateObjetHandle;
+    GFXRootSignatureHandle rootSignatureHandle;
+    GFXDescriptorSetHandle descriptorSetHandle;
+};
+
 DX11CommandQueue::DX11CommandQueue(GFXRenderDevice& gfxRenderDevice, CommandQueueType commandQueueType)
     : CommandQueue(gfxRenderDevice, commandQueueType)
     , m_Device(gfxRenderDevice.GetDevice())
@@ -91,6 +121,10 @@ void DX11CommandQueue::ExecuteCommandLists(GFXRenderCommandList** ppRenderComman
 
             case RenderCommandType::MapBuffer:
                 processedRenderCommandSize = MapBuffer(pBaseRenderCommand);
+                break;
+
+            case RenderCommandType::Dispatch:
+                processedRenderCommandSize = Dispatch(pBaseRenderCommand);
                 break;
 
             default:
@@ -300,6 +334,28 @@ size_t DX11CommandQueue::DrawIndexedSeveralVertexBuffers(BaseRenderCommand* pCmd
     return sizeof(DrawIndexedSeveralVertexBuffersCommand);
 }
 
+size_t DX11CommandQueue::Dispatch(BaseRenderCommand* pCmd)
+{
+    DispatchCommand& dispatchCommand = *static_cast<DispatchCommand*>(pCmd);
+
+    if (dispatchCommand.gfxPipelineStateObjectHandle.IsValid())
+    {
+        GFXComputePipelineStateObject& gfxPipelineStateObject = m_RenderDevice.GetComputePipelineStateObject(dispatchCommand.gfxPipelineStateObjectHandle);
+        GFXRootSignature& gfxRootSignature = m_RenderDevice.GetRootSignature(dispatchCommand.gfxRootSignatureHandle);
+        GFXDescriptorSet& gfxDescriptorSet = m_RenderDevice.GetDescriptorSet(dispatchCommand.gfxDescriptorSetHandle);
+
+        m_RenderStateCache.BindRootSignature(gfxRootSignature);
+        m_RenderStateCache.BindComputePipelineStateObject(gfxPipelineStateObject);
+        m_RenderStateCache.BindDescriptorSet(gfxDescriptorSet, gfxRootSignature);
+
+        m_RenderStateCache.CommitStateChangesForGraphics(m_RenderDevice);
+
+        m_DeviceContext->Dispatch(dispatchCommand.threadGroupCountX, dispatchCommand.threadGroupCountY, dispatchCommand.threadGroupCountZ);
+    }
+
+    return sizeof(DispatchCommand);
+}
+
 size_t DX11CommandQueue::MapBuffer(BaseRenderCommand* pCmd)
 {
     MapBufferCommand* pMapBufferCommand = static_cast<MapBufferCommand*>(pCmd);
@@ -374,12 +430,12 @@ void DX11CommandQueue::PrepareNextDrawCalls(const DrawItem& drawItem)
         m_RenderStateCache.BindDepthStencilRenderTarget(gfxDepthStencilRenderTarget);
     }
 
-    GFXPipelineStateObject& gfxPipelineStateObject = m_RenderDevice.GetPipelineStateObject(drawItem.pipelineStateObjetHandle);
+    GFXGraphicsPipelineStateObject& gfxPipelineStateObject = m_RenderDevice.GetGraphicsPipelineStateObject(drawItem.pipelineStateObjetHandle);
     GFXRootSignature& gfxRootSignature = m_RenderDevice.GetRootSignature(drawItem.rootSignatureHandle);
     GFXDescriptorSet& gfxDescriptorSet = m_RenderDevice.GetDescriptorSet(drawItem.descriptorSetHandle);
 
     m_RenderStateCache.BindRootSignature(gfxRootSignature);
-    m_RenderStateCache.BindPipelineStateObject(gfxPipelineStateObject);
+    m_RenderStateCache.BindGraphicsPipelineStateObject(gfxPipelineStateObject);
     m_RenderStateCache.BindDescriptorSet(gfxDescriptorSet, gfxRootSignature);
 
     m_RenderStateCache.SetViewport(drawItem.viewport);

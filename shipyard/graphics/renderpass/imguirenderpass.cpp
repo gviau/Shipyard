@@ -112,7 +112,7 @@ void ImGuiRenderPass::Execute(RenderContext& renderContext)
     imguiRenderState.VertexFormatTypeToRender = VertexFormatType::ImGui;
     imguiRenderState.OptionalRenderStateBlockStateOverride = nullptr;
 
-    ShaderHandler::ShaderRenderElements imguiShaderRenderElements = imguiShaderHandler->GetShaderRenderElements(gfxRenderDevice, imguiRenderState);
+    ShaderHandler::ShaderRenderElementsForGraphics imguiShaderRenderElements = imguiShaderHandler->GetShaderRenderElementsForGraphicsCommands(gfxRenderDevice, imguiRenderState);
 
     // Render command lists
     // (Because we merged all buffers into a single one, we maintain our own offset into them)
@@ -157,11 +157,11 @@ void ImGuiRenderPass::Execute(RenderContext& renderContext)
                 GFXTexture2DHandle* textureToBind = (GFXTexture2DHandle*)pcmd->TextureId;
                 m_ImGuiShaderInputProvider.ImGuiTexture = ((textureToBind != nullptr && textureToBind->IsValid()) ? *textureToBind : DefaultTextures::WhiteTexture);
 
-                imguiShaderHandler->ApplyShaderInputProviders(gfxRenderDevice, gfxRenderCommandList, imguiShaderInputProviders);
+                imguiShaderHandler->ApplyShaderInputProvidersForGraphics(gfxRenderDevice, gfxRenderCommandList, imguiShaderInputProviders);
 
                 DrawIndexedCommand* drawIndexedCommand = gfxRenderCommandList.DrawIndexed();
                 drawIndexedCommand->gfxRootSignatureHandle = imguiShaderRenderElements.GfxRootSignatureHandle;
-                drawIndexedCommand->gfxPipelineStateObjectHandle = imguiShaderRenderElements.GfxPipelineStateObjectHandle;
+                drawIndexedCommand->gfxPipelineStateObjectHandle = imguiShaderRenderElements.GfxGraphicsPipelineStateObjectHandle;
                 drawIndexedCommand->gfxDescriptorSetHandle = imguiShaderRenderElements.GfxDescriptorSetHandle;
                 drawIndexedCommand->gfxRenderTargetHandle = gfxViewSurface.GetBackBufferRenderTargetHandle();
                 drawIndexedCommand->gfxDepthStencilRenderTargetHandle = { InvalidGfxHandle };

@@ -41,9 +41,9 @@ DX11RenderDevice::DX11RenderDevice()
         m_SamplerHandleRefCounts[i] = 0;
     }
 
-    for (shipUint32 i = 0; i < SHIP_MAX_RENDER_PIPELINE_STATE_OBJECTS; i++)
+    for (shipUint32 i = 0; i < SHIP_MAX_GRAPHICS_PIPELINE_STATE_OBJECTS; i++)
     {
-        m_PipelineStateObjectHandleRefCounts[i] = 0;
+        m_GraphicsPipelineStateObjectHandleRefCounts[i] = 0;
     }
 }
 
@@ -157,9 +157,15 @@ shipBool DX11RenderDevice::Create()
         return false;
     }
 
-    if (!m_PipelineStateObjectPool.Create())
+    if (!m_GraphicsPipelineStateObjectPool.Create())
     {
-        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create PipelineStateObject pool.");
+        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create GraphicsPipelineStateObject pool.");
+        return false;
+    }
+
+    if (!m_ComputePipelineStateObjectPool.Create())
+    {
+        SHIP_LOG_ERROR("DX11RenderDevice::DX11RenderDevice() --> Couldn't create ComputePipelineStateObject pool.");
         return false;
     }
 
@@ -322,13 +328,22 @@ void DX11RenderDevice::Destroy()
         } while (m_RootSignaturePool.GetNextAllocatedIndex(indexToFree, &indexToFree));
     }
 
-    if (m_PipelineStateObjectPool.GetFirstAllocatedIndex(&indexToFree))
+    if (m_GraphicsPipelineStateObjectPool.GetFirstAllocatedIndex(&indexToFree))
     {
         do
         {
-            m_PipelineStateObjectPool.GetItem(indexToFree).Destroy();
-            m_PipelineStateObjectPool.ReleaseItem(indexToFree);
-        } while (m_PipelineStateObjectPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+            m_GraphicsPipelineStateObjectPool.GetItem(indexToFree).Destroy();
+            m_GraphicsPipelineStateObjectPool.ReleaseItem(indexToFree);
+        } while (m_GraphicsPipelineStateObjectPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+    }
+
+    if (m_ComputePipelineStateObjectPool.GetFirstAllocatedIndex(&indexToFree))
+    {
+        do
+        {
+            m_ComputePipelineStateObjectPool.GetItem(indexToFree).Destroy();
+            m_ComputePipelineStateObjectPool.ReleaseItem(indexToFree);
+        } while (m_ComputePipelineStateObjectPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
     }
 
     if (m_DescriptorSetPool.GetFirstAllocatedIndex(&indexToFree))
@@ -1013,9 +1028,9 @@ const GFXRootSignature* DX11RenderDevice::GetRootSignaturePtr(GFXRootSignatureHa
     return m_RootSignaturePool.GetItemPtr(gfxRootSignatureHandle.handle);
 }
 
-shipUint32 GetPipelineStateObjectIndex(
-        const DataPool<GFXPipelineStateObject, SHIP_MAX_RENDER_PIPELINE_STATE_OBJECTS>& pipelineStateObjectPool,
-        const PipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters)
+shipUint32 GetGraphicsPipelineStateObjectIndex(
+        const DataPool<GFXGraphicsPipelineStateObject, SHIP_MAX_GRAPHICS_PIPELINE_STATE_OBJECTS>& pipelineStateObjectPool,
+        const GraphicsPipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters)
 {
     shipUint32 allocatedPipelineStateObjectIndex = 0;
     if (pipelineStateObjectPool.GetFirstAllocatedIndex(&allocatedPipelineStateObjectIndex))
@@ -1032,52 +1047,119 @@ shipUint32 GetPipelineStateObjectIndex(
     return InvalidGfxHandle;
 }
 
-GFXPipelineStateObjectHandle DX11RenderDevice::CreatePipelineStateObject(const PipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters)
+GFXGraphicsPipelineStateObjectHandle DX11RenderDevice::CreateGraphicsPipelineStateObject(const GraphicsPipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters)
 {
-    shipUint32 pipelineStateObjectIndex = GetPipelineStateObjectIndex(m_PipelineStateObjectPool, pipelineStateObjectCreationParameters);
+    shipUint32 pipelineStateObjectIndex = GetGraphicsPipelineStateObjectIndex(m_GraphicsPipelineStateObjectPool, pipelineStateObjectCreationParameters);
     if (pipelineStateObjectIndex != InvalidGfxHandle)
     {
-        m_PipelineStateObjectHandleRefCounts[pipelineStateObjectIndex] += 1;
+        m_GraphicsPipelineStateObjectHandleRefCounts[pipelineStateObjectIndex] += 1;
 
-        return GFXPipelineStateObjectHandle(pipelineStateObjectIndex);
+        return GFXGraphicsPipelineStateObjectHandle(pipelineStateObjectIndex);
     }
 
-    GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle;
-    gfxPipelineStateObjectHandle.handle = m_PipelineStateObjectPool.GetNewItemIndex();
+    GFXGraphicsPipelineStateObjectHandle gfxPipelineStateObjectHandle;
+    gfxPipelineStateObjectHandle.handle = m_GraphicsPipelineStateObjectPool.GetNewItemIndex();
 
-    GFXPipelineStateObject& gfxPipelineStateObject = m_PipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
+    GFXGraphicsPipelineStateObject& gfxPipelineStateObject = m_GraphicsPipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
     shipBool isValid = gfxPipelineStateObject.Create(pipelineStateObjectCreationParameters);
 
     SHIP_ASSERT(isValid);
 
-    m_PipelineStateObjectHandleRefCounts[gfxPipelineStateObjectHandle.handle] += 1;
+    m_GraphicsPipelineStateObjectHandleRefCounts[gfxPipelineStateObjectHandle.handle] += 1;
 
     return gfxPipelineStateObjectHandle;
 }
 
-void DX11RenderDevice::DestroyPipelineStateObject(GFXPipelineStateObjectHandle& gfxPipelineStateObjectHandle)
+void DX11RenderDevice::DestroyGraphicsPipelineStateObject(GFXGraphicsPipelineStateObjectHandle& gfxPipelineStateObjectHandle)
 {
-    SHIP_ASSERT(m_PipelineStateObjectHandleRefCounts[gfxPipelineStateObjectHandle.handle] > 0);
-    m_PipelineStateObjectHandleRefCounts[gfxPipelineStateObjectHandle.handle] -= 1;
+    SHIP_ASSERT(m_GraphicsPipelineStateObjectHandleRefCounts[gfxPipelineStateObjectHandle.handle] > 0);
+    m_GraphicsPipelineStateObjectHandleRefCounts[gfxPipelineStateObjectHandle.handle] -= 1;
 
-    if (m_PipelineStateObjectHandleRefCounts[gfxPipelineStateObjectHandle.handle] == 0)
+    if (m_GraphicsPipelineStateObjectHandleRefCounts[gfxPipelineStateObjectHandle.handle] == 0)
     {
-        GFXPipelineStateObject& gfxPipelineStateObject = m_PipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
+        GFXGraphicsPipelineStateObject& gfxPipelineStateObject = m_GraphicsPipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
         gfxPipelineStateObject.Destroy();
 
-        m_PipelineStateObjectPool.ReleaseItem(gfxPipelineStateObjectHandle.handle);
+        m_GraphicsPipelineStateObjectPool.ReleaseItem(gfxPipelineStateObjectHandle.handle);
         gfxPipelineStateObjectHandle.handle = InvalidGfxHandle;
     }
 }
 
-GFXPipelineStateObject& DX11RenderDevice::GetPipelineStateObject(GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle)
+GFXGraphicsPipelineStateObject& DX11RenderDevice::GetGraphicsPipelineStateObject(GFXGraphicsPipelineStateObjectHandle gfxPipelineStateObjectHandle)
 {
-    return m_PipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
+    return m_GraphicsPipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
 }
 
-const GFXPipelineStateObject& DX11RenderDevice::GetPipelineStateObject(GFXPipelineStateObjectHandle gfxPipelineStateObjectHandle) const
+const GFXGraphicsPipelineStateObject& DX11RenderDevice::GetGraphicsPipelineStateObject(GFXGraphicsPipelineStateObjectHandle gfxPipelineStateObjectHandle) const
 {
-    return m_PipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
+    return m_GraphicsPipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
+}
+
+shipUint32 GetComputePipelineStateObjectIndex(
+        const DataPool<GFXComputePipelineStateObject, SHIP_MAX_COMPUTE_PIPELINE_STATE_OBJECTS>& pipelineStateObjectPool,
+        const ComputePipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters)
+{
+    shipUint32 allocatedPipelineStateObjectIndex = 0;
+    if (pipelineStateObjectPool.GetFirstAllocatedIndex(&allocatedPipelineStateObjectIndex))
+    {
+        do
+        {
+            if (pipelineStateObjectPool.GetItem(allocatedPipelineStateObjectIndex).GetCreationParameters() == pipelineStateObjectCreationParameters)
+            {
+                return allocatedPipelineStateObjectIndex;
+            }
+        } while (pipelineStateObjectPool.GetNextAllocatedIndex(allocatedPipelineStateObjectIndex, &allocatedPipelineStateObjectIndex));
+    }
+
+    return InvalidGfxHandle;
+}
+
+GFXComputePipelineStateObjectHandle DX11RenderDevice::CreateComputePipelineStateObject(const ComputePipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters)
+{
+    shipUint32 pipelineStateObjectIndex = GetComputePipelineStateObjectIndex(m_ComputePipelineStateObjectPool, pipelineStateObjectCreationParameters);
+    if (pipelineStateObjectIndex != InvalidGfxHandle)
+    {
+        m_GraphicsPipelineStateObjectHandleRefCounts[pipelineStateObjectIndex] += 1;
+
+        return GFXComputePipelineStateObjectHandle(pipelineStateObjectIndex);
+    }
+
+    GFXComputePipelineStateObjectHandle gfxPipelineStateObjectHandle;
+    gfxPipelineStateObjectHandle.handle = m_ComputePipelineStateObjectPool.GetNewItemIndex();
+
+    GFXComputePipelineStateObject& gfxPipelineStateObject = m_ComputePipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
+    shipBool isValid = gfxPipelineStateObject.Create(pipelineStateObjectCreationParameters);
+
+    SHIP_ASSERT(isValid);
+
+    m_GraphicsPipelineStateObjectHandleRefCounts[gfxPipelineStateObjectHandle.handle] += 1;
+
+    return gfxPipelineStateObjectHandle;
+}
+
+void DX11RenderDevice::DestroyComputePipelineStateObject(GFXComputePipelineStateObjectHandle& gfxPipelineStateObjectHandle)
+{
+    SHIP_ASSERT(m_ComputePipelineStateObjectHandleRefCounts[gfxPipelineStateObjectHandle.handle] > 0);
+    m_ComputePipelineStateObjectHandleRefCounts[gfxPipelineStateObjectHandle.handle] -= 1;
+
+    if (m_ComputePipelineStateObjectHandleRefCounts[gfxPipelineStateObjectHandle.handle] == 0)
+    {
+        GFXComputePipelineStateObject& gfxPipelineStateObject = m_ComputePipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
+        gfxPipelineStateObject.Destroy();
+
+        m_ComputePipelineStateObjectPool.ReleaseItem(gfxPipelineStateObjectHandle.handle);
+        gfxPipelineStateObjectHandle.handle = InvalidGfxHandle;
+    }
+}
+
+GFXComputePipelineStateObject& DX11RenderDevice::GetComputePipelineStateObject(GFXComputePipelineStateObjectHandle gfxPipelineStateObjectHandle)
+{
+    return m_ComputePipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
+}
+
+const GFXComputePipelineStateObject& DX11RenderDevice::GetComputePipelineStateObject(GFXComputePipelineStateObjectHandle gfxPipelineStateObjectHandle) const
+{
+    return m_ComputePipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
 }
 
 GFXDescriptorSetHandle DX11RenderDevice::CreateDescriptorSet(DescriptorSetType descriptorSetType, const Array<DescriptorSetEntryDeclaration>& descriptorSetEntryDeclarations)

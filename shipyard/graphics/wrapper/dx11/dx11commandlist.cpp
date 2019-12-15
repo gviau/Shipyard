@@ -71,7 +71,7 @@ void DX11BaseRenderCommandList::Close()
 
 }
 
-void DX11BaseRenderCommandList::Reset(GFXCommandListAllocator& gfxCommandListAllocator, GFXPipelineStateObject* pGfxPipelineStateObject)
+void DX11BaseRenderCommandList::Reset(GFXCommandListAllocator& gfxCommandListAllocator, PipelineStateObject* pPipelineStateObject)
 {
     m_CommandListHeapCurrentPointer = 0;
 
@@ -116,6 +116,10 @@ BaseRenderCommand* DX11BaseRenderCommandList::GetNewRenderCommand(RenderCommandT
 
     case RenderCommandType::MapBuffer:
         renderCommandSize = sizeof(MapBufferCommand);
+        break;
+
+    case RenderCommandType::Dispatch:
+        renderCommandSize = sizeof(DispatchCommand);
         break;
 
     default:
@@ -196,6 +200,13 @@ BaseRenderCommand* DX11BaseRenderCommandList::GetNewRenderCommand(RenderCommandT
     case RenderCommandType::MapBuffer:
         {
             MapBufferCommand initRenderCommandData;
+            memcpy(pNewCommand, &initRenderCommandData, sizeof(initRenderCommandData));
+        }
+        break;
+
+    case RenderCommandType::Dispatch:
+        {
+            DispatchCommand initRenderCommandData;
             memcpy(pNewCommand, &initRenderCommandData, sizeof(initRenderCommandData));
         }
         break;
@@ -311,6 +322,13 @@ DrawIndexedSeveralVertexBuffersCommand* DX11DirectRenderCommandList::DrawIndexed
     BaseRenderCommand* pCmd = GetNewRenderCommand(RenderCommandType::DrawIndexedSeveralVertexBuffers);
 
     return static_cast<DrawIndexedSeveralVertexBuffersCommand*>(pCmd);
+}
+
+DispatchCommand* DX11DirectRenderCommandList::Dispatch()
+{
+    BaseRenderCommand* pCmd = GetNewRenderCommand(RenderCommandType::Dispatch);
+
+    return static_cast<DispatchCommand*>(pCmd);
 }
 
 void* GetMappedBuffer(DX11BaseBuffer& dx11BaseBuffer, MapFlag mapFlag, ID3D11DeviceContext* pDx11DeviceContext)

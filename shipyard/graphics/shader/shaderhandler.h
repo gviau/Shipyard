@@ -34,9 +34,16 @@ namespace Shipyard
             RenderStateBlockStateOverride* OptionalRenderStateBlockStateOverride = nullptr;
         };
 
-        struct ShaderRenderElements
+        struct ShaderRenderElementsForGraphics
         {
-            GFXPipelineStateObjectHandle GfxPipelineStateObjectHandle;
+            GFXGraphicsPipelineStateObjectHandle GfxGraphicsPipelineStateObjectHandle;
+            GFXRootSignatureHandle GfxRootSignatureHandle;
+            GFXDescriptorSetHandle GfxDescriptorSetHandle;
+        };
+
+        struct ShaderRenderElementsForCompute
+        {
+            GFXComputePipelineStateObjectHandle GfxComputePipelineStateObjectHandle;
             GFXRootSignatureHandle GfxRootSignatureHandle;
             GFXDescriptorSetHandle GfxDescriptorSetHandle;
         };
@@ -45,13 +52,18 @@ namespace Shipyard
         ShaderHandler(ShaderKey shaderKey);
         ~ShaderHandler();
 
-        void ApplyShaderInputProviders(
+        void ApplyShaderInputProvidersForGraphics(
+                GFXRenderDevice& gfxRenderDevice,
+                GFXDirectRenderCommandList& gfxDirectRenderCommandList,
+                const Array<const ShaderInputProvider*>& shaderInputProviders);
+        void ApplyShaderInputProvidersForCompute(
                 GFXRenderDevice& gfxRenderDevice,
                 GFXDirectRenderCommandList& gfxDirectRenderCommandList,
                 const Array<const ShaderInputProvider*>& shaderInputProviders);
 
         const ShaderKey& GetShaderKey() const { return m_ShaderKey; }
-        ShaderRenderElements GetShaderRenderElements(GFXRenderDevice& gfxRenderDevice, const RenderState& renderState);
+        ShaderRenderElementsForGraphics GetShaderRenderElementsForGraphicsCommands(GFXRenderDevice& gfxRenderDevice, const RenderState& renderState);
+        ShaderRenderElementsForCompute GetShaderRenderElementsForCompute(GFXRenderDevice& gfxRenderDevice);
 
     private:
         ShaderKey m_ShaderKey;
@@ -60,9 +72,10 @@ namespace Shipyard
         GFXPixelShaderHandle m_GfxPixelShaderHandle;
         GFXComputeShaderHandle m_GfxComputeShaderHander;
 
-        GFXPipelineStateObjectHandle m_GfxEffectivePipelineStateObjectHandle;
+        GFXGraphicsPipelineStateObjectHandle m_GfxEffectivePipelineStateObjectHandle;
 
-        ShaderRenderElements m_ShaderRenderElements;
+        ShaderRenderElementsForGraphics m_ShaderRenderElementsForGraphics;
+        ShaderRenderElementsForCompute m_ShaderRenderElementsForCompute;
         ShaderResourceBinder m_ShaderResourceBinder;
 
         Array<GFXSamplerHandle> m_SamplerStateHandles;

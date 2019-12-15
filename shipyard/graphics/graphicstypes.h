@@ -31,7 +31,8 @@ namespace Shipyard
     DEFINE_HANDLE_TYPE(GFXConstantBufferHandle);
     DEFINE_HANDLE_TYPE(GFXByteBufferHandle);
     DEFINE_HANDLE_TYPE(GFXDescriptorSetHandle);
-    DEFINE_HANDLE_TYPE(GFXPipelineStateObjectHandle);
+    DEFINE_HANDLE_TYPE(GFXGraphicsPipelineStateObjectHandle);
+    DEFINE_HANDLE_TYPE(GFXComputePipelineStateObjectHandle);
     DEFINE_HANDLE_TYPE(GFXRenderTargetHandle);
     DEFINE_HANDLE_TYPE(GFXDepthStencilRenderTargetHandle);
     DEFINE_HANDLE_TYPE(GFXRootSignatureHandle);

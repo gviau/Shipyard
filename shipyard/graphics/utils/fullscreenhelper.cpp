@@ -58,7 +58,7 @@ void FullscreenHelper::DrawFullscreenQuad(GFXRenderDevice& gfxRenderDevice, GFXD
         return;
     }
 
-    pShaderHandler->ApplyShaderInputProviders(gfxRenderDevice, gfxRenderCommandList, renderContext.shaderInputProviders);
+    pShaderHandler->ApplyShaderInputProvidersForGraphics(gfxRenderDevice, gfxRenderCommandList, renderContext.shaderInputProviders);
 
     ShaderHandler::RenderState renderState;
     renderState.GfxRenderTargetHandle = renderContext.gfxRenderTargetHandle;
@@ -67,7 +67,7 @@ void FullscreenHelper::DrawFullscreenQuad(GFXRenderDevice& gfxRenderDevice, GFXD
     renderState.VertexFormatTypeToRender = VertexFormatType::Pos_UV;
     renderState.OptionalRenderStateBlockStateOverride = nullptr;
 
-    const ShaderHandler::ShaderRenderElements& shaderRenderElements = pShaderHandler->GetShaderRenderElements(gfxRenderDevice, renderState);
+    const ShaderHandler::ShaderRenderElementsForGraphics& shaderRenderElements = pShaderHandler->GetShaderRenderElementsForGraphicsCommands(gfxRenderDevice, renderState);
 
     const GFXRenderTarget& gfxRenderTarget = gfxRenderDevice.GetRenderTarget(renderContext.gfxRenderTargetHandle);
     shipUint32 renderTargetWidth = gfxRenderTarget.GetWidth();
@@ -85,7 +85,7 @@ void FullscreenHelper::DrawFullscreenQuad(GFXRenderDevice& gfxRenderDevice, GFXD
     pDrawIndexedCommand->gfxViewport = gfxViewport;
     pDrawIndexedCommand->gfxRenderTargetHandle = renderContext.gfxRenderTargetHandle;
     pDrawIndexedCommand->gfxDepthStencilRenderTargetHandle = renderContext.gfxDepthStencilRenderTargetHandle;
-    pDrawIndexedCommand->gfxPipelineStateObjectHandle = shaderRenderElements.GfxPipelineStateObjectHandle;
+    pDrawIndexedCommand->gfxPipelineStateObjectHandle = shaderRenderElements.GfxGraphicsPipelineStateObjectHandle;
     pDrawIndexedCommand->gfxRootSignatureHandle = shaderRenderElements.GfxRootSignatureHandle;
     pDrawIndexedCommand->gfxDescriptorSetHandle = shaderRenderElements.GfxDescriptorSetHandle;
     pDrawIndexedCommand->gfxVertexBufferHandle = m_FullscreenQuadVertexBufferHandle;

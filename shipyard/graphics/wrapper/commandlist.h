@@ -8,6 +8,8 @@
 
 namespace Shipyard
 {
+    class PipelineStateObject;
+
     class SHIPYARD_GRAPHICS_API BaseRenderCommandListType
     {
     public:
@@ -25,7 +27,7 @@ namespace Shipyard
         virtual void Destroy() = 0;
 
         virtual void Close() = 0;
-        virtual void Reset(GFXCommandListAllocator& gfxCommandListAllocator, GFXPipelineStateObject* pGfxPipelineStateObject) = 0;
+        virtual void Reset(GFXCommandListAllocator& gfxCommandListAllocator, PipelineStateObject* pPipelineStateObject) = 0;
 #endif // #ifdef DEBUG_WRAPPER_INTERFACE_COMPILATION
     };
 
@@ -64,6 +66,8 @@ namespace Shipyard
         virtual DrawSeveralVertexBuffersCommand* DrawSeveralVertexBuffers() = 0;
         virtual DrawIndexedCommand* DrawIndexed() = 0;
         virtual DrawIndexedSeveralVertexBuffersCommand* DrawIndexedSeveralVertexBuffers() = 0;
+
+        virtual DispatchCommand* Dispatch() = 0;
 
         virtual void* MapVertexBuffer(GFXVertexBufferHandle gfxVertexBufferhandle, MapFlag mapFlag, size_t bufferOffset) = 0;
         virtual void* MapIndexBuffer(GFXIndexBufferHandle gfxIndexBufferHandle, MapFlag mapFlag, size_t bufferOffset) = 0;

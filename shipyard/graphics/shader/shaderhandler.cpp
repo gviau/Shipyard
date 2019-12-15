@@ -4,6 +4,7 @@
 
 #include <graphics/material/gfxmaterialunifiedconstantbuffer.h>
 
+#include <graphics/shader/shaderfamilies.h>
 #include <graphics/shader/shaderinputprovider.h>
 
 #include <graphics/wrapper/wrapper.h>
@@ -20,7 +21,7 @@ ShaderHandler::~ShaderHandler()
 {
 }
 
-void ShaderHandler::ApplyShaderInputProviders(
+void ShaderHandler::ApplyShaderInputProvidersForGraphics(
         GFXRenderDevice& gfxRenderDevice,
         GFXDirectRenderCommandList& gfxDirectRenderCommandList,
         const Array<const ShaderInputProvider*>& shaderInputProviders)
@@ -60,24 +61,65 @@ void ShaderHandler::ApplyShaderInputProviders(
             gfxRenderDevice,
             gfxDirectRenderCommandList,
             shaderInputProviders,
-            m_ShaderRenderElements.GfxDescriptorSetHandle);
+            m_ShaderRenderElementsForGraphics.GfxDescriptorSetHandle);
 
     m_ShaderResourceBinder.BindSamplerStates(
             gfxRenderDevice,
             m_SamplerStateHandles,
-            m_ShaderRenderElements.GfxDescriptorSetHandle);
+            m_ShaderRenderElementsForGraphics.GfxDescriptorSetHandle);
 }
 
-ShaderHandler::ShaderRenderElements ShaderHandler::GetShaderRenderElements(GFXRenderDevice& gfxRenderDevice, const RenderState& renderState)
+void ShaderHandler::ApplyShaderInputProvidersForCompute(
+        GFXRenderDevice& gfxRenderDevice,
+        GFXDirectRenderCommandList& gfxDirectRenderCommandList,
+        const Array<const ShaderInputProvider*>& shaderInputProviders)
 {
-    ShaderRenderElements shaderRenderElements = m_ShaderRenderElements;
-    SHIP_ASSERT(shaderRenderElements.GfxPipelineStateObjectHandle.handle != InvalidGfxHandle);
+    if (shaderInputProviders.Empty() || m_ShaderKey.GetShaderFamily() == ShaderFamily::Error)
+    {
+        return;
+    }
+
+    for (const ShaderInputProvider* shaderInputProvider : shaderInputProviders)
+    {
+        SHIP_ASSERT(shaderInputProvider != nullptr);
+
+        if (shaderInputProvider->GetRequiredSizeForProvider() == 0)
+        {
+            continue;
+        }
+
+        ShaderInputProviderDeclaration* shaderInputProviderDeclaration = shaderInputProvider->GetShaderInputProviderDeclaration();
+
+        if (ShaderInputProviderUtils::IsUsingConstantBuffer(shaderInputProviderDeclaration->GetShaderInputProviderUsage()))
+        {
+            constexpr size_t bufferOffset = 0;
+            void* pMappedBuffer = gfxDirectRenderCommandList.MapConstantBuffer(shaderInputProvider->m_GfxConstantBufferHandle, MapFlag::Write_Discard, bufferOffset);
+
+            GetShaderInputProviderManager().CopyShaderInputsToBuffer(*shaderInputProvider, pMappedBuffer);
+        }
+    }
+
+    m_ShaderResourceBinder.BindShaderInputProvders(
+            gfxRenderDevice,
+            gfxDirectRenderCommandList,
+            shaderInputProviders,
+            m_ShaderRenderElementsForCompute.GfxDescriptorSetHandle);
+
+    m_ShaderResourceBinder.BindSamplerStates(
+            gfxRenderDevice,
+            m_SamplerStateHandles,
+            m_ShaderRenderElementsForCompute.GfxDescriptorSetHandle);
+}
+
+ShaderHandler::ShaderRenderElementsForGraphics ShaderHandler::GetShaderRenderElementsForGraphicsCommands(GFXRenderDevice& gfxRenderDevice, const RenderState& renderState){
+    ShaderRenderElementsForGraphics shaderRenderElements = m_ShaderRenderElementsForGraphics;
+    SHIP_ASSERT(shaderRenderElements.GfxGraphicsPipelineStateObjectHandle.handle != InvalidGfxHandle);
     SHIP_ASSERT(shaderRenderElements.GfxRootSignatureHandle.handle != InvalidGfxHandle);
     SHIP_ASSERT(shaderRenderElements.GfxDescriptorSetHandle.handle != InvalidGfxHandle);
 
-    const GFXPipelineStateObject& gfxPipelineStateObject = gfxRenderDevice.GetPipelineStateObject(shaderRenderElements.GfxPipelineStateObjectHandle);
+    const GFXGraphicsPipelineStateObject& gfxPipelineStateObject = gfxRenderDevice.GetGraphicsPipelineStateObject(shaderRenderElements.GfxGraphicsPipelineStateObjectHandle);
 
-    PipelineStateObjectCreationParameters pipelineStateObjectCreationParameters = gfxPipelineStateObject.GetCreationParameters();
+    GraphicsPipelineStateObjectCreationParameters pipelineStateObjectCreationParameters = gfxPipelineStateObject.GetCreationParameters();
 
     pipelineStateObjectCreationParameters.PrimitiveTopologyToUse = renderState.PrimitiveTopologyToRender;
     pipelineStateObjectCreationParameters.VertexFormatTypeToUse = renderState.VertexFormatTypeToRender;
@@ -113,21 +155,33 @@ ShaderHandler::ShaderRenderElements ShaderHandler::GetShaderRenderElements(GFXRe
     shipBool needToCreateEffectivePso = (m_GfxEffectivePipelineStateObjectHandle.handle == InvalidGfxHandle);
     if (!needToCreateEffectivePso)
     {
-        const GFXPipelineStateObject& gfxEffectivePipelineStateObject = gfxRenderDevice.GetPipelineStateObject(m_GfxEffectivePipelineStateObjectHandle);
+        const GFXGraphicsPipelineStateObject& gfxEffectivePipelineStateObject = gfxRenderDevice.GetGraphicsPipelineStateObject(m_GfxEffectivePipelineStateObjectHandle);
         needToCreateEffectivePso = (gfxEffectivePipelineStateObject.GetCreationParameters() != pipelineStateObjectCreationParameters);
 
         if (needToCreateEffectivePso)
         {
-            gfxRenderDevice.DestroyPipelineStateObject(m_GfxEffectivePipelineStateObjectHandle);
+            gfxRenderDevice.DestroyGraphicsPipelineStateObject(m_GfxEffectivePipelineStateObjectHandle);
         }
     }
 
     if (needToCreateEffectivePso)
     {
-        m_GfxEffectivePipelineStateObjectHandle = gfxRenderDevice.CreatePipelineStateObject(pipelineStateObjectCreationParameters);
+        m_GfxEffectivePipelineStateObjectHandle = gfxRenderDevice.CreateGraphicsPipelineStateObject(pipelineStateObjectCreationParameters);
     }
 
-    shaderRenderElements.GfxPipelineStateObjectHandle = m_GfxEffectivePipelineStateObjectHandle;
+    shaderRenderElements.GfxGraphicsPipelineStateObjectHandle = m_GfxEffectivePipelineStateObjectHandle;
+
+    return shaderRenderElements;
+}
+
+ShaderHandler::ShaderRenderElementsForCompute ShaderHandler::GetShaderRenderElementsForCompute(GFXRenderDevice& gfxRenderDevice)
+{
+    ShaderRenderElementsForCompute shaderRenderElements = m_ShaderRenderElementsForCompute;
+
+    if (m_ShaderKey.GetShaderFamily() == ShaderFamily::Error)
+    {
+        shaderRenderElements.GfxComputePipelineStateObjectHandle = { InvalidGfxHandle };
+    }
 
     return shaderRenderElements;
 }

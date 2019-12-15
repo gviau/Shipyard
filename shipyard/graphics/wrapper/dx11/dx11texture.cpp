@@ -222,12 +222,15 @@ ID3D11ShaderResourceView* CreateShaderResourceView(
 ID3D11UnorderedAccessView* CreateUnorderedAccessView(
         ID3D11Device& device,
         ID3D11Resource& resource,
+        GfxFormat pixelFormat,
         TextureViewType textureViewType,
         shipUint32 mipIndex,
         shipUint32 numSlices,
         shipUint32 firstSlice)
 {
     D3D11_UNORDERED_ACCESS_VIEW_DESC unorderedAccessViewDesc;
+
+    unorderedAccessViewDesc.Format = ConvertShipyardFormatToDX11(pixelFormat);
 
     switch (textureViewType)
     {
@@ -353,6 +356,7 @@ shipBool DX11Texture2D::Create(
         m_UnorderedAccessView = CreateUnorderedAccessView(
                 device,
                 *m_Texture,
+                m_PixelFormat,
                 TextureViewType::Tex2D,
                 mostDetailedMip,
                 numSlices,
@@ -446,6 +450,7 @@ shipBool DX11Texture2DArray::Create(
         m_UnorderedAccessView = CreateUnorderedAccessView(
                 device,
                 *m_Texture,
+                m_PixelFormat,
                 TextureViewType::Tex2DArray,
                 mostDetailedMip,
                 m_NumSlices,
@@ -559,6 +564,7 @@ shipBool DX11Texture3D::Create(
         m_UnorderedAccessView = CreateUnorderedAccessView(
                 device,
                 *m_Texture,
+                m_PixelFormat,
                 TextureViewType::Tex3D,
                 mostDetailedMip,
                 numSlices,
@@ -651,6 +657,7 @@ shipBool DX11TextureCube::Create(
         m_UnorderedAccessView = CreateUnorderedAccessView(
                 device,
                 *m_Texture,
+                m_PixelFormat,
                 TextureViewType::Tex2DArray,
                 mostDetailedMip,
                 m_NumSlices,

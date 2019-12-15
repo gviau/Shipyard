@@ -101,9 +101,9 @@ void DX11RenderStateCache::Reset()
         m_NativeBlendState = nullptr;
     }
 
-    m_VertexShaderHandle.handle = InvalidGfxHandle;
-    m_PixelShaderHandle.handle = InvalidGfxHandle;
-    m_ComputeShaderHandle.handle = InvalidGfxHandle;
+    m_VertexShaderHandle = { InvalidGfxHandle };
+    m_PixelShaderHandle = { InvalidGfxHandle };
+    m_ComputeShaderHandle = { InvalidGfxHandle };
 
     memset(m_NativeRenderTargets, 0, sizeof(m_NativeRenderTargets));
     m_NativeDepthStencilView = nullptr;
@@ -229,20 +229,20 @@ void DX11RenderStateCache::BindGraphicsPipelineStateObject(const GFXGraphicsPipe
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_BlendState);
     }
 
-    if (pipelineStateObjectParameters.GfxVertexShaderHandle.handle != m_VertexShaderHandle.handle)
+    if (pipelineStateObjectParameters.GfxVertexShaderHandle != m_VertexShaderHandle)
     {
-        SHIP_ASSERT(m_ComputeShaderHandle.handle != InvalidGfxHandle || pipelineStateObjectParameters.GfxVertexShaderHandle.handle != InvalidGfxHandle);
+        SHIP_ASSERT(m_ComputeShaderHandle.IsValid() || pipelineStateObjectParameters.GfxVertexShaderHandle.IsValid());
 
         m_VertexShaderHandle = pipelineStateObjectParameters.GfxVertexShaderHandle;
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_VertexShader);
     }
 
-    if (pipelineStateObjectParameters.GfxPixelShaderHandle.handle != m_PixelShaderHandle.handle)
+    if (pipelineStateObjectParameters.GfxPixelShaderHandle != m_PixelShaderHandle)
     {
         // Null pixel shader is actually okay (for example, depth rendering only).
-        if (pipelineStateObjectParameters.GfxPixelShaderHandle.handle == InvalidGfxHandle)
+        if (!pipelineStateObjectParameters.GfxPixelShaderHandle.IsValid())
         {
-            m_PixelShaderHandle.handle = InvalidGfxHandle;
+            m_PixelShaderHandle = { InvalidGfxHandle };
         }
         else
         {
@@ -269,7 +269,7 @@ void DX11RenderStateCache::BindComputePipelineStateObject(const GFXComputePipeli
 {
     const ComputePipelineStateObjectCreationParameters& pipelineStateObjectParameters = pipelineStateObject.GetCreationParameters();
 
-    if (pipelineStateObjectParameters.GfxComputeShaderHandle.handle != m_ComputeShaderHandle.handle)
+    if (pipelineStateObjectParameters.GfxComputeShaderHandle != m_ComputeShaderHandle)
     {
         m_ComputeShaderHandle = pipelineStateObjectParameters.GfxComputeShaderHandle;
         m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ComputeShader);
@@ -817,14 +817,14 @@ void DX11RenderStateCache::CommitStateChangesForGraphics(GFXRenderDevice& gfxRen
 
     if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_PixelShader))
     {
-        if (m_PixelShaderHandle.handle == InvalidGfxHandle)
-        {
-            m_DeviceContext->PSSetShader(nullptr, nullptr, 0);
-        }
-        else
+        if (m_PixelShaderHandle.IsValid())
         {
             GFXPixelShader& gfxPixelShader = gfxRenderDevice.GetPixelShader(m_PixelShaderHandle);
             m_DeviceContext->PSSetShader(gfxPixelShader.GetShader(), nullptr, 0);
+        }
+        else
+        {
+            m_DeviceContext->PSSetShader(nullptr, nullptr, 0);
         }
 
         m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_PixelShader);

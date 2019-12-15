@@ -246,7 +246,7 @@ void ShaderResourceBinder::BindShaderInputProviderDescriptor(
 #ifdef VALIDATE_SHADER_INPUT_PROVIDER_BINDING
             ShaderInputProviderDeclaration* shaderInputProviderDeclaration = shaderInputProvider->GetShaderInputProviderDeclaration();
             SHIP_ASSERT_MSG(
-                    gfxTexture2DHandle.handle != InvalidGfxHandle,
+                    gfxTexture2DHandle.IsValid(),
                     "Texture2D %s in ShaderInputProvider %s is not valid!",
                     GetShaderInputProviderManager().GetShaderInputNameFromProvider(shaderInputProviderDeclaration, shaderResourceBinderEntry.DataOffsetInProvider),
                     shaderInputProviderDeclaration->GetShaderInputProviderName());
@@ -265,7 +265,7 @@ void ShaderResourceBinder::BindShaderInputProviderDescriptor(
 #ifdef VALIDATE_SHADER_INPUT_PROVIDER_BINDING
             ShaderInputProviderDeclaration* shaderInputProviderDeclaration = shaderInputProvider->GetShaderInputProviderDeclaration();
             SHIP_ASSERT_MSG(
-                    gfxTexture2DArrayHandle.handle != InvalidGfxHandle,
+                    gfxTexture2DArrayHandle.IsValid(),
                     "Texture2DArray %s in ShaderInputProvider %s is not valid!",
                     GetShaderInputProviderManager().GetShaderInputNameFromProvider(shaderInputProviderDeclaration, shaderResourceBinderEntry.DataOffsetInProvider),
                     shaderInputProviderDeclaration->GetShaderInputProviderName());
@@ -284,7 +284,7 @@ void ShaderResourceBinder::BindShaderInputProviderDescriptor(
 #ifdef VALIDATE_SHADER_INPUT_PROVIDER_BINDING
             ShaderInputProviderDeclaration* shaderInputProviderDeclaration = shaderInputProvider->GetShaderInputProviderDeclaration();
             SHIP_ASSERT_MSG(
-                    gfxTexture3DHandle.handle != InvalidGfxHandle,
+                    gfxTexture3DHandle.IsValid(),
                     "Texture3D %s in ShaderInputProvider %s is not valid!",
                     GetShaderInputProviderManager().GetShaderInputNameFromProvider(shaderInputProviderDeclaration, shaderResourceBinderEntry.DataOffsetInProvider),
                     shaderInputProviderDeclaration->GetShaderInputProviderName());
@@ -303,7 +303,7 @@ void ShaderResourceBinder::BindShaderInputProviderDescriptor(
 #ifdef VALIDATE_SHADER_INPUT_PROVIDER_BINDING
             ShaderInputProviderDeclaration* shaderInputProviderDeclaration = shaderInputProvider->GetShaderInputProviderDeclaration();
             SHIP_ASSERT_MSG(
-                    gfxTextureCubeHandle.handle != InvalidGfxHandle,
+                    gfxTextureCubeHandle.IsValid(),
                     "TextureCube %s in ShaderInputProvider %s is not valid!",
                     GetShaderInputProviderManager().GetShaderInputNameFromProvider(shaderInputProviderDeclaration, shaderResourceBinderEntry.DataOffsetInProvider),
                     shaderInputProviderDeclaration->GetShaderInputProviderName());
@@ -322,7 +322,7 @@ void ShaderResourceBinder::BindShaderInputProviderDescriptor(
 #ifdef VALIDATE_SHADER_INPUT_PROVIDER_BINDING
             ShaderInputProviderDeclaration* shaderInputProviderDeclaration = shaderInputProvider->GetShaderInputProviderDeclaration();
             SHIP_ASSERT_MSG(
-                    gfxByteBufferHandle.handle != InvalidGfxHandle,
+                    gfxByteBufferHandle.IsValid(),
                     "ByteBuffer %s in ShaderInputProvider %s is not valid!",
                     GetShaderInputProviderManager().GetShaderInputNameFromProvider(shaderInputProviderDeclaration, shaderResourceBinderEntry.DataOffsetInProvider),
                     shaderInputProviderDeclaration->GetShaderInputProviderName());
@@ -360,7 +360,7 @@ void ShaderResourceBinder::BindShaderInputProviderConstantBuffer(
         GFXDescriptorSet& gfxDescriptorSet) const
 {
     SHIP_ASSERT_MSG(
-            shaderInputProvider->m_GfxConstantBufferHandle.handle != InvalidGfxHandle,
+            shaderInputProvider->m_GfxConstantBufferHandle.IsValid(),
             "ShaderInputProvider %s ConstantBuffer is invalid, this shouldn't happen.",
             shaderInputProvider->GetShaderInputProviderDeclaration()->GetShaderInputProviderName());
 
@@ -395,7 +395,7 @@ void ShaderResourceBinder::BindShaderGlobalBuffer(
             GFXMaterialUnifiedConstantBuffer& gfxMaterialUnifiedConstantBuffer = GetGFXMaterialUnifiedConstantBuffer();
             GFXByteBufferHandle gfxByteBufferHandle = gfxMaterialUnifiedConstantBuffer.BindMaterialUnfiedConstantBuffer(gfxDirectRenderCommandList);
 
-            SHIP_ASSERT(gfxByteBufferHandle.handle != InvalidGfxHandle);
+            SHIP_ASSERT(gfxByteBufferHandle.IsValid());
 
             GFXByteBuffer& gfxByteBuffer = gfxRenderDevice.GetByteBuffer(gfxByteBufferHandle);
 

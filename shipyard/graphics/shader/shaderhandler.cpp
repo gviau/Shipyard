@@ -113,9 +113,9 @@ void ShaderHandler::ApplyShaderInputProvidersForCompute(
 
 ShaderHandler::ShaderRenderElementsForGraphics ShaderHandler::GetShaderRenderElementsForGraphicsCommands(GFXRenderDevice& gfxRenderDevice, const RenderState& renderState){
     ShaderRenderElementsForGraphics shaderRenderElements = m_ShaderRenderElementsForGraphics;
-    SHIP_ASSERT(shaderRenderElements.GfxGraphicsPipelineStateObjectHandle.handle != InvalidGfxHandle);
-    SHIP_ASSERT(shaderRenderElements.GfxRootSignatureHandle.handle != InvalidGfxHandle);
-    SHIP_ASSERT(shaderRenderElements.GfxDescriptorSetHandle.handle != InvalidGfxHandle);
+    SHIP_ASSERT(shaderRenderElements.GfxGraphicsPipelineStateObjectHandle.IsValid());
+    SHIP_ASSERT(shaderRenderElements.GfxRootSignatureHandle.IsValid());
+    SHIP_ASSERT(shaderRenderElements.GfxDescriptorSetHandle.IsValid());
 
     const GFXGraphicsPipelineStateObject& gfxPipelineStateObject = gfxRenderDevice.GetGraphicsPipelineStateObject(shaderRenderElements.GfxGraphicsPipelineStateObjectHandle);
 
@@ -124,7 +124,7 @@ ShaderHandler::ShaderRenderElementsForGraphics ShaderHandler::GetShaderRenderEle
     pipelineStateObjectCreationParameters.PrimitiveTopologyToUse = renderState.PrimitiveTopologyToRender;
     pipelineStateObjectCreationParameters.VertexFormatTypeToUse = renderState.VertexFormatTypeToRender;
 
-    if (renderState.GfxRenderTargetHandle.handle == InvalidGfxHandle)
+    if (!renderState.GfxRenderTargetHandle.IsValid())
     {
         pipelineStateObjectCreationParameters.NumRenderTargets = 0;
     }
@@ -139,7 +139,7 @@ ShaderHandler::ShaderRenderElementsForGraphics ShaderHandler::GetShaderRenderEle
         memcpy(&pipelineStateObjectCreationParameters.RenderTargetsFormat[0], &renderTargetFormats[0], pipelineStateObjectCreationParameters.NumRenderTargets);
     }
 
-    if (renderState.GfxDepthStencilRenderTargetHandle.handle != InvalidGfxHandle)
+    if (renderState.GfxDepthStencilRenderTargetHandle.IsValid())
     {
         const GFXDepthStencilRenderTarget& gfxDepthStencilRenderTarget = gfxRenderDevice.GetDepthStencilRenderTarget(renderState.GfxDepthStencilRenderTargetHandle);
 
@@ -152,7 +152,7 @@ ShaderHandler::ShaderRenderElementsForGraphics ShaderHandler::GetShaderRenderEle
         renderState.OptionalRenderStateBlockStateOverride->ApplyOverridenValues(pipelineStateObjectCreationParameters.RenderStateBlockToUse);
     }
 
-    shipBool needToCreateEffectivePso = (m_GfxEffectivePipelineStateObjectHandle.handle == InvalidGfxHandle);
+    shipBool needToCreateEffectivePso = (!m_GfxEffectivePipelineStateObjectHandle.IsValid());
     if (!needToCreateEffectivePso)
     {
         const GFXGraphicsPipelineStateObject& gfxEffectivePipelineStateObject = gfxRenderDevice.GetGraphicsPipelineStateObject(m_GfxEffectivePipelineStateObjectHandle);

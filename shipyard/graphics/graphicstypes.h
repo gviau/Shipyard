@@ -9,21 +9,30 @@ namespace Shipyard
 #define DEFINE_HANDLE_TYPE(HandleTypeName) \
     struct HandleTypeName \
     { \
+        friend class DX11RenderDevice; \
         HandleTypeName() \
             : handle(InvalidGfxHandle) \
+            , generation(0) \
         { } \
         HandleTypeName(shipUint32 _handle) \
             : handle(_handle) \
+            , generation(0) \
         { } \
         shipBool operator== (const HandleTypeName& rhs) const \
         { \
-            return handle == rhs.handle; \
+            return handle == rhs.handle && generation == rhs.generation; \
+        } \
+        shipBool operator!= (const HandleTypeName& rhs) const \
+        { \
+            return !(*this == rhs); \
         } \
         shipBool IsValid() const \
         { \
             return handle != InvalidGfxHandle; \
         } \
+    private: \
         shipUint32 handle; \
+        shipUint16 generation; \
     }
 
     DEFINE_HANDLE_TYPE(GFXVertexBufferHandle);

@@ -1029,7 +1029,7 @@ void ShaderInputProviderManager::CreateShaderInputProviderConstantBuffer(ShaderI
 
 void ShaderInputProviderManager::DestroyShaderInputProviderConstantBuffer(ShaderInputProvider* shaderInputProvider)
 {
-    if (shaderInputProvider->m_GfxConstantBufferHandle.handle == InvalidGfxHandle)
+    if (!shaderInputProvider->m_GfxConstantBufferHandle.IsValid())
     {
         return;
     }

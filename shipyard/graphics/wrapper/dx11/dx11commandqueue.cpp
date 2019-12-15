@@ -141,7 +141,7 @@ size_t DX11CommandQueue::ClearFullRenderTarget(BaseRenderCommand* pCmd)
 {
     ClearFullRenderTargetCommand& clearFullRenderTargetCommand = *static_cast<ClearFullRenderTargetCommand*>(pCmd);
 
-    SHIP_ASSERT(clearFullRenderTargetCommand.gfxRenderTargetHandle.handle != InvalidGfxHandle);
+    SHIP_ASSERT(clearFullRenderTargetCommand.gfxRenderTargetHandle.IsValid());
 
     const GFXRenderTarget& gfxRenderTarget = m_RenderDevice.GetRenderTarget(clearFullRenderTargetCommand.gfxRenderTargetHandle);
 
@@ -165,7 +165,7 @@ size_t DX11CommandQueue::ClearSingleRenderTarget(BaseRenderCommand* pCmd)
 {
     ClearSingleRenderTargetCommand& clearSingleRenderTargetCommand = *static_cast<ClearSingleRenderTargetCommand*>(pCmd);
 
-    SHIP_ASSERT(clearSingleRenderTargetCommand.gfxRenderTargetHandle.handle != InvalidGfxHandle);
+    SHIP_ASSERT(clearSingleRenderTargetCommand.gfxRenderTargetHandle.IsValid());
     SHIP_ASSERT(clearSingleRenderTargetCommand.renderTargetIndex < GfxConstants::GfxConstants_MaxRenderTargetsBound);
 
     const GFXRenderTarget& gfxRenderTarget = m_RenderDevice.GetRenderTarget(clearSingleRenderTargetCommand.gfxRenderTargetHandle);
@@ -187,7 +187,7 @@ size_t DX11CommandQueue::ClearDepthStencilRenderTarget(BaseRenderCommand* pCmd)
 {
     ClearDepthStencilRenderTargetCommand& clearDepthStencilRenderTargetCommand = *static_cast<ClearDepthStencilRenderTargetCommand*>(pCmd);
 
-    SHIP_ASSERT(clearDepthStencilRenderTargetCommand.gfxDepthStencilRenderTargetHandle.handle != InvalidGfxHandle);
+    SHIP_ASSERT(clearDepthStencilRenderTargetCommand.gfxDepthStencilRenderTargetHandle.IsValid());
 
     const GFXDepthStencilRenderTarget& gfxDepthStencilRenderTarget = m_RenderDevice.GetDepthStencilRenderTarget(clearDepthStencilRenderTargetCommand.gfxDepthStencilRenderTargetHandle);
 
@@ -267,7 +267,7 @@ size_t DX11CommandQueue::DrawIndexed(BaseRenderCommand* pCmd)
 {
     DrawIndexedCommand& drawIndexedCommand = *static_cast<DrawIndexedCommand*>(pCmd);
 
-    SHIP_ASSERT(drawIndexedCommand.gfxIndexBufferHandle.handle != InvalidGfxHandle);
+    SHIP_ASSERT(drawIndexedCommand.gfxIndexBufferHandle.IsValid());
     const GFXIndexBuffer& gfxIndexBuffer = m_RenderDevice.GetIndexBuffer(drawIndexedCommand.gfxIndexBufferHandle);
 
     m_RenderStateCache.SetIndexBuffer(gfxIndexBuffer, drawIndexedCommand.indexBufferOffset);
@@ -301,7 +301,7 @@ size_t DX11CommandQueue::DrawIndexedSeveralVertexBuffers(BaseRenderCommand* pCmd
 {
     DrawIndexedSeveralVertexBuffersCommand& drawIndexedSeveralVertexBuffersCommand = *static_cast<DrawIndexedSeveralVertexBuffersCommand*>(pCmd);
 
-    SHIP_ASSERT(drawIndexedSeveralVertexBuffersCommand.gfxIndexBufferHandle.handle != InvalidGfxHandle);
+    SHIP_ASSERT(drawIndexedSeveralVertexBuffersCommand.gfxIndexBufferHandle.IsValid());
     const GFXIndexBuffer& gfxIndexBuffer = m_RenderDevice.GetIndexBuffer(drawIndexedSeveralVertexBuffersCommand.gfxIndexBufferHandle);
 
     m_RenderStateCache.SetIndexBuffer(gfxIndexBuffer, drawIndexedSeveralVertexBuffersCommand.indexBufferOffset);
@@ -416,14 +416,14 @@ size_t DX11CommandQueue::MapBuffer(BaseRenderCommand* pCmd)
 
 void DX11CommandQueue::PrepareNextDrawCalls(const DrawItem& drawItem)
 {
-    if (drawItem.renderTargetHandle.handle != InvalidGfxHandle)
+    if (drawItem.renderTargetHandle.IsValid())
     {
         const GFXRenderTarget& gfxRenderTarget = m_RenderDevice.GetRenderTarget(drawItem.renderTargetHandle);
 
         m_RenderStateCache.BindRenderTarget(gfxRenderTarget);
     }
 
-    if (drawItem.depthStencilRenderTargetHandle.handle != InvalidGfxHandle)
+    if (drawItem.depthStencilRenderTargetHandle.IsValid())
     {
         const GFXDepthStencilRenderTarget& gfxDepthStencilRenderTarget = m_RenderDevice.GetDepthStencilRenderTarget(drawItem.depthStencilRenderTargetHandle);
 

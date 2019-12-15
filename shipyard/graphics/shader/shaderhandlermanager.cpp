@@ -104,42 +104,42 @@ void ShaderHandlerManager::Destroy()
     {
         ShaderHandler* shaderHandler = keyValue.second;
 
-        if (shaderHandler->m_GfxVertexShaderHandle.handle != InvalidGfxHandle)
+        if (shaderHandler->m_GfxVertexShaderHandle.IsValid())
         {
             m_RenderDevice->DestroyVertexShader(shaderHandler->m_GfxVertexShaderHandle);
         }
 
-        if (shaderHandler->m_GfxPixelShaderHandle.handle != InvalidGfxHandle)
+        if (shaderHandler->m_GfxPixelShaderHandle.IsValid())
         {
             m_RenderDevice->DestroyPixelShader(shaderHandler->m_GfxPixelShaderHandle);
         }
 
-        if (shaderHandler->m_ShaderRenderElementsForGraphics.GfxGraphicsPipelineStateObjectHandle.handle != InvalidGfxHandle)
+        if (shaderHandler->m_ShaderRenderElementsForGraphics.GfxGraphicsPipelineStateObjectHandle.IsValid())
         {
             m_RenderDevice->DestroyGraphicsPipelineStateObject(shaderHandler->m_ShaderRenderElementsForGraphics.GfxGraphicsPipelineStateObjectHandle);
         }
 
-        if (shaderHandler->m_ShaderRenderElementsForGraphics.GfxRootSignatureHandle.handle != InvalidGfxHandle)
+        if (shaderHandler->m_ShaderRenderElementsForGraphics.GfxRootSignatureHandle.IsValid())
         {
             m_RenderDevice->DestroyRootSignature(shaderHandler->m_ShaderRenderElementsForGraphics.GfxRootSignatureHandle);
         }
 
-        if (shaderHandler->m_ShaderRenderElementsForGraphics.GfxDescriptorSetHandle.handle != InvalidGfxHandle)
+        if (shaderHandler->m_ShaderRenderElementsForGraphics.GfxDescriptorSetHandle.IsValid())
         {
             m_RenderDevice->DestroyDescriptorSet(shaderHandler->m_ShaderRenderElementsForGraphics.GfxDescriptorSetHandle);
         }
 
-        if (shaderHandler->m_ShaderRenderElementsForCompute.GfxComputePipelineStateObjectHandle.handle != InvalidGfxHandle)
+        if (shaderHandler->m_ShaderRenderElementsForCompute.GfxComputePipelineStateObjectHandle.IsValid())
         {
             m_RenderDevice->DestroyComputePipelineStateObject(shaderHandler->m_ShaderRenderElementsForCompute.GfxComputePipelineStateObjectHandle);
         }
 
-        if (shaderHandler->m_ShaderRenderElementsForCompute.GfxRootSignatureHandle.handle != InvalidGfxHandle)
+        if (shaderHandler->m_ShaderRenderElementsForCompute.GfxRootSignatureHandle.IsValid())
         {
             m_RenderDevice->DestroyRootSignature(shaderHandler->m_ShaderRenderElementsForCompute.GfxRootSignatureHandle);
         }
 
-        if (shaderHandler->m_ShaderRenderElementsForCompute.GfxDescriptorSetHandle.handle != InvalidGfxHandle)
+        if (shaderHandler->m_ShaderRenderElementsForCompute.GfxDescriptorSetHandle.IsValid())
         {
             m_RenderDevice->DestroyDescriptorSet(shaderHandler->m_ShaderRenderElementsForCompute.GfxDescriptorSetHandle);
         }
@@ -233,17 +233,17 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
 
     if (createShaders)
     {
-        if (shaderHandler->m_GfxVertexShaderHandle.handle != InvalidGfxHandle)
+        if (shaderHandler->m_GfxVertexShaderHandle.IsValid())
         {
             m_RenderDevice->DestroyVertexShader(shaderHandler->m_GfxVertexShaderHandle);
         }
 
-        if (shaderHandler->m_GfxPixelShaderHandle.handle != InvalidGfxHandle)
+        if (shaderHandler->m_GfxPixelShaderHandle.IsValid())
         {
             m_RenderDevice->DestroyPixelShader(shaderHandler->m_GfxPixelShaderHandle);
         }
 
-        if (shaderHandler->m_GfxComputeShaderHander.handle != InvalidGfxHandle)
+        if (shaderHandler->m_GfxComputeShaderHander.IsValid())
         {
             m_RenderDevice->DestroyComputeShader(shaderHandler->m_GfxComputeShaderHander);
         }
@@ -268,26 +268,23 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
 
         if (shaderHandler->m_GfxComputeShaderHander.IsValid())
         {
-            if (shaderHandler->m_ShaderRenderElementsForCompute.GfxRootSignatureHandle.handle != InvalidGfxHandle)
+            if (shaderHandler->m_ShaderRenderElementsForCompute.GfxRootSignatureHandle.IsValid())
             {
                 m_RenderDevice->DestroyRootSignature(shaderHandler->m_ShaderRenderElementsForCompute.GfxRootSignatureHandle);
-                shaderHandler->m_ShaderRenderElementsForCompute.GfxRootSignatureHandle.handle = InvalidGfxHandle;
             }
 
             shaderHandler->m_ShaderRenderElementsForCompute.GfxRootSignatureHandle = gfxRootSignatureHandle;
 
-            if (shaderHandler->m_ShaderRenderElementsForCompute.GfxDescriptorSetHandle.handle != InvalidGfxHandle)
+            if (shaderHandler->m_ShaderRenderElementsForCompute.GfxDescriptorSetHandle.IsValid())
             {
                 m_RenderDevice->DestroyDescriptorSet(shaderHandler->m_ShaderRenderElementsForCompute.GfxDescriptorSetHandle);
-                shaderHandler->m_ShaderRenderElementsForCompute.GfxDescriptorSetHandle.handle = InvalidGfxHandle;
             }
 
             shaderHandler->m_ShaderRenderElementsForCompute.GfxDescriptorSetHandle = gfxDescriptorSetHandle;
 
-            if (shaderHandler->m_ShaderRenderElementsForCompute.GfxComputePipelineStateObjectHandle.handle != InvalidGfxHandle)
+            if (shaderHandler->m_ShaderRenderElementsForCompute.GfxComputePipelineStateObjectHandle.IsValid())
             {
                 m_RenderDevice->DestroyComputePipelineStateObject(shaderHandler->m_ShaderRenderElementsForCompute.GfxComputePipelineStateObjectHandle);
-                shaderHandler->m_ShaderRenderElementsForCompute.GfxComputePipelineStateObjectHandle.handle = InvalidGfxHandle;
             }
 
             ComputePipelineStateObjectCreationParameters pipelineStateObjectCreationParameters;
@@ -298,26 +295,23 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
         }
         else if (shaderHandler->m_GfxVertexShaderHandle.IsValid())
         {
-            if (shaderHandler->m_ShaderRenderElementsForGraphics.GfxRootSignatureHandle.handle != InvalidGfxHandle)
+            if (shaderHandler->m_ShaderRenderElementsForGraphics.GfxRootSignatureHandle.IsValid())
             {
                 m_RenderDevice->DestroyRootSignature(shaderHandler->m_ShaderRenderElementsForGraphics.GfxRootSignatureHandle);
-                shaderHandler->m_ShaderRenderElementsForGraphics.GfxRootSignatureHandle.handle = InvalidGfxHandle;
             }
 
             shaderHandler->m_ShaderRenderElementsForGraphics.GfxRootSignatureHandle = gfxRootSignatureHandle;
 
-            if (shaderHandler->m_ShaderRenderElementsForGraphics.GfxDescriptorSetHandle.handle != InvalidGfxHandle)
+            if (shaderHandler->m_ShaderRenderElementsForGraphics.GfxDescriptorSetHandle.IsValid())
             {
                 m_RenderDevice->DestroyDescriptorSet(shaderHandler->m_ShaderRenderElementsForGraphics.GfxDescriptorSetHandle);
-                shaderHandler->m_ShaderRenderElementsForGraphics.GfxDescriptorSetHandle.handle = InvalidGfxHandle;
             }
 
             shaderHandler->m_ShaderRenderElementsForGraphics.GfxDescriptorSetHandle = gfxDescriptorSetHandle;
 
-            if (shaderHandler->m_ShaderRenderElementsForGraphics.GfxGraphicsPipelineStateObjectHandle.handle != InvalidGfxHandle)
+            if (shaderHandler->m_ShaderRenderElementsForGraphics.GfxGraphicsPipelineStateObjectHandle.IsValid())
             {
                 m_RenderDevice->DestroyGraphicsPipelineStateObject(shaderHandler->m_ShaderRenderElementsForGraphics.GfxGraphicsPipelineStateObjectHandle);
-                shaderHandler->m_ShaderRenderElementsForGraphics.GfxGraphicsPipelineStateObjectHandle.handle = InvalidGfxHandle;
             }
 
             GraphicsPipelineStateObjectCreationParameters pipelineStateObjectCreationParameters;
@@ -333,7 +327,7 @@ ShaderHandler* ShaderHandlerManager::GetShaderHandlerForShaderKey(ShaderKey shad
 
         for (GFXSamplerHandle gfxSamplerStateHandle : shaderHandler->m_SamplerStateHandles)
         {
-            if (gfxSamplerStateHandle.handle != InvalidGfxHandle)
+            if (gfxSamplerStateHandle.IsValid())
             {
                 m_RenderDevice->DestroySampler(gfxSamplerStateHandle);
             }

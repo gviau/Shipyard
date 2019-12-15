@@ -193,166 +193,167 @@ void DX11RenderDevice::Destroy()
     }
 
     shipUint32 indexToFree = 0;
-    if (m_VertexBufferPool.GetFirstAllocatedIndex(&indexToFree))
+    shipUint16 generation = 0;
+    if (m_VertexBufferPool.GetFirstAllocatedIndex(&indexToFree, &generation))
     {
         do
         {
-            m_VertexBufferPool.GetItem(indexToFree).Destroy();
+            m_VertexBufferPool.GetItem(indexToFree, generation).Destroy();
             m_VertexBufferPool.ReleaseItem(indexToFree);
-        } while (m_VertexBufferPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+        } while (m_VertexBufferPool.GetNextAllocatedIndex(indexToFree, &indexToFree, &generation));
     }
 
-    if (m_IndexBufferPool.GetFirstAllocatedIndex(&indexToFree))
+    if (m_IndexBufferPool.GetFirstAllocatedIndex(&indexToFree, &generation))
     {
         do
         {
-            m_IndexBufferPool.GetItem(indexToFree).Destroy();
+            m_IndexBufferPool.GetItem(indexToFree, generation).Destroy();
             m_IndexBufferPool.ReleaseItem(indexToFree);
-        } while (m_IndexBufferPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+        } while (m_IndexBufferPool.GetNextAllocatedIndex(indexToFree, &indexToFree, &generation));
     }
 
-    if (m_ConstantBufferPool.GetFirstAllocatedIndex(&indexToFree))
+    if (m_ConstantBufferPool.GetFirstAllocatedIndex(&indexToFree, &generation))
     {
         do
         {
-            m_ConstantBufferPool.GetItem(indexToFree).Destroy();
+            m_ConstantBufferPool.GetItem(indexToFree, generation).Destroy();
             m_ConstantBufferPool.ReleaseItem(indexToFree);
-        } while (m_ConstantBufferPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+        } while (m_ConstantBufferPool.GetNextAllocatedIndex(indexToFree, &indexToFree, &generation));
     }
 
-    if (m_ByteBufferPool.GetFirstAllocatedIndex(&indexToFree))
+    if (m_ByteBufferPool.GetFirstAllocatedIndex(&indexToFree, &generation))
     {
         do
         {
-            m_ByteBufferPool.GetItem(indexToFree).Destroy();
+            m_ByteBufferPool.GetItem(indexToFree, generation).Destroy();
             m_ByteBufferPool.ReleaseItem(indexToFree);
-        } while (m_ByteBufferPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+        } while (m_ByteBufferPool.GetNextAllocatedIndex(indexToFree, &indexToFree, &generation));
     }
 
-    if (m_Texture2dPool.GetFirstAllocatedIndex(&indexToFree))
+    if (m_Texture2dPool.GetFirstAllocatedIndex(&indexToFree, &generation))
     {
         do
         {
-            m_Texture2dPool.GetItem(indexToFree).Destroy();
+            m_Texture2dPool.GetItem(indexToFree, generation).Destroy();
             m_Texture2dPool.ReleaseItem(indexToFree);
-        } while (m_Texture2dPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+        } while (m_Texture2dPool.GetNextAllocatedIndex(indexToFree, &indexToFree, &generation));
     }
 
-    if (m_Texture2dArrayPool.GetFirstAllocatedIndex(&indexToFree))
+    if (m_Texture2dArrayPool.GetFirstAllocatedIndex(&indexToFree, &generation))
     {
         do
         {
-            m_Texture2dArrayPool.GetItem(indexToFree).Destroy();
+            m_Texture2dArrayPool.GetItem(indexToFree, generation).Destroy();
             m_Texture2dArrayPool.ReleaseItem(indexToFree);
-        } while (m_Texture2dArrayPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+        } while (m_Texture2dArrayPool.GetNextAllocatedIndex(indexToFree, &indexToFree, &generation));
     }
 
-    if (m_Texture3dPool.GetFirstAllocatedIndex(&indexToFree))
+    if (m_Texture3dPool.GetFirstAllocatedIndex(&indexToFree, &generation))
     {
         do
         {
-            m_Texture3dPool.GetItem(indexToFree).Destroy();
+            m_Texture3dPool.GetItem(indexToFree, generation).Destroy();
             m_Texture3dPool.ReleaseItem(indexToFree);
-        } while (m_Texture3dPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+        } while (m_Texture3dPool.GetNextAllocatedIndex(indexToFree, &indexToFree, &generation));
     }
 
-    if (m_TextureCubePool.GetFirstAllocatedIndex(&indexToFree))
+    if (m_TextureCubePool.GetFirstAllocatedIndex(&indexToFree, &generation))
     {
         do
         {
-            m_TextureCubePool.GetItem(indexToFree).Destroy();
+            m_TextureCubePool.GetItem(indexToFree, generation).Destroy();
             m_TextureCubePool.ReleaseItem(indexToFree);
-        } while (m_TextureCubePool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+        } while (m_TextureCubePool.GetNextAllocatedIndex(indexToFree, &indexToFree, &generation));
     }
 
-    if (m_SamplerPool.GetFirstAllocatedIndex(&indexToFree))
+    if (m_SamplerPool.GetFirstAllocatedIndex(&indexToFree, &generation))
     {
         do
         {
-            m_SamplerPool.GetItem(indexToFree).Destroy();
+            m_SamplerPool.GetItem(indexToFree, generation).Destroy();
             m_SamplerPool.ReleaseItem(indexToFree);
-        } while (m_SamplerPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+        } while (m_SamplerPool.GetNextAllocatedIndex(indexToFree, &indexToFree, &generation));
     }
 
-    if (m_RenderTargetPool.GetFirstAllocatedIndex(&indexToFree))
+    if (m_RenderTargetPool.GetFirstAllocatedIndex(&indexToFree, &generation))
     {
         do
         {
-            m_RenderTargetPool.GetItem(indexToFree).Destroy();
+            m_RenderTargetPool.GetItem(indexToFree, generation).Destroy();
             m_RenderTargetPool.ReleaseItem(indexToFree);
-        } while (m_RenderTargetPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+        } while (m_RenderTargetPool.GetNextAllocatedIndex(indexToFree, &indexToFree, &generation));
     }
 
-    if (m_DepthStencilRenderTargetPool.GetFirstAllocatedIndex(&indexToFree))
+    if (m_DepthStencilRenderTargetPool.GetFirstAllocatedIndex(&indexToFree, &generation))
     {
         do
         {
-            m_DepthStencilRenderTargetPool.GetItem(indexToFree).Destroy();
+            m_DepthStencilRenderTargetPool.GetItem(indexToFree, generation).Destroy();
             m_DepthStencilRenderTargetPool.ReleaseItem(indexToFree);
-        } while (m_DepthStencilRenderTargetPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+        } while (m_DepthStencilRenderTargetPool.GetNextAllocatedIndex(indexToFree, &indexToFree, &generation));
     }
 
-    if (m_VertexShaderPool.GetFirstAllocatedIndex(&indexToFree))
+    if (m_VertexShaderPool.GetFirstAllocatedIndex(&indexToFree, &generation))
     {
         do
         {
-            m_VertexShaderPool.GetItem(indexToFree).Destroy();
+            m_VertexShaderPool.GetItem(indexToFree, generation).Destroy();
             m_VertexShaderPool.ReleaseItem(indexToFree);
-        } while (m_VertexShaderPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+        } while (m_VertexShaderPool.GetNextAllocatedIndex(indexToFree, &indexToFree, &generation));
     }
 
-    if (m_PixelShaderPool.GetFirstAllocatedIndex(&indexToFree))
+    if (m_PixelShaderPool.GetFirstAllocatedIndex(&indexToFree, &generation))
     {
         do
         {
-            m_PixelShaderPool.GetItem(indexToFree).Destroy();
+            m_PixelShaderPool.GetItem(indexToFree, generation).Destroy();
             m_PixelShaderPool.ReleaseItem(indexToFree);
-        } while (m_PixelShaderPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+        } while (m_PixelShaderPool.GetNextAllocatedIndex(indexToFree, &indexToFree, &generation));
     }
 
-    if (m_ComputeShaderPool.GetFirstAllocatedIndex(&indexToFree))
+    if (m_ComputeShaderPool.GetFirstAllocatedIndex(&indexToFree, &generation))
     {
         do
         {
-            m_ComputeShaderPool.GetItem(indexToFree).Destroy();
+            m_ComputeShaderPool.GetItem(indexToFree, generation).Destroy();
             m_ComputeShaderPool.ReleaseItem(indexToFree);
-        } while (m_ComputeShaderPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+        } while (m_ComputeShaderPool.GetNextAllocatedIndex(indexToFree, &indexToFree, &generation));
     }
 
-    if (m_RootSignaturePool.GetFirstAllocatedIndex(&indexToFree))
+    if (m_RootSignaturePool.GetFirstAllocatedIndex(&indexToFree, &generation))
     {
         do
         {
-            m_RootSignaturePool.GetItem(indexToFree).Destroy();
+            m_RootSignaturePool.GetItem(indexToFree, generation).Destroy();
             m_RootSignaturePool.ReleaseItem(indexToFree);
-        } while (m_RootSignaturePool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+        } while (m_RootSignaturePool.GetNextAllocatedIndex(indexToFree, &indexToFree, &generation));
     }
 
-    if (m_GraphicsPipelineStateObjectPool.GetFirstAllocatedIndex(&indexToFree))
+    if (m_GraphicsPipelineStateObjectPool.GetFirstAllocatedIndex(&indexToFree, &generation))
     {
         do
         {
-            m_GraphicsPipelineStateObjectPool.GetItem(indexToFree).Destroy();
+            m_GraphicsPipelineStateObjectPool.GetItem(indexToFree, generation).Destroy();
             m_GraphicsPipelineStateObjectPool.ReleaseItem(indexToFree);
-        } while (m_GraphicsPipelineStateObjectPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+        } while (m_GraphicsPipelineStateObjectPool.GetNextAllocatedIndex(indexToFree, &indexToFree, &generation));
     }
 
-    if (m_ComputePipelineStateObjectPool.GetFirstAllocatedIndex(&indexToFree))
+    if (m_ComputePipelineStateObjectPool.GetFirstAllocatedIndex(&indexToFree, &generation))
     {
         do
         {
-            m_ComputePipelineStateObjectPool.GetItem(indexToFree).Destroy();
+            m_ComputePipelineStateObjectPool.GetItem(indexToFree, generation).Destroy();
             m_ComputePipelineStateObjectPool.ReleaseItem(indexToFree);
-        } while (m_ComputePipelineStateObjectPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+        } while (m_ComputePipelineStateObjectPool.GetNextAllocatedIndex(indexToFree, &indexToFree, &generation));
     }
 
-    if (m_DescriptorSetPool.GetFirstAllocatedIndex(&indexToFree))
+    if (m_DescriptorSetPool.GetFirstAllocatedIndex(&indexToFree, &generation))
     {
         do
         {
-            m_DescriptorSetPool.GetItem(indexToFree).Destroy();
+            m_DescriptorSetPool.GetItem(indexToFree, generation).Destroy();
             m_DescriptorSetPool.ReleaseItem(indexToFree);
-        } while (m_DescriptorSetPool.GetNextAllocatedIndex(indexToFree, &indexToFree));
+        } while (m_DescriptorSetPool.GetNextAllocatedIndex(indexToFree, &indexToFree, &generation));
     }
 
     if (m_Device != nullptr)
@@ -369,9 +370,9 @@ void DX11RenderDevice::Destroy()
 GFXVertexBufferHandle DX11RenderDevice::CreateVertexBuffer(shipUint32 numVertices, VertexFormatType vertexFormatType, shipBool dynamic, void* initialData)
 {
     GFXVertexBufferHandle gfxVertexBufferHandle;
-    gfxVertexBufferHandle.handle = m_VertexBufferPool.GetNewItemIndex();
+    gfxVertexBufferHandle.handle = m_VertexBufferPool.GetNewItemIndex(&gfxVertexBufferHandle.generation);
 
-    GFXVertexBuffer& gfxVertexBuffer = m_VertexBufferPool.GetItem(gfxVertexBufferHandle.handle);
+    GFXVertexBuffer& gfxVertexBuffer = m_VertexBufferPool.GetItem(gfxVertexBufferHandle.handle, gfxVertexBufferHandle.generation);
     shipBool isValid = gfxVertexBuffer.Create(*m_Device, *m_ImmediateDeviceContext, numVertices, vertexFormatType, dynamic, initialData);
 
     SHIP_ASSERT(isValid);
@@ -381,29 +382,30 @@ GFXVertexBufferHandle DX11RenderDevice::CreateVertexBuffer(shipUint32 numVertice
 
 void DX11RenderDevice::DestroyVertexBuffer(GFXVertexBufferHandle& gfxVertexBufferHandle)
 {
-    GFXVertexBuffer& gfxVertexBuffer = m_VertexBufferPool.GetItem(gfxVertexBufferHandle.handle);
+    GFXVertexBuffer& gfxVertexBuffer = m_VertexBufferPool.GetItem(gfxVertexBufferHandle.handle, gfxVertexBufferHandle.generation);
     gfxVertexBuffer.Destroy();
 
     m_VertexBufferPool.ReleaseItem(gfxVertexBufferHandle.handle);
     gfxVertexBufferHandle.handle = InvalidGfxHandle;
+    gfxVertexBufferHandle.generation += 1;
 }
 
 GFXVertexBuffer& DX11RenderDevice::GetVertexBuffer(GFXVertexBufferHandle gfxVertexBufferHandle)
 {
-    return m_VertexBufferPool.GetItem(gfxVertexBufferHandle.handle);
+    return m_VertexBufferPool.GetItem(gfxVertexBufferHandle.handle, gfxVertexBufferHandle.generation);
 }
 
 const GFXVertexBuffer& DX11RenderDevice::GetVertexBuffer(GFXVertexBufferHandle gfxVertexBufferHandle) const
 {
-    return m_VertexBufferPool.GetItem(gfxVertexBufferHandle.handle);
+    return m_VertexBufferPool.GetItem(gfxVertexBufferHandle.handle, gfxVertexBufferHandle.generation);
 }
 
 GFXIndexBufferHandle DX11RenderDevice::CreateIndexBuffer(shipUint32 numIndices, shipBool uses2BytesPerIndex, shipBool dynamic, void* initialData)
 {
     GFXIndexBufferHandle gfxIndexBufferHandle;
-    gfxIndexBufferHandle.handle = m_IndexBufferPool.GetNewItemIndex();
+    gfxIndexBufferHandle.handle = m_IndexBufferPool.GetNewItemIndex(&gfxIndexBufferHandle.generation);
 
-    GFXIndexBuffer& gfxIndexBuffer = m_IndexBufferPool.GetItem(gfxIndexBufferHandle.handle);
+    GFXIndexBuffer& gfxIndexBuffer = m_IndexBufferPool.GetItem(gfxIndexBufferHandle.handle, gfxIndexBufferHandle.generation);
     shipBool isValid = gfxIndexBuffer.Create(*m_Device, *m_ImmediateDeviceContext, numIndices, uses2BytesPerIndex, dynamic, initialData);
 
     SHIP_ASSERT(isValid);
@@ -413,21 +415,22 @@ GFXIndexBufferHandle DX11RenderDevice::CreateIndexBuffer(shipUint32 numIndices, 
 
 void DX11RenderDevice::DestroyIndexBuffer(GFXIndexBufferHandle& gfxIndexBufferHandle)
 {
-    GFXIndexBuffer& gfxIndexBuffer = m_IndexBufferPool.GetItem(gfxIndexBufferHandle.handle);
+    GFXIndexBuffer& gfxIndexBuffer = m_IndexBufferPool.GetItem(gfxIndexBufferHandle.handle, gfxIndexBufferHandle.generation);
     gfxIndexBuffer.Destroy();
 
     m_IndexBufferPool.ReleaseItem(gfxIndexBufferHandle.handle);
     gfxIndexBufferHandle.handle = InvalidGfxHandle;
+    gfxIndexBufferHandle.generation += 1;
 }
 
 GFXIndexBuffer& DX11RenderDevice::GetIndexBuffer(GFXIndexBufferHandle gfxIndexBufferHandle)
 {
-    return m_IndexBufferPool.GetItem(gfxIndexBufferHandle.handle);
+    return m_IndexBufferPool.GetItem(gfxIndexBufferHandle.handle, gfxIndexBufferHandle.generation);
 }
 
 const GFXIndexBuffer& DX11RenderDevice::GetIndexBuffer(GFXIndexBufferHandle gfxIndexBufferHandle) const
 {
-    return m_IndexBufferPool.GetItem(gfxIndexBufferHandle.handle);
+    return m_IndexBufferPool.GetItem(gfxIndexBufferHandle.handle, gfxIndexBufferHandle.generation);
 }
 
 GFXConstantBufferHandle DX11RenderDevice::CreateConstantBuffer(shipUint32 dataSizeInBytes, shipBool dynamic, void* initialData)
@@ -439,9 +442,9 @@ GFXConstantBufferHandle DX11RenderDevice::CreateConstantBuffer(shipUint32 dataSi
         return gfxConstantBufferHandle;
     }
     
-    gfxConstantBufferHandle.handle = m_ConstantBufferPool.GetNewItemIndex();
+    gfxConstantBufferHandle.handle = m_ConstantBufferPool.GetNewItemIndex(&gfxConstantBufferHandle.generation);
 
-    GFXConstantBuffer& gfxConstantBuffer = m_ConstantBufferPool.GetItem(gfxConstantBufferHandle.handle);
+    GFXConstantBuffer& gfxConstantBuffer = m_ConstantBufferPool.GetItem(gfxConstantBufferHandle.handle, gfxConstantBufferHandle.generation);
     shipBool isValid = gfxConstantBuffer.Create(*m_Device, *m_ImmediateDeviceContext, dataSizeInBytes, dynamic, initialData);
 
     SHIP_ASSERT(isValid);
@@ -451,21 +454,22 @@ GFXConstantBufferHandle DX11RenderDevice::CreateConstantBuffer(shipUint32 dataSi
 
 void DX11RenderDevice::DestroyConstantBuffer(GFXConstantBufferHandle& gfxConstantBufferHandle)
 {
-    GFXConstantBuffer& gfxConstantBuffer = m_ConstantBufferPool.GetItem(gfxConstantBufferHandle.handle);
+    GFXConstantBuffer& gfxConstantBuffer = m_ConstantBufferPool.GetItem(gfxConstantBufferHandle.handle, gfxConstantBufferHandle.generation);
     gfxConstantBuffer.Destroy();
 
     m_ConstantBufferPool.ReleaseItem(gfxConstantBufferHandle.handle);
     gfxConstantBufferHandle.handle = InvalidGfxHandle;
+    gfxConstantBufferHandle.generation += 1;
 }
 
 GFXConstantBuffer& DX11RenderDevice::GetConstantBuffer(GFXConstantBufferHandle gfxConstantBufferHandle)
 {
-    return m_ConstantBufferPool.GetItem(gfxConstantBufferHandle.handle);
+    return m_ConstantBufferPool.GetItem(gfxConstantBufferHandle.handle, gfxConstantBufferHandle.generation);
 }
 
 const GFXConstantBuffer& DX11RenderDevice::GetConstantBuffer(GFXConstantBufferHandle gfxConstantBufferHandle) const
 {
-    return m_ConstantBufferPool.GetItem(gfxConstantBufferHandle.handle);
+    return m_ConstantBufferPool.GetItem(gfxConstantBufferHandle.handle, gfxConstantBufferHandle.generation);
 }
 
 GFXByteBufferHandle DX11RenderDevice::CreateByteBuffer(ByteBuffer::ByteBufferCreationFlags byteBufferCreationFlags, shipUint32 dataSizeInBytes, shipBool dynamic, void* initialData)
@@ -477,9 +481,9 @@ GFXByteBufferHandle DX11RenderDevice::CreateByteBuffer(ByteBuffer::ByteBufferCre
         return gfxByteBufferHandle;
     }
     
-    gfxByteBufferHandle.handle = m_ByteBufferPool.GetNewItemIndex();
+    gfxByteBufferHandle.handle = m_ByteBufferPool.GetNewItemIndex(&gfxByteBufferHandle.generation);
 
-    GFXByteBuffer& gfxByteBuffer = m_ByteBufferPool.GetItem(gfxByteBufferHandle.handle);
+    GFXByteBuffer& gfxByteBuffer = m_ByteBufferPool.GetItem(gfxByteBufferHandle.handle, gfxByteBufferHandle.generation);
     shipBool isValid = gfxByteBuffer.Create(*m_Device, *m_ImmediateDeviceContext, byteBufferCreationFlags, dataSizeInBytes, dynamic, initialData);
 
     SHIP_ASSERT(isValid);
@@ -489,31 +493,32 @@ GFXByteBufferHandle DX11RenderDevice::CreateByteBuffer(ByteBuffer::ByteBufferCre
 
 void DX11RenderDevice::DestroyByteBuffer(GFXByteBufferHandle& gfxByteBufferHandle)
 {
-    GFXByteBuffer& gfxByteBuffer = m_ByteBufferPool.GetItem(gfxByteBufferHandle.handle);
+    GFXByteBuffer& gfxByteBuffer = m_ByteBufferPool.GetItem(gfxByteBufferHandle.handle, gfxByteBufferHandle.generation);
     gfxByteBuffer.Destroy();
 
     m_ByteBufferPool.ReleaseItem(gfxByteBufferHandle.handle);
     gfxByteBufferHandle.handle = InvalidGfxHandle;
+    gfxByteBufferHandle.generation += 1;
 }
 
 GFXByteBuffer& DX11RenderDevice::GetByteBuffer(GFXByteBufferHandle gfxByteBufferHandle)
 {
-    return m_ByteBufferPool.GetItem(gfxByteBufferHandle.handle);
+    return m_ByteBufferPool.GetItem(gfxByteBufferHandle.handle, gfxByteBufferHandle.generation);
 }
 
 const GFXByteBuffer& DX11RenderDevice::GetByteBuffer(GFXByteBufferHandle gfxByteBufferHandle) const
 {
-    return m_ByteBufferPool.GetItem(gfxByteBufferHandle.handle);
+    return m_ByteBufferPool.GetItem(gfxByteBufferHandle.handle, gfxByteBufferHandle.generation);
 }
 
 GFXByteBuffer* DX11RenderDevice::GetByteBufferPtr(GFXByteBufferHandle gfxByteBufferHandle)
 {
-    return m_ByteBufferPool.GetItemPtr(gfxByteBufferHandle.handle);
+    return m_ByteBufferPool.GetItemPtr(gfxByteBufferHandle.handle, gfxByteBufferHandle.generation);
 }
 
 const GFXByteBuffer* DX11RenderDevice::GetByteBufferPtr(GFXByteBufferHandle gfxByteBufferHandle) const
 {
-    return m_ByteBufferPool.GetItemPtr(gfxByteBufferHandle.handle);
+    return m_ByteBufferPool.GetItemPtr(gfxByteBufferHandle.handle, gfxByteBufferHandle.generation);
 }
 
 GFXTexture2DHandle DX11RenderDevice::CreateTexture2D(shipUint32 width, shipUint32 height, GfxFormat pixelFormat, shipBool dynamic, void* initialData, shipBool generateMips, TextureUsage textureUsage)
@@ -525,9 +530,9 @@ GFXTexture2DHandle DX11RenderDevice::CreateTexture2D(shipUint32 width, shipUint3
         return gfxTexture2dHandle;
     }
 
-    gfxTexture2dHandle.handle = m_Texture2dPool.GetNewItemIndex();
+    gfxTexture2dHandle.handle = m_Texture2dPool.GetNewItemIndex(&gfxTexture2dHandle.generation);
 
-    GFXTexture2D& gfxTexture2d = m_Texture2dPool.GetItem(gfxTexture2dHandle.handle);
+    GFXTexture2D& gfxTexture2d = m_Texture2dPool.GetItem(gfxTexture2dHandle.handle, gfxTexture2dHandle.generation);
     shipBool isValid = gfxTexture2d.Create(*m_Device, width, height, pixelFormat, dynamic, initialData, generateMips, textureUsage);
 
     SHIP_ASSERT(isValid);
@@ -537,31 +542,32 @@ GFXTexture2DHandle DX11RenderDevice::CreateTexture2D(shipUint32 width, shipUint3
 
 void DX11RenderDevice::DestroyTexture2D(GFXTexture2DHandle& gfxTexture2dHandle)
 {
-    GFXTexture2D& gfxTexture2d = m_Texture2dPool.GetItem(gfxTexture2dHandle.handle);
+    GFXTexture2D& gfxTexture2d = m_Texture2dPool.GetItem(gfxTexture2dHandle.handle, gfxTexture2dHandle.generation);
     gfxTexture2d.Destroy();
 
     m_Texture2dPool.ReleaseItem(gfxTexture2dHandle.handle);
     gfxTexture2dHandle.handle = InvalidGfxHandle;
+    gfxTexture2dHandle.generation += 1;
 }
 
 GFXTexture2D& DX11RenderDevice::GetTexture2D(GFXTexture2DHandle gfxTexture2dHandle)
 {
-    return m_Texture2dPool.GetItem(gfxTexture2dHandle.handle);
+    return m_Texture2dPool.GetItem(gfxTexture2dHandle.handle, gfxTexture2dHandle.generation);
 }
 
 const GFXTexture2D& DX11RenderDevice::GetTexture2D(GFXTexture2DHandle gfxTexture2dHandle) const
 {
-    return m_Texture2dPool.GetItem(gfxTexture2dHandle.handle);
+    return m_Texture2dPool.GetItem(gfxTexture2dHandle.handle, gfxTexture2dHandle.generation);
 }
 
 GFXTexture2D* DX11RenderDevice::GetTexture2DPtr(GFXTexture2DHandle gfxTexture2dHandle)
 {
-    return m_Texture2dPool.GetItemPtr(gfxTexture2dHandle.handle);
+    return m_Texture2dPool.GetItemPtr(gfxTexture2dHandle.handle, gfxTexture2dHandle.generation);
 }
 
 const GFXTexture2D* DX11RenderDevice::GetTexture2DPtr(GFXTexture2DHandle gfxTexture2dHandle) const
 {
-    return m_Texture2dPool.GetItemPtr(gfxTexture2dHandle.handle);
+    return m_Texture2dPool.GetItemPtr(gfxTexture2dHandle.handle, gfxTexture2dHandle.generation);
 }
 
 GFXTexture2DArrayHandle DX11RenderDevice::CreateTexture2DArray(
@@ -581,9 +587,9 @@ GFXTexture2DArrayHandle DX11RenderDevice::CreateTexture2DArray(
         return gfxTexture2DArrayHandle;
     }
 
-    gfxTexture2DArrayHandle.handle = m_Texture3dPool.GetNewItemIndex();
+    gfxTexture2DArrayHandle.handle = m_Texture3dPool.GetNewItemIndex(&gfxTexture2DArrayHandle.generation);
 
-    GFXTexture2DArray& gfxTexture2dArray = m_Texture2dArrayPool.GetItem(gfxTexture2DArrayHandle.handle);
+    GFXTexture2DArray& gfxTexture2dArray = m_Texture2dArrayPool.GetItem(gfxTexture2DArrayHandle.handle, gfxTexture2DArrayHandle.generation);
     shipBool isValid = gfxTexture2dArray.Create(*m_Device, width, height, numSlices, pixelFormat, dynamic, initialData, generateMips, textureUsage);
 
     SHIP_ASSERT(isValid);
@@ -593,31 +599,32 @@ GFXTexture2DArrayHandle DX11RenderDevice::CreateTexture2DArray(
 
 void DX11RenderDevice::DestroyTexture2DArray(GFXTexture2DArrayHandle& gfxTexture2DArrayHandle)
 {
-    GFXTexture2DArray& gfxTexture2dArray = m_Texture2dArrayPool.GetItem(gfxTexture2DArrayHandle.handle);
+    GFXTexture2DArray& gfxTexture2dArray = m_Texture2dArrayPool.GetItem(gfxTexture2DArrayHandle.handle, gfxTexture2DArrayHandle.generation);
     gfxTexture2dArray.Destroy();
 
     m_Texture2dArrayPool.ReleaseItem(gfxTexture2DArrayHandle.handle);
     gfxTexture2DArrayHandle.handle = InvalidGfxHandle;
+    gfxTexture2DArrayHandle.generation += 1;
 }
 
 GFXTexture2DArray& DX11RenderDevice::GetTexture2DArray(GFXTexture2DArrayHandle gfxTexture2DArrayHandle)
 {
-    return m_Texture2dArrayPool.GetItem(gfxTexture2DArrayHandle.handle);
+    return m_Texture2dArrayPool.GetItem(gfxTexture2DArrayHandle.handle, gfxTexture2DArrayHandle.generation);
 }
 
 const GFXTexture2DArray& DX11RenderDevice::GetTexture2DArray(GFXTexture2DArrayHandle gfxTexture2DArrayHandle) const
 {
-    return m_Texture2dArrayPool.GetItem(gfxTexture2DArrayHandle.handle);
+    return m_Texture2dArrayPool.GetItem(gfxTexture2DArrayHandle.handle, gfxTexture2DArrayHandle.generation);
 }
 
 GFXTexture2DArray* DX11RenderDevice::GetTexture2DArrayPtr(GFXTexture2DArrayHandle gfxTexture2DArrayHandle)
 {
-    return m_Texture2dArrayPool.GetItemPtr(gfxTexture2DArrayHandle.handle);
+    return m_Texture2dArrayPool.GetItemPtr(gfxTexture2DArrayHandle.handle, gfxTexture2DArrayHandle.generation);
 }
 
 const GFXTexture2DArray* DX11RenderDevice::GetTexture2DArrayPtr(GFXTexture2DArrayHandle gfxTexture2DArrayHandle) const
 {
-    return m_Texture2dArrayPool.GetItemPtr(gfxTexture2DArrayHandle.handle);
+    return m_Texture2dArrayPool.GetItemPtr(gfxTexture2DArrayHandle.handle, gfxTexture2DArrayHandle.generation);
 }
 
 GFXTexture3DHandle DX11RenderDevice::CreateTexture3D(
@@ -637,9 +644,9 @@ GFXTexture3DHandle DX11RenderDevice::CreateTexture3D(
         return gfxTexture3dHandle;
     }
 
-    gfxTexture3dHandle.handle = m_Texture3dPool.GetNewItemIndex();
+    gfxTexture3dHandle.handle = m_Texture3dPool.GetNewItemIndex(&gfxTexture3dHandle.generation);
 
-    GFXTexture3D& gfxTexture3d = m_Texture3dPool.GetItem(gfxTexture3dHandle.handle);
+    GFXTexture3D& gfxTexture3d = m_Texture3dPool.GetItem(gfxTexture3dHandle.handle, gfxTexture3dHandle.generation);
     shipBool isValid = gfxTexture3d.Create(*m_Device, width, height, depth, pixelFormat, dynamic, initialData, generateMips, textureUsage);
 
     SHIP_ASSERT(isValid);
@@ -649,33 +656,33 @@ GFXTexture3DHandle DX11RenderDevice::CreateTexture3D(
 
 void DX11RenderDevice::DestroyTexture3D(GFXTexture3DHandle& gfxTexture3DHandle)
 {
-    GFXTexture3D& gfxTexture3d = m_Texture3dPool.GetItem(gfxTexture3DHandle.handle);
+    GFXTexture3D& gfxTexture3d = m_Texture3dPool.GetItem(gfxTexture3DHandle.handle, gfxTexture3DHandle.generation);
     gfxTexture3d.Destroy();
 
     m_Texture3dPool.ReleaseItem(gfxTexture3DHandle.handle);
     gfxTexture3DHandle.handle = InvalidGfxHandle;
+    gfxTexture3DHandle.generation += 1;
 }
 
 GFXTexture3D& DX11RenderDevice::GetTexture3D(GFXTexture3DHandle gfxTexture3DHandle)
 {
-    return m_Texture3dPool.GetItem(gfxTexture3DHandle.handle);
+    return m_Texture3dPool.GetItem(gfxTexture3DHandle.handle, gfxTexture3DHandle.generation);
 }
 
 const GFXTexture3D& DX11RenderDevice::GetTexture3D(GFXTexture3DHandle gfxTexture3DHandle) const
 {
-    return m_Texture3dPool.GetItem(gfxTexture3DHandle.handle);
+    return m_Texture3dPool.GetItem(gfxTexture3DHandle.handle, gfxTexture3DHandle.generation);
 }
 
 GFXTexture3D* DX11RenderDevice::GetTexture3DPtr(GFXTexture3DHandle gfxTexture3DHandle)
 {
-    return m_Texture3dPool.GetItemPtr(gfxTexture3DHandle.handle);
+    return m_Texture3dPool.GetItemPtr(gfxTexture3DHandle.handle, gfxTexture3DHandle.generation);
 }
 
 const GFXTexture3D* DX11RenderDevice::GetTexture3DPtr(GFXTexture3DHandle gfxTexture3DHandle) const
 {
-    return m_Texture3dPool.GetItemPtr(gfxTexture3DHandle.handle);
+    return m_Texture3dPool.GetItemPtr(gfxTexture3DHandle.handle, gfxTexture3DHandle.generation);
 }
-
 
 GFXTextureCubeHandle DX11RenderDevice::CreateTextureCube(
         shipUint32 width,
@@ -693,9 +700,9 @@ GFXTextureCubeHandle DX11RenderDevice::CreateTextureCube(
         return gfxTextureCubeHandle;
     }
 
-    gfxTextureCubeHandle.handle = m_TextureCubePool.GetNewItemIndex();
+    gfxTextureCubeHandle.handle = m_TextureCubePool.GetNewItemIndex(&gfxTextureCubeHandle.generation);
 
-    GFXTextureCube& gfxTextureCube = m_TextureCubePool.GetItem(gfxTextureCubeHandle.handle);
+    GFXTextureCube& gfxTextureCube = m_TextureCubePool.GetItem(gfxTextureCubeHandle.handle, gfxTextureCubeHandle.generation);
     shipBool isValid = gfxTextureCube.Create(*m_Device, width, height, pixelFormat, dynamic, initialData, generateMips, textureUsage);
 
     SHIP_ASSERT(isValid);
@@ -705,45 +712,47 @@ GFXTextureCubeHandle DX11RenderDevice::CreateTextureCube(
 
 void DX11RenderDevice::DestroyTextureCube(GFXTextureCubeHandle& gfxTextureCubeHandle)
 {
-    GFXTextureCube& gfxTextureCube = m_TextureCubePool.GetItem(gfxTextureCubeHandle.handle);
+    GFXTextureCube& gfxTextureCube = m_TextureCubePool.GetItem(gfxTextureCubeHandle.handle, gfxTextureCubeHandle.generation);
     gfxTextureCube.Destroy();
 
     m_TextureCubePool.ReleaseItem(gfxTextureCubeHandle.handle);
     gfxTextureCubeHandle.handle = InvalidGfxHandle;
+    gfxTextureCubeHandle.generation += 1;
 }
 
 GFXTextureCube& DX11RenderDevice::GetTextureCube(GFXTextureCubeHandle gfxTextureCubeHandle)
 {
-    return m_TextureCubePool.GetItem(gfxTextureCubeHandle.handle);
+    return m_TextureCubePool.GetItem(gfxTextureCubeHandle.handle, gfxTextureCubeHandle.generation);
 }
 
 const GFXTextureCube& DX11RenderDevice::GetTextureCube(GFXTextureCubeHandle gfxTextureCubeHandle) const
 {
-    return m_TextureCubePool.GetItem(gfxTextureCubeHandle.handle);
+    return m_TextureCubePool.GetItem(gfxTextureCubeHandle.handle, gfxTextureCubeHandle.generation);
 }
 
 GFXTextureCube* DX11RenderDevice::GetTextureCubePtr(GFXTextureCubeHandle gfxTextureCubeHandle)
 {
-    return m_TextureCubePool.GetItemPtr(gfxTextureCubeHandle.handle);
+    return m_TextureCubePool.GetItemPtr(gfxTextureCubeHandle.handle, gfxTextureCubeHandle.generation);
 }
 
 const GFXTextureCube* DX11RenderDevice::GetTextureCubePtr(GFXTextureCubeHandle gfxTextureCubeHandle) const
 {
-    return m_TextureCubePool.GetItemPtr(gfxTextureCubeHandle.handle);
+    return m_TextureCubePool.GetItemPtr(gfxTextureCubeHandle.handle, gfxTextureCubeHandle.generation);
 }
 
-shipUint32 GetSamplerIndexFromSamplerState(const DataPool<GFXSampler, SHIP_MAX_SAMPLERS>& samplerPool, const SamplerState& samplerState)
+shipUint32 GetSamplerIndexFromSamplerState(const GenerationalDataPool<GFXSampler, SHIP_MAX_SAMPLERS>& samplerPool, const SamplerState& samplerState)
 {
     shipUint32 allocatedSamplerIndex = 0;
-    if (samplerPool.GetFirstAllocatedIndex(&allocatedSamplerIndex))
+    shipUint16 allocatedSamplerGeneration = 0;
+    if (samplerPool.GetFirstAllocatedIndex(&allocatedSamplerIndex, &allocatedSamplerGeneration))
     {
         do
         {
-            if (samplerPool.GetItem(allocatedSamplerIndex).GetSamplerState() == samplerState)
+            if (samplerPool.GetItem(allocatedSamplerIndex, allocatedSamplerGeneration).GetSamplerState() == samplerState)
             {
                 return allocatedSamplerIndex;
             }
-        } while (samplerPool.GetNextAllocatedIndex(allocatedSamplerIndex, &allocatedSamplerIndex));
+        } while (samplerPool.GetNextAllocatedIndex(allocatedSamplerIndex, &allocatedSamplerIndex, &allocatedSamplerGeneration));
     }
 
     return InvalidGfxHandle;
@@ -760,9 +769,9 @@ GFXSamplerHandle DX11RenderDevice::CreateSampler(const SamplerState& samplerStat
     }
 
     GFXSamplerHandle gfxSamplerHandle;
-    gfxSamplerHandle.handle = m_SamplerPool.GetNewItemIndex();
+    gfxSamplerHandle.handle = m_SamplerPool.GetNewItemIndex(&gfxSamplerHandle.generation);
 
-    GFXSampler& gfxSampler = m_SamplerPool.GetItem(gfxSamplerHandle.handle);
+    GFXSampler& gfxSampler = m_SamplerPool.GetItem(gfxSamplerHandle.handle, gfxSamplerHandle.generation);
     shipBool isValid = gfxSampler.Create(*m_Device, samplerState);
 
     SHIP_ASSERT(isValid);
@@ -779,40 +788,41 @@ void DX11RenderDevice::DestroySampler(GFXSamplerHandle& gfxSamplerHandle)
 
     if (m_SamplerHandleRefCounts[gfxSamplerHandle.handle] == 0)
     {
-        GFXSampler& gfxSampler = m_SamplerPool.GetItem(gfxSamplerHandle.handle);
+        GFXSampler& gfxSampler = m_SamplerPool.GetItem(gfxSamplerHandle.handle, gfxSamplerHandle.generation);
         gfxSampler.Destroy();
 
         m_SamplerPool.ReleaseItem(gfxSamplerHandle.handle);
         gfxSamplerHandle.handle = InvalidGfxHandle;
+        gfxSamplerHandle.generation += 1;
     }
 }
 
 GFXSampler& DX11RenderDevice::GetSampler(GFXSamplerHandle gfxSamplerHandle)
 {
-    return m_SamplerPool.GetItem(gfxSamplerHandle.handle);
+    return m_SamplerPool.GetItem(gfxSamplerHandle.handle, gfxSamplerHandle.generation);
 }
 
 const GFXSampler& DX11RenderDevice::GetSampler(GFXSamplerHandle gfxSamplerHandle) const
 {
-    return m_SamplerPool.GetItem(gfxSamplerHandle.handle);
+    return m_SamplerPool.GetItem(gfxSamplerHandle.handle, gfxSamplerHandle.generation);
 }
 
 GFXSampler* DX11RenderDevice::GetSamplerPtr(GFXSamplerHandle gfxSamplerHandle)
 {
-    return m_SamplerPool.GetItemPtr(gfxSamplerHandle.handle);
+    return m_SamplerPool.GetItemPtr(gfxSamplerHandle.handle, gfxSamplerHandle.generation);
 }
 
 const GFXSampler* DX11RenderDevice::GetSamplerPtr(GFXSamplerHandle gfxSamplerHandle) const
 {
-    return m_SamplerPool.GetItemPtr(gfxSamplerHandle.handle);
+    return m_SamplerPool.GetItemPtr(gfxSamplerHandle.handle, gfxSamplerHandle.generation);
 }
 
 GFXRenderTargetHandle DX11RenderDevice::CreateRenderTarget(GFXTexture2DHandle* texturesToAttach, shipUint32 numTexturesToAttach)
 {
     GFXRenderTargetHandle gfxRenderTargetHandle;
-    gfxRenderTargetHandle.handle = m_RenderTargetPool.GetNewItemIndex();
+    gfxRenderTargetHandle.handle = m_RenderTargetPool.GetNewItemIndex(&gfxRenderTargetHandle.generation);
 
-    GFXRenderTarget& gfxRenderTarget = m_RenderTargetPool.GetItem(gfxRenderTargetHandle.handle);
+    GFXRenderTarget& gfxRenderTarget = m_RenderTargetPool.GetItem(gfxRenderTargetHandle.handle, gfxRenderTargetHandle.generation);
 
     GFXTexture2D* textures[GfxConstants_MaxRenderTargetsBound];
     for (shipUint32 i = 0; i < numTexturesToAttach; i++)
@@ -823,7 +833,7 @@ GFXRenderTargetHandle DX11RenderDevice::CreateRenderTarget(GFXTexture2DHandle* t
         }
         else
         {
-            textures[i] = &m_Texture2dPool.GetItem(texturesToAttach[i].handle);
+            textures[i] = &m_Texture2dPool.GetItem(texturesToAttach[i].handle, texturesToAttach[i].generation);
         }
     }
 
@@ -836,33 +846,34 @@ GFXRenderTargetHandle DX11RenderDevice::CreateRenderTarget(GFXTexture2DHandle* t
 
 void DX11RenderDevice::DestroyRenderTarget(GFXRenderTargetHandle& gfxRenderTargetHandle)
 {
-    GFXRenderTarget& gfxRenderTarget = m_RenderTargetPool.GetItem(gfxRenderTargetHandle.handle);
+    GFXRenderTarget& gfxRenderTarget = m_RenderTargetPool.GetItem(gfxRenderTargetHandle.handle, gfxRenderTargetHandle.generation);
     gfxRenderTarget.Destroy();
 
     m_RenderTargetPool.ReleaseItem(gfxRenderTargetHandle.handle);
     gfxRenderTargetHandle.handle = InvalidGfxHandle;
+    gfxRenderTargetHandle.generation += 1;
 }
 
 GFXRenderTarget& DX11RenderDevice::GetRenderTarget(GFXRenderTargetHandle gfxRenderTargetHandle)
 {
-    return m_RenderTargetPool.GetItem(gfxRenderTargetHandle.handle);
+    return m_RenderTargetPool.GetItem(gfxRenderTargetHandle.handle, gfxRenderTargetHandle.generation);
 }
 
 const GFXRenderTarget& DX11RenderDevice::GetRenderTarget(GFXRenderTargetHandle gfxRenderTargetHandle) const
 {
-    return m_RenderTargetPool.GetItem(gfxRenderTargetHandle.handle);
+    return m_RenderTargetPool.GetItem(gfxRenderTargetHandle.handle, gfxRenderTargetHandle.generation);
 }
 
 GFXDepthStencilRenderTargetHandle DX11RenderDevice::CreateDepthStencilRenderTarget(GFXTexture2DHandle depthStencilTexture)
 {
-    SHIP_ASSERT(depthStencilTexture.handle != InvalidGfxHandle);
+    SHIP_ASSERT(depthStencilTexture.IsValid());
 
     GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle;
-    gfxDepthStencilRenderTargetHandle.handle = m_DepthStencilRenderTargetPool.GetNewItemIndex();
+    gfxDepthStencilRenderTargetHandle.handle = m_DepthStencilRenderTargetPool.GetNewItemIndex(&gfxDepthStencilRenderTargetHandle.generation);
 
-    GFXDepthStencilRenderTarget& gfxDepthStencilRenderTarget = m_DepthStencilRenderTargetPool.GetItem(gfxDepthStencilRenderTargetHandle.handle);
+    GFXDepthStencilRenderTarget& gfxDepthStencilRenderTarget = m_DepthStencilRenderTargetPool.GetItem(gfxDepthStencilRenderTargetHandle.handle, gfxDepthStencilRenderTargetHandle.generation);
 
-    GFXTexture2D& gfxDepthStencilTexture = m_Texture2dPool.GetItem(depthStencilTexture.handle);
+    GFXTexture2D& gfxDepthStencilTexture = m_Texture2dPool.GetItem(depthStencilTexture.handle, depthStencilTexture.generation);
 
     shipBool isValid = gfxDepthStencilRenderTarget.Create(*m_Device, gfxDepthStencilTexture);
 
@@ -873,29 +884,30 @@ GFXDepthStencilRenderTargetHandle DX11RenderDevice::CreateDepthStencilRenderTarg
 
 void DX11RenderDevice::DestroyDepthStencilRenderTarget(GFXDepthStencilRenderTargetHandle& gfxDepthStencilRenderTargetHandle)
 {
-    GFXDepthStencilRenderTarget& gfxDepthStencilRenderTarget = m_DepthStencilRenderTargetPool.GetItem(gfxDepthStencilRenderTargetHandle.handle);
+    GFXDepthStencilRenderTarget& gfxDepthStencilRenderTarget = m_DepthStencilRenderTargetPool.GetItem(gfxDepthStencilRenderTargetHandle.handle, gfxDepthStencilRenderTargetHandle.generation);
     gfxDepthStencilRenderTarget.Destroy();
 
     m_DepthStencilRenderTargetPool.ReleaseItem(gfxDepthStencilRenderTargetHandle.handle);
     gfxDepthStencilRenderTargetHandle.handle = InvalidGfxHandle;
+    gfxDepthStencilRenderTargetHandle.generation += 1;
 }
 
 GFXDepthStencilRenderTarget& DX11RenderDevice::GetDepthStencilRenderTarget(GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle)
 {
-    return m_DepthStencilRenderTargetPool.GetItem(gfxDepthStencilRenderTargetHandle.handle);
+    return m_DepthStencilRenderTargetPool.GetItem(gfxDepthStencilRenderTargetHandle.handle, gfxDepthStencilRenderTargetHandle.generation);
 }
 
 const GFXDepthStencilRenderTarget& DX11RenderDevice::GetDepthStencilRenderTarget(GFXDepthStencilRenderTargetHandle gfxDepthStencilRenderTargetHandle) const
 {
-    return m_DepthStencilRenderTargetPool.GetItem(gfxDepthStencilRenderTargetHandle.handle);
+    return m_DepthStencilRenderTargetPool.GetItem(gfxDepthStencilRenderTargetHandle.handle, gfxDepthStencilRenderTargetHandle.generation);
 }
 
 GFXVertexShaderHandle DX11RenderDevice::CreateVertexShader(void* shaderData, shipUint64 shaderDataSize)
 {
     GFXVertexShaderHandle gfxVertexShaderHandle;
-    gfxVertexShaderHandle.handle = m_VertexShaderPool.GetNewItemIndex();
+    gfxVertexShaderHandle.handle = m_VertexShaderPool.GetNewItemIndex(&gfxVertexShaderHandle.generation);
 
-    GFXVertexShader& gfxVertexShader = m_VertexShaderPool.GetItem(gfxVertexShaderHandle.handle);
+    GFXVertexShader& gfxVertexShader = m_VertexShaderPool.GetItem(gfxVertexShaderHandle.handle, gfxVertexShaderHandle.generation);
     shipBool isValid = gfxVertexShader.Create(*m_Device, shaderData, shaderDataSize);
 
     SHIP_ASSERT(isValid);
@@ -905,29 +917,30 @@ GFXVertexShaderHandle DX11RenderDevice::CreateVertexShader(void* shaderData, shi
 
 void DX11RenderDevice::DestroyVertexShader(GFXVertexShaderHandle& gfxVertexShaderHandle)
 {
-    GFXVertexShader& gfxVertexShader = m_VertexShaderPool.GetItem(gfxVertexShaderHandle.handle);
+    GFXVertexShader& gfxVertexShader = m_VertexShaderPool.GetItem(gfxVertexShaderHandle.handle, gfxVertexShaderHandle.generation);
     gfxVertexShader.Destroy();
 
     m_VertexShaderPool.ReleaseItem(gfxVertexShaderHandle.handle);
     gfxVertexShaderHandle.handle = InvalidGfxHandle;
+    gfxVertexShaderHandle.generation += 1;
 }
 
 GFXVertexShader& DX11RenderDevice::GetVertexShader(GFXVertexShaderHandle gfxVertexShaderHandle)
 {
-    return m_VertexShaderPool.GetItem(gfxVertexShaderHandle.handle);
+    return m_VertexShaderPool.GetItem(gfxVertexShaderHandle.handle, gfxVertexShaderHandle.generation);
 }
 
 const GFXVertexShader& DX11RenderDevice::GetVertexShader(GFXVertexShaderHandle gfxVertexShaderHandle) const
 {
-    return m_VertexShaderPool.GetItem(gfxVertexShaderHandle.handle);
+    return m_VertexShaderPool.GetItem(gfxVertexShaderHandle.handle, gfxVertexShaderHandle.generation);
 }
 
 GFXPixelShaderHandle DX11RenderDevice::CreatePixelShader(void* shaderData, shipUint64 shaderDataSize)
 {
     GFXPixelShaderHandle gfxPixelShaderHandle;
-    gfxPixelShaderHandle.handle = m_PixelShaderPool.GetNewItemIndex();
+    gfxPixelShaderHandle.handle = m_PixelShaderPool.GetNewItemIndex(&gfxPixelShaderHandle.generation);
 
-    GFXPixelShader& gfxPixelShader = m_PixelShaderPool.GetItem(gfxPixelShaderHandle.handle);
+    GFXPixelShader& gfxPixelShader = m_PixelShaderPool.GetItem(gfxPixelShaderHandle.handle, gfxPixelShaderHandle.generation);
     shipBool isValid = gfxPixelShader.Create(*m_Device, shaderData, shaderDataSize);
 
     SHIP_ASSERT(isValid);
@@ -937,29 +950,30 @@ GFXPixelShaderHandle DX11RenderDevice::CreatePixelShader(void* shaderData, shipU
 
 void DX11RenderDevice::DestroyPixelShader(GFXPixelShaderHandle& gfxPixelShaderHandle)
 {
-    GFXPixelShader& gfxPixelShader = m_PixelShaderPool.GetItem(gfxPixelShaderHandle.handle);
+    GFXPixelShader& gfxPixelShader = m_PixelShaderPool.GetItem(gfxPixelShaderHandle.handle, gfxPixelShaderHandle.generation);
     gfxPixelShader.Destroy();
 
     m_PixelShaderPool.ReleaseItem(gfxPixelShaderHandle.handle);
     gfxPixelShaderHandle.handle = InvalidGfxHandle;
+    gfxPixelShaderHandle.generation += 1;
 }
 
 GFXPixelShader& DX11RenderDevice::GetPixelShader(GFXPixelShaderHandle gfxPixelShaderHandle)
 {
-    return m_PixelShaderPool.GetItem(gfxPixelShaderHandle.handle);
+    return m_PixelShaderPool.GetItem(gfxPixelShaderHandle.handle, gfxPixelShaderHandle.generation);
 }
 
 const GFXPixelShader& DX11RenderDevice::GetPixelShader(GFXPixelShaderHandle gfxPixelShaderHandle) const
 {
-    return m_PixelShaderPool.GetItem(gfxPixelShaderHandle.handle);
+    return m_PixelShaderPool.GetItem(gfxPixelShaderHandle.handle, gfxPixelShaderHandle.generation);
 }
 
 GFXComputeShaderHandle DX11RenderDevice::CreateComputeShader(void* shaderData, shipUint64 shaderDataSize)
 {
     GFXComputeShaderHandle gfxComputeShaderHandle;
-    gfxComputeShaderHandle.handle = m_ComputeShaderPool.GetNewItemIndex();
+    gfxComputeShaderHandle.handle = m_ComputeShaderPool.GetNewItemIndex(&gfxComputeShaderHandle.generation);
 
-    GFXComputeShader& gfxComputeShader = m_ComputeShaderPool.GetItem(gfxComputeShaderHandle.handle);
+    GFXComputeShader& gfxComputeShader = m_ComputeShaderPool.GetItem(gfxComputeShaderHandle.handle, gfxComputeShaderHandle.generation);
     shipBool isValid = gfxComputeShader.Create(*m_Device, shaderData, shaderDataSize);
 
     SHIP_ASSERT(isValid);
@@ -969,29 +983,30 @@ GFXComputeShaderHandle DX11RenderDevice::CreateComputeShader(void* shaderData, s
 
 void DX11RenderDevice::DestroyComputeShader(GFXComputeShaderHandle& gfxComputeShaderHandle)
 {
-    GFXComputeShader& gfxComputeShader = m_ComputeShaderPool.GetItem(gfxComputeShaderHandle.handle);
+    GFXComputeShader& gfxComputeShader = m_ComputeShaderPool.GetItem(gfxComputeShaderHandle.handle, gfxComputeShaderHandle.generation);
     gfxComputeShader.Destroy();
 
     m_ComputeShaderPool.ReleaseItem(gfxComputeShaderHandle.handle);
     gfxComputeShaderHandle.handle = InvalidGfxHandle;
+    gfxComputeShaderHandle.generation += 1;
 }
 
 GFXComputeShader& DX11RenderDevice::GetComputeShader(GFXComputeShaderHandle gfxComputeShaderHandle)
 {
-    return m_ComputeShaderPool.GetItem(gfxComputeShaderHandle.handle);
+    return m_ComputeShaderPool.GetItem(gfxComputeShaderHandle.handle, gfxComputeShaderHandle.generation);
 }
 
 const GFXComputeShader& DX11RenderDevice::GetComputeShader(GFXComputeShaderHandle gfxComputeShaderHandle) const
 {
-    return m_ComputeShaderPool.GetItem(gfxComputeShaderHandle.handle);
+    return m_ComputeShaderPool.GetItem(gfxComputeShaderHandle.handle, gfxComputeShaderHandle.generation);
 }
 
 GFXRootSignatureHandle DX11RenderDevice::CreateRootSignature(const Array<RootSignatureParameterEntry>& rootSignatureParameters)
 {
     GFXRootSignatureHandle gfxRootSignatureHandle;
-    gfxRootSignatureHandle.handle = m_RootSignaturePool.GetNewItemIndex();
+    gfxRootSignatureHandle.handle = m_RootSignaturePool.GetNewItemIndex(&gfxRootSignatureHandle.generation);
 
-    GFXRootSignature& gfxRootSignature = m_RootSignaturePool.GetItem(gfxRootSignatureHandle.handle);
+    GFXRootSignature& gfxRootSignature = m_RootSignaturePool.GetItem(gfxRootSignatureHandle.handle, gfxRootSignatureHandle.generation);
     shipBool isValid = gfxRootSignature.Create(rootSignatureParameters);
 
     SHIP_ASSERT(isValid);
@@ -1001,47 +1016,49 @@ GFXRootSignatureHandle DX11RenderDevice::CreateRootSignature(const Array<RootSig
 
 void DX11RenderDevice::DestroyRootSignature(GFXRootSignatureHandle& gfxRootSignatureHandle)
 {
-    GFXRootSignature& gfxRootSignature = m_RootSignaturePool.GetItem(gfxRootSignatureHandle.handle);
+    GFXRootSignature& gfxRootSignature = m_RootSignaturePool.GetItem(gfxRootSignatureHandle.handle, gfxRootSignatureHandle.generation);
     gfxRootSignature.Destroy();
 
     m_RootSignaturePool.ReleaseItem(gfxRootSignatureHandle.handle);
     gfxRootSignatureHandle.handle = InvalidGfxHandle;
+    gfxRootSignatureHandle.generation += 1;
 }
 
 GFXRootSignature& DX11RenderDevice::GetRootSignature(GFXRootSignatureHandle gfxRootSignatureHandle)
 {
-    return m_RootSignaturePool.GetItem(gfxRootSignatureHandle.handle);
+    return m_RootSignaturePool.GetItem(gfxRootSignatureHandle.handle, gfxRootSignatureHandle.generation);
 }
 
 const GFXRootSignature& DX11RenderDevice::GetRootSignature(GFXRootSignatureHandle gfxRootSignatureHandle) const
 {
-    return m_RootSignaturePool.GetItem(gfxRootSignatureHandle.handle);
+    return m_RootSignaturePool.GetItem(gfxRootSignatureHandle.handle, gfxRootSignatureHandle.generation);
 }
 
 GFXRootSignature* DX11RenderDevice::GetRootSignaturePtr(GFXRootSignatureHandle gfxRootSignatureHandle)
 {
-    return m_RootSignaturePool.GetItemPtr(gfxRootSignatureHandle.handle);
+    return m_RootSignaturePool.GetItemPtr(gfxRootSignatureHandle.handle, gfxRootSignatureHandle.generation);
 }
 
 const GFXRootSignature* DX11RenderDevice::GetRootSignaturePtr(GFXRootSignatureHandle gfxRootSignatureHandle) const
 {
-    return m_RootSignaturePool.GetItemPtr(gfxRootSignatureHandle.handle);
+    return m_RootSignaturePool.GetItemPtr(gfxRootSignatureHandle.handle, gfxRootSignatureHandle.generation);
 }
 
 shipUint32 GetGraphicsPipelineStateObjectIndex(
-        const DataPool<GFXGraphicsPipelineStateObject, SHIP_MAX_GRAPHICS_PIPELINE_STATE_OBJECTS>& pipelineStateObjectPool,
+        const GenerationalDataPool<GFXGraphicsPipelineStateObject, SHIP_MAX_GRAPHICS_PIPELINE_STATE_OBJECTS>& pipelineStateObjectPool,
         const GraphicsPipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters)
 {
     shipUint32 allocatedPipelineStateObjectIndex = 0;
-    if (pipelineStateObjectPool.GetFirstAllocatedIndex(&allocatedPipelineStateObjectIndex))
+    shipUint16 allocatedPipelineStateObjectGeneration = 0;
+    if (pipelineStateObjectPool.GetFirstAllocatedIndex(&allocatedPipelineStateObjectIndex, &allocatedPipelineStateObjectGeneration))
     {
         do
         {
-            if (pipelineStateObjectPool.GetItem(allocatedPipelineStateObjectIndex).GetCreationParameters() == pipelineStateObjectCreationParameters)
+            if (pipelineStateObjectPool.GetItem(allocatedPipelineStateObjectIndex, allocatedPipelineStateObjectGeneration).GetCreationParameters() == pipelineStateObjectCreationParameters)
             {
                 return allocatedPipelineStateObjectIndex;
             }
-        } while (pipelineStateObjectPool.GetNextAllocatedIndex(allocatedPipelineStateObjectIndex, &allocatedPipelineStateObjectIndex));
+        } while (pipelineStateObjectPool.GetNextAllocatedIndex(allocatedPipelineStateObjectIndex, &allocatedPipelineStateObjectIndex, &allocatedPipelineStateObjectGeneration));
     }
 
     return InvalidGfxHandle;
@@ -1058,9 +1075,9 @@ GFXGraphicsPipelineStateObjectHandle DX11RenderDevice::CreateGraphicsPipelineSta
     }
 
     GFXGraphicsPipelineStateObjectHandle gfxPipelineStateObjectHandle;
-    gfxPipelineStateObjectHandle.handle = m_GraphicsPipelineStateObjectPool.GetNewItemIndex();
+    gfxPipelineStateObjectHandle.handle = m_GraphicsPipelineStateObjectPool.GetNewItemIndex(&gfxPipelineStateObjectHandle.generation);
 
-    GFXGraphicsPipelineStateObject& gfxPipelineStateObject = m_GraphicsPipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
+    GFXGraphicsPipelineStateObject& gfxPipelineStateObject = m_GraphicsPipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle, gfxPipelineStateObjectHandle.generation);
     shipBool isValid = gfxPipelineStateObject.Create(pipelineStateObjectCreationParameters);
 
     SHIP_ASSERT(isValid);
@@ -1077,38 +1094,40 @@ void DX11RenderDevice::DestroyGraphicsPipelineStateObject(GFXGraphicsPipelineSta
 
     if (m_GraphicsPipelineStateObjectHandleRefCounts[gfxPipelineStateObjectHandle.handle] == 0)
     {
-        GFXGraphicsPipelineStateObject& gfxPipelineStateObject = m_GraphicsPipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
+        GFXGraphicsPipelineStateObject& gfxPipelineStateObject = m_GraphicsPipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle, gfxPipelineStateObjectHandle.generation);
         gfxPipelineStateObject.Destroy();
 
         m_GraphicsPipelineStateObjectPool.ReleaseItem(gfxPipelineStateObjectHandle.handle);
         gfxPipelineStateObjectHandle.handle = InvalidGfxHandle;
+        gfxPipelineStateObjectHandle.generation += 1;
     }
 }
 
 GFXGraphicsPipelineStateObject& DX11RenderDevice::GetGraphicsPipelineStateObject(GFXGraphicsPipelineStateObjectHandle gfxPipelineStateObjectHandle)
 {
-    return m_GraphicsPipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
+    return m_GraphicsPipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle, gfxPipelineStateObjectHandle.generation);
 }
 
 const GFXGraphicsPipelineStateObject& DX11RenderDevice::GetGraphicsPipelineStateObject(GFXGraphicsPipelineStateObjectHandle gfxPipelineStateObjectHandle) const
 {
-    return m_GraphicsPipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
+    return m_GraphicsPipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle, gfxPipelineStateObjectHandle.generation);
 }
 
 shipUint32 GetComputePipelineStateObjectIndex(
-        const DataPool<GFXComputePipelineStateObject, SHIP_MAX_COMPUTE_PIPELINE_STATE_OBJECTS>& pipelineStateObjectPool,
+        const GenerationalDataPool<GFXComputePipelineStateObject, SHIP_MAX_COMPUTE_PIPELINE_STATE_OBJECTS>& pipelineStateObjectPool,
         const ComputePipelineStateObjectCreationParameters& pipelineStateObjectCreationParameters)
 {
     shipUint32 allocatedPipelineStateObjectIndex = 0;
-    if (pipelineStateObjectPool.GetFirstAllocatedIndex(&allocatedPipelineStateObjectIndex))
+    shipUint16 allocatedPipelineStateObjetGeneration = 0;
+    if (pipelineStateObjectPool.GetFirstAllocatedIndex(&allocatedPipelineStateObjectIndex, &allocatedPipelineStateObjetGeneration))
     {
         do
         {
-            if (pipelineStateObjectPool.GetItem(allocatedPipelineStateObjectIndex).GetCreationParameters() == pipelineStateObjectCreationParameters)
+            if (pipelineStateObjectPool.GetItem(allocatedPipelineStateObjectIndex, allocatedPipelineStateObjetGeneration).GetCreationParameters() == pipelineStateObjectCreationParameters)
             {
                 return allocatedPipelineStateObjectIndex;
             }
-        } while (pipelineStateObjectPool.GetNextAllocatedIndex(allocatedPipelineStateObjectIndex, &allocatedPipelineStateObjectIndex));
+        } while (pipelineStateObjectPool.GetNextAllocatedIndex(allocatedPipelineStateObjectIndex, &allocatedPipelineStateObjectIndex, &allocatedPipelineStateObjetGeneration));
     }
 
     return InvalidGfxHandle;
@@ -1125,9 +1144,9 @@ GFXComputePipelineStateObjectHandle DX11RenderDevice::CreateComputePipelineState
     }
 
     GFXComputePipelineStateObjectHandle gfxPipelineStateObjectHandle;
-    gfxPipelineStateObjectHandle.handle = m_ComputePipelineStateObjectPool.GetNewItemIndex();
+    gfxPipelineStateObjectHandle.handle = m_ComputePipelineStateObjectPool.GetNewItemIndex(&gfxPipelineStateObjectHandle.generation);
 
-    GFXComputePipelineStateObject& gfxPipelineStateObject = m_ComputePipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
+    GFXComputePipelineStateObject& gfxPipelineStateObject = m_ComputePipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle, gfxPipelineStateObjectHandle.generation);
     shipBool isValid = gfxPipelineStateObject.Create(pipelineStateObjectCreationParameters);
 
     SHIP_ASSERT(isValid);
@@ -1144,30 +1163,31 @@ void DX11RenderDevice::DestroyComputePipelineStateObject(GFXComputePipelineState
 
     if (m_ComputePipelineStateObjectHandleRefCounts[gfxPipelineStateObjectHandle.handle] == 0)
     {
-        GFXComputePipelineStateObject& gfxPipelineStateObject = m_ComputePipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
+        GFXComputePipelineStateObject& gfxPipelineStateObject = m_ComputePipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle, gfxPipelineStateObjectHandle.generation);
         gfxPipelineStateObject.Destroy();
 
         m_ComputePipelineStateObjectPool.ReleaseItem(gfxPipelineStateObjectHandle.handle);
         gfxPipelineStateObjectHandle.handle = InvalidGfxHandle;
+        gfxPipelineStateObjectHandle.generation += 1;
     }
 }
 
 GFXComputePipelineStateObject& DX11RenderDevice::GetComputePipelineStateObject(GFXComputePipelineStateObjectHandle gfxPipelineStateObjectHandle)
 {
-    return m_ComputePipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
+    return m_ComputePipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle, gfxPipelineStateObjectHandle.generation);
 }
 
 const GFXComputePipelineStateObject& DX11RenderDevice::GetComputePipelineStateObject(GFXComputePipelineStateObjectHandle gfxPipelineStateObjectHandle) const
 {
-    return m_ComputePipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle);
+    return m_ComputePipelineStateObjectPool.GetItem(gfxPipelineStateObjectHandle.handle, gfxPipelineStateObjectHandle.generation);
 }
 
 GFXDescriptorSetHandle DX11RenderDevice::CreateDescriptorSet(DescriptorSetType descriptorSetType, const Array<DescriptorSetEntryDeclaration>& descriptorSetEntryDeclarations)
 {
     GFXDescriptorSetHandle gfxDescriptorSetHandle;
-    gfxDescriptorSetHandle.handle = m_DescriptorSetPool.GetNewItemIndex();
+    gfxDescriptorSetHandle.handle = m_DescriptorSetPool.GetNewItemIndex(&gfxDescriptorSetHandle.generation);
 
-    GFXDescriptorSet& gfxDescriptorSet = m_DescriptorSetPool.GetItem(gfxDescriptorSetHandle.handle);
+    GFXDescriptorSet& gfxDescriptorSet = m_DescriptorSetPool.GetItem(gfxDescriptorSetHandle.handle, gfxDescriptorSetHandle.generation);
     
     shipBool isValid = gfxDescriptorSet.Create(descriptorSetType, descriptorSetEntryDeclarations);
 
@@ -1178,21 +1198,22 @@ GFXDescriptorSetHandle DX11RenderDevice::CreateDescriptorSet(DescriptorSetType d
 
 void DX11RenderDevice::DestroyDescriptorSet(GFXDescriptorSetHandle& gfxDescriptorSetHandle)
 {
-    GFXDescriptorSet& gfxDescriptorSet = m_DescriptorSetPool.GetItem(gfxDescriptorSetHandle.handle);
+    GFXDescriptorSet& gfxDescriptorSet = m_DescriptorSetPool.GetItem(gfxDescriptorSetHandle.handle, gfxDescriptorSetHandle.generation);
     gfxDescriptorSet.Destroy();
 
     m_DescriptorSetPool.ReleaseItem(gfxDescriptorSetHandle.handle);
     gfxDescriptorSetHandle.handle = InvalidGfxHandle;
+    gfxDescriptorSetHandle.generation += 1;
 }
 
 GFXDescriptorSet& DX11RenderDevice::GetDescriptorSet(GFXDescriptorSetHandle gfxDescriptorSetHandle)
 {
-    return m_DescriptorSetPool.GetItem(gfxDescriptorSetHandle.handle);
+    return m_DescriptorSetPool.GetItem(gfxDescriptorSetHandle.handle, gfxDescriptorSetHandle.generation);
 }
 
 const GFXDescriptorSet& DX11RenderDevice::GetDescriptorSet(GFXDescriptorSetHandle gfxDescriptorSetHandle) const
 {
-    return m_DescriptorSetPool.GetItem(gfxDescriptorSetHandle.handle);
+    return m_DescriptorSetPool.GetItem(gfxDescriptorSetHandle.handle, gfxDescriptorSetHandle.generation);
 }
 
 IDXGISwapChain* DX11RenderDevice::CreateSwapchain(shipUint32 width, shipUint32 height, GfxFormat format, HWND hWnd, GFXTexture2DHandle& swapChainTextureHandle)
@@ -1245,9 +1266,9 @@ IDXGISwapChain* DX11RenderDevice::CreateSwapchain(shipUint32 width, shipUint32 h
         return nullptr;
     }
 
-    swapChainTextureHandle.handle = m_Texture2dPool.GetNewItemIndex();
+    swapChainTextureHandle.handle = m_Texture2dPool.GetNewItemIndex(&swapChainTextureHandle.generation);
 
-    GFXTexture2D& swapChainTexture = m_Texture2dPool.GetItem(swapChainTextureHandle.handle);
+    GFXTexture2D& swapChainTexture = m_Texture2dPool.GetItem(swapChainTextureHandle.handle, swapChainTextureHandle.generation);
 
     swapChainTexture = DX11Texture2D(*m_Device, *backBufferTexture, format);
 

@@ -54,7 +54,7 @@ typedef DX11DirectRenderCommandList GFXDirectRenderCommandList;
 typedef DX11GraphicsPipelineStateObject GFXGraphicsPipelineStateObject;
 typedef DX11IndexBuffer GFXIndexBuffer;
 typedef DX11PixelShader GFXPixelShader;
-typedef DX11RenderDevice GFXRenderDevice;
+using GFXRenderDevice = DX11RenderDevice;
 typedef DX11RenderTarget GFXRenderTarget;
 typedef DX11RootSignature GFXRootSignature;
 typedef DX11Sampler GFXSampler;

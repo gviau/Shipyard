@@ -176,24 +176,24 @@ namespace Shipyard
         ID3D11DeviceContext* m_ImmediateDeviceContext;
 
         // Render device pools.
-        DataPool<GFXVertexBuffer, SHIP_MAX_VERTEX_BUFFERS> m_VertexBufferPool;
-        DataPool<GFXIndexBuffer, SHIP_MAX_INDEX_BUFFERS> m_IndexBufferPool;
-        DataPool<GFXConstantBuffer, SHIP_MAX_CONSTANT_BUFFERS> m_ConstantBufferPool;
-        DataPool<GFXByteBuffer, SHIP_MAX_BYTE_BUFFERS> m_ByteBufferPool;
-        DataPool<GFXTexture2D, SHIP_MAX_2D_TEXTURES> m_Texture2dPool;
-        DataPool<GFXTexture2DArray, SHIP_MAX_2D_ARRAY_TEXTURES> m_Texture2dArrayPool;
-        DataPool<GFXTexture3D, SHIP_MAX_3D_TEXTURES> m_Texture3dPool;
-        DataPool<GFXTextureCube, SHIP_MAX_CUBE_TEXTURES> m_TextureCubePool;
-        DataPool<GFXSampler, SHIP_MAX_SAMPLERS> m_SamplerPool;
-        DataPool<GFXRenderTarget, SHIP_MAX_RENDER_TARGETS> m_RenderTargetPool;
-        DataPool<GFXDepthStencilRenderTarget, SHIP_MAX_DEPTH_STENCIL_RENDER_TARGETS> m_DepthStencilRenderTargetPool;
-        DataPool<GFXVertexShader, SHIP_MAX_VERTEX_SHADERS> m_VertexShaderPool;
-        DataPool<GFXPixelShader, SHIP_MAX_PIXEL_SHADERS> m_PixelShaderPool;
-        DataPool<GFXComputeShader, SHIP_MAX_COMPUTE_SHADERS> m_ComputeShaderPool;
-        DataPool<GFXRootSignature, SHIP_MAX_ROOT_SIGNATURES> m_RootSignaturePool;
-        DataPool<GFXGraphicsPipelineStateObject, SHIP_MAX_GRAPHICS_PIPELINE_STATE_OBJECTS> m_GraphicsPipelineStateObjectPool;
-        DataPool<GFXComputePipelineStateObject, SHIP_MAX_COMPUTE_PIPELINE_STATE_OBJECTS> m_ComputePipelineStateObjectPool;
-        DataPool<GFXDescriptorSet, SHIP_MAX_DESCRIPTOR_SETS> m_DescriptorSetPool;
+        GenerationalDataPool<GFXVertexBuffer, SHIP_MAX_VERTEX_BUFFERS> m_VertexBufferPool;
+        GenerationalDataPool<GFXIndexBuffer, SHIP_MAX_INDEX_BUFFERS> m_IndexBufferPool;
+        GenerationalDataPool<GFXConstantBuffer, SHIP_MAX_CONSTANT_BUFFERS> m_ConstantBufferPool;
+        GenerationalDataPool<GFXByteBuffer, SHIP_MAX_BYTE_BUFFERS> m_ByteBufferPool;
+        GenerationalDataPool<GFXTexture2D, SHIP_MAX_2D_TEXTURES> m_Texture2dPool;
+        GenerationalDataPool<GFXTexture2DArray, SHIP_MAX_2D_ARRAY_TEXTURES> m_Texture2dArrayPool;
+        GenerationalDataPool<GFXTexture3D, SHIP_MAX_3D_TEXTURES> m_Texture3dPool;
+        GenerationalDataPool<GFXTextureCube, SHIP_MAX_CUBE_TEXTURES> m_TextureCubePool;
+        GenerationalDataPool<GFXSampler, SHIP_MAX_SAMPLERS> m_SamplerPool;
+        GenerationalDataPool<GFXRenderTarget, SHIP_MAX_RENDER_TARGETS> m_RenderTargetPool;
+        GenerationalDataPool<GFXDepthStencilRenderTarget, SHIP_MAX_DEPTH_STENCIL_RENDER_TARGETS> m_DepthStencilRenderTargetPool;
+        GenerationalDataPool<GFXVertexShader, SHIP_MAX_VERTEX_SHADERS> m_VertexShaderPool;
+        GenerationalDataPool<GFXPixelShader, SHIP_MAX_PIXEL_SHADERS> m_PixelShaderPool;
+        GenerationalDataPool<GFXComputeShader, SHIP_MAX_COMPUTE_SHADERS> m_ComputeShaderPool;
+        GenerationalDataPool<GFXRootSignature, SHIP_MAX_ROOT_SIGNATURES> m_RootSignaturePool;
+        GenerationalDataPool<GFXGraphicsPipelineStateObject, SHIP_MAX_GRAPHICS_PIPELINE_STATE_OBJECTS> m_GraphicsPipelineStateObjectPool;
+        GenerationalDataPool<GFXComputePipelineStateObject, SHIP_MAX_COMPUTE_PIPELINE_STATE_OBJECTS> m_ComputePipelineStateObjectPool;
+        GenerationalDataPool<GFXDescriptorSet, SHIP_MAX_DESCRIPTOR_SETS> m_DescriptorSetPool;
 
         // Ref counts for particular type of objects, of which there can be a limited number. Therefore,
         // with each creation, we can return an already allocated handle.

@@ -99,7 +99,7 @@ shipBool ShipyardViewer::CreateApp(HWND windowHandle, shipUint32 windowWidth, sh
     windowWidth = m_WindowWidth;
     windowHeight = m_WindowHeight;
 
-    size_t heapSize = 256 * 1024 * 1024;
+    size_t heapSize = 512 * 1024 * 1024;
     m_pHeap = malloc(heapSize);
 
     size_t numChunks = 256 * 1024;

@@ -313,6 +313,25 @@ void ShaderResourceBinder::BindShaderInputProviderDescriptor(
         }
         break;
 
+    case ShaderInputType::ByteBuffer:
+        {
+            size_t shaderInputProviderAddress = reinterpret_cast<size_t>(shaderInputProvider);
+            size_t byteBufferHandleAddress = shaderInputProviderAddress + shaderResourceBinderEntry.DataOffsetInProvider;
+            GFXByteBufferHandle gfxByteBufferHandle = *reinterpret_cast<GFXByteBufferHandle*>(byteBufferHandleAddress);
+
+#ifdef VALIDATE_SHADER_INPUT_PROVIDER_BINDING
+            ShaderInputProviderDeclaration* shaderInputProviderDeclaration = shaderInputProvider->GetShaderInputProviderDeclaration();
+            SHIP_ASSERT_MSG(
+                    gfxByteBufferHandle.handle != InvalidGfxHandle,
+                    "ByteBuffer %s in ShaderInputProvider %s is not valid!",
+                    GetShaderInputProviderManager().GetShaderInputNameFromProvider(shaderInputProviderDeclaration, shaderResourceBinderEntry.DataOffsetInProvider),
+                    shaderInputProviderDeclaration->GetShaderInputProviderName());
+#endif // #ifdef VALIDATE_SHADER_INPUT_PROVIDER_BINDING
+
+            gfxResourceToBind = gfxRenderDevice.GetByteBufferPtr(gfxByteBufferHandle);
+        }
+        break;
+
     default:
         SHIP_ASSERT(!"Unsupported shader input type.");
         break;

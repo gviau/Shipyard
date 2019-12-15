@@ -732,9 +732,12 @@ namespace Shipyard
 
     enum TextureUsage : shipUint8
     {
-        TextureUsage_Default = 0x00,
         TextureUsage_RenderTarget = 0x01,
-        TextureUsage_DepthStencil = 0x02
+        TextureUsage_DepthStencil = 0x02,
+        TextureUsage_ShaderResourceView = 0x04,
+        TextureUsage_UnorderedAccessView = 0x08,
+
+        TextureUsage_Default = TextureUsage_ShaderResourceView
     };
 
     enum class GfxResourceType

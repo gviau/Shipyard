@@ -125,7 +125,10 @@ shipBool DX11DepthStencilRenderTarget::Create(ID3D11Device& device, GFXTexture2D
     m_DepthStencilView = CreateDepthStencilView(device, depthStencilTexture.GetTexture(), ConvertShipyardFormatToDX11(depthStencilTexture.GetPixelFormat()));
 
     m_DepthStencilShaderResourceView = depthStencilTexture.GetShaderResourceView();
-    m_DepthStencilShaderResourceView->AddRef();
+    if (m_DepthStencilShaderResourceView != nullptr)
+    {
+        m_DepthStencilShaderResourceView->AddRef();
+    }
 
     return true;
 }

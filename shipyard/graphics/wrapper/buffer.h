@@ -53,7 +53,8 @@ namespace Shipyard
     public:
         enum ByteBufferCreationFlags
         {
-            ByteBufferCreationFlags_ShaderResourceView = 0x01
+            ByteBufferCreationFlags_ShaderResourceView = 0x01,
+            ByteBufferCreationFlags_UnorderedAccessView = 0x02
         };
     };
 }

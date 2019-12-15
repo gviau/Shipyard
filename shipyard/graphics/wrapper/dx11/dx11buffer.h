@@ -6,6 +6,7 @@ struct ID3D11Buffer;
 struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct ID3D11ShaderResourceView;
+struct ID3D11UnorderedAccessView;
 
 namespace Shipyard
 {
@@ -18,6 +19,7 @@ namespace Shipyard
 
         ID3D11Buffer* GetBuffer() const { return m_Buffer; }
         ID3D11ShaderResourceView* GetShaderResourceView() { return m_ShaderResourceView; }
+        ID3D11UnorderedAccessView* GetUnorderedAccessView() { return m_UnorderedAccessView; }
 
         size_t GetSize() const { return m_SizeInBytes; }
 
@@ -25,6 +27,7 @@ namespace Shipyard
         ID3D11DeviceContext* m_DeviceContext;
         ID3D11Buffer* m_Buffer;
         ID3D11ShaderResourceView* m_ShaderResourceView;
+        ID3D11UnorderedAccessView* m_UnorderedAccessView;
 
         size_t m_SizeInBytes;
     };
@@ -57,5 +60,8 @@ namespace Shipyard
                 shipUint32 dataSizeInBytes,
                 shipBool dynamic,
                 void* initialData);
+
+    private:
+        ID3D11UnorderedAccessView* m_UnorderedAccessView;
     };
 }

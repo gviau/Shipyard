@@ -37,6 +37,12 @@ void DX11BaseBuffer::Destroy()
         m_ShaderResourceView = nullptr;
     }
 
+    if (m_UnorderedAccessView != nullptr)
+    {
+        m_UnorderedAccessView->Release();
+        m_UnorderedAccessView = nullptr;
+    }
+
     m_DeviceContext = nullptr;
 }
 
@@ -166,12 +172,22 @@ shipBool DX11ByteBuffer::Create(
 
     D3D11_USAGE usage = (dynamic) ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
 
-    D3D11_BIND_FLAG bindFlag = D3D11_BIND_SHADER_RESOURCE;
+    DWORD bindFlags = 0;
+    
+    if ((byteBufferCreationFlags & ByteBufferCreationFlags::ByteBufferCreationFlags_ShaderResourceView) > 0)
+    {
+        bindFlags |= D3D11_BIND_SHADER_RESOURCE;
+    }
+
+    if ((byteBufferCreationFlags & ByteBufferCreationFlags::ByteBufferCreationFlags_UnorderedAccessView) > 0)
+    {
+        bindFlags |= D3D11_BIND_UNORDERED_ACCESS;
+    }
 
     D3D11_BUFFER_DESC desc;
     desc.Usage = usage;
     desc.ByteWidth = dataSizeInBytes;
-    desc.BindFlags = bindFlag;
+    desc.BindFlags = D3D11_BIND_FLAG(bindFlags);
     desc.CPUAccessFlags = (dynamic) ? D3D11_CPU_ACCESS_WRITE : 0;
     desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS;
 
@@ -209,6 +225,23 @@ shipBool DX11ByteBuffer::Create(
         if (FAILED(hr))
         {
             SHIP_LOG_ERROR("DX11ByteBuffer::Create() --> Couldn't create shader resource view.");
+            return false;
+        }
+    }
+
+    if ((byteBufferCreationFlags & ByteBufferCreationFlags::ByteBufferCreationFlags_UnorderedAccessView) > 0)
+    {
+        D3D11_UNORDERED_ACCESS_VIEW_DESC unorderedAccessViewDesc;
+        unorderedAccessViewDesc.Format = DXGI_FORMAT::DXGI_FORMAT_R32_TYPELESS;
+        unorderedAccessViewDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+        unorderedAccessViewDesc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_RAW;
+        unorderedAccessViewDesc.Buffer.FirstElement = 0;
+        unorderedAccessViewDesc.Buffer.NumElements = dataSizeInBytes / 4;
+
+        hr = device.CreateUnorderedAccessView(m_Buffer, &unorderedAccessViewDesc, &m_UnorderedAccessView);
+        if (FAILED(hr))
+        {
+            SHIP_LOG_ERROR("DX11ByteBuffer::Create --> Couldn't create unordered access view.");
             return false;
         }
     }

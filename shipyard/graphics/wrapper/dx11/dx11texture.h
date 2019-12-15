@@ -7,6 +7,7 @@ struct ID3D11Resource;
 struct ID3D11ShaderResourceView;
 struct ID3D11Texture2D;
 struct ID3D11Texture3D;
+struct ID3D11UnorderedAccessView;
 
 namespace Shipyard
 {
@@ -25,9 +26,11 @@ namespace Shipyard
         DX11BaseTexture();
 
         ID3D11ShaderResourceView* GetShaderResourceView() const { return m_ShaderResourceView; }
+        ID3D11UnorderedAccessView* GetUnorderedAccessView() const { return m_UnorderedAccessView; }
 
     protected:
         ID3D11ShaderResourceView* m_ShaderResourceView;
+        ID3D11UnorderedAccessView* m_UnorderedAccessView;
     };
 
     class SHIPYARD_GRAPHICS_API DX11Texture2D : public Texture2D, public DX11BaseTexture

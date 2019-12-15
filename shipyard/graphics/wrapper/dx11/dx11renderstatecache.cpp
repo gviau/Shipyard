@@ -498,6 +498,10 @@ void DX11RenderStateCache::BindDescriptorTableFromDescriptorSet(
             BindResourceAsShaderResourceView(descriptorResource, rootSignatureParameter.shaderVisibility, shaderBindingSlot);
             break;
 
+        case DescriptorRangeType::UnorderedAccessView:
+            BindResourceAsUnorderedAccessView(descriptorResource, rootSignatureParameter.shaderVisibility, shaderBindingSlot);
+            break;
+
         case DescriptorRangeType::Sampler:
             BindResourceAsSampler(descriptorResource, rootSignatureParameter.shaderVisibility, shaderBindingSlot);
             break;
@@ -526,6 +530,10 @@ void DX11RenderStateCache::BindDescriptorFromDescriptorSet(GfxResource* descript
 
         case RootSignatureParameterType::ShaderResourceView:
             BindResourceAsShaderResourceView(descriptorResource, rootSignatureParameter.shaderVisibility, bindingSlot);
+            break;
+
+        case RootSignatureParameterType::UnorderedAccessView:
+            BindResourceAsUnorderedAccessView(descriptorResource, rootSignatureParameter.shaderVisibility, bindingSlot);
             break;
 
         default:
@@ -595,6 +603,43 @@ void DX11RenderStateCache::BindResourceAsShaderResourceView(GfxResource* descrip
             MarkBindingSlotAsDirty(m_DirtySlotShaderResourceViewsPerShaderStage, shaderVisibility, shaderBindingSlot);
 
             m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_ShaderResourceViews);
+        }
+    }
+}
+
+void DX11RenderStateCache::BindResourceAsUnorderedAccessView(GfxResource* descriptorResource, ShaderVisibility shaderVisibility, shipUint32 shaderBindingSlot)
+{
+    GfxResourceType resourceType = descriptorResource->GetResourceType();
+
+    ID3D11UnorderedAccessView* nativeUnorderedAccessView = nullptr;
+
+    if (resourceType == GfxResourceType::Texture)
+    {
+        DX11BaseTexture* texture = static_cast<DX11BaseTexture*>(descriptorResource);
+        nativeUnorderedAccessView = texture->GetUnorderedAccessView();
+    }
+    else
+    {
+        DX11BaseBuffer* buffer = static_cast<DX11BaseBuffer*>(descriptorResource);
+        nativeUnorderedAccessView = buffer->GetUnorderedAccessView();
+    }
+
+    for (shipUint32 i = 0; i < ShaderStage::ShaderStage_Count; i++)
+    {
+        ShaderStage shaderStage = ShaderStage(i);
+
+        if ((shaderVisibility & GetShaderVisibilityForShaderStage(shaderStage)) == 0)
+        {
+            continue;
+        }
+
+        if (m_NativeUnorderedAccessViews[i][shaderBindingSlot] != nativeUnorderedAccessView)
+        {
+            m_NativeUnorderedAccessViews[i][shaderBindingSlot] = nativeUnorderedAccessView;
+
+            MarkBindingSlotAsDirty(m_DirtySlotUnorderedAccessViewsPerShaderStage, shaderVisibility, shaderBindingSlot);
+
+            m_RenderStateCacheDirtyFlags.SetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_UnorderedAccessViews);
         }
     }
 }
@@ -863,6 +908,29 @@ void DX11RenderStateCache::CommitStateChangesForGraphics(GFXRenderDevice& gfxRen
 
     if (m_RenderStateCacheDirtyFlags.IsBitSet(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_UnorderedAccessViews))
     {
+        // TODO pixel shader support for UAVs.
+
+        shipUint32 shaderStage = shipUint32(ShaderStage::ShaderStage_Compute);
+
+        if (!m_DirtySlotUnorderedAccessViewsPerShaderStage[shaderStage].IsClear())
+        {
+            shipUint32 startingBindingSlot = 0;
+            shipUint32 firstBindingSlot = 0;
+
+            
+            while (m_DirtySlotUnorderedAccessViewsPerShaderStage[shaderStage].GetFirstBitSet(startingBindingSlot, firstBindingSlot))
+            {
+                shipUint32 numBindingSlotsToSet = m_DirtySlotUnorderedAccessViewsPerShaderStage[shaderStage].GetLongestRangeWithBitsSet(firstBindingSlot);
+
+                constexpr const UINT* pUavInitialCounts = nullptr;
+                m_DeviceContext->CSSetUnorderedAccessViews(firstBindingSlot, numBindingSlotsToSet, &m_NativeUnorderedAccessViews[shaderStage][firstBindingSlot], pUavInitialCounts);
+
+                startingBindingSlot = firstBindingSlot + numBindingSlotsToSet;
+            }
+
+            m_DirtySlotUnorderedAccessViewsPerShaderStage[shaderStage].Clear();
+        }
+
         m_RenderStateCacheDirtyFlags.UnsetBit(RenderStateCacheDirtyFlag::RenderStateCacheDirtyFlag_UnorderedAccessViews);
     }
 

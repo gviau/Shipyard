@@ -317,7 +317,7 @@ void ShipyardViewer::ComputeOneFrame()
             shaderInputProviders.Add(m_pDataProvider);
             shaderInputProviders.Add(&gfxMaterial->GetGfxMaterialShaderInputProvider());
 
-            pShaderHandler->ApplyShaderInputProviders(*m_pGfxRenderDevice, *m_pGfxDirectRenderCommandList, shaderInputProviders);
+            pShaderHandler->ApplyShaderInputProvidersForGraphics(*m_pGfxRenderDevice, *m_pGfxDirectRenderCommandList, shaderInputProviders);
 
             ShaderHandler::RenderState renderState;
             renderState.GfxRenderTargetHandle = gfxRenderTargetHandle;
@@ -326,13 +326,13 @@ void ShipyardViewer::ComputeOneFrame()
             renderState.VertexFormatTypeToRender = vertexFormatType;
             renderState.OptionalRenderStateBlockStateOverride = nullptr;
 
-            const ShaderHandler::ShaderRenderElements& shaderRenderElements = pShaderHandler->GetShaderRenderElements(*m_pGfxRenderDevice, renderState);
+            const ShaderHandler::ShaderRenderElementsForGraphics& shaderRenderElements = pShaderHandler->GetShaderRenderElementsForGraphicsCommands(*m_pGfxRenderDevice, renderState);
 
             DrawIndexedCommand* pDrawIndexedCommand = m_pGfxDirectRenderCommandList->DrawIndexed();
             pDrawIndexedCommand->gfxViewport = gfxViewport;
             pDrawIndexedCommand->gfxRenderTargetHandle = gfxRenderTargetHandle;
             pDrawIndexedCommand->gfxDepthStencilRenderTargetHandle = m_GfxDepthStencilRenderTargetHandle;
-            pDrawIndexedCommand->gfxPipelineStateObjectHandle = shaderRenderElements.GfxPipelineStateObjectHandle;
+            pDrawIndexedCommand->gfxPipelineStateObjectHandle = shaderRenderElements.GfxGraphicsPipelineStateObjectHandle;
             pDrawIndexedCommand->gfxRootSignatureHandle = shaderRenderElements.GfxRootSignatureHandle;
             pDrawIndexedCommand->gfxDescriptorSetHandle = shaderRenderElements.GfxDescriptorSetHandle;
             pDrawIndexedCommand->gfxVertexBufferHandle = gfxVertexBufferHandle;

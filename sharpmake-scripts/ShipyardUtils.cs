@@ -16,7 +16,7 @@ namespace ShipyardSharpmake
         {
             get
             {
-                return DevEnv.vs2019;
+                return DevEnv.vs2017 | DevEnv.vs2019;
             }
         }
 

@@ -51,7 +51,7 @@ SHIP_DECLARE_SHADER_INPUT_PROVIDER_END(SimpleConstantBufferProvider)
 ShipyardViewer::~ShipyardViewer()
 {
     SHIP_DELETE(m_pDefaultMaterial);
-    SHIP_DELETE(m_pLoadedMeshData);
+    SHIP_DELETE(m_pGfxMesh);
 
     SHIP_DELETE(m_pRenderer);
 
@@ -296,13 +296,14 @@ void ShipyardViewer::ComputeOneFrame()
     pClearDepthStencilRenderTargetCommand->depthValue = 1.0f;
     pClearDepthStencilRenderTargetCommand->stencilValue = 0;
 
-    if (m_pLoadedMeshData != nullptr)
+    if (m_pGfxMesh != nullptr)
     {
-        for (shipUint32 i = 0; i < m_pLoadedMeshData->m_SubMeshVertexBuffers.Size(); i++)
+        const Array<GFXSubMesh>& gfxSubMeshes = m_pGfxMesh->GetGfxSubMeshes();
+        for (const GFXSubMesh& gfxSubMesh : gfxSubMeshes)
         {
-            GFXVertexBufferHandle gfxVertexBufferHandle = m_pLoadedMeshData->m_SubMeshVertexBuffers[i];
-            GFXIndexBufferHandle gfxIndexBufferHandle = m_pLoadedMeshData->m_SubMeshIndexBuffers[i];
-            GFXMaterial* gfxMaterial = m_pLoadedMeshData->m_UsedMaterialPerSubMesh[i];
+            GFXVertexBufferHandle gfxVertexBufferHandle = gfxSubMesh.GetGfxVertexBufferHandle();
+            GFXIndexBufferHandle gfxIndexBufferHandle = gfxSubMesh.GetGfxIndexBufferHandle();
+            const GFXMaterial* gfxMaterial = gfxSubMesh.GetGfxMaterial();
 
             VertexFormatType vertexFormatType = m_pGfxRenderDevice->GetVertexBuffer(gfxVertexBufferHandle).GetVertexFormatType();
 
@@ -397,22 +398,15 @@ shipBool ShipyardViewer::OnWin32Msg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 
 void ShipyardViewer::ClearViewerAndLoadMesh(const shipChar* filename)
 {
-    if (m_pLoadedMeshData != nullptr)
+    SHIP_DELETE(m_pGfxMesh);
+    m_pGfxMesh = nullptr;
+    
+    for (GFXMaterial* gfxMaterial : m_LoadedMaterials)
     {
-        for (shipUint32 i = 0; i < m_pLoadedMeshData->m_SubMeshVertexBuffers.Size(); i++)
-        {
-            m_pGfxRenderDevice->DestroyVertexBuffer(m_pLoadedMeshData->m_SubMeshVertexBuffers[i]);
-            m_pGfxRenderDevice->DestroyIndexBuffer(m_pLoadedMeshData->m_SubMeshIndexBuffers[i]);
-        }
-
-        for (shipUint32 i = 0; i < m_pLoadedMeshData->m_LoadedMaterials.Size(); i++)
-        {
-            SHIP_DELETE(m_pLoadedMeshData->m_LoadedMaterials[i]);
-        }
+        SHIP_DELETE(gfxMaterial);
     }
 
-    SHIP_DELETE(m_pLoadedMeshData);
-    m_pLoadedMeshData = nullptr;
+    m_LoadedMaterials.Clear();
 
     MeshImporter::ImportedMesh importedMesh;
     MeshImporter::LoadMeshFromFile(filename, *m_pGfxRenderDevice, MeshImporter::None, &importedMesh);
@@ -422,16 +416,16 @@ void ShipyardViewer::ClearViewerAndLoadMesh(const shipChar* filename)
         return;
     }
 
-    m_pLoadedMeshData = SHIP_NEW(LoadedMeshData, 1);
-
-    for (shipUint32 i = 0; i < importedMesh.SubMeshMaterials.Size(); i++)
+    for (const MeshImporter::ImportedSubMeshMaterial& importedSubMeshMaterial : importedMesh.SubMeshMaterials)
     {
-        MeshImporter::ImportedSubMeshMaterial& importedSubMeshMaterial = importedMesh.SubMeshMaterials[i];
-
-        GFXMaterial*& gfxMaterial = m_pLoadedMeshData->m_LoadedMaterials.Grow();
+        GFXMaterial*& gfxMaterial = m_LoadedMaterials.Grow();
         gfxMaterial = SHIP_NEW(GFXMaterial, 1);
         gfxMaterial->Create(ShaderFamily::Error, importedSubMeshMaterial.SubMeshMaterialTextures);
     }
+
+    m_pGfxMesh = SHIP_NEW(GFXMesh, 1);
+
+    InplaceArray<GFXMesh::GFXSubMeshCreationData, 16> gfxSubMeshCreationDatas;
 
     for (shipUint32 i = 0; i < importedMesh.SubMeshes.Size(); i++)
     {
@@ -450,27 +444,40 @@ void ShipyardViewer::ClearViewerAndLoadMesh(const shipChar* filename)
                 dynamic,
                 &importedSubMesh.SubMeshIndices[0]);
 
-        m_pLoadedMeshData->m_SubMeshVertexBuffers.Add(gfxVertexBufferHandle);
-        m_pLoadedMeshData->m_SubMeshIndexBuffers.Add(gfxIndexBufferHandle);
+        GFXMaterial* usedMaterial = nullptr;
 
         if (importedSubMesh.ReferencedSubMeshMaterial == nullptr)
         {
-            m_pLoadedMeshData->m_UsedMaterialPerSubMesh.Add(m_pDefaultMaterial);
+            usedMaterial = m_pDefaultMaterial;
         }
         else
         {
-            for (shipUint32 j = 0; j < importedMesh.SubMeshMaterials.Size(); j++)
+            shipUint32 j = 0;
+
+            for (; j < importedMesh.SubMeshMaterials.Size(); j++)
             {
                 MeshImporter::ImportedSubMeshMaterial& importedSubMeshMaterial = importedMesh.SubMeshMaterials[j];
 
                 if (&importedSubMeshMaterial == importedSubMesh.ReferencedSubMeshMaterial)
                 {
-                    m_pLoadedMeshData->m_UsedMaterialPerSubMesh.Add(m_pLoadedMeshData->m_LoadedMaterials[j]);
+                    usedMaterial = m_LoadedMaterials[j];
                     break;
                 }
             }
+
+            if (j == importedMesh.SubMeshMaterials.Size())
+            {
+                usedMaterial = m_pDefaultMaterial;
+            }
         }
+
+        GFXMesh::GFXSubMeshCreationData& gfxSubMeshCreationData =  gfxSubMeshCreationDatas.Grow();
+        gfxSubMeshCreationData.gfxVertexBufferHandle = gfxVertexBufferHandle;
+        gfxSubMeshCreationData.gfxIndexBufferHandle = gfxIndexBufferHandle;
+        gfxSubMeshCreationData.gfxMaterial = usedMaterial;
     }
+
+    m_pGfxMesh->SetSubMeshes(*m_pGfxRenderDevice, gfxSubMeshCreationDatas);
 }
 
 }

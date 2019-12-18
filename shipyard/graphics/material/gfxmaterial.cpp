@@ -25,7 +25,7 @@ GFXMaterial::~GFXMaterial()
 
 }
 
-shipBool GFXMaterial::Create(ShaderFamily shaderFamily, GFXTexture2DHandle materialTextures[shipUint32(GfxMaterialTextureType::Count)])
+shipBool GFXMaterial::Create(ShaderFamily shaderFamily, const GFXTexture2DHandle materialTextures[shipUint32(GfxMaterialTextureType::Count)])
 {
     m_ShaderFamily = shaderFamily;
 

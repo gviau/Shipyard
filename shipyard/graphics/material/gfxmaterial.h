@@ -34,7 +34,7 @@ namespace Shipyard
         GFXMaterial();
         ~GFXMaterial();
 
-        shipBool Create(ShaderFamily shaderFamily, GFXTexture2DHandle materialTextures[shipUint32(GfxMaterialTextureType::Count)]);
+        shipBool Create(ShaderFamily shaderFamily, const GFXTexture2DHandle materialTextures[shipUint32(GfxMaterialTextureType::Count)]);
 
         ShaderFamily GetShaderFamily() const;
         const GFXMaterialShaderInputProvider& GetGfxMaterialShaderInputProvider() const;

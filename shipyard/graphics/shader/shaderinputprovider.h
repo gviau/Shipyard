@@ -397,6 +397,7 @@ namespace Shipyard
     SHIP_DECLARE_SHADER_INPUT_PROVIDER_BEGIN_INTERNAL_1(##shaderInputProviderType_StaticDeclaration, ##shaderInputProviderType, shaderInputProviderUsage)
 
 #define SHIP_DECLARE_SHADER_INPUT_PROVIDER_END_INTERNAL_1(shaderInputProviderTypeStaticDeclarationType, shaderInputProviderType, shaderInputProviderDeclarationName) \
+            SHIP_ASSERT_MSG(m_ShaderInputProviderUsage != ShaderInputProviderUsage::Default || ((m_RequiredSizeForProvider % 16) == 0), "ShaderInputProvider %s has Default usage, but the size of the sum (%u bytes) of the scalar input is not divisible by 16, which is required.", m_ShaderInputProviderName, m_RequiredSizeForProvider); \
             ShaderInputProviderType::ms_ShaderInputProviderDeclaration = this; \
         } \
     }; static shaderInputProviderTypeStaticDeclarationType<shaderInputProviderType> shaderInputProviderDeclarationName;

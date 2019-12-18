@@ -24,3 +24,6 @@ This software uses the Dear ImGui open source library. See https://github.com/oc
 			
 This software uses the Sharpmake open source library. See https://github.com/ubisoftinc/Sharpmake for details.
 			Sharpmake is used under the Apache License 2.0.
+            
+This software uses the ImGuizmo open source library. See https://github.com/CedricGuillemet/ImGuizmo for details.
+			ImGuizmo is used under the MIT License.

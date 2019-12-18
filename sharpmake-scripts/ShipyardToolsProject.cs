@@ -9,7 +9,7 @@ namespace ShipyardSharpmake
         public ShipyardToolsProject()
             : base("shipyard.tools", @"..\shipyard\tools\", ShipyardUtils.DefaultShipyardTargetDll)
         {
-            
+            AdditionalSourceRootPaths.Add(@"[project.SharpmakeCsPath]\..\shipyard\extern\imguizmo\");
         }
 
         public override void ConfigureAll(Configuration configuration, ShipyardTarget target)
@@ -36,6 +36,7 @@ namespace ShipyardSharpmake
 
             configuration.IncludePaths.Add(SourceRootPath + @"..\extern\assimp\");
             configuration.IncludePaths.Add(SourceRootPath + @"..\extern\freeimage\");
+            configuration.IncludePaths.Add(SourceRootPath + @"..\extern\imguizmo");
         }
 
         protected override void ConfigurePlatform(Configuration configuration, Platform platform)

@@ -32,19 +32,23 @@
 #include <extern/glm/gtc/matrix_transform.hpp>
 #include <extern/glm/gtc/type_ptr.hpp>
 
+#include <extern/imguizmo/ImGuizmo.h>
+
 namespace Shipyard
 {;
 
 struct SimpleConstantBufferProvider : public BaseShaderInputProvider<SimpleConstantBufferProvider>
 {
-    shipMat4x4 Matrix;
-    GFXTexture2DHandle TestTexture;
+    shipMat4x4 WorldProjectionMatrix;
+    shipMat4x4 ViewFromWorldMatrix;
+    shipMat4x4 WorldFromLocalMatrix;
 };
 
 SHIP_DECLARE_SHADER_INPUT_PROVIDER_BEGIN(SimpleConstantBufferProvider, PerInstance)
 {
-    SHIP_SCALAR_SHADER_INPUT("Test", Matrix);
-    SHIP_TEXTURE2D_SHADER_INPUT(ShaderInputScalarType::Float4, "TestTexture", TestTexture);
+    SHIP_SCALAR_SHADER_INPUT("WorldProjectionMatrix", WorldProjectionMatrix);
+    SHIP_SCALAR_SHADER_INPUT("ViewFromWorldMatrix", ViewFromWorldMatrix);
+    SHIP_SCALAR_SHADER_INPUT("WorldFromLocalMatrix", WorldFromLocalMatrix);
 }
 SHIP_DECLARE_SHADER_INPUT_PROVIDER_END(SimpleConstantBufferProvider)
 
@@ -174,55 +178,6 @@ shipBool ShipyardViewer::CreateApp(HWND windowHandle, shipUint32 windowWidth, sh
 
     m_GfxDepthStencilRenderTargetHandle = m_pGfxRenderDevice->CreateDepthStencilRenderTarget(m_GfxDepthTextureHandle);
 
-    Vertex_Pos_UV vertexBufferData[] =
-    {
-        { { -0.5f, -0.5f, -0.25f }, { 0.0f, 0.0f } },
-        { { -0.5f,  0.5f, -0.25f }, { 0.0f, 1.0f } },
-        { {  0.5f,  0.5f, -0.25f }, { 1.0f, 1.0f } },
-        { {  0.5f, -0.5f, -0.25f }, { 1.0f, 0.0f } },
-
-        { { -0.5f, -0.5f,  0.25f }, { 0.0f, 0.0f } },
-        { { -0.5f,  0.5f,  0.25f }, { 0.0f, 1.0f } },
-        { {  0.5f,  0.5f,  0.25f }, { 1.0f, 1.0f } },
-        { {  0.5f, -0.5f,  0.25f }, { 1.0f, 0.0f } }
-    };
-
-    unsigned short indices[] =
-    {
-        0, 1, 2,
-        0, 2, 3,
-
-        3, 2, 6,
-        3, 6, 7,
-
-        4, 5, 1,
-        4, 1, 0,
-
-        1, 5, 6,
-        1, 6, 2,
-
-        4, 0, 3,
-        4, 3, 7,
-
-        7, 6, 5,
-        7, 5, 4
-    };
-
-    shipUint8 textureData[] =
-    {
-        255, 255, 255, 255, 255, 0, 0, 255,
-        255, 0, 0, 255, 255, 0, 0, 255
-    };
-
-    m_VertexBufferHandle = m_pGfxRenderDevice->CreateVertexBuffer(8, VertexFormatType::Pos_UV, false, vertexBufferData);
-    m_IndexBufferHandle = m_pGfxRenderDevice->CreateIndexBuffer(36, true, false, indices);
-    m_TextureHandle = m_pGfxRenderDevice->CreateTexture2D(2, 2, GfxFormat::R8G8B8A8_UNORM, false, textureData, false);
-
-    m_TestTextureHandle = m_pGfxRenderDevice->CreateTexture2D(windowWidth, windowHeight, GfxFormat::R8G8B8A8_UNORM, false, nullptr, false, TextureUsage::TextureUsage_RenderTarget);
-
-    GFXTexture2DHandle renderTargetTextures[] = { m_TestTextureHandle };
-    m_TestRenderTargetHandle = m_pGfxRenderDevice->CreateRenderTarget(&renderTargetTextures[0], 1);
-
     m_pDataProvider = SHIP_NEW(SimpleConstantBufferProvider, 1);
 
     GetGFXMaterialUnifiedConstantBuffer().Create(*m_pGfxRenderDevice, nullptr, 4 * 1024 * 1024);
@@ -249,12 +204,15 @@ shipBool ShipyardViewer::CreateApp(HWND windowHandle, shipUint32 windowWidth, sh
 
     m_pDefaultMaterial->Create(ShaderFamily::Error, defaultMaterialTextures);
 
+    ImGuizmo::SetRect(0.0f, 0.0f, shipFloat(m_WindowWidth), shipFloat(m_WindowHeight));
+
     return true;
 }
 
 void ShipyardViewer::ComputeOneFrame()
 {
     StartNewImGuiFrame();
+    ImGuizmo::BeginFrame();
 
     GFXMaterialUnifiedConstantBuffer& gfxMaterialUnifiedConstantBuffer = GetGFXMaterialUnifiedConstantBuffer();
     gfxMaterialUnifiedConstantBuffer.PrepareForNextDrawCall();
@@ -271,13 +229,43 @@ void ShipyardViewer::ComputeOneFrame()
 
     m_pGfxDirectRenderCommandList->Reset(*m_pGfxCommandListAllocator, nullptr);
 
-    glm::mat4 matrix(1.0f, 0.0f, 0.0f, 0.0f,
-                     0.0f, 1.0f, 0.0f, 0.0f,
-                     0.0f, 0.0f, 1.0f, 0.25f,
-                     0.0f, 0.0f, 0.0f, 1.0f);
+    shipMat4x4 viewFromWorldMatrix = glm::lookAtLH(shipVec3(0.25f, 0.25f, -0.25f), shipVec3(0.0f, 0.0f, 0.0f), shipVec3(0.0f, 1.0f, 0.0f));
+    shipMat4x4 projectionFromViewMatrix = glm::perspectiveFovLH(glm::radians(90.0f), shipFloat(m_WindowWidth), shipFloat(m_WindowHeight), 0.001f, 1000.0f);
 
-    m_pDataProvider->Matrix = glm::rotate(matrix, theta, shipVec3(0.0f, 1.0f, 0.0f));
-    m_pDataProvider->TestTexture = m_TextureHandle;
+    static glm::mat4 worldFromLocalMatrix(1.0f, 0.0f, 0.0f, 0.0f,
+                    0.0f, 1.0f, 0.0f, 0.0f,
+                    0.0f, 0.0f, 1.0f, 0.25f,
+                    0.0f, 0.0f, 0.0f, 1.0f);
+
+    static ImGuizmo::OPERATION imguizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
+
+    // Taken from https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes..
+    constexpr int keyW = 0x57;
+    constexpr int keyE = 0x45;
+    constexpr int keyR = 0x52;
+    if (ImGui::IsKeyPressed(keyW))
+    {
+        imguizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
+    }
+    else if (ImGui::IsKeyPressed(keyE))
+    {
+        imguizmoOperation = ImGuizmo::OPERATION::ROTATE;
+    }
+    else if (ImGui::IsKeyPressed(keyR))
+    {
+        imguizmoOperation = ImGuizmo::OPERATION::SCALE;
+    }
+
+    ImGuizmo::Manipulate(
+            reinterpret_cast<shipFloat*>(&viewFromWorldMatrix),
+            reinterpret_cast<shipFloat*>(&projectionFromViewMatrix),
+            imguizmoOperation,
+            ImGuizmo::WORLD,
+            reinterpret_cast<shipFloat*>(&worldFromLocalMatrix));
+
+    m_pDataProvider->WorldFromLocalMatrix = worldFromLocalMatrix;
+    m_pDataProvider->WorldProjectionMatrix = viewFromWorldMatrix * worldFromLocalMatrix;
+    m_pDataProvider->WorldProjectionMatrix = projectionFromViewMatrix * viewFromWorldMatrix * worldFromLocalMatrix;
 
     theta += 0.001f;
 
@@ -420,7 +408,16 @@ void ShipyardViewer::ClearViewerAndLoadMesh(const shipChar* filename)
     {
         GFXMaterial*& gfxMaterial = m_LoadedMaterials.Grow();
         gfxMaterial = SHIP_NEW(GFXMaterial, 1);
-        gfxMaterial->Create(ShaderFamily::Error, importedSubMeshMaterial.SubMeshMaterialTextures);
+
+        GFXTexture2DHandle materialTextures[] =
+        {
+            (importedSubMeshMaterial.SubMeshMaterialTextures[0].IsValid()) ? importedSubMeshMaterial.SubMeshMaterialTextures[0] : DefaultTextures::WhiteTexture,
+            (importedSubMeshMaterial.SubMeshMaterialTextures[1].IsValid()) ? importedSubMeshMaterial.SubMeshMaterialTextures[1] : DefaultTextures::BlackTexture,
+            (importedSubMeshMaterial.SubMeshMaterialTextures[2].IsValid()) ? importedSubMeshMaterial.SubMeshMaterialTextures[2] : DefaultTextures::BlackTexture,
+            (importedSubMeshMaterial.SubMeshMaterialTextures[3].IsValid()) ? importedSubMeshMaterial.SubMeshMaterialTextures[3] : DefaultTextures::BlackTexture
+        };
+
+        gfxMaterial->Create(ShaderFamily::Generic, materialTextures);
     }
 
     m_pGfxMesh = SHIP_NEW(GFXMesh, 1);

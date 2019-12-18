@@ -60,11 +60,6 @@ namespace Shipyard
 
         GFXTexture2DHandle m_GfxDepthTextureHandle;
         GFXDepthStencilRenderTargetHandle m_GfxDepthStencilRenderTargetHandle;
-        GFXVertexBufferHandle m_VertexBufferHandle;
-        GFXIndexBufferHandle m_IndexBufferHandle;
-        GFXTexture2DHandle m_TextureHandle;
-        GFXTexture2DHandle m_TestTextureHandle;
-        GFXRenderTargetHandle m_TestRenderTargetHandle;
 
         ShaderDatabase* m_pShaderDatabase = nullptr;
 

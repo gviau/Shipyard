@@ -238,11 +238,18 @@ void ShipyardViewer::ComputeOneFrame()
                     0.0f, 0.0f, 0.0f, 1.0f);
 
     static ImGuizmo::OPERATION imguizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
+    static ImGuizmo::MODE imguizmoMode = ImGuizmo::WORLD;
 
     // Taken from https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes..
+    constexpr int keyQ = 0x51;
     constexpr int keyW = 0x57;
     constexpr int keyE = 0x45;
     constexpr int keyR = 0x52;
+    if (ImGui::IsKeyPressed(keyQ))
+    {
+        imguizmoMode = ImGuizmo::MODE((int(imguizmoMode) + 1) % 2);
+    }
+
     if (ImGui::IsKeyPressed(keyW))
     {
         imguizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
@@ -256,11 +263,16 @@ void ShipyardViewer::ComputeOneFrame()
         imguizmoOperation = ImGuizmo::OPERATION::SCALE;
     }
 
+    if (imguizmoOperation == ImGuizmo::OPERATION::SCALE)
+    {
+        imguizmoMode = ImGuizmo::MODE::LOCAL;
+    }
+
     ImGuizmo::Manipulate(
             reinterpret_cast<shipFloat*>(&viewFromWorldMatrix),
             reinterpret_cast<shipFloat*>(&projectionFromViewMatrix),
             imguizmoOperation,
-            ImGuizmo::WORLD,
+            imguizmoMode,
             reinterpret_cast<shipFloat*>(&worldFromLocalMatrix));
 
     m_pDataProvider->WorldFromLocalMatrix = worldFromLocalMatrix;
